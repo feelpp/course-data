@@ -12,6 +12,7 @@
 ** xref:foundations/safe-pipelines.adoc[Safe pipelines and baselines]
 ** xref:foundations/metrics-errors.adoc[Metrics and error analysis]
 ** xref:foundations/reproducible-delivery.adoc[Reproducible delivery]
+** xref:foundations/baseline-synthesis.adoc[Baseline synthesis]
 * xref:notebooks.adoc[Notebook workflow]
 * Assessment
 ** xref:assessment/overview.adoc[Assessment guide]

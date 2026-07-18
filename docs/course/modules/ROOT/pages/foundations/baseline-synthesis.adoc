@@ -1,0 +1,47 @@
+= End-to-end baseline synthesis
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-GOV-01, DP-REP-01, DP-QLT-03, DP-EVAL-01, DP-EVAL-02, DP-PIPE-01, DP-EVAL-03, DP-MET-02, DP-DOC-01, DP-TST-01, DP-AI-01, DP-INT-01
+:page-course-priority: P0
+:page-course-difficulty: D3
+:page-course-duration-minutes: 150
+:page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO9, LO10
+:page-course-prerequisites: all foundation laboratories
+:page-course-assessed: yes
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d3]#D3 Synthesis#
+
+This exercise is the P0 completion checkpoint. It combines source/use review, executable quality checks, feature roles, an untouched evaluation split, fitted preprocessing, a dummy baseline, consequence-aware metrics, error counts, tests, and a bounded result claim.
+
+== Question and evidence chain
+
+Using the synthetic AI4I teaching table, estimate whether pre-outcome sensor and product-type measurements contain useful screening information for the aggregate machine-failure label. The analysis is a teaching exercise: it does not validate a model for any real factory.
+
+Your evidence chain must identify:
+
+. source ID, licence, synthetic status, unit, key, target, and intended use;
+. identifier, predictor, target, and post-outcome/target-derived field roles;
+. exact identity/schema checks and an explicit missing-value policy;
+. a split created before any learned preprocessing;
+. one fitted numeric/categorical pipeline and one dummy baseline on identical test cases;
+. a prevalence-aware primary metric, threshold error counts, and one failure pattern;
+. data/split/environment/code identities, tests, limitations, and AI declaration.
+
+== Notebook and delivery artifacts
+
+xref:attachment$notebooks/foundations/baseline-synthesis.ipynb[Download the synthesis notebook].
+
+Complete the five xref:foundations/reproducible-delivery.adoc[delivery templates] and include a clean command that runs the public checks. The notebook should be restartable without manual path edits when used in the course clone.
+
+== Public acceptance checks
+
+* The 10,000-row identity contract and binary target are valid.
+* `TWF`, `HDF`, `PWF`, `OSF`, and `RNF` never enter the predictor matrix.
+* The test set contains 2,500 rows under the declared deterministic split.
+* Learned transformations are fitted through one training pipeline.
+* Model and dummy PR-AUC use the same protected cases; the model exceeds the prevalence baseline.
+* Confusion counts sum exactly to the test-set size.
+* The result record includes data/split IDs and an explicit real-factory limitation.
+
+== Review rule
+
+Validity precedes optimisation. A high score produced with target-derived fields, global preprocessing, repeated final-test selection, or an undocumented source is insufficient. A technically modest baseline with correct evidence, tests, and limitations meets the checkpoint.

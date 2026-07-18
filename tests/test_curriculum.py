@@ -75,3 +75,16 @@ def test_schedule_prerequisites_are_taught_earlier() -> None:
             assert first_taught[prerequisite] < block["block"]
         for concept in [*block["concepts"], *block.get("optional_concepts", [])]:
             first_taught.setdefault(concept, block["block"])
+
+
+def test_foundation_release_inventory_is_complete() -> None:
+    curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))
+    release = curriculum["foundation_release"]
+    assert release["implementation_status"] == "complete"
+    assert release["external_academic_review"] == "pending"
+    assert len(release["pages"]) == 8
+    assert len(release["notebooks"]) == 7
+    assert len(release["templates"]) == 5
+    for group in ("pages", "notebooks", "templates", "teaching_data"):
+        assert all((ROOT / path).exists() for path in release[group])
+    assert (ROOT / release["public_specimen"]).exists()

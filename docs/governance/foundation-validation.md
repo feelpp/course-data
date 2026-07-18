@@ -16,7 +16,7 @@ The P0 path now covers the complete baseline workflow:
 6. regression/classification metric reasoning, thresholds, counts, and error analysis;
 7. tests, datasheets, result cards, reproducibility manifests, and AI-assistance logs.
 
-Six English foundation notebooks are generated into clean student variants and execute in fast CPU CI. Every notebook declares concept IDs, importance, difficulty, duration, outcomes, prerequisites, assessment status, and execution profile. Solution and instructor-only cells are absent from student output.
+Seven English foundation notebooks are generated into clean student variants and execute in fast CPU CI. The final notebook is an integrated synthesis checkpoint that produces one traceable path from source/role audit through a protected pipeline, dummy comparison, metrics, errors, tests, and bounded result record. Every notebook declares concept IDs, importance, difficulty, duration, outcomes, prerequisites, assessment status, and execution profile. Solution and instructor-only cells are absent from student output.
 
 ## Data and templates
 
@@ -29,23 +29,23 @@ Six English foundation notebooks are generated into clean student variants and e
 
 `npm run check` passed with:
 
-- 9 repository/curriculum/notebook/data tests;
+- 11 repository/curriculum/notebook/data tests, including release-inventory and deterministic-cell-ID regression checks;
 - 55-concept and 11-outcome curriculum validation;
-- all 6 P0 notebooks executed on CPU;
-- 6 solution-free student notebooks generated;
-- 23 Antora HTML pages built;
+- all 7 P0 notebooks executed on CPU;
+- 7 solution-free student notebooks generated;
+- 24 Antora HTML pages built;
 - generated-site link and asset checks passed;
 - dataset snapshot and teaching-table checksums passed;
 - public/private and naming-boundary checks passed.
 
-Regenerating teaching tables and canonical foundation notebooks produces no content drift.
+Regenerating teaching tables and canonical foundation notebooks produces no content drift. The complete page, notebook, template, teaching-data, and specimen inventory is declared in `curriculum.yml`; validation rejects missing artifacts or a P0 notebook outside fast CI.
 
 ## Exit review
 
 | Criterion | Status | Evidence |
 |---|---|---|
-| Student completes an end-to-end leakage-safe baseline from a clean clone | Pass | `safe-pipelines.ipynb`, public checks, executed fast profile. |
-| All P0 notebooks execute in CI | Pass | Six notebooks selected by and completed in the fast profile. |
+| Student completes an end-to-end leakage-safe baseline from a clean clone | Pass | `baseline-synthesis.ipynb` integrates source/role audit, quality checks, split, fitted pipeline, dummy baseline, PR-AUC, error counts, result identity and limitations. |
+| All P0 notebooks execute in CI | Pass | Seven notebooks selected by and completed in the fast profile. |
 | Control 1 has a public specimen, point rubric, caps, private reference and hidden-test design | Pass | Public assessment pages and private specimen records. |
 | Control 1 receives independent academic moderation | Pending external action | Private moderation checklist is ready; the academic moderator fields must be signed by a person distinct from the course lead. |
 

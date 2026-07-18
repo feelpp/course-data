@@ -45,6 +45,37 @@ execution_contract:
     - A tolerance must be justified by numerical scale or controlled stochastic variation.
     - CPU correctness is the baseline; accelerator use is optional.
 
+foundation_release:
+  implementation_status: complete
+  external_academic_review: pending
+  pages:
+    - docs/course/modules/ROOT/pages/foundations/data-lifecycle.adoc
+    - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
+    - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
+    - docs/course/modules/ROOT/pages/foundations/eda-sampling.adoc
+    - docs/course/modules/ROOT/pages/foundations/safe-pipelines.adoc
+    - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc
+    - docs/course/modules/ROOT/pages/foundations/reproducible-delivery.adoc
+    - docs/course/modules/ROOT/pages/foundations/baseline-synthesis.adoc
+  notebooks:
+    - notebooks/instructor/foundations/data-lifecycle.ipynb
+    - notebooks/instructor/foundations/tabular-data.ipynb
+    - notebooks/instructor/foundations/data-quality.ipynb
+    - notebooks/instructor/foundations/eda-sampling.ipynb
+    - notebooks/instructor/foundations/safe-pipelines.ipynb
+    - notebooks/instructor/foundations/metrics-errors.ipynb
+    - notebooks/instructor/foundations/baseline-synthesis.ipynb
+  templates:
+    - templates/dataset-datasheet.md
+    - templates/result-card.md
+    - templates/data-contract.yml
+    - templates/reproducibility-manifest.yml
+    - templates/ai-notes/README.md
+  teaching_data:
+    - datasets/teaching/air-quality/MANIFEST.yml
+    - datasets/teaching/predictive-maintenance/MANIFEST.yml
+  public_specimen: docs/course/modules/ROOT/pages/assessment/control-1-specimen.adoc
+
 priority_definitions:
   P0:
     label: Essential

@@ -195,6 +195,31 @@ def validate_blueprint(curriculum: dict[str, Any], errors: list[str]) -> None:
     if any(value <= 0 for value in contract["limits"].values()):
         errors.append("Execution limits must be positive")
 
+    release = curriculum["foundation_release"]
+    release_paths = [
+        *release["pages"],
+        *release["notebooks"],
+        *release["templates"],
+        *release["teaching_data"],
+        release["public_specimen"],
+    ]
+    if len(release_paths) != len(set(release_paths)):
+        errors.append("Foundation release inventory contains duplicate paths")
+    for relative in release_paths:
+        if not (ROOT / relative).exists():
+            errors.append(f"Foundation release artifact is missing: {relative}")
+    for relative in release["pages"]:
+        page = ROOT / relative
+        if page.exists() and parse_header(page).get("page-course-priority") != "P0":
+            errors.append(f"Foundation page must be P0: {relative}")
+    for relative in release["notebooks"]:
+        path = ROOT / relative
+        if not path.exists():
+            continue
+        course = nbformat.read(path, as_version=4).metadata.get("course", {})
+        if course.get("priority") != "P0" or course.get("execution_profile") != "fast":
+            errors.append(f"Foundation notebook must be P0 and fast: {relative}")
+
 
 def load_curriculum(errors: list[str]) -> tuple[dict[str, Any], set[str], set[str]]:
     curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 import nbformat
@@ -39,6 +40,16 @@ def notebook(metadata: dict, cells: list) -> nbformat.NotebookNode:
             "language_info": {"name": "python", "version": "3.12"},
         },
     )
+
+
+def deterministic_cell_id(filename: str, index: int) -> str:
+    return hashlib.sha256(f"{filename}:{index}".encode()).hexdigest()[:8]
+
+
+def write_notebook(filename: str, content: nbformat.NotebookNode) -> None:
+    for index, cell in enumerate(content.cells):
+        cell["id"] = deterministic_cell_id(filename, index)
+    nbformat.write(content, OUTPUT / filename)
 
 
 LOCATOR = """from pathlib import Path
@@ -127,7 +138,7 @@ def build_tabular() -> None:
             ["instructor-only"],
         ),
     ]
-    nbformat.write(notebook(meta, cells), OUTPUT / "tabular-data.ipynb")
+    write_notebook("tabular-data.ipynb", notebook(meta, cells))
 
 
 def build_quality() -> None:
@@ -206,7 +217,7 @@ def build_quality() -> None:
             "## Transfer\n\nWrite a data-contract table with rule, severity, observed count, decision, and evidence. Explain which finding blocks modelling and which requires sensitivity/domain review."
         ),
     ]
-    nbformat.write(notebook(meta, cells), OUTPUT / "data-quality.ipynb")
+    write_notebook("data-quality.ipynb", notebook(meta, cells))
 
 
 def build_eda() -> None:
@@ -273,7 +284,7 @@ def build_eda() -> None:
             ["instructor-only"],
         ),
     ]
-    nbformat.write(notebook(meta, cells), OUTPUT / "eda-sampling.ipynb")
+    write_notebook("eda-sampling.ipynb", notebook(meta, cells))
 
 
 def build_safe_pipeline() -> None:
@@ -361,7 +372,7 @@ def build_safe_pipeline() -> None:
             "## Transfer\n\nRepair a version that imputes globally and retains `HDF`. Explain the split and feature-time boundary, add a leakage assertion, and state why this synthetic random split is not evidence of future factory performance."
         ),
     ]
-    nbformat.write(notebook(meta, cells), OUTPUT / "safe-pipelines.ipynb")
+    write_notebook("safe-pipelines.ipynb", notebook(meta, cells))
 
 
 def build_metrics() -> None:
@@ -439,7 +450,139 @@ def build_metrics() -> None:
             ["instructor-only"],
         ),
     ]
-    nbformat.write(notebook(meta, cells), OUTPUT / "metrics-errors.ipynb")
+    write_notebook("metrics-errors.ipynb", notebook(meta, cells))
+
+
+def build_baseline_synthesis() -> None:
+    meta = {
+        "assessed": True,
+        "concept_ids": [
+            "DP-FND-01",
+            "DP-GOV-01",
+            "DP-REP-01",
+            "DP-QLT-03",
+            "DP-EVAL-01",
+            "DP-EVAL-02",
+            "DP-PIPE-01",
+            "DP-EVAL-03",
+            "DP-MET-02",
+            "DP-DOC-01",
+            "DP-TST-01",
+            "DP-AI-01",
+            "DP-INT-01",
+        ],
+        "difficulty": "D3",
+        "duration_minutes": 150,
+        "execution_profile": "fast",
+        "language": "en",
+        "outcomes": ["LO1", "LO2", "LO3", "LO4", "LO5", "LO6", "LO9", "LO10"],
+        "prerequisites": ["All foundation laboratories"],
+        "priority": "P0",
+    }
+    cells = [
+        markdown(
+            "# End-to-end baseline synthesis\n\n"
+            "**P0 Essential · D3 Synthesis · 150 minutes**\n\n"
+            "Deliver one traceable evidence chain from source identity to a leakage-safe baseline and "
+            "bounded conclusion."
+        ),
+        code(
+            "import pandas as pd\n"
+            "from sklearn.compose import ColumnTransformer\n"
+            "from sklearn.dummy import DummyClassifier\n"
+            "from sklearn.impute import SimpleImputer\n"
+            "from sklearn.linear_model import LogisticRegression\n"
+            "from sklearn.metrics import average_precision_score, confusion_matrix\n"
+            "from sklearn.model_selection import train_test_split\n"
+            "from sklearn.pipeline import Pipeline\n"
+            "from sklearn.preprocessing import OneHotEncoder, StandardScaler\n\n" + LOCATOR,
+            ["setup"],
+        ),
+        code(
+            "path = locate('datasets/teaching/predictive-maintenance/observations.csv', "
+            "'observations.csv')\n"
+            "data = pd.read_csv(path)\n"
+            "assert data['UDI'].notna().all() and data['UDI'].is_unique\n"
+            "assert set(data['Machine failure'].unique()) <= {0, 1}\n"
+            "data.shape",
+            ["setup", "test-public"],
+        ),
+        markdown(
+            "## Task\n\nImplement `run_baseline`. Protect feature-time and split boundaries, compare "
+            "with a dummy classifier on the same test cases, and return a machine-readable result "
+            "record."
+        ),
+        code(
+            "def run_baseline(frame: pd.DataFrame) -> dict:\n"
+            "    target = 'Machine failure'\n"
+            "    leakage = ['TWF', 'HDF', 'PWF', 'OSF', 'RNF']\n"
+            "    identifiers = ['UDI', 'Product ID']\n"
+            "    features = [column for column in frame.columns\n"
+            "                if column not in [target, *leakage, *identifiers]]\n"
+            "    X_train, X_test, y_train, y_test = train_test_split(\n"
+            "        frame[features], frame[target], test_size=0.25, random_state=20260718,\n"
+            "        stratify=frame[target])\n"
+            "    numeric = [column for column in features if column != 'Type']\n"
+            "    preprocessing = ColumnTransformer([\n"
+            "        ('numeric', Pipeline([('impute', SimpleImputer(strategy='median')),\n"
+            "                              ('scale', StandardScaler())]), numeric),\n"
+            "        ('category', Pipeline([('impute', SimpleImputer(strategy='most_frequent')),\n"
+            "                               ('encode', OneHotEncoder(handle_unknown='ignore'))]),\n"
+            "         ['Type']),\n"
+            "    ])\n"
+            "    model = Pipeline([('preprocess', preprocessing),\n"
+            "                      ('model', LogisticRegression(max_iter=1000,\n"
+            "                                                   class_weight='balanced'))])\n"
+            "    dummy = DummyClassifier(strategy='prior')\n"
+            "    model.fit(X_train, y_train)\n"
+            "    dummy.fit(X_train, y_train)\n"
+            "    scores = model.predict_proba(X_test)[:, 1]\n"
+            "    baseline_scores = dummy.predict_proba(X_test)[:, 1]\n"
+            "    prediction = scores >= 0.5\n"
+            "    tn, fp, fn, tp = confusion_matrix(y_test, prediction, labels=[0, 1]).ravel()\n"
+            "    return {\n"
+            "        'data_id': 'uci-601-teaching-v1',\n"
+            "        'split_id': 'stratified-test-0.25-seed-20260718',\n"
+            "        'rows': int(len(frame)),\n"
+            "        'test_rows': int(len(y_test)),\n"
+            "        'prevalence': float(y_test.mean()),\n"
+            "        'dummy_pr_auc': float(average_precision_score(y_test, baseline_scores)),\n"
+            "        'model_pr_auc': float(average_precision_score(y_test, scores)),\n"
+            "        'confusion': {'tn': int(tn), 'fp': int(fp), 'fn': int(fn), 'tp': int(tp)},\n"
+            "        'excluded_target_relatives': leakage,\n"
+            "        'limitation': 'Synthetic row-level evidence; not validated for a real factory.',\n"
+            "    }",
+            ["solution"],
+            "def run_baseline(frame: pd.DataFrame) -> dict:\n"
+            "    # TODO: audit roles, split first, fit preprocessing inside one pipeline, compare a dummy,\n"
+            "    # and return source/split/metric/error/limitation evidence.\n"
+            "    raise NotImplementedError\n",
+        ),
+        code(
+            "result = run_baseline(data)\n"
+            "assert result['rows'] == 10_000\n"
+            "assert result['test_rows'] == 2_500\n"
+            "assert result['model_pr_auc'] > result['dummy_pr_auc']\n"
+            "assert sum(result['confusion'].values()) == result['test_rows']\n"
+            "assert set(result['excluded_target_relatives']) == {'TWF','HDF','PWF','OSF','RNF'}\n"
+            "assert 'real factory' in result['limitation']\n"
+            "result",
+            ["test-public"],
+        ),
+        markdown(
+            "## Delivery\n\nComplete the public dataset-datasheet, result-card, data-contract, "
+            "reproducibility-manifest, and AI-log templates. Add one toy-oracle test and one smoke "
+            "command. Your conclusion must state the unit, synthetic population, primary metric, "
+            "baseline comparison, error counts, and external-validity limit."
+        ),
+        markdown(
+            "**Instructor note.** This is the clean-clone exit exercise. Review the evidence chain "
+            "rather than rewarding metric optimisation. Introduce one feature-role or split defect "
+            "during oral verification and ask the student to repair it.",
+            ["instructor-only"],
+        ),
+    ]
+    write_notebook("baseline-synthesis.ipynb", notebook(meta, cells))
 
 
 def main() -> None:
@@ -449,7 +592,8 @@ def main() -> None:
     build_eda()
     build_safe_pipeline()
     build_metrics()
-    print("Built five P0 foundation notebooks")
+    build_baseline_synthesis()
+    print("Built six P0 foundation notebooks")
 
 
 if __name__ == "__main__":

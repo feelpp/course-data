@@ -30,5 +30,6 @@ Never submit a notebook whose correctness depends on cells being run in a hidden
 * xref:attachment$notebooks/foundations/eda-sampling.ipynb[Exploratory analysis and sampling]
 * xref:attachment$notebooks/foundations/safe-pipelines.ipynb[Leakage-safe pipelines and baselines]
 * xref:attachment$notebooks/foundations/metrics-errors.ipynb[Metrics, thresholds, and error analysis]
+* xref:attachment$notebooks/foundations/baseline-synthesis.ipynb[End-to-end baseline synthesis]
 
 Notebooks locate data automatically when run inside the course clone. If you download one notebook independently, also download its linked CSV files into the same directory. All required foundation notebooks run on CPU in the fast CI profile.
