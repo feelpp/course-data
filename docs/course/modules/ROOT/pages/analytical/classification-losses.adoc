@@ -12,11 +12,92 @@
 
 Logistic and softmax regression model class scores/logits and convert them to probabilities through a normalised exponential family. Cross-entropy is the categorical negative log-likelihood; it is not a synonym for classification error.
 
+== Binary logistic model
+
+For stem:[x_i\in\mathbb R^p], define the logit stem:[\eta_i=x_i^\top\beta] and probability
+
+[stem]
+++++
+p_i=P(Y_i=1\mid X_i=x_i)=\sigma(\eta_i)
+=\frac{1}{1+e^{-\eta_i}}.
+++++
+
+.Definition: Binary cross-entropy
+[.def#def:binary-cross-entropy]
+****
+For stem:[y_i\in\{0,1\}], the average negative Bernoulli log-likelihood is
+
+[stem]
+++++
+\widehat L(\beta)
+=-\frac1n\sum_{i=1}^{n}
+\left[y_i\log p_i+(1-y_i)\log(1-p_i)\right].
+++++
+****
+
+Using stem:[\operatorname{softplus}(t)=\log(1+e^t)], one stable per-observation form is
+
+[stem]
+++++
+\ell(y,\eta)=\operatorname{softplus}(\eta)-y\eta.
+++++
+
+Its gradient is stem:[\nabla_\beta\widehat L=X^\top(p-y)/n]. The residual-like term stem:[p_i-y_i] is probability error, not a class label error.
+
+== Multiclass softmax
+
+For stem:[K] classes and logits stem:[z_i\in\mathbb R^K],
+
+[stem]
+++++
+p_{ik}=\frac{e^{z_{ik}}}{\sum_{j=1}^{K}e^{z_{ij}}},
+\qquad
+\ell_i=-\log p_{i,y_i}
+=-z_{i,y_i}+\log\sum_{j=1}^{K}e^{z_{ij}}.
+++++
+
+.Proposition: Shift invariance
+[.prop#prop:softmax-shift]
+****
+For any scalar stem:[c], stem:[\operatorname{softmax}(z+c\mathbf 1)=\operatorname{softmax}(z)]. Multiplying numerator and denominator by stem:[e^{-c}] cancels the shift. Choosing stem:[c=-\max_j z_j] prevents overflow while preserving probabilities.
+****
+
 == Stable computation
 
 Direct `exp(logit)` overflows for large logits. Subtract the row maximum before exponentiating, or use `logsumexp`/a maintained library loss. Softmax is invariant to adding the same constant to every class logit. Binary logistic loss should use a stable `logaddexp` formulation.
 
 The loss trains probability scores; a threshold or argmax creates a decision. Calibration, prevalence, and asymmetric costs determine whether the default decision rule is suitable.
+
+== Error estimation
+
+On an untouched test set of size stem:[m], log loss is an empirical mean stem:[\widehat L=m^{-1}\sum_i\ell_i]. If test units are independent, its standard error is stem:[s_\ell/\sqrt m]. Because log loss is unbounded when the model assigns a near-zero probability to the observed class, inspect the loss distribution and influential cases rather than reporting only a symmetric interval.
+
+For recall stem:[r=TP/(TP+FN)] with stem:[m_+=TP+FN] independent positive cases, a rough binomial estimate is
+
+[stem]
+++++
+\widehat{\operatorname{SE}}(r)
+=\sqrt{\frac{r(1-r)}{m_+}}.
+++++
+
+Use a group or block bootstrap when cases share machines, patients, sites, or time dependence. Threshold selection and probability calibration must occur before final evaluation; otherwise the uncertainty estimate omits selection optimism.
+
+== Worked example
+
+.Example: Same decision, different log loss
+[.examp#ex:log-loss-confidence]
+****
+For a positive case, probabilities stem:[0.6] and stem:[0.9] both predict class 1 at threshold stem:[0.5], but their losses are
+
+[stem]
+++++
+-\log(0.6)\approx0.511,
+\qquad
+-\log(0.9)\approx0.105.
+++++
+
+The confusion matrix is unchanged while log loss rewards the better probability assignment. If the true class were 0, the losses would instead be stem:[-\log(0.4)\approx0.916] and stem:[-\log(0.1)\approx2.303]; overconfidence is penalised strongly.
+****
 
 == Guided laboratory
 
@@ -31,3 +112,17 @@ Create an imbalanced three-class synthetic problem. Compare accuracy, macro-F1, 
 == Assessment evidence
 
 Required evidence includes the likelihood/loss link, stable formula, shape/label encoding, oracle test, class-conditional interpretation, and separation of score, probability, and decision. Framework-specific neural-network mechanics are not required.
+
+== Exercises
+
+.Exercise: Stable binary loss
+[.exer#ex:stable-binary-loss]
+****
+Show algebraically that stem:[\operatorname{softplus}(\eta)-y\eta] equals binary cross-entropy. Evaluate it for stem:[(y,\eta)=(1,1000)] without computing stem:[e^{1000}].
+****
+
+.Exercise: Softmax and uncertainty
+[.exer#ex:softmax-error]
+****
+Derive the softmax shift-invariance property. Then design a resampling unit for hourly observations from three stations and explain why row-wise bootstrap intervals would be too narrow.
+****

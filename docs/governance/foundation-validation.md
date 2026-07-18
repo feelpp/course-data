@@ -6,17 +6,18 @@
 
 ## Delivered learning path
 
-The P0 path now covers the complete baseline workflow:
+The P0 path now opens with a mathematical background chapter and covers the complete baseline workflow:
 
-1. data lifecycle, question, provenance, and first audit;
-2. NumPy/table semantics, tidy transformations, grouping, and validated joins;
-3. schemas, types/units, missingness, duplicates, impossible values, anomalies, and data contracts;
-4. EDA, sampling, representativeness, and truthful visualisation;
-5. split/feature-time/selection boundaries, leakage-safe fitted pipelines, and dummy baselines;
-6. regression/classification metric reasoning, thresholds, counts, and error analysis;
-7. tests, datasheets, result cards, reproducibility manifests, and AI-assistance logs.
+1. notation, norms, conditioning, probability, bias--variance, risk, sampling uncertainty, and the error ledger;
+2. data lifecycle, question, provenance, and first audit;
+3. NumPy/table semantics, tidy transformations, grouping, and validated joins;
+4. schemas, types/units, missingness, duplicates, impossible values, anomalies, and data contracts;
+5. EDA, sampling, representativeness, and truthful visualisation;
+6. split/feature-time/selection boundaries, leakage-safe fitted pipelines, and dummy baselines;
+7. regression/classification metric reasoning, thresholds, counts, and error analysis;
+8. tests, datasheets, result cards, reproducibility manifests, and AI-assistance logs.
 
-Seven English foundation notebooks are generated into clean student variants and execute in fast CPU CI. The final notebook is an integrated synthesis checkpoint that produces one traceable path from source/role audit through a protected pipeline, dummy comparison, metrics, errors, tests, and bounded result record. Every notebook declares concept IDs, importance, difficulty, duration, outcomes, prerequisites, assessment status, and execution profile. Solution and instructor-only cells are absent from student output.
+Nine English foundation chapters and seven foundation notebooks form the learning path. The notebooks are generated into clean student variants and execute in fast CPU CI. The final notebook is an integrated synthesis checkpoint that produces one traceable path from source/role audit through a protected pipeline, dummy comparison, metrics, errors, tests, and bounded result record. Every notebook declares concept IDs, importance, difficulty, duration, outcomes, prerequisites, assessment status, and execution profile. Solution and instructor-only cells are absent from student output.
 
 ## Data and templates
 
@@ -27,14 +28,14 @@ Seven English foundation notebooks are generated into clean student variants and
 
 ## Automated evidence
 
-`npm run check` passed with:
+`npm run check` passed after the mathematical-learning revision with:
 
-- 11 repository/curriculum/notebook/data tests, including release-inventory and deterministic-cell-ID regression checks;
+- 13 repository/curriculum/notebook/data tests, including release-inventory and deterministic-cell-ID regression checks;
 - 55-concept and 11-outcome curriculum validation;
 - all 7 P0 notebooks executed on CPU;
 - 7 solution-free student notebooks generated;
-- 24 Antora HTML pages built;
-- generated-site link and asset checks passed;
+- 32 Antora HTML pages built;
+- generated-site link, asset, inline/displayed mathematics, and MathJax checks passed;
 - dataset snapshot and teaching-table checksums passed;
 - public/private and naming-boundary checks passed.
 

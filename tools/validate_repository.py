@@ -210,8 +210,21 @@ def validate_blueprint(curriculum: dict[str, Any], errors: list[str]) -> None:
             errors.append(f"Foundation release artifact is missing: {relative}")
     for relative in release["pages"]:
         page = ROOT / relative
-        if page.exists() and parse_header(page).get("page-course-priority") != "P0":
+        if not page.exists():
+            continue
+        if parse_header(page).get("page-course-priority") != "P0":
             errors.append(f"Foundation page must be P0: {relative}")
+        source = page.read_text(encoding="utf-8")
+        if "stem:[" not in source and "[stem]" not in source:
+            errors.append(f"Foundation page lacks mathematical notation: {relative}")
+    mathematical_background = ROOT / release["pages"][0]
+    if mathematical_background.exists():
+        source = mathematical_background.read_text(encoding="utf-8")
+        if source.count("stem:[") + source.count("[stem]") < 20:
+            errors.append("Mathematical background lacks sufficient worked notation")
+        for fragment in (".Definition:", ".Proposition:", "== Error estimation", ".Exercise:"):
+            if fragment not in source:
+                errors.append(f"Mathematical background lacks required element: {fragment}")
     for relative in release["notebooks"]:
         path = ROOT / relative
         if not path.exists():
@@ -246,6 +259,23 @@ def validate_blueprint(curriculum: dict[str, Any], errors: list[str]) -> None:
         source = path.read_text(encoding="utf-8")
         if "== Guided laboratory" not in source or "== Independent transfer" not in source:
             errors.append(f"Analytical page lacks guided/transfer evidence: {relative}")
+        required_learning_elements = (
+            ".Definition:",
+            "[stem]",
+            "== Error estimation",
+            "== Worked example",
+            "== Exercises",
+            ".Exercise:",
+        )
+        missing_elements = [
+            element for element in required_learning_elements if element not in source
+        ]
+        if missing_elements:
+            errors.append(
+                f"Analytical page lacks learn-from-page elements {missing_elements}: {relative}"
+            )
+        if source.count("stem:[") + source.count("[stem]") < 8:
+            errors.append(f"Analytical page has insufficient mathematical development: {relative}")
         page_p1.update(set(split_values(attrs.get("page-course-concepts", ""))) & expected_p1)
     notebook_p1: set[str] = set()
     for relative in analytical["notebooks"]:

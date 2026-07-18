@@ -12,11 +12,67 @@
 
 Cross-validation estimates a selection procedure only when each fold reproduces the complete fitted workflow. Imputation, scaling, feature construction/selection, PCA, and threshold tuning belong inside the folds.
 
+== Risk-estimation setting
+
+Let stem:[\mathcal A_\lambda] denote a complete fitting algorithm with hyperparameter stem:[\lambda]. Given training data stem:[\mathcal D], it returns stem:[\widehat f_{\lambda,\mathcal D}]. The target is the risk of the *procedure*, not an abstract model detached from its fitted preprocessing.
+
+.Definition: K-fold cross-validation estimate
+[.def#def:kfold]
+****
+Partition indices into validation folds stem:[I_1,\ldots,I_K]. With stem:[I_{-k}] denoting all non-`k` folds,
+
+[stem]
+++++
+\widehat R_{\mathrm{CV}}(\lambda)
+=\frac1K\sum_{k=1}^{K}
+\frac{1}{|I_k|}\sum_{i\in I_k}
+L\!\left(Y_i,
+\mathcal A_\lambda(\mathcal D_{I_{-k}})(X_i)\right).
+++++
+
+Every learned operation is refitted using stem:[I_{-k}] only.
+****
+
+The selected hyperparameter is stem:[\widehat\lambda=\arg\min_\lambda\widehat R_{\mathrm{CV}}(\lambda)]. Reporting the same minimum as if stem:[\lambda] had been fixed in advance ignores selection optimism.
+
+== Nested evaluation
+
+Nested cross-validation separates selection from evaluation. In outer fold stem:[b], choose stem:[\widehat\lambda_b] using only the outer-training observations, refit there, and score once on outer-test fold stem:[J_b]:
+
+[stem]
+++++
+\widehat R_{\mathrm{nested}}
+=\frac1B\sum_{b=1}^{B}
+\frac1{|J_b|}\sum_{i\in J_b}
+L\!\left(Y_i,
+\mathcal A_{\widehat\lambda_b}(\mathcal D_{J_{-b}})(X_i)\right).
+++++
+
+This estimates the combined data-dependent selection and fitting procedure for training sets of the outer-fold size.
+
 == Choose folds from dependence
 
 Use stratification for class prevalence, groups when related observations must remain together, and forward/blocked time splits when future information is unavailable. Random row folds are not a neutral default for repeated entities or autocorrelated measurements.
 
 Grid search is appropriate for a small structured space; random search explores more dimensions under a fixed budget. Record distributions across folds, not only the best mean. Nested CV is required when the outer estimate must include the uncertainty introduced by model/hyperparameter selection.
+
+== Error estimation
+
+There are at least three sources of variation: which observations enter training, which enter validation, and which candidates are searched. Fold scores share training observations and are correlated. Their sample standard deviation is a useful stability diagnostic but stem:[s_{\mathrm{fold}}/\sqrt K] is not automatically a valid standard error.
+
+Use repeated group/time-respecting outer splits, or a block/group bootstrap of the complete selection procedure, when uncertainty matters. Preserve candidate-level scores: if several candidates differ by less than the observed resampling variation, prefer the simpler or more stable choice rather than declaring a decisive winner.
+
+Searching stem:[M] noisy candidates increases the chance that one looks good by luck. This multiple-comparisons effect is another reason to fix the search budget and use untouched outer or final evidence.
+
+== Worked example
+
+.Example: Group leakage
+[.examp#ex:group-leakage]
+****
+Suppose 30 machines each contribute 20 rows and the target is nearly constant within a machine. Random five-fold CV places rows from every machine in training and validation, allowing a machine identifier or proxy to predict the label. `GroupKFold` holds out complete machines and estimates transfer to unseen machines. Both procedures may be coded correctly, but they estimate different risks.
+
+With 600 rows, random folds have about 120 validation rows but nearly zero new-machine information. The effective sampling unit for the intended deployment is the 30 machines, not the 600 rows.
+****
 
 == Guided laboratory
 
@@ -31,3 +87,17 @@ On the air-quality table, compare random-row and chronological validation for a 
 == Assessment evidence
 
 Required answers name the data dependency, choose folds accordingly, show every learned step inside the pipeline, preserve the final test, and interpret search uncertainty/budget. A larger search without a valid design earns no additional credit.
+
+== Exercises
+
+.Exercise: Write the estimand
+[.exer#ex:cv-estimand]
+****
+For hourly measurements from known stations and future dates, compare random-row, leave-one-station-out, and forward-time validation. State the target population and dependence assumption for each estimate.
+****
+
+.Exercise: Selection optimism
+[.exer#ex:selection-optimism]
+****
+Explain why the minimum of 100 equally performing noisy validation estimates is expected to be below their common true risk. Design an outer evaluation that measures the consequence.
+****

@@ -31,6 +31,6 @@ P3 Deferred:: Assigned to another course or kept as background reading.
 
 Start with the xref:course-contract.adoc[course contract], review the xref:course-map.adoc[course map], verify the xref:environment.adoc[computing environment], and complete the xref:readiness-check.adoc[readiness check].
 
-The first complete learning path is available under *Foundations*. It includes seven executable notebooks, an integrated baseline-synthesis checkpoint, reviewed teaching tables, public acceptance checks, and delivery templates. Current assessment solutions and hidden tests remain outside this public site.
+The first complete learning path is available under *Foundations*. It starts with a mathematical background and error-estimation chapter, then connects each concept to seven executable notebooks, an integrated baseline-synthesis checkpoint, reviewed teaching tables, public acceptance checks, and delivery templates. Current assessment solutions and hidden tests remain outside this public site.
 
 The *Analytical core* adds seven P1 notebooks covering stable/probabilistic regression, classification losses, regularisation, model selection, tree ensembles, PCA/clustering, and columnar performance. The full CPU workflow executes all fourteen notebooks.

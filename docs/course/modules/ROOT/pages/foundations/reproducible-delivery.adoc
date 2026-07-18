@@ -12,6 +12,8 @@
 
 A result is a traceable bundle, not the state of one notebook. Another person must be able to identify the code, data, environment, split, method, and artifact—and understand what the result does not establish.
 
+The result should bind a point estimate to its error statement. Reporting stem:[\widehat\theta] without a sampling uncertainty, sensitivity range, numerical tolerance, or explicit “not estimated” entry leaves the evidence incomplete. Use the ledger in xref:foundations/mathematical-background.adoc[Mathematical background and error estimation].
+
 == Minimum evidence bundle
 
 * source, creator, DOI/URL, licence, purpose, snapshot/checksum, schema and privacy classification;
@@ -23,6 +25,45 @@ A result is a traceable bundle, not the state of one notebook. Another person mu
 * generated artifact paths and expected runtime.
 
 Tests protect contracts. A toy oracle proves a calculation on known input; a data contract protects key/schema/semantic invariants; a smoke test proves the workflow connects. A successful run does not by itself prove the scientific conclusion, and a notebook with stored outputs is not a reproducibility record.
+
+== Numerical reproducibility and tolerances
+
+Floating-point results should usually be compared using a scale-aware rule
+
+[stem]
+++++
+|a-b|\le \operatorname{atol}+\operatorname{rtol}|b|.
+++++
+
+The absolute tolerance controls behaviour near zero; the relative tolerance scales with the reference magnitude. A tolerance is justified by conditioning, floating-point arithmetic, solver termination, or controlled stochastic variation—not chosen after observing a failing result. Exact counts, keys, and category sets remain exact.
+
+Reproducibility is layered: *computational* reproduction reruns the same code and data; *statistical* replication studies variation under a valid new sample or seed; *scientific* replication asks whether the conclusion survives a new setting. One cannot substitute for another.
+
+== Error estimation record
+
+Every result card must classify each important uncertainty as quantified, bounded, diagnosed, or unknown. At minimum record:
+
+* finite-sample uncertainty or why it was not estimated;
+* sensitivity to split, seed, missingness, and preprocessing choices;
+* numerical residual/tolerance for iterative or ill-conditioned calculations;
+* population mismatch and plausible distribution shift;
+* the difference between statistical uncertainty and operational consequences.
+
+== Worked example
+
+.Example: A tolerance can hide a defect
+[.examp#ex:tolerance-defect]
+****
+For reference stem:[b=10^{-8}], stem:[\operatorname{rtol}=10^{-6}] alone permits only stem:[10^{-14}] absolute error, which may be too strict near zero. Setting stem:[\operatorname{atol}=10^{-10}] makes the intended near-zero scale explicit. Conversely, an absolute tolerance of stem:[1] would let a materially wrong result pass; the course execution contract therefore documents tolerances before assessment.
+****
+
+== Exercise
+
+.Exercise: Complete an error record
+[.exer#ex:delivery-error-record]
+****
+Choose one notebook result. State its estimand, estimate, sampling uncertainty, numerical tolerance, sensitivity analysis, and one unknown error source. Identify which entry can be tested automatically and which requires domain review.
+****
 
 == Templates
 

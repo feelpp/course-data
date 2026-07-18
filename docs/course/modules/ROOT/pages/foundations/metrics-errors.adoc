@@ -12,15 +12,106 @@
 
 A metric compresses consequences; it does not define them. Select the metric and decision threshold from the use, prevalence, scale, and costs before comparing many models.
 
+Use the notation and uncertainty rules from xref:foundations/mathematical-background.adoc[Mathematical background and error estimation]. Let stem:[y_i] be the observed response, stem:[\widehat y_i] a prediction, and stem:[e_i=y_i-\widehat y_i] the residual on stem:[n] protected evaluation cases.
+
 == Regression
 
-MAE is in target units and treats deviations linearly. RMSE penalises large residuals more strongly and is sensitive to scale/extremes. Always compare with a constant baseline and inspect residuals by predicted value, time, group, and relevant operating range. A lower aggregate error can hide systematic failure for one station or regime.
+.Definition: Common regression losses
+[.def#def:regression-losses]
+****
+[stem]
+++++
+\operatorname{MAE}=\frac1n\sum_{i=1}^{n}|e_i|,
+\qquad
+\operatorname{MSE}=\frac1n\sum_{i=1}^{n}e_i^2,
+\qquad
+\operatorname{RMSE}=\sqrt{\operatorname{MSE}}.
+++++
+****
+
+MAE is in target units and treats deviations linearly. RMSE is also in target units but penalises large residuals more strongly. MSE is the empirical risk associated with squared-error regression. All three depend on target scale.
+
+The coefficient of determination compares squared error with a constant-mean baseline:
+
+[stem]
+++++
+R^2=1-\frac{\sum_i(y_i-\widehat y_i)^2}{\sum_i(y_i-\bar y)^2}.
+++++
+
+It can be negative on new data. A negative test stem:[R^2] means the model is worse, under this loss and sample, than predicting the test-sample mean used by the formula. Always compare with a baseline fitted without test information and inspect residuals by predicted value, time, group, and operating range.
 
 == Classification
 
-The confusion matrix contains the operational counts. Precision conditions on predicted positives; recall conditions on actual positives; F1 encodes one symmetric trade-off. ROC-AUC ranks across thresholds but can look reassuring under severe imbalance; PR-AUC focuses on the positive class and must be compared with prevalence. Neither AUC selects the deployment threshold.
+For a declared positive class, the confusion matrix records true positives stem:[TP], false positives stem:[FP], true negatives stem:[TN], and false negatives stem:[FN].
 
-Choose a threshold using missed-event cost, false-alarm workload, or an explicit constraint. Do not tune the threshold on the final test. A score is not automatically a calibrated probability.
+.Definition: Rates derived from the confusion matrix
+[.def#def:classification-rates]
+****
+[stem]
+++++
+\operatorname{precision}=\frac{TP}{TP+FP},
+\quad
+\operatorname{recall}=\frac{TP}{TP+FN},
+\quad
+\operatorname{specificity}=\frac{TN}{TN+FP},
+\quad
+F_1=\frac{2\,\operatorname{precision}\,\operatorname{recall}}
+{\operatorname{precision}+\operatorname{recall}}.
+++++
+****
+
+Precision conditions on predicted positives; recall conditions on actual positives. They answer different questions and use different denominators. ROC-AUC estimates a ranking probability across thresholds. Under severe imbalance it can look reassuring while the positive predictions remain operationally poor. PR-AUC focuses on the positive class and must be compared with prevalence stem:[P(Y=1)], the expected average precision of an uninformative ranking. Neither AUC selects the deployment threshold.
+
+== Thresholds and costs
+
+For a score stem:[s(x)] and threshold stem:[t], predict positive when stem:[s(x)\ge t]. If a false negative costs stem:[c_{FN}] and a false positive costs stem:[c_{FP}], empirical decision cost is
+
+[stem]
+++++
+\widehat C(t)=\frac{c_{FN}FN(t)+c_{FP}FP(t)}{n}.
+++++
+
+This formula makes the assumed exchange rate between missed events and false alarms visible. Capacity constraints can instead impose stem:[FP(t)\le B] for an inspection budget stem:[B]. Choose the threshold on training/validation evidence, then estimate its consequences once on the final test. A score is not automatically a calibrated probability.
+
+== Error estimation
+
+A reported metric is an estimate, not a property known exactly. For per-case losses stem:[\ell_i], estimate the sampling standard error by
+
+[stem]
+++++
+\widehat{\operatorname{SE}}(\bar\ell)=\frac{s_\ell}{\sqrt n}
+++++
+
+only when cases can reasonably be treated as independent. For recall stem:[r] evaluated on stem:[n_+=TP+FN] positive cases, a rough binomial standard error is
+
+[stem]
+++++
+\widehat{\operatorname{SE}}(r)=\sqrt{\frac{r(1-r)}{n_+}}.
+++++
+
+Use group or block bootstrap intervals when patients, machines, sites, or adjacent times are dependent. To compare two models, resample or analyse the paired loss differences stem:[d_i=\ell_{i,A}-\ell_{i,B}]; treating the two metric estimates as independent discards the pairing. Finite-test uncertainty does not include training instability, distribution shift, label error, or the uncertainty introduced by choosing the metric and threshold.
+
+== Worked example
+
+.Example: Counts, rates, and uncertainty
+[.examp#ex:confusion-worked]
+****
+Suppose stem:[TP=36], stem:[FP=24], stem:[TN=920], and stem:[FN=20]. Then precision is stem:[36/60=0.60], recall is stem:[36/56\approx0.643], and specificity is stem:[920/944\approx0.975]. The recall standard error is approximately stem:[\sqrt{0.643(1-0.643)/56}\approx0.064]. Despite 95.6% accuracy, the classifier misses 20 of 56 events; the count is essential to the decision.
+****
+
+== Exercises
+
+.Exercise: Regression metric choice
+[.exer#ex:metric-choice]
+****
+For residuals stem:[(-1,-1,-1,5)], compute MAE and RMSE. Repeat after multiplying the target by 100. Which statements are invariant to the unit change, and which operational preference does each metric encode?
+****
+
+.Exercise: Threshold decision
+[.exer#ex:threshold-decision]
+****
+Threshold A gives stem:[FN=12,FP=30]; threshold B gives stem:[FN=5,FP=80]. Compare them for stem:[(c_{FN},c_{FP})=(10,1)] and stem:[(2,1)]. State which evidence would still be required before deployment.
+****
 
 == Laboratory
 

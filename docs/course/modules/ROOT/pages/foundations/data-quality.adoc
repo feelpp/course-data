@@ -12,6 +12,8 @@
 
 Data quality is fitness for a stated use, not a generic “clean/dirty” label. The same extreme measurement may be a sensor failure, a rare event of scientific interest, or an influential but valid observation.
 
+Quality checks alter the data-generating and sampling process seen by downstream methods. Their statistical consequences belong in the error ledger from xref:foundations/mathematical-background.adoc[Mathematical background and error estimation].
+
 == Audit dimensions
 
 [cols="2,4,4",options="header"]
@@ -29,9 +31,68 @@ Data quality is fitness for a stated use, not a generic “clean/dirty” label.
 
 First report the pattern and context. Do not replace missing values merely to satisfy an API. Dropping can change the population; constant or statistical imputation changes distributions; predictive imputation adds modelling assumptions. Any learned imputer is fitted only on training folds through the pipeline. The target is not silently imputed.
 
+Let stem:[M_{ij}=1] when variable stem:[j] is missing for row stem:[i]. Its empirical missing rate is
+
+[stem]
+++++
+\widehat p_j=\frac1n\sum_{i=1}^{n}M_{ij}.
+++++
+
+.Definition: Missingness mechanisms
+[.def#def:missingness]
+****
+Using stem:[X_{\mathrm{obs}}] for observed values and stem:[X_{\mathrm{mis}}] for missing values:
+
+* *MCAR* requires stem:[P(M\mid X_{\mathrm{obs}},X_{\mathrm{mis}})=P(M)];
+* *MAR* requires stem:[P(M\mid X_{\mathrm{obs}},X_{\mathrm{mis}})=P(M\mid X_{\mathrm{obs}})];
+* *MNAR* allows dependence on unobserved values after conditioning on observed values.
+
+These are assumptions about a process, not labels inferred from a missingness heatmap. Observed data alone generally cannot distinguish MAR from MNAR.
+****
+
 == Duplicates and anomalies
 
 Separate exact ingestion duplicates from repeated events and conflicting records. Never call `drop_duplicates()` without a declared identity and resolution policy. Likewise, never delete an outlier only because a boxplot labels it: verify unit, sensor range, event context, leverage, and conclusion sensitivity.
+
+For a univariate robust screen, define the median absolute deviation
+
+[stem]
+++++
+\operatorname{MAD}=\operatorname{median}_i
+\left|x_i-\operatorname{median}_k x_k\right|.
+++++
+
+A large robust score is a review flag, not a deletion rule. It can indicate unit errors, sensor failures, mixtures, or scientifically important extremes.
+
+== Error estimation
+
+If missingness indicators are independent, stem:[\widehat{\operatorname{SE}}(\widehat p_j)=\sqrt{\widehat p_j(1-\widehat p_j)/n}]. Use group/block resampling when missingness occurs in bursts or by device. More importantly, compare missing rates and downstream estimates by relevant group, time, and outcome availability.
+
+For a deterministic unit conversion stem:[y=ax+b], a small measurement uncertainty stem:[u_x] propagates as stem:[u_y=|a|u_x] when stem:[a] and stem:[b] are treated as exact. If calibration parameters are estimated, their uncertainty also belongs in the calculation.
+
+Sensitivity analysis should expose non-identifiable repair choices: rerun the result under defensible deletion, imputation, anomaly-retention, and anomaly-quarantine rules. The range is not automatically a confidence interval, but it reveals conclusion dependence on the policy.
+
+== Worked example
+
+.Example: Overall missingness hides a group problem
+[.examp#ex:missingness-group]
+****
+Suppose 10 of 100 values are missing overall. If all 10 occur among 20 observations from station A, its missing rate is stem:[10/20=0.50], while station B's is stem:[0/80=0]. Reporting only stem:[0.10] conceals a quality mechanism aligned with station. Mean imputation across both stations would also borrow information across different distributions.
+****
+
+== Exercises
+
+.Exercise: Missingness estimand
+[.exer#ex:missingness-estimand]
+****
+For a sensor that stops reporting above an unknown temperature, classify the most plausible missingness mechanism. Explain why complete-case estimation of mean temperature is biased and propose a sensitivity analysis.
+****
+
+.Exercise: Unit uncertainty
+[.exer#ex:unit-uncertainty]
+****
+A temperature sensor reports stem:[20.0\pm0.2] degrees Celsius. Convert the value and uncertainty to Fahrenheit using stem:[F=1.8C+32]. List one calibration uncertainty omitted by this calculation.
+****
 
 == Laboratory and transfer
 

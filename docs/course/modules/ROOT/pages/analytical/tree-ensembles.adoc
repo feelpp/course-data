@@ -14,6 +14,98 @@ A decision tree recursively partitions feature space to reduce impurity or predi
 
 Bagging averages decorrelated trees; random forests add feature subsampling and provide out-of-bag evidence. Boosting fits learners sequentially to correct current errors and requires learning-rate/tree-complexity regularisation. All must be compared with the same protected baseline and metric.
 
+== Tree objective
+
+At a node stem:[t] containing stem:[N_t] observations, let stem:[p_{kt}] be the proportion of class stem:[k].
+
+.Definition: Gini impurity
+[.def#def:gini]
+****
+[stem]
+++++
+G(t)=1-\sum_{k=1}^{K}p_{kt}^2.
+++++
+
+It is zero for a pure node and largest when classes are evenly represented.
+****
+
+For a split into left and right children, the weighted impurity decrease is
+
+[stem]
+++++
+\Delta G
+=G(t)-\frac{N_L}{N_t}G(t_L)-\frac{N_R}{N_t}G(t_R).
+++++
+
+A greedy classifier chooses a candidate split with large stem:[\Delta G]. For regression, replace class impurity with within-node squared deviations from the node mean. Greedy improvement does not imply a globally optimal or stable tree.
+
+== Bagging and forests
+
+Let stem:[T_1(x),\ldots,T_B(x)] be tree predictions from bootstrap samples. A regression forest averages
+
+[stem]
+++++
+\widehat f_B(x)=\frac1B\sum_{b=1}^{B}T_b(x).
+++++
+
+.Proposition: Variance of an equally correlated ensemble
+[.prop#prop:forest-variance]
+****
+If every tree prediction has variance stem:[\sigma_T^2] and every pair has correlation stem:[\rho], then
+
+[stem]
+++++
+\operatorname{Var}(\widehat f_B(x))
+=\rho\sigma_T^2+\frac{1-\rho}{B}\sigma_T^2.
+++++
+
+Adding trees reduces only the uncorrelated component. Random feature subsets aim to reduce stem:[\rho] while retaining useful signal.
+****
+
+For each training observation, out-of-bag prediction uses only trees whose bootstrap sample excluded that observation. It provides internal validation evidence, not a substitute for a deployment-relevant group/time test.
+
+== Boosting as additive modelling
+
+Gradient boosting constructs
+
+[stem]
+++++
+F_m(x)=F_{m-1}(x)+\nu h_m(x),
+++++
+
+where stem:[h_m] approximates a descent direction for the current loss and stem:[\nu] is the learning rate. Tree depth, number of stages, and stem:[\nu] jointly control approximation and overfitting.
+
+== Error estimation
+
+Report test or outer-fold uncertainty using the true sampling unit. Compare forest OOB, cross-validation, and protected-test estimates; disagreement is a diagnostic of split mismatch or instability. Refit across bootstrap samples or seeds and report the variation of predictions, subgroup errors, and permutation importance.
+
+Permutation importance for feature stem:[j] estimates a loss increase
+
+[stem]
+++++
+\widehat I_j
+=\widehat R_{\mathrm{perm}(j)}-\widehat R_{\mathrm{original}}.
+++++
+
+Its uncertainty depends on the test sample and permutations. Correlated features can substitute for one another, dividing or hiding importance. Neither impurity nor permutation importance identifies an intervention effect.
+
+== Worked example
+
+.Example: Gini split
+[.examp#ex:gini-split]
+****
+A node contains six observations: three positive and three negative, so stem:[G(t)=1-(1/2)^2-(1/2)^2=1/2]. A split creates a left node with two positives and no negatives and a right node with one positive and three negatives. Then
+
+[stem]
+++++
+G(t_L)=0,
+\qquad
+G(t_R)=1-(1/4)^2-(3/4)^2=3/8,
+++++
+
+and stem:[\Delta G=1/2-(2/6)0-(4/6)(3/8)=1/4]. This calculation explains the local criterion; it does not establish generalisation.
+****
+
 == Guided laboratory
 
 On AI4I pre-outcome features, compare a depth-controlled tree, random forest with OOB score, and histogram gradient boosting against the logistic/dummy baselines. Use fixed budgets, inspect class-conditional errors, and compare impurity importance with held-out permutation importance.
@@ -27,3 +119,17 @@ Perturb the training sample seed and report tree structure/importance instabilit
 == Assessment evidence
 
 Students must explain split/impurity, complexity control, bagging variance reduction, forest feature subsampling/OOB, and boosting’s sequential correction. Marks require baseline comparison, protected evaluation, failure analysis, and interpretation caveats—not a leaderboard.
+
+== Exercises
+
+.Exercise: Ensemble correlation
+[.exer#ex:ensemble-correlation]
+****
+Compute the ensemble variance relative to one tree for stem:[B=100] and stem:[\rho\in\{0,0.1,0.8\}]. Explain why increasing stem:[B] cannot repair highly correlated trees.
+****
+
+.Exercise: Importance uncertainty
+[.exer#ex:importance-uncertainty]
+****
+Design a group-bootstrap procedure for permutation importance when each machine contributes repeated rows. State what is resampled and which claim the resulting interval supports.
+****

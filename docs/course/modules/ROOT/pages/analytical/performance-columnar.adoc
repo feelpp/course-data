@@ -14,6 +14,75 @@ Efficient processing starts with an estimate: rows × columns × bytes, temporar
 
 CSV loses types and requires parsing; Parquet stores typed columns with compression and statistics. An analytical engine can project columns, filter rows, and aggregate before returning a small DataFrame. This is query pushdown, not a replacement for database theory.
 
+== Cost model
+
+Let a table contain stem:[n] rows and selected columns stem:[j\in S] with physical widths stem:[b_j] bytes. A lower-bound payload estimate is
+
+[stem]
+++++
+M_{\mathrm{payload}}=n\sum_{j\in S}b_j.
+++++
+
+.Definition: Peak-memory budget
+[.def#def:peak-memory]
+****
+A useful first model is
+
+[stem]
+++++
+M_{\mathrm{peak}}
+\approx M_{\mathrm{input}}+M_{\mathrm{output}}+M_{\mathrm{temporary}}+M_{\mathrm{runtime}}.
+++++
+
+Object headers, null bitmaps, string offsets/data, indexes, decompression buffers, copies, and hash tables make peak memory larger than raw payload.
+****
+
+For a scan that reads stem:[B] bytes from storage bandwidth stem:[q] bytes/s, stem:[T\ge B/q] even before parsing or computation. Projection and predicate pushdown reduce stem:[B]; changing syntax without reducing work does not.
+
+If a parallel fraction stem:[a] is accelerated by stem:[s] while fraction stem:[1-a] remains serial, Amdahl's model gives
+
+[stem]
+++++
+S_{\mathrm{total}}\le\frac{1}{(1-a)+a/s}.
+++++
+
+It explains why distributing a workflow with dominant I/O, serial parsing, or data transfer may add overhead without useful speedup.
+
+== Columnar execution
+
+For an analytical query stem:[Q=\gamma\circ\sigma\circ\pi]—projection stem:[\pi], selection stem:[\sigma], then aggregation stem:[\gamma]—a lazy engine can move stem:[\pi] and stem:[\sigma] close to the file scan. Correctness requires that the reordered plan preserve null, type, predicate, and aggregation semantics.
+
+Parquet row-group statistics may prove that a group cannot satisfy a predicate, allowing it to be skipped. Compression changes both bytes read and CPU decompression work; smaller files are not automatically faster for every query.
+
+== Error estimation for benchmarks
+
+Let stem:[T_1,\ldots,T_r] be repeated elapsed times after a declared warm-up. Report median and spread, environment, workload, and result equality. Under a stable approximately independent benchmark process, the standard error of the mean is stem:[s_T/\sqrt r], but operating-system scheduling, caches, thermal behaviour, and background work often violate that simple model.
+
+For paired alternatives run in interleaved order and examine log ratios
+
+[stem]
+++++
+d_i=\log\frac{T_{A,i}}{T_{B,i}}.
+++++
+
+The exponentiated mean/median describes a relative factor. A performance conclusion must be bounded to the tested data, query, machine, versions, and cache state. Runtime remains ungraded.
+
+== Worked example
+
+.Example: Memory estimate before execution
+[.examp#ex:memory-estimate]
+****
+A table has stem:[n=10^7] rows, four `float64` columns, two `int32` columns, and a one-byte boolean. The raw selected payload is
+
+[stem]
+++++
+10^7\left(4\times8+2\times4+1\right)
+=4.1\times10^8\ \text{bytes}\approx391\ \text{MiB}.
+++++
+
+Reading the complete 40-column table, creating a boolean mask, and copying filtered rows can exceed a 4 GiB budget even though the seven-column payload fits. Projection before materialisation changes the feasibility of the workflow.
+****
+
 == Guided laboratory
 
 Expand the air-quality slice deterministically to a moderate benchmark table. Compare CSV and Parquet size, read time, dtypes, selected-column reads, and filtered DuckDB aggregation. Use repeated measurements after a warm-up, verify identical results, and distinguish storage/parsing gains from algorithmic changes.
@@ -27,3 +96,17 @@ Given a memory budget, design a query that returns daily PM2.5 summaries for sel
 == Assessment evidence
 
 Required evidence includes a memory estimate, fair benchmark method, result equality test, typed/columnar explanation, projected/filtered query, and a bounded conclusion. Tool-name memorisation and one noisy timing receive no credit.
+
+== Exercises
+
+.Exercise: Query budget
+[.exer#ex:query-budget]
+****
+Estimate payload, output, and one full-size temporary for stem:[5\times10^7] rows with six `float32` columns. Decide whether the plan fits a 4 GiB limit before dataframe overhead.
+****
+
+.Exercise: Benchmark claim
+[.exer#ex:benchmark-claim]
+****
+Two engines have paired times `(1.0, 1.1, 0.9)` and `(0.8, 1.5, 0.7)` seconds. Compute paired ratios, describe their instability, and state what additional repetitions or controls are needed before claiming a speedup.
+****

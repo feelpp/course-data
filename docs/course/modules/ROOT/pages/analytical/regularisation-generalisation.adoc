@@ -12,11 +12,98 @@
 
 Regularisation trades training fit for constrained model complexity and stability. Ridge shrinks correlated coefficients continuously; Lasso can set coefficients to zero but its selected feature among correlated alternatives may be unstable.
 
+== Penalised objectives
+
+Assume the columns of stem:[X] have been scaled inside the fitted pipeline.
+
+.Definition: Ridge estimator
+[.def#def:ridge]
+****
+[stem]
+++++
+\widehat\beta_{\mathrm{ridge}}(\lambda)
+=\operatorname*{argmin}_{\beta}
+\left\{\frac1n\lVert y-X\beta\rVert_2^2
++\lambda\lVert\beta\rVert_2^2\right\},
+\qquad \lambda\ge0.
+++++
+
+For the stated scaling of the loss,
+
+[stem]
+++++
+\widehat\beta_{\mathrm{ridge}}
+=\left(X^\top X+n\lambda I\right)^{-1}X^\top y.
+++++
+****
+
+.Definition: Lasso estimator
+[.def#def:lasso]
+****
+[stem]
+++++
+\widehat\beta_{\mathrm{lasso}}(\lambda)
+=\operatorname*{argmin}_{\beta}
+\left\{\frac1n\lVert y-X\beta\rVert_2^2
++\lambda\lVert\beta\rVert_1\right\}.
+++++
+
+The stem:[\ell_1] objective is convex but not differentiable at zero. Its geometry can produce exact zero coefficients; it does not prove that the remaining variables are causal or uniquely important.
+****
+
+The intercept is normally left unpenalised. Without scaling, the same stem:[\lambda] penalises coefficients attached to differently scaled features unequally.
+
+== Bias–variance mathematics
+
+For a fitted predictor stem:[\widehat f] and a new response stem:[Y=f(x)+\varepsilon] with stem:[\mathbb E\varepsilon=0] and stem:[\operatorname{Var}(\varepsilon)=\sigma^2], the pointwise expected squared prediction error is
+
+[stem]
+++++
+\mathbb E_{\mathcal D,\varepsilon}
+\left[(Y-\widehat f_{\mathcal D}(x))^2\right]
+=\sigma^2
++\left(\mathbb E_{\mathcal D}\widehat f_{\mathcal D}(x)-f(x)\right)^2
++\operatorname{Var}_{\mathcal D}(\widehat f_{\mathcal D}(x)).
+++++
+
+The three terms are irreducible noise, squared bias, and training-sample variance. Increasing regularisation usually raises bias and lowers variance, but the balance depends on stem:[x], sample size, feature geometry, and the true signal.
+
 == Generalisation diagnosis
 
 Bias and variance describe expected error behaviour across possible training samples, not a visual slogan about one curve. Learning curves compare training and validation evidence as sample size changes. Hyperparameters are selected inside cross-validation; the final test remains outside the entire selection process.
 
 Scale features inside the fitted pipeline before applying coefficient penalties. Report coefficient paths as conditional predictive behaviour, not automatic causal importance.
+
+== Error estimation
+
+Cross-validation estimates performance of the entire selection procedure only when scaling, feature construction, and stem:[\lambda] selection occur inside each training fold. Report the fold distribution and repeat the outer split when feasible. Overlapping training folds make fold scores dependent, so a naive stem:[s/\sqrt K] interval should not be presented as exact.
+
+For feature stability, define a selection indicator stem:[I_{jb}=1] if feature stem:[j] is non-zero in resample stem:[b]. The empirical selection frequency
+
+[stem]
+++++
+\widehat\pi_j=\frac1B\sum_{b=1}^{B}I_{jb}
+++++
+
+describes algorithmic stability under the chosen resampling design. It is not a posterior inclusion probability and does not correct confounding.
+
+Learning curves estimate how training and validation risk change with sample size. Their variation across resamples is as important as the mean; one curve from nested subsets can hide sample sensitivity.
+
+== Worked example
+
+.Example: Ridge shrinkage in an orthogonal design
+[.examp#ex:ridge-orthogonal]
+****
+Suppose stem:[X^\top X=nI] and define the unregularised estimate stem:[\widehat\beta_{\mathrm{ols}}=X^\top y/n]. Then
+
+[stem]
+++++
+\widehat\beta_{\mathrm{ridge}}
+=\frac{1}{1+\lambda}\widehat\beta_{\mathrm{ols}}.
+++++
+
+Every coefficient is shrunk by the same factor. For stem:[\lambda=1], the coefficients are halved. In a correlated design the shrinkage acts along singular-vector directions and is not a coordinate-wise halving.
+****
 
 == Guided laboratory
 
@@ -31,3 +118,17 @@ Use correlated Dry Bean shape features for one-vs-rest classification or regress
 == Assessment evidence
 
 Students must identify under/overfitting from controlled evidence, place scaling and tuning inside CV, preserve the final test, interpret shrinkage/sparsity, and propose a remedy consistent with the observed bias/variance pattern.
+
+== Exercises
+
+.Exercise: Ridge solution
+[.exer#ex:ridge-solution]
+****
+Differentiate the Ridge objective and derive the closed-form solution above. State how the formula changes if the squared loss is written without stem:[1/n].
+****
+
+.Exercise: Selection stability
+[.exer#ex:selection-stability]
+****
+A Lasso variable is selected in 37 of 50 group-bootstrap fits. Compute stem:[\widehat\pi_j] and explain three reasons why this number is not evidence that the variable causes the outcome.
+****
