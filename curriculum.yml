@@ -49,6 +49,7 @@ foundation_release:
   implementation_status: complete
   external_academic_review: pending
   pages:
+    - docs/course/modules/ROOT/pages/foundations/mathematical-background.adoc
     - docs/course/modules/ROOT/pages/foundations/data-lifecycle.adoc
     - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality.adoc

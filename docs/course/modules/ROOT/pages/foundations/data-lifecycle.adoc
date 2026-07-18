@@ -13,6 +13,14 @@
 
 A reliable analysis starts before modelling. First define what one row represents, where the data came from, what may be missing or duplicated, and which values are impossible.
 
+.Definition: Estimand and estimate
+[.def#def:lifecycle-estimand]
+****
+An *estimand* is the population quantity stem:[\theta(P)] that answers the stated question. An *estimate* stem:[\widehat\theta(\mathcal D)] is the value computed from observed data stem:[\mathcal D]. The distinction forces three early questions: what is the target population stem:[P], how was stem:[\mathcal D] obtained, and which transformations connect the raw records to stem:[\widehat\theta]?
+****
+
+Read xref:foundations/mathematical-background.adoc[Mathematical background and error estimation] before the first modelling chapter; it defines the notation used across the site.
+
 == Audit sequence
 
 . State the decision or scientific question.
@@ -22,6 +30,31 @@ A reliable analysis starts before modelling. First define what one row represent
 . Quantify missing values and duplicates.
 . Test domain constraints and investigate anomalies.
 . Save the audit as executable checks, not only prose.
+
+== First error ledger
+
+Before calculation, list at least one possible data, sampling, modelling, numerical, and communication error. A useful analysis records the transformation chain
+
+[stem]
+++++
+\mathcal D_{\mathrm{raw}}
+\xrightarrow{\text{validate/repair}}
+\mathcal D_{\mathrm{analysis}}
+\xrightarrow{\text{method}}
+\widehat\theta
+\xrightarrow{\text{report}}
+\text{decision claim}.
+++++
+
+Checks at one arrow do not validate the others. A schema-valid table can be unrepresentative; a numerically accurate estimate can answer the wrong population question.
+
+== Worked example
+
+.Example: Mean temperature is not yet a question
+[.examp#ex:lifecycle-mean]
+****
+The formula stem:[\bar x=n^{-1}\sum_i x_i] is unambiguous, but its meaning is not. It may average sensor readings equally, days equally, or stations equally. Those estimands differ when groups have different numbers of rows. The unit of analysis and target population must precede the code.
+****
 
 == Lab
 
@@ -33,3 +66,10 @@ xref:attachment$notebooks/foundations/data-lifecycle.ipynb[Download the student 
 
 Your notebook must produce a structured audit result, contain no hidden state, and distinguish an observation from a data-quality issue. A reviewer should be able to rerun it without editing paths or downloading data.
 
+== Exercise
+
+.Exercise: Declare the quantity
+[.exer#ex:declare-quantity]
+****
+Rewrite “estimate average pollution” as two distinct estimands: an observation-weighted mean and an equal-station mean. Give the formula, observational unit, population, and one error source for each.
+****

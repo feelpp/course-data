@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import re
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
@@ -59,6 +60,17 @@ def main() -> None:
     notebook = SITE / "course-data/_attachments/notebooks/foundations/data-lifecycle.ipynb"
     if not notebook.exists():
         errors.append("Generated student notebook attachment is missing")
+    mathematics_page = SITE / "course-data/foundations/mathematical-background.html"
+    if not mathematics_page.exists():
+        errors.append("Generated mathematical-background page is missing")
+    else:
+        mathematics_html = mathematics_page.read_text(encoding="utf-8")
+        if 'class="stemblock"' not in mathematics_html:
+            errors.append("Displayed stem mathematics is absent from the generated page")
+        if not re.search(r"<p>.*?\\\(.*?\\\)", mathematics_html, re.DOTALL):
+            errors.append("Inline stem mathematics is absent from the generated page")
+        if "MathJax.js" not in mathematics_html:
+            errors.append("MathJax is not loaded on the generated mathematical page")
     if errors:
         print("Generated-site validation failed:")
         for error in errors:

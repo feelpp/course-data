@@ -12,6 +12,8 @@
 
 This exercise is the P0 completion checkpoint. It combines source/use review, executable quality checks, feature roles, an untouched evaluation split, fitted preprocessing, a dummy baseline, consequence-aware metrics, error counts, tests, and a bounded result claim.
 
+The checkpoint also tests the error language developed in xref:foundations/mathematical-background.adoc[Mathematical background and error estimation]. A model is not better merely because its point estimate is larger.
+
 == Question and evidence chain
 
 Using the synthetic AI4I teaching table, estimate whether pre-outcome sensor and product-type measurements contain useful screening information for the aggregate machine-failure label. The analysis is a teaching exercise: it does not validate a model for any real factory.
@@ -25,6 +27,41 @@ Your evidence chain must identify:
 . one fitted numeric/categorical pipeline and one dummy baseline on identical test cases;
 . a prevalence-aware primary metric, threshold error counts, and one failure pattern;
 . data/split/environment/code identities, tests, limitations, and AI declaration.
+
+== Quantitative comparison
+
+For protected cases stem:[i=1,\ldots,m], compare the baseline stem:[f_0] and fitted model stem:[\widehat f] using paired losses
+
+[stem]
+++++
+d_i=L(y_i,f_0(x_i))-L(y_i,\widehat f(x_i)),
+\qquad
+\widehat\Delta=\frac1m\sum_{i=1}^{m}d_i.
+++++
+
+Positive stem:[\widehat\Delta] favours the fitted model under the declared loss. For independent cases its estimated standard error is stem:[s_d/\sqrt m]; otherwise use a group- or block-aware design. Also report metric denominators, confusion counts, and variability across the permitted training resamples. Separate:
+
+* data and population mismatch;
+* estimation and split variation;
+* selection caused by tried pipelines and thresholds;
+* numerical or stochastic solver variation;
+* operational error costs not represented by the metric.
+
+== Worked example
+
+.Example: Improvement without decisive evidence
+[.examp#ex:baseline-improvement]
+****
+If stem:[\widehat\Delta=0.012] loss units and stem:[\widehat{SE}(\widehat\Delta)=0.010], the point estimate favours the model, but the improvement is small relative to test-sample variation. This is not evidence of equality; it is evidence that the current evaluation does not precisely determine the improvement. More representative data may matter more than additional tuning.
+****
+
+== Exercise
+
+.Exercise: Synthesis error ledger
+[.exer#ex:synthesis-ledger]
+****
+Complete the five-part error ledger for the notebook result. Quantify at least estimation error and one threshold consequence; give a falsifiable diagnostic for the remaining entries.
+****
 
 == Notebook and delivery artifacts
 

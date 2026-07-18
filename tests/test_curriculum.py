@@ -83,7 +83,7 @@ def test_foundation_release_inventory_is_complete() -> None:
     release = curriculum["foundation_release"]
     assert release["implementation_status"] == "complete"
     assert release["external_academic_review"] == "pending"
-    assert len(release["pages"]) == 8
+    assert len(release["pages"]) == 9
     assert len(release["notebooks"]) == 7
     assert len(release["templates"]) == 5
     for group in ("pages", "notebooks", "templates", "teaching_data"):

@@ -48,7 +48,7 @@ Construct a small DataFrame with columns `station`, `timestamp`, `variable`, and
 
 . Explain the difference between a scalar, a vector, and a matrix using shapes.
 . Compute the mean and population variance of `[1, 2, 3]`.
-. Explain why `log(a * b) = log(a) + log(b)` helps when multiplying many small probabilities.
+. Explain why stem:[\log(ab)=\log(a)+\log(b)] helps when multiplying many small probabilities.
 . State one reason a predictive association is not automatically a causal effect.
 
 == Remediation routes

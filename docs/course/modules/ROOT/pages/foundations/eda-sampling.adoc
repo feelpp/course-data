@@ -12,6 +12,32 @@
 
 Exploration is a disciplined search for structure, quality problems, assumptions, and alternative explanations. It is not permission to tune repeatedly on final-test data or to present attractive plots without a population claim.
 
+Use xref:foundations/mathematical-background.adoc[Mathematical background and error estimation] for the distinction between population quantities, estimators, and uncertainty.
+
+== Distribution summaries
+
+For observations stem:[x_1,\ldots,x_n], the empirical cumulative distribution function is
+
+[stem]
+++++
+\widehat F_n(t)=\frac1n\sum_{i=1}^{n}\mathbf 1\{x_i\le t\}.
+++++
+
+It preserves distributional information that a mean and standard deviation can hide. Quantiles, histograms, and box plots are summaries of the empirical distribution, not evidence that a particular parametric distribution generated the data.
+
+.Definition: Empirical covariance and correlation
+[.def#def:covariance-correlation]
+****
+[stem]
+++++
+s_{xy}=\frac1{n-1}\sum_{i=1}^{n}(x_i-\bar x)(y_i-\bar y),
+\qquad
+r_{xy}=\frac{s_{xy}}{s_xs_y}.
+++++
+
+Correlation measures linear association in the observed sample. It is sensitive to outliers, mixtures, time trends, and range restriction; it does not identify a causal effect.
+****
+
 == Question before figure
 
 For every figure, write the question, population/sample, unit, grouping, scale, missing-data rule, and uncertainty or variation shown. Label axes with units. Avoid truncated axes for magnitude comparisons, overplotting without density/alpha/bin decisions, dual axes that imply a false relationship, and colour palettes that hide categories.
@@ -19,6 +45,41 @@ For every figure, write the question, population/sample, unit, grouping, scale, 
 == Sampling and representativeness
 
 The Beijing slice contains three stations and fourteen days from March 2013. It can support exercises about those recorded observations; it cannot represent all Beijing stations, seasons, current air quality, Strasbourg, or causal effects of weather. Temporal autocorrelation means hourly rows are not automatically independent. A random row split can exaggerate forecasting evidence by placing near-neighbour times in both train and test.
+
+Let stem:[S_i=1] indicate inclusion of population unit stem:[i]. The inclusion probability stem:[\pi_i=P(S_i=1)] matters: if it varies with the measurement or relevant covariates, the unweighted sample mean need not estimate the population mean. A larger convenience sample reduces neither coverage error nor selection bias by itself.
+
+== Error estimation
+
+Under independent sampling, stem:[\widehat{\operatorname{SE}}(\bar X)=s/\sqrt n]. With temporal or grouped observations,
+
+[stem]
+++++
+\operatorname{Var}(\bar X)=\frac1{n^2}\sum_{i=1}^{n}\sum_{j=1}^{n}\operatorname{Cov}(X_i,X_j),
+++++
+
+so positive within-group correlation makes the independent-row formula too small. Match resampling to the population claim: resample stations for a station population, days or contiguous blocks for a temporal claim, and complete subjects or machines for repeated measures. Variation across the three observed stations is not a reliable estimate of variation across all stations.
+
+== Worked example
+
+.Example: Effective information under clustering
+[.examp#ex:cluster-information]
+****
+Suppose 24 hourly observations have standard deviation stem:[s=12]. Treating them as independent gives stem:[SE=12/\sqrt{24}\approx2.45]. If they form six four-hour blocks with within-block correlation stem:[\rho=0.5], the design effect is approximately stem:[1+(4-1)\rho=2.5], giving stem:[SE\approx2.45\sqrt{2.5}=3.87]. The point estimate is unchanged, but its claimed precision is not.
+****
+
+== Exercises
+
+.Exercise: Simpson's reversal
+[.exer#ex:simpson]
+****
+Construct two groups in which stem:[x] and stem:[y] have a positive within-group association but a negative aggregate association. Explain which population question each correlation addresses.
+****
+
+.Exercise: Sampling unit
+[.exer#ex:sampling-unit]
+****
+For an air-quality claim about future days at the same stations, identify the observational unit, resampling unit, target population, and one source of bias that a confidence interval cannot repair.
+****
 
 == Laboratory
 

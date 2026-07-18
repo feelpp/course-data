@@ -12,6 +12,16 @@
 
 Evaluation data must simulate genuinely unseen use. Leakage occurs whenever training or selection uses information that would not be available for the future case being evaluated.
 
+Let stem:[\mathcal A] denote the complete learning algorithm: preprocessing, feature selection, model fitting, hyperparameter selection, and threshold choice. Given training data stem:[\mathcal D_{\mathrm{train}}], it returns stem:[\widehat f=\mathcal A(\mathcal D_{\mathrm{train}})]. The target is the population risk
+
+[stem]
+++++
+R(\widehat f)=\mathbb E_{(X,Y)\sim P_{\mathrm{use}}}
+\left[L\!\left(Y,\widehat f(X)\right)\mid\mathcal D_{\mathrm{train}}\right],
+++++
+
+not the training error minimised by the algorithm. See xref:foundations/mathematical-background.adoc[Mathematical background and error estimation] for risk and the error ledger.
+
 == Four boundaries
 
 . *Feature-time boundary:* use only information available at the stated decision time. A failure-mode or post-review field is not a predictor of the aggregate failure outcome.
@@ -21,9 +31,62 @@ Evaluation data must simulate genuinely unseen use. Leakage occurs whenever trai
 
 `Pipeline` and `ColumnTransformer` encode the fitted transformation graph. They do not choose the correct split for you: group and temporal reasoning still precede the API.
 
+.Definition: Training-fitted transformation
+[.def#def:training-transformation]
+****
+A learned transformation is a map stem:[T_{\mathcal D_{\mathrm{train}}}] whose parameters depend only on the training data. A valid test prediction has the composition
+
+[stem]
+++++
+x_{\mathrm{test}}
+\longmapsto T_{\mathcal D_{\mathrm{train}}}(x_{\mathrm{test}})
+\longmapsto \widehat f_{\mathcal D_{\mathrm{train}}}
+\!\left(T_{\mathcal D_{\mathrm{train}}}(x_{\mathrm{test}})\right).
+++++
+
+Using stem:[T_{\mathcal D_{\mathrm{all}}}] instead changes the learning algorithm and lets evaluation cases influence the fitted representation.
+****
+
 == Baselines and sanity checks
 
 Compare with a dummy/constant rule and one simple interpretable method. Check target prevalence, train/test population differences, shuffled-label behaviour where suitable, and whether an implausibly high score indicates a proxy or duplicate. A sophisticated model that does not beat a defensible baseline has not established value.
+
+== Error estimation
+
+For two fitted rules evaluated on the same stem:[m] protected cases, let
+
+[stem]
+++++
+d_i=L(y_i,\widehat f_A(x_i))-L(y_i,\widehat f_B(x_i)),
+\qquad
+\bar d=\frac1m\sum_{i=1}^{m}d_i.
+++++
+
+Under independent cases, the standard error of the paired difference is stem:[s_d/\sqrt m]. Pairing matters because both methods face the same cases. When the learning procedure itself is the object of comparison, repeat the complete split--fit--select process using group- or time-aware outer splits. Do not estimate uncertainty by repeatedly consulting the final test: that turns it into selection data.
+
+The evaluation claim inherits every boundary assumption. A narrow confidence interval cannot repair leakage, a population mismatch, post-outcome features, or a split that breaks dependence.
+
+== Worked example
+
+.Example: Leakage through global standardisation
+[.examp#ex:global-scaling]
+****
+Training values are stem:[(0,2)] and the future test value is stem:[100]. Training-only scaling uses mean stem:[1] and standard deviation stem:[1], so the test value is far outside the observed range. Global scaling uses mean stem:[34] and makes the training data depend on the future value. Even without labels, this is leakage because the fitted representation uses the evaluation distribution.
+****
+
+== Exercises
+
+.Exercise: Split the algorithm
+[.exer#ex:split-algorithm]
+****
+Draw the information flow for imputation, scaling, feature selection, hyperparameter search, threshold choice, and final evaluation. Mark the earliest point at which each validation or test label may be used.
+****
+
+.Exercise: Dependence boundary
+[.exer#ex:dependence-boundary]
+****
+A table contains 100 measurements from each of 20 machines. Compare the estimand and likely bias of random-row, group-by-machine, and future-time splits for three intended uses: another reading from a known machine, a new machine, and next month's readings.
+****
 
 == Industrial laboratory
 

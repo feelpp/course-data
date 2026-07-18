@@ -12,6 +12,8 @@
 
 The unit of analysis must survive every selection, reshape, aggregation, and join. A table that looks plausible can still be wrong when keys multiply rows or when storage types hide semantic errors.
 
+The mathematical object behind a table matters: rows index observational units, columns represent variables, and keys define identity. Array and aggregation errors can therefore change the estimand, not merely the file layout. The notation follows xref:foundations/mathematical-background.adoc[Mathematical background and error estimation].
+
 == What you must be able to do
 
 * reason about array shapes, dtypes, masks, broadcasting, and reductions;
@@ -28,6 +30,63 @@ A tidy row is one observation of the declared unit; a column is one variable; a 
 For a join, write the expected relationship first: one-to-one, one-to-many, many-to-one, or intentional many-to-many. In pandas, use `validate=` where possible, inspect key uniqueness on both sides, record unmatched keys, and compare the pre/post key set. Row-count equality alone is insufficient: one row can be lost while another is duplicated.
 
 Storage dtype is not semantics. An integer may be an identifier, a float may carry a physical unit, and a string may encode an ordered category or timestamp. Record types, units, category vocabulary, nullability, and timezone alongside the code.
+
+== Array shapes and reductions
+
+For stem:[X\in\mathbb R^{n\times p}], rows index stem:[n] observational units and columns index stem:[p] variables. A column mean is
+
+[stem]
+++++
+\bar x_j=\frac1n\sum_{i=1}^{n}X_{ij},
+++++
+
+whereas a row mean averages different variables and often has no scientific meaning. Broadcasting a vector stem:[a\in\mathbb R^p] across rows produces stem:[Y_{ij}=X_{ij}+a_j]; the shape is valid only if this per-variable operation matches units and semantics.
+
+.Definition: Join multiplicity
+[.def#def:join-multiplicity]
+****
+For join key stem:[k], let stem:[m_L(k)] and stem:[m_R(k)] be its multiplicities in left and right tables. An inner equality join produces
+
+[stem]
+++++
+N_{\mathrm{join}}=\sum_{k}m_L(k)m_R(k)
+++++
+
+rows. A key duplicated twice on each side produces four joined rows. The formula explains why an unintended many-to-many join can silently reweight later summaries.
+****
+
+== Aggregation and error
+
+If group stem:[g] has stem:[n_g] observations and mean stem:[\bar x_g], the global mean is the size-weighted quantity
+
+[stem]
+++++
+\bar x=\frac{\sum_g n_g\bar x_g}{\sum_g n_g},
+++++
+
+not the unweighted mean of group means unless all group sizes are equal or the target population gives groups equal weight. Standard deviation describes variation among observations; standard error describes uncertainty of an estimator. Aggregating hourly measurements to daily means changes both the observational unit and the dependence structure.
+
+== Worked example
+
+.Example: Join amplification
+[.examp#ex:join-amplification]
+****
+For key A, the left table has two rows and the right table three; for key B, each has one. The inner join contains stem:[2\times3+1\times1=7] rows. A mean computed after this join weights A six times and B once. If the intended unit was one key, the result answers the wrong question even though the merge succeeds.
+****
+
+== Exercises
+
+.Exercise: Weighted group summaries
+[.exer#ex:weighted-groups]
+****
+Groups of sizes stem:[10] and stem:[90] have means stem:[2] and stem:[8]. Compute the observation-weighted and equal-group means. State a population question for which each is correct.
+****
+
+.Exercise: Validate a join
+[.exer#ex:join-validation]
+****
+Given key multiplicities stem:[m_L=(2,1,3)] and stem:[m_R=(1,4,0)], predict the inner-join row count. Identify the cardinality contract and assertions needed if the right table is intended as unique metadata.
+****
 
 == Guided laboratory
 

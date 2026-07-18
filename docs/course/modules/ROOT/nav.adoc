@@ -5,6 +5,7 @@
 * xref:readiness-check.adoc[Readiness check]
 * xref:technical-contract.adoc[Execution contract]
 * Foundations
+** xref:foundations/mathematical-background.adoc[Mathematical background and error]
 ** xref:foundations/data-lifecycle.adoc[Data lifecycle and audit]
 ** xref:foundations/tabular-data.adoc[Arrays, tables, and joins]
 ** xref:foundations/data-quality.adoc[Data quality and schemas]
