@@ -160,6 +160,18 @@ def validate_naming_and_privacy(errors: list[str]) -> None:
             errors.append("Raw archive content is tracked by Git")
 
 
+def validate_workflow_pins(errors: list[str]) -> None:
+    for path in sorted((ROOT / ".github/workflows").glob("*.yml")):
+        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            match = re.search(r"\buses:\s*([^@\s]+)@([^\s#]+)", line)
+            if not match or match.group(1).startswith("./"):
+                continue
+            if not re.fullmatch(r"[0-9a-f]{40}", match.group(2)):
+                errors.append(
+                    f"{path.relative_to(ROOT)}:{line_number}: action is not pinned to a commit"
+                )
+
+
 def main() -> None:
     errors: list[str] = []
     _, concepts, outcomes = load_curriculum(errors)
@@ -167,6 +179,7 @@ def main() -> None:
     validate_notebooks(concepts, outcomes, errors)
     validate_datasets(errors)
     validate_naming_and_privacy(errors)
+    validate_workflow_pins(errors)
     ui_bundle = ROOT / "vendor/antora-ui/ui-bundle-v0.53.zip"
     if not ui_bundle.exists() or digest(ui_bundle) != UI_SHA256:
         errors.append("Pinned Antora UI bundle is missing or has the wrong checksum")
