@@ -19,7 +19,7 @@ Let stem:[\mathcal A_\lambda] denote a complete fitting algorithm with hyperpara
 .Definition: K-fold cross-validation estimate
 [.def#def:kfold]
 ****
-Partition indices into validation folds stem:[I_1,\ldots,I_K]. With stem:[I_{-k}] denoting all non-`k` folds,
+Partition indices into validation folds stem:[I_1,\ldots,I_K]. With stem:[I_{-k}] denoting all folds except stem:[k],
 
 [stem]
 ++++

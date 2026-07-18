@@ -10,7 +10,7 @@
 
 [.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d2]#D2 Independent#
 
-Linear regression is both a predictive baseline and a bridge between linear algebra, numerical analysis, and probability. The algebraic normal equations do not justify explicitly computing `(X^T X)^{-1}` in production code.
+Linear regression is both a predictive baseline and a bridge between linear algebra, numerical analysis, and probability. The algebraic normal equations do not justify explicitly computing stem:[(X^\top X)^{-1}] in production code.
 
 == Mathematical setting
 
@@ -63,9 +63,9 @@ For fixed stem:[\sigma^2], maximum likelihood and least squares have the same st
 
 == Numerical contract
 
-For `y = Xβ + ε`, ordinary least squares minimises `||Xβ-y||²`. Under independent Gaussian errors with constant variance, the same coefficient estimate maximises the likelihood. These are distinct statements: the numerical objective can be used without believing every probabilistic assumption, while confidence or likelihood interpretations require the assumptions.
+For stem:[y=X\beta+\varepsilon], ordinary least squares minimises stem:[\lVert X\beta-y\rVert_2^2]. Under independent Gaussian errors with constant variance, the same coefficient estimate maximises the likelihood. These are distinct statements: the numerical objective can be used without believing every probabilistic assumption, while confidence or likelihood interpretations require the assumptions.
 
-`X^T X` squares the condition number. Use `lstsq`, QR, or SVD; inspect singular values and scaling; use Ridge when shrinkage is substantively and computationally justified. Residual plots must challenge linearity, variance, dependence, and subgroup/time structure.
+The normal-equation matrix stem:[X^\top X] squares the condition number. Use `lstsq`, QR, or SVD; inspect singular values and scaling; use Ridge when shrinkage is substantively and computationally justified. Residual plots must challenge linearity, variance, dependence, and subgroup/time structure.
 
 With the singular-value decomposition stem:[X=U\Sigma V^\top], the least-squares solution uses stem:[\Sigma^+] rather than dividing blindly by near-zero singular values:
 

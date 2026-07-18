@@ -108,5 +108,5 @@ Estimate payload, output, and one full-size temporary for stem:[5\times10^7] row
 .Exercise: Benchmark claim
 [.exer#ex:benchmark-claim]
 ****
-Two engines have paired times `(1.0, 1.1, 0.9)` and `(0.8, 1.5, 0.7)` seconds. Compute paired ratios, describe their instability, and state what additional repetitions or controls are needed before claiming a speedup.
+Two engines have paired times stem:[(1.0,1.1,0.9)] and stem:[(0.8,1.5,0.7)] seconds. Compute paired ratios, describe their instability, and state what additional repetitions or controls are needed before claiming a speedup.
 ****
