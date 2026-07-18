@@ -62,3 +62,18 @@ def test_built_analytical_notebooks_have_deterministic_cell_ids() -> None:
             deterministic_cell_id(f"analytical/{path.name}", index)
             for index in range(len(notebook.cells))
         ]
+
+
+def test_built_extension_notebooks_have_deterministic_cell_ids() -> None:
+    extensions = ROOT / "notebooks/instructor/extensions"
+    for path in extensions.glob("*.ipynb"):
+        notebook = nbformat.read(path, as_version=4)
+        assert [cell.id for cell in notebook.cells] == [
+            deterministic_cell_id(f"extensions/{path.name}", index)
+            for index in range(len(notebook.cells))
+        ]
+        code_source = "\n".join(
+            cell.source for cell in notebook.cells if cell.cell_type == "code"
+        ).lower()
+        assert "import optax" not in code_source
+        assert "jax.tree" not in code_source

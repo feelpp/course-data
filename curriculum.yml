@@ -131,6 +131,48 @@ analytical_release:
   project_specification: docs/course/modules/ROOT/pages/assessment/mini-project.adoc
   final_specification: docs/course/modules/ROOT/pages/assessment/final-exam-specimen.adoc
 
+enrichment_release:
+  implementation_status: complete
+  required_contact_hours: 0
+  assessment_eligible: false
+  removable_without_core_loss: true
+  concepts:
+    - DP-JAX-01
+    - DP-JAX-02
+    - DP-JAX-03
+    - DP-ENG-01
+    - DP-OPS-01
+    - DP-KER-01
+  supporting_core_concepts: [DP-THR-01, DP-REG-01, DP-CV-01, DP-PERF-01]
+  pages:
+    - docs/course/modules/ROOT/pages/extensions/jax-transformations.adoc
+    - docs/course/modules/ROOT/pages/extensions/kernel-methods.adoc
+    - docs/course/modules/ROOT/pages/extensions/probability-calibration.adoc
+    - docs/course/modules/ROOT/pages/extensions/dataframe-engines.adoc
+    - docs/course/modules/ROOT/pages/extensions/experiment-tracking.adoc
+    - docs/course/modules/ROOT/pages/extensions/drift-monitoring.adoc
+    - docs/course/modules/ROOT/pages/extensions/downstream-paths.adoc
+  notebooks:
+    - notebooks/instructor/extensions/jax-transformations.ipynb
+  dependency_extra: extensions
+  pinned_optional_dependencies:
+    jax: "0.10.2"
+    polars: "1.42.1"
+  validation_record: docs/governance/enrichment-validation.md
+  downstream_record: docs/governance/sciml-handoff.md
+  downstream_owners:
+    - Scientific Machine Learning 1
+    - High Performance Computing
+    - Database
+    - Project
+  explicitly_deferred:
+    - PyTrees and Optax training architectures
+    - Neural-network implementation mastery
+    - Large sentiment and MNIST training studies
+    - Deep architecture surveys
+    - Distributed and multi-device execution
+    - Full deployment orchestration
+
 priority_definitions:
   P0:
     label: Essential

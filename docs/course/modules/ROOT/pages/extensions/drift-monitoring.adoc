@@ -1,0 +1,35 @@
+= Drift and monitoring
+:page-course-language: en
+:page-course-concepts: DP-OPS-01, DP-SMP-01, DP-MET-02, DP-INT-01
+:page-course-priority: P2
+:page-course-difficulty: D3
+:page-course-duration-minutes: 45
+:page-course-outcomes: LO2, LO6, LO9, LO10
+:page-course-prerequisites: Sampling, metrics, error analysis, result cards
+:page-course-assessed: no
+
+[.course-badge.priority-p2]#P2 Extension# [.course-badge.difficulty-d3]#D3 Synthesis#
+
+Monitoring asks whether the data pipeline, input population, predictions, outcomes, and operational consequences still support the original result claim. A change detector is an alerting component, not an automatic retraining command.
+
+== Distinguish the changes
+
+Data-quality failure:: Schema, unit, range, missingness, join, or freshness contracts fail.
+Covariate shift:: The distribution of observed inputs changes.
+Prediction shift:: The distribution of model outputs or decisions changes.
+Label/prior shift:: Outcome prevalence changes.
+Concept drift:: The relationship between inputs and outcomes changes; labels are required to establish it.
+
+An input-distribution alert alone cannot prove concept drift. Delayed or selectively observed labels can also make performance monitoring biased.
+
+== Monitoring record
+
+For every signal, declare the reference window, current window, population filters, statistic, minimum sample size, threshold rationale, multiple-testing policy, owner, and response. Monitor data contracts before model metrics. Break results down by scientifically or operationally relevant groups, subject to privacy and sample-size constraints.
+
+== Independent transfer
+
+Generate six monthly windows from the air-quality teaching table. Introduce one unit error, one station-composition change, and one conditional outcome change. Design checks that distinguish these events. For each alert, write one diagnostic action and one safe operational response; include a false-alert and missing-label scenario.
+
+Useful statistics include proportion/rate differences with intervals, quantile changes, two-sample tests, and domain-specific tolerances. Population Stability Index may be a descriptive signal, but arbitrary universal thresholds are not evidence of operational harm.
+
+Pair the record with xref:extensions/experiment-tracking.adoc[experiment lineage]. Production observability and distributed monitoring continue through xref:extensions/downstream-paths.adoc[the downstream courses].

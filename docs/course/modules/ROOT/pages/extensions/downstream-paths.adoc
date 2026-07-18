@@ -1,0 +1,40 @@
+= Downstream CSMI paths
+:page-course-language: en
+:page-course-concepts: DP-JAX-01, DP-JAX-02, DP-JAX-03, DP-ENG-01, DP-OPS-01, DP-KER-01, DP-NN-01, DP-NN-02, DP-DIST-01, DP-MLOPS-01
+:page-course-priority: P2
+:page-course-difficulty: D2
+:page-course-duration-minutes: 20
+:page-course-outcomes: LO8, LO9, LO10, LO11
+:page-course-prerequisites: Complete P0/P1 course
+:page-course-assessed: no
+
+[.course-badge.priority-p2]#P2 Extension# [.course-badge.difficulty-d2]#D2 Independent#
+
+This course ends at a deliberate boundary. The P0/P1 path makes data, validation, evaluation, and results trustworthy; downstream courses deepen software engineering, numerical models, accelerators, databases, and distributed execution. See the https://csmi.cemosis.fr/en/csmi/csmi-2024-2028/index.html#_courses[CSMI 2024–2028 course map] for the programme context.
+
+[cols="2,4,4",options="header"]
+|===
+|Downstream owner |Bring from Data Processing |Continue there
+
+|Scientific Machine Learning 1
+|Array shapes/dtypes, pure numerical functions, explicit random keys, verified gradients, leakage-safe evaluation
+|Model construction, PyTrees, Optax, neural networks, accelerator execution, physics-informed objectives, large training studies
+
+|High Performance Computing
+|Vectorisation, complexity and memory evidence, Parquet/Arrow, query-before-materialisation, reproducible benchmarks
+|Parallel decomposition, communication costs, distributed data/model execution, multi-device scaling, profilers
+
+|Database
+|Units of analysis, key/cardinality checks, joins, tidy schemas, DuckDB/Polars interoperability
+|Relational design, transactions, query optimisation, indexes, storage engines, SQL and NoSQL in depth
+
+|https://feelpp.github.io/course-project/[Project]
+|Dataset/result documentation, tests, environment locks, local experiment records, privacy and AI-use declarations
+|GitHub workflow, CI/CD, containers, project planning, reviews, releases, team operation, stakeholder delivery
+|===
+
+== Deferred archive map
+
+The legacy PyTree, manual/Optax training, hyperparameter-agent, sentiment, MNIST, two-dimensional neural-network, and deep-architecture notebooks are retained only in the restricted source archive. They are not published as optional Data Processing units. The detailed ownership proposal is recorded in the repository governance documentation.
+
+Kernel methods, calibration, local engines, tracking, and drift on this site are compact bridges. They are not hidden prerequisites and are not eligible for controls or the final examination.
