@@ -35,6 +35,21 @@ npm run serve
 
 Then open `http://localhost:8080`.
 
+Build and validate the deterministic solution-free student bundle:
+
+```sh
+npm run release:bundle
+npm run release:check
+```
+
+Run the complete candidate preparation, including all fifteen notebooks:
+
+```sh
+npm run release:prepare
+```
+
+Candidate and annual tags remain subject to the human gates in `RELEASE.md`.
+
 ## Important paths
 
 - `curriculum.yml`: learning outcomes, importance levels, concepts, schedule, datasets, and assessments.
@@ -43,10 +58,11 @@ Then open `http://localhost:8080`.
 - `build/notebooks/student`: generated output-free student notebooks.
 - `datasets/snapshots`: checksum-pinned and attributed source datasets.
 - `datasets/teaching`: deterministic classroom tables, manifests, and datasheets.
-- `templates`: datasheet, result-card, data-contract, reproducibility, and AI-log starters.
+- `templates`: learning-delivery, pilot, feedback, assessment-statistics, retrospective, and approval starters.
 - `tools`: generation and validation commands.
 - `docs/governance`: course contract and settled decisions.
 - `docs/analysis`: source audit and production roadmap.
+- `build/release`: generated student bundle and checksums (ignored by Git).
 
 ## Publication boundary
 

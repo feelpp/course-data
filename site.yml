@@ -31,10 +31,10 @@ asciidoc:
     icons: font
     source-highlighter: highlight.js
     stem: latexmath
+    sectanchors: false
     hide-uri-scheme: true
     course-title: Data Processing and Mining
     course-programme: CSMI
     course-repository-url: https://github.com/feelpp/course-data
   extensions:
     - '@feelpp/asciidoctor-extensions'
-

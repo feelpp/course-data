@@ -28,6 +28,14 @@ def code(
 
 
 def notebook(metadata: dict, cells: list) -> nbformat.NotebookNode:
+    metadata = {
+        **metadata,
+        "accessibility": {
+            "colour_alone_forbidden": True,
+            "keyboard_only": True,
+            "required_figure_contract": "title, labelled axes with units, caption, text description",
+        },
+    }
     return nbformat.v4.new_notebook(
         cells=cells,
         metadata={
@@ -266,15 +274,22 @@ def build_eda() -> None:
             ["test-public"],
         ),
         code(
+            "plt.style.use('tableau-colorblind10')\n"
             "fig, ax = plt.subplots(figsize=(8, 4))\n"
-            "for station, group in air.groupby('station'):\n"
+            "styles = [('-', 'o'), ('--', 's'), (':', '^')]\n"
+            "for (station, group), (line_style, marker) in zip(air.groupby('station'), styles, strict=True):\n"
             "    daily = group.set_index('timestamp')['PM2.5'].resample('D').mean()\n"
-            "    ax.plot(daily.index, daily, marker='o', label=station)\n"
+            "    ax.plot(daily.index, daily, linestyle=line_style, marker=marker, label=station)\n"
             "ax.set(title='Daily mean PM2.5 in the teaching slice', ylabel='PM2.5 (µg/m³)', xlabel='Date')\n"
             "ax.legend()\n"
+            "ax.grid(alpha=0.25)\n"
             "fig.autofmt_xdate()\n"
+            "fig.tight_layout()\n"
             "plt.show()",
             ["demo"],
+        ),
+        markdown(
+            "**Figure description.** Daily mean PM2.5 for the three teaching stations over fourteen March 2013 days. Station series use distinct line patterns and markers as well as colour. The figure describes this limited slice; it does not establish seasonal or city-wide behaviour."
         ),
         markdown(
             "## Independent brief\n\nCreate exactly three figures: coverage/missingness, a distribution with extremes, and one stratified relationship. Every caption must report the analysis count and one limitation. Do not claim that this slice represents all stations, seasons, cities, or current conditions."

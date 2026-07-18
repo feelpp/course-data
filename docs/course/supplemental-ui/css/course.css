@@ -16,3 +16,50 @@
 .difficulty-d2 { background: #fff4d6; color: #684c00; }
 .difficulty-d3 { background: #f5e5f4; color: #66235e; }
 
+.skip-link {
+  background: #fff;
+  border: 3px solid #111;
+  color: #111;
+  left: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  position: fixed;
+  top: -5rem;
+  z-index: 10000;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+/* Keep page navigation inside the viewport when the UI reserves scrollbar space. */
+.pagination {
+  margin-right: 0;
+}
+
+.sr-only {
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  border-radius: 0.15rem;
+  outline: 3px solid #ffbf47 !important;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

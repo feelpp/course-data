@@ -198,6 +198,42 @@ enrichment_release:
     - Distributed and multi-device execution
     - Full deployment orchestration
 
+operational_release:
+  implementation_status: complete
+  candidate_status: pending_human_pilot_and_signoff
+  annual_release_status: not_authorised
+  public_pages:
+    - docs/course/modules/ROOT/pages/accessibility.adoc
+    - docs/course/modules/ROOT/pages/glossary.adoc
+    - docs/course/modules/ROOT/pages/feedback.adoc
+    - docs/course/modules/ROOT/pages/downloads.adoc
+  governance_records:
+    - docs/governance/pilot-protocol.md
+    - docs/governance/accessibility-validation.md
+    - docs/governance/release-readiness.md
+    - docs/governance/course-operations.md
+  operational_templates:
+    - templates/pilot-observation.md
+    - templates/block-feedback.csv
+    - templates/assessment-item-statistics.csv
+    - templates/course-retrospective.md
+    - templates/release-approval.md
+  bundle_builder: tools/build_student_bundle.py
+  bundle_validator: tools/validate_student_bundle.py
+  evidence_summariser: tools/summarise_course_evidence.py
+  release_workflow: .github/workflows/release.yml
+  release_procedure: RELEASE.md
+  changelog: CHANGELOG.md
+  candidate_tag_pattern: v0.9-pilot.N
+  annual_tag: v1.0-2026
+  human_gates:
+    colleague_reviewers: 1
+    representative_students_or_alumni: 2
+    academic_signoff_required: true
+    accessibility_signoff_required: true
+    data_steward_signoff_required: true
+    assessment_custodian_signoff_required: true
+
 priority_definitions:
   P0:
     label: Essential

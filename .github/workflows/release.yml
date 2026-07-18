@@ -1,0 +1,56 @@
+name: Build course release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          enable-cache: true
+          cache-suffix: release
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: uv sync --locked --all-groups --extra extensions
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm run release:prepare
+      - name: Package the generated site
+        run: |
+          tar --sort=name --mtime='UTC 2026-01-01' --owner=0 --group=0 --numeric-owner -czf build/release/course-data-site.tar.gz -C public .
+          sha256sum build/release/course-data-student-bundle.zip build/release/course-data-site.tar.gz > build/release/release-checksums.txt
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: course-release-${{ github.ref_name }}
+          path: |
+            build/release/course-data-student-bundle.zip
+            build/release/course-data-student-bundle.zip.sha256
+            build/release/course-data-site.tar.gz
+            build/release/release-checksums.txt
+          if-no-files-found: error
+      - name: Publish immutable tagged artifacts
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            build/release/course-data-student-bundle.zip \
+            build/release/course-data-student-bundle.zip.sha256 \
+            build/release/course-data-site.tar.gz \
+            build/release/release-checksums.txt \
+            --verify-tag --generate-notes --title "CSMI Data Processing and Mining $GITHUB_REF_NAME"

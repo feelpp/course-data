@@ -17,8 +17,18 @@ class LinkParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self.targets: list[str] = []
+        self.images_without_alt: list[str] = []
+        self.has_main_landmark = False
+        self.has_skip_link = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if tag == "img" and "alt" not in attributes:
+            self.images_without_alt.append(attributes.get("src") or "<unknown image>")
+        if tag == "main" and attributes.get("id") == "main-content":
+            self.has_main_landmark = True
+        if tag == "a" and attributes.get("href") == "#main-content":
+            self.has_skip_link = True
         for name, value in attrs:
             if value and ((tag == "a" and name == "href") or name == "src"):
                 self.targets.append(value)
@@ -48,6 +58,12 @@ def main() -> None:
     for page in pages:
         parser = LinkParser()
         parser.feed(page.read_text(encoding="utf-8"))
+        for source in parser.images_without_alt:
+            errors.append(f"{page.relative_to(SITE)}: image lacks alt attribute: {source}")
+        if not parser.has_main_landmark:
+            errors.append(f"{page.relative_to(SITE)}: main content landmark is missing")
+        if not parser.has_skip_link:
+            errors.append(f"{page.relative_to(SITE)}: skip-to-content link is missing")
         for target in parser.targets:
             destination = target_path(page, target)
             if destination is None:

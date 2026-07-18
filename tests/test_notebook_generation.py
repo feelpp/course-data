@@ -13,6 +13,13 @@ def test_student_notebook_removes_private_cells_and_outputs(tmp_path: Path) -> N
     assert len(outputs) >= 7
     for output in outputs:
         notebook = nbformat.read(output, as_version=4)
+        assert notebook.metadata["course"]["accessibility"] == {
+            "colour_alone_forbidden": True,
+            "keyboard_only": True,
+            "required_figure_contract": (
+                "title, labelled axes with units, caption, text description"
+            ),
+        }
         tags = [set(cell.metadata.get("tags", [])) for cell in notebook.cells]
         assert all("solution" not in cell_tags for cell_tags in tags)
         assert all("instructor-only" not in cell_tags for cell_tags in tags)

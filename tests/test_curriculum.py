@@ -152,3 +152,26 @@ def test_enrichment_is_complete_optional_and_removable() -> None:
         *curriculum["analytical_release"]["notebooks"],
     ]
     assert all("/extensions/" not in path for path in core_paths)
+
+
+def test_operational_release_preserves_human_approval_gates() -> None:
+    curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))
+    release = curriculum["operational_release"]
+    assert release["implementation_status"] == "complete"
+    assert release["candidate_status"] == "pending_human_pilot_and_signoff"
+    assert release["annual_release_status"] == "not_authorised"
+    assert release["candidate_tag_pattern"] == "v0.9-pilot.N"
+    assert release["annual_tag"] == "v1.0-2026"
+    assert release["human_gates"]["colleague_reviewers"] >= 1
+    assert release["human_gates"]["representative_students_or_alumni"] >= 2
+    for group in ("public_pages", "governance_records", "operational_templates"):
+        assert all((ROOT / path).exists() for path in release[group])
+    for key in (
+        "bundle_builder",
+        "bundle_validator",
+        "evidence_summariser",
+        "release_workflow",
+        "release_procedure",
+        "changelog",
+    ):
+        assert (ROOT / release[key]).exists()

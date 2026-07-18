@@ -1,0 +1,9 @@
+<a href="#" class="menu-expand-toggle" aria-label="Toggle course navigation width"></a>
+<div class="nav-container"{{#if page.component}} data-component="{{page.component.name}}" data-version="{{page.version}}"{{/if}}>
+  <aside class="nav" aria-label="Course navigation">
+    <div class="panels">
+{{> nav-menu}}
+{{> nav-explore}}
+    </div>
+  </aside>
+</div>

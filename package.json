@@ -20,6 +20,9 @@
     "format:check": "uv run ruff format --check tools tests",
     "site": "antora --stacktrace site.yml",
     "site:check": "uv run python tools/check_site.py",
+    "release:bundle": "uv run python -m tools.build_student_bundle",
+    "release:check": "uv run python -m tools.validate_student_bundle",
+    "release:prepare": "npm run check && npm run notebooks:test:full && npm run release:bundle && npm run release:check",
     "build": "npm run validate && npm run notebooks:test && npm run site && npm run site:check",
     "check": "npm run lint && npm run format:check && npm run test && npm run build",
     "serve": "http-server public -c-1 -p 8080"

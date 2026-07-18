@@ -4,6 +4,10 @@
 * xref:environment.adoc[Computing environment]
 * xref:readiness-check.adoc[Readiness check]
 * xref:technical-contract.adoc[Execution contract]
+* xref:accessibility.adoc[Accessibility and inclusive use]
+* xref:glossary.adoc[English–French glossary]
+* xref:feedback.adoc[Feedback and course improvement]
+* xref:downloads.adoc[Downloads and releases]
 * Foundations
 ** xref:foundations/mathematical-background.adoc[Mathematical background and error]
 ** xref:foundations/data-lifecycle.adoc[Data lifecycle and audit]

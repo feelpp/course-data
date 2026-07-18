@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,7 @@ DEFAULT_SOURCE = ROOT / "notebooks/instructor"
 DEFAULT_OUTPUT = ROOT / "build/notebooks"
 REQUIRED_METADATA = {
     "assessed",
+    "accessibility",
     "concept_ids",
     "difficulty",
     "duration_minutes",
@@ -40,6 +42,11 @@ def validate_source(notebook: Any, path: Path) -> None:
         raise ValueError(f"{path}: missing course metadata: {', '.join(missing)}")
     if course["language"] != "en":
         raise ValueError(f"{path}: student-facing notebook language must be en")
+    accessibility = course.get("accessibility", {})
+    if accessibility.get("keyboard_only") is not True:
+        raise ValueError(f"{path}: notebook must support keyboard-only completion")
+    if accessibility.get("colour_alone_forbidden") is not True:
+        raise ValueError(f"{path}: notebook must forbid colour-only meaning")
     for index, cell in enumerate(notebook.cells):
         tags = set(cell.metadata.get("tags", []))
         if "solution" in tags and not cell.metadata.get("course", {}).get("student_source"):
@@ -48,7 +55,7 @@ def validate_source(notebook: Any, path: Path) -> None:
 
 def generated_banner(source_path: Path, mode: str) -> Any:
     label = "student" if mode == "student" else "instructor"
-    return nbformat.v4.new_markdown_cell(
+    cell = nbformat.v4.new_markdown_cell(
         "\n".join(
             [
                 f"> **Generated {label} notebook.**",
@@ -59,6 +66,8 @@ def generated_banner(source_path: Path, mode: str) -> Any:
         ),
         metadata={"tags": ["generated-notice"]},
     )
+    cell["id"] = hashlib.sha256(f"banner:{mode}:{source_path}".encode()).hexdigest()[:8]
+    return cell
 
 
 def transform(source: Any, source_path: Path, mode: str) -> Any:

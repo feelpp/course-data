@@ -1,0 +1,29 @@
+= Feedback and course improvement
+:page-course-language: en
+:page-course-concepts: DP-GOV-01, DP-DOC-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 5
+:page-course-outcomes: LO10
+:page-course-prerequisites: None
+:page-course-assessed: no
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
+
+Short anonymous feedback is collected after each teaching block to improve explanations, pacing, notebooks, and environment support. It is not used for grading and should not contain names, email addresses, health information, submission identifiers, or free text that identifies another person.
+
+== Five-question block check
+
+. Which concept is clearest after this block?
+. Which concept remains least clear?
+. How many minutes did the independent task require?
+. Did a page, notebook, dataset, environment, or accessibility problem block progress?
+. What single change would most improve the next delivery?
+
+The first two clarity questions use a 1--5 scale in addition to optional text. The course team reports aggregated counts, medians, and recurring themes only when a group is large enough to protect anonymity.
+
+== Closing the loop
+
+At the start of the next block, the instructor states what will change, what needs more evidence, and what remains unchanged because it is part of the course contract. Urgent technical or accessibility defects should be reported immediately through the approved support channel rather than waiting for the survey.
+
+Assessment-item statistics are reviewed separately after marks are final. They are aggregated by item and contain no student-level rows in the public course repository.

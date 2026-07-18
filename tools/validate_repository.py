@@ -343,6 +343,43 @@ def validate_blueprint(curriculum: dict[str, Any], errors: list[str]) -> None:
     if actual_extra != expected_extra:
         errors.append("Enrichment dependency extra disagrees with the canonical pin inventory")
 
+    operational = curriculum["operational_release"]
+    operational_paths = [
+        *operational["public_pages"],
+        *operational["governance_records"],
+        *operational["operational_templates"],
+        operational["bundle_builder"],
+        operational["bundle_validator"],
+        operational["evidence_summariser"],
+        operational["release_workflow"],
+        operational["release_procedure"],
+        operational["changelog"],
+    ]
+    for relative in operational_paths:
+        if not (ROOT / relative).exists():
+            errors.append(f"Operational release artifact is missing: {relative}")
+    if operational["implementation_status"] != "complete":
+        errors.append("Operational release tooling must be complete")
+    if operational["candidate_status"] != "pending_human_pilot_and_signoff":
+        errors.append("Candidate status must preserve the pending human gate")
+    if operational["annual_release_status"] != "not_authorised":
+        errors.append("Annual release cannot be authorised by repository automation")
+    human_gates = operational["human_gates"]
+    if human_gates["colleague_reviewers"] < 1:
+        errors.append("At least one colleague reviewer is required")
+    if human_gates["representative_students_or_alumni"] < 2:
+        errors.append("At least two representative learners are required")
+    if not all(
+        human_gates[key]
+        for key in (
+            "academic_signoff_required",
+            "accessibility_signoff_required",
+            "data_steward_signoff_required",
+            "assessment_custodian_signoff_required",
+        )
+    ):
+        errors.append("Every named human release sign-off must remain required")
+
 
 def load_curriculum(errors: list[str]) -> tuple[dict[str, Any], set[str], set[str]]:
     curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))
@@ -397,6 +434,11 @@ def validate_notebooks(concepts: set[str], outcomes: set[str], errors: list[str]
         course = notebook.metadata.get("course", {})
         if course.get("language") != "en":
             errors.append(f"{path.relative_to(ROOT)}: language must be en")
+        accessibility = course.get("accessibility", {})
+        if accessibility.get("keyboard_only") is not True:
+            errors.append(f"{path.relative_to(ROOT)}: keyboard-only completion is required")
+        if accessibility.get("colour_alone_forbidden") is not True:
+            errors.append(f"{path.relative_to(ROOT)}: colour-only meaning must be forbidden")
         if course.get("priority") == "P0" and course.get("execution_profile") != "fast":
             errors.append(f"{path.relative_to(ROOT)}: P0 notebooks must execute in fast CI")
         unknown_concepts = set(course.get("concept_ids", [])) - concepts
@@ -410,6 +452,22 @@ def validate_notebooks(concepts: set[str], outcomes: set[str], errors: list[str]
             if "solution" in tags and not cell.metadata.get("course", {}).get("student_source"):
                 errors.append(
                     f"{path.relative_to(ROOT)}: solution cell {index} lacks student source"
+                )
+        combined_code = "\n".join(
+            cell.source for cell in notebook.cells if cell.cell_type == "code"
+        )
+        if course.get("priority") in {"P0", "P1"} and "ipywidgets" in combined_code:
+            errors.append(f"{path.relative_to(ROOT)}: required notebook depends on widgets")
+        plotting_cells = [
+            cell.source
+            for cell in notebook.cells
+            if cell.cell_type == "code" and "plt.show()" in cell.source
+        ]
+        for source in plotting_cells:
+            required_figure_terms = ("title=", "xlabel=", "ylabel=", "linestyle=", "marker=")
+            if any(term not in source for term in required_figure_terms):
+                errors.append(
+                    f"{path.relative_to(ROOT)}: figure lacks labels or non-colour encoding"
                 )
 
 

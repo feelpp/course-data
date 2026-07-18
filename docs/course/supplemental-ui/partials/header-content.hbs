@@ -1,0 +1,64 @@
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="header">
+  <nav class="navbar navbar-expand-sm bg-dark navbar-dark" aria-label="Global navigation">
+    <div class="navbar-brand">
+      <div class="navbar-item feelpp-logo">
+        <a href="{{{site.url}}}"><img src="{{{uiRootPath}}}/img/feelpp-logo.svg" alt="Feel++ documentation home"/></a>
+      </div>
+      <button class="navbar-burger" data-target="topbar-nav" aria-label="Open global navigation" aria-controls="topbar-nav" aria-expanded="false">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <div class="navbar-item search hide-for-print">
+          <form class="search" role="search">
+            <i class="fa-solid fa-search" aria-hidden="true"></i>
+            <label class="sr-only" for="search-query">Search the course</label>
+            <input type="text" placeholder="Search {{{site.title}}}" class="query" id="search-query" aria-label="Search the course">
+          </form>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <div class="navbar-link">Manuals</div>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://docs.feelpp.org/user/{{{asciidoc.attributes.feelpp-version}}}">User</a>
+            <a class="navbar-item" href="https://docs.feelpp.org/dev/{{{asciidoc.attributes.feelpp-version}}}">Developer</a>
+            <a class="navbar-item" href="https://docs.feelpp.org/toolbox/{{{asciidoc.attributes.feelpp-version}}}">Toolbox</a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable">
+          <div class="navbar-link" data-title="Support" aria-label="Support links">
+            <span class="icon"><img src="{{{uiRootPath}}}/img/octicons-24.svg#view-comment-discussion" alt=""/></span>
+          </div>
+          <div class="navbar-dropdown is-right">
+            <a class="navbar-item has-icon" href="https://join.slack.com/t/feelpp/shared_invite/zt-2qe0q9hw-4pVbhohCXUE6Po9Ma8dbiQ" target="_blank" rel="noopener">
+              <span class="icon"><img src="{{{uiRootPath}}}/img/slack-icon.svg" alt=""/></span><span>Chat</span>
+            </a>
+            <a class="navbar-item has-icon" href="https://github.com/orgs/feelpp/discussions" target="_blank" rel="noopener">
+              <span class="icon"><img src="{{{uiRootPath}}}/img/octicons-16.svg#view-discussion-closed" alt=""/></span><span>Discussions</span>
+            </a>
+            <a class="navbar-item has-icon" href="{{replace page.attributes.origin-url '.git' ''}}" target="_blank" rel="noopener">
+              <span class="icon"><img src="{{{uiRootPath}}}/img/octicons-16.svg#view-mark-github" alt=""/></span><span>Source</span>
+            </a>
+            <a class="navbar-item has-icon" href="https://linkedin.com/company/feelpp" target="_blank" rel="noopener">
+              <span class="icon"><img src="{{{uiRootPath}}}/img/social-icon/LinkedIn_black.svg" alt=""/></span><span>LinkedIn</span>
+            </a>
+            <a class="navbar-item has-icon" href="{{replace page.attributes.origin-url '.git' ''}}/issues" target="_blank" rel="noopener">
+              <span class="icon"><img src="{{uiRootPath}}/img/octicons-16.svg#view-bug" alt=""/></span><span>Issues</span>
+            </a>
+          </div>
+        </div>
+        <div class="navbar-item has-dropdown is-hoverable download-item">
+          {{#with (get-install-page 'latest')}}
+            <div class="navbar-item"><a href="{{{relativize this.pub.url}}}" class="download-btn">Get Feel++</a></div>
+          {{/with}}
+        </div>
+        <div class="navbar-item"><a class="navbar-brand" href="https://www.cemosis.fr"><img class="cemosis-logo" src="{{{uiRootPath}}}/img/cemosis-logo.svg" alt="Cemosis"/></a></div>
+        <div class="navbar-item"><a class="navbar-brand" href="https://www.cnrs.fr"><img class="cnrs-logo" src="{{{uiRootPath}}}/img/logo-cnrs.svg" alt="CNRS"/></a></div>
+        <div class="navbar-item"><a class="navbar-brand" href="https://www.unistra.fr"><img class="unistra-logo" src="{{{uiRootPath}}}/img/unistra-logo.svg" alt="Université de Strasbourg"/></a></div>
+      </div>
+    </div>
+  </nav>
+</header>
