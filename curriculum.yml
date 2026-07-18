@@ -131,6 +131,30 @@ analytical_release:
   project_specification: docs/course/modules/ROOT/pages/assessment/mini-project.adoc
   final_specification: docs/course/modules/ROOT/pages/assessment/final-exam-specimen.adoc
 
+assessment_hardening:
+  implementation_status: complete
+  live_release_status: pending_human_signoff_and_physical_pilot
+  public_delivery_page: docs/course/modules/ROOT/pages/assessment/delivery.adoc
+  validation_record: docs/governance/assessment-hardening-validation.md
+  variant_counts:
+    control_1: 2
+    control_2: 2
+    final: 3
+  final_roles: [main, retake, reserve]
+  required_priorities: [P0, P1]
+  network_required: false
+  personal_account_required: false
+  accelerator_required: false
+  runtime_used_for_marks: false
+  private_controls:
+    - deterministic generation and checksums
+    - separated public and hidden checks
+    - point-level partial-credit records
+    - pseudonymous allow-listed submission export
+    - checksum-addressed archive
+    - fresh-account lifecycle rehearsal
+    - independently runnable retake
+
 priority_definitions:
   P0:
     label: Essential

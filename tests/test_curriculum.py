@@ -102,3 +102,20 @@ def test_analytical_release_covers_every_core_concept() -> None:
         assert all((ROOT / path).exists() for path in release[group])
     assert (ROOT / release["project_specification"]).exists()
     assert (ROOT / release["final_specification"]).exists()
+
+
+def test_assessment_hardening_contract_is_complete() -> None:
+    curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))
+    record = curriculum["assessment_hardening"]
+    assert record["implementation_status"] == "complete"
+    assert record["live_release_status"] == "pending_human_signoff_and_physical_pilot"
+    assert record["variant_counts"] == {"control_1": 2, "control_2": 2, "final": 3}
+    assert record["final_roles"] == ["main", "retake", "reserve"]
+    assert set(record["required_priorities"]) == {"P0", "P1"}
+    assert record["network_required"] is False
+    assert record["personal_account_required"] is False
+    assert record["accelerator_required"] is False
+    assert record["runtime_used_for_marks"] is False
+    assert len(record["private_controls"]) == 7
+    assert (ROOT / record["public_delivery_page"]).exists()
+    assert (ROOT / record["validation_record"]).exists()
