@@ -31,3 +31,4 @@ The fast pull-request gate checks:
 
 Scheduled validation runs the full notebook profile. GitHub Pages deployment rebuilds from the lockfiles and publishes only `public/`.
 
+Python dependency upgrades are prepared with `uv lock --upgrade` and reviewed with the full notebook gate. Dependabot manages npm and commit-pinned GitHub Actions; it does not manage Python because pip-style updates do not maintain `uv.lock` consistently.
