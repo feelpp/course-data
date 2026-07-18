@@ -45,3 +45,9 @@ Notebooks locate data automatically when run inside the course clone. If you dow
 * xref:attachment$notebooks/analytical/performance-columnar.ipynb[Columnar performance]
 
 The analytical notebooks are P1 Core and execute in the full scheduled/release workflow. Each contains a guided reference path, public checks, and an independent transfer task.
+
+== Optional extension notebook
+
+* xref:attachment$notebooks/extensions/jax-transformations.ipynb[JAX transformations: autodiff, JIT, and vectorisation]
+
+This P2 notebook is not assessed and is not part of the 28-hour contact contract. Install its separate CPU dependencies with `npm run setup:extensions`. The normal course setup and all P0/P1 notebooks remain independent of JAX and Polars.

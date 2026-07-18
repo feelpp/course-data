@@ -21,6 +21,14 @@
 ** xref:analytical/tree-ensembles.adoc[Tree ensembles]
 ** xref:analytical/pca-clustering.adoc[PCA and clustering]
 ** xref:analytical/performance-columnar.adoc[Columnar performance]
+* Extensions
+** xref:extensions/jax-transformations.adoc[JAX transformations]
+** xref:extensions/kernel-methods.adoc[Kernel methods]
+** xref:extensions/probability-calibration.adoc[Probability calibration]
+** xref:extensions/dataframe-engines.adoc[Dataframe engines]
+** xref:extensions/experiment-tracking.adoc[Experiment tracking]
+** xref:extensions/drift-monitoring.adoc[Drift and monitoring]
+** xref:extensions/downstream-paths.adoc[Downstream CSMI paths]
 * xref:notebooks.adoc[Notebook workflow]
 * Assessment
 ** xref:assessment/overview.adoc[Assessment guide]

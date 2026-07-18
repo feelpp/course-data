@@ -7,6 +7,7 @@ import hashlib
 import json
 import re
 import subprocess
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -263,6 +264,54 @@ def validate_blueprint(curriculum: dict[str, Any], errors: list[str]) -> None:
     question_ids = analytical["question_bank_ids"]
     if len(question_ids) != len(set(question_ids)) or len(question_ids) < len(analytical["pages"]):
         errors.append("Analytical question-bank identifiers are incomplete or duplicated")
+
+    enrichment = curriculum["enrichment_release"]
+    enrichment_paths = [
+        *enrichment["pages"],
+        *enrichment["notebooks"],
+        enrichment["validation_record"],
+        enrichment["downstream_record"],
+    ]
+    for relative in enrichment_paths:
+        if not (ROOT / relative).exists():
+            errors.append(f"Enrichment artifact is missing: {relative}")
+    expected_p2 = {item["id"] for item in curriculum["concepts"] if item["priority"] == "P2"}
+    if set(enrichment["concepts"]) != expected_p2:
+        errors.append("Enrichment concept inventory must equal the complete P2 concept set")
+    if (
+        enrichment["required_contact_hours"] != 0
+        or enrichment["assessment_eligible"]
+        or not enrichment["removable_without_core_loss"]
+    ):
+        errors.append("Enrichment must remain optional and removable from the core contract")
+    for relative in enrichment["pages"]:
+        path = ROOT / relative
+        if not path.exists():
+            continue
+        attrs = parse_header(path)
+        if attrs.get("page-course-priority") != "P2":
+            errors.append(f"Enrichment page must be P2: {relative}")
+        if attrs.get("page-course-assessed") != "no":
+            errors.append(f"Enrichment page cannot be assessed: {relative}")
+    for relative in enrichment["notebooks"]:
+        path = ROOT / relative
+        if not path.exists():
+            continue
+        course = nbformat.read(path, as_version=4).metadata.get("course", {})
+        if (
+            course.get("priority") != "P2"
+            or course.get("assessed") is not False
+            or course.get("execution_profile") != "full"
+        ):
+            errors.append(f"Enrichment notebook must be optional P2 and full CPU: {relative}")
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    extra_name = enrichment["dependency_extra"]
+    actual_extra = set(project["project"]["optional-dependencies"].get(extra_name, []))
+    expected_extra = {
+        f"{name}=={version}" for name, version in enrichment["pinned_optional_dependencies"].items()
+    }
+    if actual_extra != expected_extra:
+        errors.append("Enrichment dependency extra disagrees with the canonical pin inventory")
 
 
 def load_curriculum(errors: list[str]) -> tuple[dict[str, Any], set[str], set[str]]:

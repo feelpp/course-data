@@ -1,0 +1,48 @@
+= Kernel methods
+:page-course-language: en
+:page-course-concepts: DP-KER-01, DP-REG-01, DP-CV-01, DP-NUM-01
+:page-course-priority: P2
+:page-course-difficulty: D3
+:page-course-duration-minutes: 55
+:page-course-outcomes: LO6, LO7, LO8
+:page-course-prerequisites: Ridge regularisation, cross-validation, feature scaling
+:page-course-assessed: no
+
+[.course-badge.priority-p2]#P2 Extension# [.course-badge.difficulty-d3]#D3 Synthesis#
+
+Kernel methods express similarity through a positive-semidefinite Gram matrix. They provide a useful bridge between linear regularisation, nonlinear prediction, numerical conditioning, and scientific priors without requiring a neural network.
+
+== Core construction
+
+For observations stem:[x_i], choose a kernel stem:[k(x_i,x_j)] and form stem:[K_{ij}=k(x_i,x_j)]. Kernel Ridge solves
+
+[stem]
+++++
+(K + \alpha I)c = y,
+++++
+
+then predicts stem:[f(x)=\sum_i c_i k(x_i,x)]. Solve the linear system; do not form an explicit inverse. The regularisation stem:[\alpha] controls stability and fit, while an RBF kernel's stem:[\gamma] controls locality. Both must be selected inside the validation design.
+
+== Guided comparison
+
+. Standardise numeric inputs inside a pipeline.
+. Compare linear Ridge with `KernelRidge(kernel="rbf")` on a small nonlinear oracle.
+. Search a modest joint grid for `alpha` and `gamma` with the correct group or time split.
+. Report the baseline, validation design, uncertainty across folds, and residual structure.
+. Repeat after rescaling one feature to expose why distance-based kernels need scale discipline.
+
+The official https://scikit-learn.org/stable/modules/kernel_ridge.html[scikit-learn Kernel Ridge documentation] describes the estimator contract. The page is original course material; the restricted legacy kernel PDF is not redistributed or used as a student dependency.
+
+== Scaling boundary
+
+The Gram matrix stores stem:[n^2] pairwise similarities and a direct solve can approach stem:[n^3] work. Kernel methods can be excellent for hundreds or a few thousands of observations and inappropriate for millions. Before using one, estimate matrix memory, fit complexity, prediction cost, and the consequence of hyperparameter search.
+
+== Failure modes
+
+* Leakage from scaling or kernel selection before cross-validation.
+* A `gamma` so large that each observation becomes isolated, or so small that the model becomes nearly constant.
+* Treating a kernel score as causal evidence.
+* Comparing a tuned kernel model with an untuned or differently split baseline.
+* Ignoring ill-conditioning because the final metric appears acceptable.
+
+Continue to xref:extensions/downstream-paths.adoc[the downstream map] for optimisation and SciML connections.

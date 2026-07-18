@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import nbformat
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -119,3 +120,35 @@ def test_assessment_hardening_contract_is_complete() -> None:
     assert len(record["private_controls"]) == 7
     assert (ROOT / record["public_delivery_page"]).exists()
     assert (ROOT / record["validation_record"]).exists()
+
+
+def test_enrichment_is_complete_optional_and_removable() -> None:
+    curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))
+    release = curriculum["enrichment_release"]
+    expected_p2 = {
+        concept["id"] for concept in curriculum["concepts"] if concept["priority"] == "P2"
+    }
+    assert release["implementation_status"] == "complete"
+    assert release["required_contact_hours"] == 0
+    assert release["assessment_eligible"] is False
+    assert release["removable_without_core_loss"] is True
+    assert set(release["concepts"]) == expected_p2
+    assert len(release["pages"]) == 7
+    assert len(release["notebooks"]) == 1
+    for relative in release["pages"]:
+        source = (ROOT / relative).read_text(encoding="utf-8")
+        assert ":page-course-priority: P2" in source
+        assert ":page-course-assessed: no" in source
+    notebook = nbformat.read(ROOT / release["notebooks"][0], as_version=4)
+    assert notebook.metadata["course"]["priority"] == "P2"
+    assert notebook.metadata["course"]["assessed"] is False
+    assert notebook.metadata["course"]["execution_profile"] == "full"
+    for key in ("validation_record", "downstream_record"):
+        assert (ROOT / release[key]).exists()
+    core_paths = [
+        *curriculum["foundation_release"]["pages"],
+        *curriculum["foundation_release"]["notebooks"],
+        *curriculum["analytical_release"]["pages"],
+        *curriculum["analytical_release"]["notebooks"],
+    ]
+    assert all("/extensions/" not in path for path in core_paths)

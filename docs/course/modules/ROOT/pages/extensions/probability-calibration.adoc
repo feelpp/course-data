@@ -1,0 +1,33 @@
+= Probability calibration
+:page-course-language: en
+:page-course-concepts: DP-THR-01, DP-PROB-01, DP-MET-02, DP-CV-01
+:page-course-priority: P2
+:page-course-difficulty: D3
+:page-course-duration-minutes: 45
+:page-course-outcomes: LO6, LO7, LO10
+:page-course-prerequisites: Classification losses, cross-validation, threshold selection
+:page-course-assessed: no
+
+[.course-badge.priority-p2]#P2 Extension# [.course-badge.difficulty-d3]#D3 Synthesis#
+
+A classifier can rank cases well while its reported probabilities are unreliable. Calibration asks whether cases assigned probability stem:[p] occur at approximately rate stem:[p] over a relevant population. It is different from discrimination and different again from choosing a decision threshold.
+
+== Evidence to collect
+
+* A reliability diagram with bin counts or uncertainty, not only a smooth line.
+* A proper scoring rule such as log loss or Brier score.
+* A discrimination measure appropriate to the class balance.
+* The operational threshold and consequence model, selected without touching the final test.
+* Results by relevant site, time period, or group when pooled calibration can hide failures.
+
+== Leakage-safe calibration
+
+Fit the base estimator on training data. Learn Platt/sigmoid or isotonic calibration from held-out predictions or through cross-validation, never from the final test. Isotonic regression is flexible but can overfit small calibration sets; sigmoid calibration is more constrained. Preserve an untouched final evaluation set for the complete estimator-plus-calibrator decision.
+
+Use https://scikit-learn.org/stable/modules/calibration.html[scikit-learn's calibration guide] for the supported estimator API and cross-validation behaviour.
+
+== Independent transfer
+
+Create an imbalanced binary oracle whose logits are deliberately overconfident. Compare the uncalibrated model, sigmoid calibration, and isotonic calibration across at least three seeds. Report Brier score, log loss, discrimination, reliability evidence, and the threshold consequence. Explain why selecting the lowest Brier score does not automatically select the best operational decision.
+
+Calibration does not repair dataset shift, label bias, an invalid split, or target leakage. Continue with xref:extensions/drift-monitoring.adoc[drift and monitoring] for post-release evidence.

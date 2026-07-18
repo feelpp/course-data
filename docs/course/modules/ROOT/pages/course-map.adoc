@@ -105,6 +105,12 @@ The course contains fourteen two-hour blocks. P0 and P1 material is the binding 
 
 The Beijing Multi-Site Air Quality snapshot is the semester spine. AI4I 2020 supplies a compact industrial classification context, Dry Bean is a reserve multiclass dataset, and versioned synthetic generators provide mathematical oracles. No normal class activity or assessment depends on a live download.
 
+== Optional extension routes
+
+The extension section sits outside the fourteen scheduled blocks. Students may select JAX transformations, kernel methods, probability calibration, DuckDB/Polars comparison, local experiment tracking, or drift monitoring for preparation or project exploration. These routes add no required contact hours and no assessment prerequisite.
+
+Use xref:extensions/downstream-paths.adoc[the downstream CSMI map] to carry the appropriate evidence into Scientific Machine Learning, High Performance Computing, Database, and Project courses.
+
 == How to read the map
 
 * *Importance* says whether a concept is required: P0 Essential, P1 Core, P2 Extension, or P3 Deferred.
