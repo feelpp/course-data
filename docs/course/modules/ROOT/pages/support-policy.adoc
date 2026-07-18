@@ -1,0 +1,14 @@
+= Support policy
+:page-course-language: en
+:page-course-concepts: DP-REP-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 5
+:page-course-outcomes: LO9
+:page-course-prerequisites: None
+:page-course-assessed: no
+
+Supported student environments are Ubuntu 24.04 LTS, Windows through WSL, and current macOS releases, using CPython 3.12 and the checked-in lockfiles. CPU execution is the required baseline.
+
+Report reproducible defects through the repository issue tracker. Include the operating system, Python and Node versions, the command that failed, and a minimal error log. Do not attach private assessment content or sensitive data.
+

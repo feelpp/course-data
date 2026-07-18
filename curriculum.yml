@@ -1,0 +1,539 @@
+schema_version: 1
+decision_version: "2026-07-18-baseline"
+
+course:
+  id: course-data
+  title: Data Processing and Mining
+  programme: CSMI
+  level: M1
+  semester: S1
+  ects: 3
+  contact_hours: 28
+  delivery_blocks: 14
+  block_duration_hours: 2
+  site_language: en
+  student_facing_language: en
+  primary_runtime:
+    python: "3.12"
+    os: Ubuntu 24.04 LTS
+    accelerator_required: false
+
+priority_definitions:
+  P0:
+    label: Essential
+    contract: Taught explicitly, practised repeatedly, assessed individually, final-exam eligible.
+  P1:
+    label: Core
+    contract: Taught and practised, assessed at least once, eligible for announced assessments.
+  P2:
+    label: Extension
+    contract: Optional or selected bridge/project material; never an unannounced prerequisite.
+  P3:
+    label: Deferred
+    contract: Outside the 28-hour contract and transferred to another course or archive.
+
+difficulty_definitions:
+  D1: Guided
+  D2: Independent
+  D3: Synthesis
+
+learning_outcomes:
+  - id: LO1
+    statement: Formulate a data question and identify the unit of analysis, target, stakeholders, assumptions, and risks.
+    priority: P0
+  - id: LO2
+    statement: Document and audit provenance, licence, privacy, schema, types, units, missingness, duplicates, anomalies, and representativeness.
+    priority: P0
+  - id: LO3
+    statement: Combine and transform tabular data with validated joins, reshaping, grouping, and executable quality checks.
+    priority: P0
+  - id: LO4
+    statement: Produce reproducible exploratory analysis and truthful visualisations.
+    priority: P0
+  - id: LO5
+    statement: Construct leakage-safe preprocessing and evaluation pipelines for heterogeneous features.
+    priority: P0
+  - id: LO6
+    statement: Select and interpret baselines, splits, cross-validation, metrics, thresholds, uncertainty, and failure analyses.
+    priority: P0
+  - id: LO7
+    statement: Explain and apply the core supervised and unsupervised methods in the course priority map.
+    priority: P1
+  - id: LO8
+    statement: Reason about complexity, memory, dtypes, columnar storage, and query-before-materialisation workflows.
+    priority: P1
+  - id: LO9
+    statement: Test transformations and metrics with toy oracles and execute the analysis from a clean checkout.
+    priority: P0
+  - id: LO10
+    statement: Write dataset and result documentation, limitations, and an AI-assistance declaration.
+    priority: P0
+  - id: LO11
+    statement: Explain how vectorised data workflows connect to downstream JAX, SciML, and HPC topics.
+    priority: P2
+
+course_boundaries:
+  owns:
+    - Data provenance, quality, schemas, wrangling, and exploratory analysis
+    - Leakage-safe preprocessing and evaluation
+    - Statistical-learning foundations and tabular baselines
+    - PCA, clustering, and cluster validation
+    - Performance-aware single-node data processing
+    - Reproducibility, testing, dataset/result documentation, and responsible data use
+  applies_from_other_courses:
+    project_1:
+      - Git and GitHub
+      - Continuous integration
+      - Containers and project management
+    database:
+      - Relational design and SQL foundations
+    random_models:
+      - Probability and stochastic-process foundations
+    scientific_computing_optimisation:
+      - Numerical methods and optimisation foundations
+  defers:
+    scientific_machine_learning_1:
+      - Detailed JAX model construction
+      - PyTrees and Optax training architectures
+      - Neural-network implementation mastery
+      - Accelerator and physics-informed learning
+    hpc:
+      - Distributed data processing and multi-device scaling
+    database:
+      - Relational design, transaction theory, SQL, and NoSQL in depth
+
+assessments:
+  - id: A1
+    title: Control 1 - Data audit and safe baseline
+    weight_percent: 20
+    mode: individual
+    ai_mode: A
+    contact_block: 8
+  - id: A2
+    title: Reproducible scientific or industrial mini-project
+    weight_percent: 25
+    mode: pair_with_individual_verification
+    ai_mode: B
+    contact_block: 13
+  - id: A3
+    title: Control 2 - Audit a flawed analysis
+    weight_percent: 15
+    mode: individual
+    ai_mode: A
+    contact_block: 14
+  - id: A4
+    title: Final practical and written exam
+    weight_percent: 40
+    mode: individual
+    ai_mode: A
+    duration_minutes: 165
+
+datasets:
+  spine:
+    id: uci-501
+    title: Beijing Multi-Site Air Quality
+    doi: 10.24432/C5RK5G
+    licence: CC-BY-4.0
+  industrial_classification:
+    id: uci-601
+    title: AI4I 2020 Predictive Maintenance
+    doi: 10.24432/C5HS5C
+    licence: CC-BY-4.0
+  multiclass_reserve:
+    id: uci-602
+    title: Dry Bean
+    doi: 10.24432/C50S4B
+    licence: CC-BY-4.0
+  synthetic_oracles:
+    generated: true
+    versioned: true
+
+concepts:
+  - id: DP-FND-01
+    title: Problem formulation and unit of analysis
+    priority: P0
+    difficulty: D2
+    outcomes: [LO1]
+    assessed_in: [A1, A2, A4]
+  - id: DP-FND-02
+    title: Data lifecycle
+    priority: P0
+    difficulty: D1
+    outcomes: [LO1, LO10]
+    assessed_in: [A2, A3, A4]
+  - id: DP-GOV-01
+    title: Provenance, licence, citation, purpose, and privacy
+    priority: P0
+    difficulty: D2
+    outcomes: [LO2, LO10]
+    assessed_in: [A1, A2, A3, A4]
+  - id: DP-REP-01
+    title: Reproducible environment, seeds, and clean rerun
+    priority: P0
+    difficulty: D2
+    outcomes: [LO9]
+    assessed_in: [A1, A2, A3, A4]
+  - id: DP-ARR-01
+    title: NumPy arrays, shapes, dtypes, broadcasting, and vectorisation
+    priority: P0
+    difficulty: D1
+    outcomes: [LO3, LO8]
+    assessed_in: [A1, A4]
+  - id: DP-TAB-01
+    title: DataFrames, indexes, selection, and safe assignment
+    priority: P0
+    difficulty: D1
+    outcomes: [LO3]
+    assessed_in: [A1, A2, A4]
+  - id: DP-TAB-02
+    title: Tidy data, reshape, group, and aggregate
+    priority: P0
+    difficulty: D2
+    outcomes: [LO3]
+    assessed_in: [A1, A2, A4]
+  - id: DP-TAB-03
+    title: Validated joins and referential integrity
+    priority: P0
+    difficulty: D2
+    outcomes: [LO2, LO3]
+    assessed_in: [A1, A2, A3, A4]
+  - id: DP-QLT-01
+    title: Types, units, timestamps, categories, and encodings
+    priority: P0
+    difficulty: D2
+    outcomes: [LO2, LO3]
+    assessed_in: [A1, A2, A4]
+  - id: DP-QLT-02
+    title: Missing values and fitted imputation
+    priority: P0
+    difficulty: D2
+    outcomes: [LO2, LO5]
+    assessed_in: [A1, A2, A3, A4]
+  - id: DP-QLT-03
+    title: Duplicates, impossible values, schemas, and data contracts
+    priority: P0
+    difficulty: D2
+    outcomes: [LO2, LO9]
+    assessed_in: [A1, A2, A3, A4]
+  - id: DP-QLT-04
+    title: Outliers and anomalies
+    priority: P0
+    difficulty: D3
+    outcomes: [LO2, LO4]
+    assessed_in: [A1, A2, A4]
+  - id: DP-EDA-01
+    title: Exploratory data analysis and truthful visualisation
+    priority: P0
+    difficulty: D2
+    outcomes: [LO4]
+    assessed_in: [A2, A3, A4]
+  - id: DP-SMP-01
+    title: Sampling, representativeness, selection bias, and stratification
+    priority: P0
+    difficulty: D3
+    outcomes: [LO1, LO2, LO6]
+    assessed_in: [A1, A2, A4]
+  - id: DP-EVAL-01
+    title: Train, validation, and untouched test roles
+    priority: P0
+    difficulty: D2
+    outcomes: [LO5, LO6]
+    assessed_in: [A1, A2, A3, A4]
+  - id: DP-EVAL-02
+    title: Target, temporal, and group leakage
+    priority: P0
+    difficulty: D3
+    outcomes: [LO5, LO6]
+    assessed_in: [A1, A2, A3, A4]
+  - id: DP-PIPE-01
+    title: Fitted preprocessing pipelines for heterogeneous data
+    priority: P0
+    difficulty: D3
+    outcomes: [LO5, LO9]
+    assessed_in: [A1, A2, A3, A4]
+  - id: DP-EVAL-03
+    title: Baselines and sanity checks
+    priority: P0
+    difficulty: D2
+    outcomes: [LO6]
+    assessed_in: [A1, A2, A4]
+  - id: DP-MET-01
+    title: Regression metrics and residual analysis
+    priority: P0
+    difficulty: D2
+    outcomes: [LO6]
+    assessed_in: [A1, A2, A4]
+  - id: DP-MET-02
+    title: Classification confusion, precision, recall, F1, ROC-AUC, and PR-AUC
+    priority: P0
+    difficulty: D2
+    outcomes: [LO6]
+    assessed_in: [A1, A2, A3, A4]
+  - id: DP-DOC-01
+    title: Dataset datasheet and result or model card
+    priority: P0
+    difficulty: D2
+    outcomes: [LO10]
+    assessed_in: [A2, A3, A4]
+  - id: DP-TST-01
+    title: Tests for transformations, metrics, and end-to-end smoke paths
+    priority: P0
+    difficulty: D2
+    outcomes: [LO9]
+    assessed_in: [A1, A2, A3, A4]
+  - id: DP-AI-01
+    title: Responsible AI assistance, disclosure, and independent verification
+    priority: P0
+    difficulty: D2
+    outcomes: [LO10]
+    assessed_in: [A2, A3, A4]
+  - id: DP-LIN-01
+    title: Stable linear regression, conditioning, and residuals
+    priority: P1
+    difficulty: D2
+    outcomes: [LO7]
+    assessed_in: [A2, A4]
+  - id: DP-PROB-01
+    title: Probabilistic modelling, likelihood, loss, and uncertainty
+    priority: P1
+    difficulty: D3
+    outcomes: [LO7]
+    assessed_in: [A2, A3, A4]
+  - id: DP-CLS-01
+    title: Logistic and softmax regression, logits, and cross-entropy
+    priority: P1
+    difficulty: D2
+    outcomes: [LO7]
+    assessed_in: [A2, A4]
+  - id: DP-NUM-01
+    title: Numerical stability, scaling, log-sum-exp, and conditioning
+    priority: P1
+    difficulty: D3
+    outcomes: [LO7, LO8]
+    assessed_in: [A3, A4]
+  - id: DP-REG-01
+    title: Ridge and Lasso regularisation
+    priority: P1
+    difficulty: D2
+    outcomes: [LO7]
+    assessed_in: [A1, A2, A4]
+  - id: DP-GEN-01
+    title: Bias, variance, overfitting, and learning curves
+    priority: P1
+    difficulty: D3
+    outcomes: [LO6, LO7]
+    assessed_in: [A1, A3, A4]
+  - id: DP-CV-01
+    title: Cross-validation with group and time constraints
+    priority: P1
+    difficulty: D3
+    outcomes: [LO5, LO6]
+    assessed_in: [A1, A2, A3, A4]
+  - id: DP-SEARCH-01
+    title: Grid and random hyperparameter search
+    priority: P1
+    difficulty: D2
+    outcomes: [LO6, LO7]
+    assessed_in: [A2, A4]
+  - id: DP-FEAT-01
+    title: Feature engineering and leakage-safe feature selection
+    priority: P1
+    difficulty: D3
+    outcomes: [LO5, LO7]
+    assessed_in: [A2, A4]
+  - id: DP-TREE-01
+    title: Decision trees and CART regularisation
+    priority: P1
+    difficulty: D2
+    outcomes: [LO7]
+    assessed_in: [A2, A4]
+  - id: DP-ENS-01
+    title: Bagging, random forests, and out-of-bag evaluation
+    priority: P1
+    difficulty: D2
+    outcomes: [LO7]
+    assessed_in: [A2, A4]
+  - id: DP-ENS-02
+    title: Gradient boosting concepts
+    priority: P1
+    difficulty: D2
+    outcomes: [LO7]
+    assessed_in: [A2]
+  - id: DP-THR-01
+    title: Imbalance, thresholds, asymmetric costs, and calibration
+    priority: P1
+    difficulty: D3
+    outcomes: [LO6, LO7]
+    assessed_in: [A2, A3, A4]
+  - id: DP-PCA-01
+    title: PCA and SVD dimensionality reduction
+    priority: P1
+    difficulty: D3
+    outcomes: [LO7, LO8]
+    assessed_in: [A2, A4]
+  - id: DP-CLU-01
+    title: K-means clustering
+    priority: P1
+    difficulty: D2
+    outcomes: [LO7]
+    assessed_in: [A2, A4]
+  - id: DP-CLU-02
+    title: Hierarchical clustering and DBSCAN comparison
+    priority: P1
+    difficulty: D2
+    outcomes: [LO7]
+    assessed_in: [A2]
+  - id: DP-CLU-03
+    title: Cluster stability, validation, and interpretation limits
+    priority: P1
+    difficulty: D3
+    outcomes: [LO6, LO7]
+    assessed_in: [A2, A3, A4]
+  - id: DP-PERF-01
+    title: Complexity, memory, dtypes, vectorised and chunked processing
+    priority: P1
+    difficulty: D2
+    outcomes: [LO8]
+    assessed_in: [A2, A3, A4]
+  - id: DP-FMT-01
+    title: CSV limits, Parquet, Arrow, and columnar processing
+    priority: P1
+    difficulty: D2
+    outcomes: [LO8]
+    assessed_in: [A2, A4]
+  - id: DP-SQL-01
+    title: Analytical query pushdown and dataframe interoperability
+    priority: P1
+    difficulty: D2
+    outcomes: [LO8]
+    assessed_in: [A2]
+  - id: DP-INT-01
+    title: Predictive interpretation and non-causality caveats
+    priority: P1
+    difficulty: D3
+    outcomes: [LO6, LO10]
+    assessed_in: [A2, A3, A4]
+  - id: DP-JAX-01
+    title: JAX arrays, pure functions, and explicit PRNG keys
+    priority: P2
+    difficulty: D2
+    outcomes: [LO11]
+    assessed_in: []
+  - id: DP-JAX-02
+    title: Automatic differentiation and gradient verification
+    priority: P2
+    difficulty: D2
+    outcomes: [LO11]
+    assessed_in: []
+  - id: DP-JAX-03
+    title: JIT compilation and automatic vectorisation
+    priority: P2
+    difficulty: D2
+    outcomes: [LO8, LO11]
+    assessed_in: []
+  - id: DP-ENG-01
+    title: DuckDB or Polars comparative engine lab
+    priority: P2
+    difficulty: D2
+    outcomes: [LO8]
+    assessed_in: [A2]
+  - id: DP-OPS-01
+    title: Experiment tracking, drift, and monitoring concepts
+    priority: P2
+    difficulty: D2
+    outcomes: [LO9, LO10]
+    assessed_in: [A2]
+  - id: DP-KER-01
+    title: Kernel methods and kernel Ridge or SVM
+    priority: P2
+    difficulty: D3
+    outcomes: [LO7]
+    assessed_in: []
+  - id: DP-NN-01
+    title: Neural-network and MLP construction
+    priority: P3
+    difficulty: D3
+    outcomes: [LO11]
+    assessed_in: []
+  - id: DP-NN-02
+    title: PyTrees, Optax agent architecture, and checkpoint internals
+    priority: P3
+    difficulty: D3
+    outcomes: [LO11]
+    assessed_in: []
+  - id: DP-DL-01
+    title: Deep CNN, Inception, residual, and sentiment architectures
+    priority: P3
+    difficulty: D3
+    outcomes: [LO11]
+    assessed_in: []
+  - id: DP-DIST-01
+    title: Distributed data and multi-device JAX processing
+    priority: P3
+    difficulty: D3
+    outcomes: [LO8, LO11]
+    assessed_in: []
+  - id: DP-MLOPS-01
+    title: Full MLOps deployment and cloud orchestration
+    priority: P3
+    difficulty: D3
+    outcomes: [LO10]
+    assessed_in: []
+
+schedule:
+  - block: 1
+    title: Course contract, data lifecycle, diagnostic, and reproducible repository
+    concepts: [DP-FND-01, DP-FND-02, DP-GOV-01, DP-REP-01, DP-ARR-01]
+    checkpoint: Environment check, diagnostic, and source/licence record
+  - block: 2
+    title: DataFrames, types, units, tidy data, reshape, and grouping
+    concepts: [DP-TAB-01, DP-TAB-02, DP-QLT-01]
+    checkpoint: Clean transformation notebook with assertions
+  - block: 3
+    title: Joins, schemas, missing values, duplicates, and anomalies
+    concepts: [DP-TAB-03, DP-QLT-02, DP-QLT-03, DP-QLT-04]
+    checkpoint: Data-quality report and tests
+  - block: 4
+    title: EDA, sampling, representativeness, and visual communication
+    concepts: [DP-EDA-01, DP-SMP-01]
+    checkpoint: One-page evidence-based EDA brief
+  - block: 5
+    title: Splits, leakage, preprocessing pipelines, and baselines
+    concepts: [DP-EVAL-01, DP-EVAL-02, DP-PIPE-01, DP-EVAL-03]
+    checkpoint: Leakage-safe mixed-feature pipeline
+  - block: 6
+    title: Regression, stable least squares, likelihood, and residuals
+    concepts: [DP-LIN-01, DP-PROB-01, DP-NUM-01, DP-MET-01]
+    checkpoint: Solver and conditioning experiment
+  - block: 7
+    title: Logistic and softmax models, losses, metrics, and thresholds
+    concepts: [DP-CLS-01, DP-MET-02, DP-THR-01]
+    checkpoint: Metric and threshold justified from consequences
+  - block: 8
+    title: Ridge, Lasso, bias-variance, cross-validation, and Control 1
+    concepts: [DP-REG-01, DP-GEN-01, DP-CV-01]
+    checkpoint: A1 Control 1
+  - block: 9
+    title: Trees, random forests, boosting, and interpretation limits
+    concepts: [DP-TREE-01, DP-ENS-01, DP-ENS-02, DP-INT-01]
+    checkpoint: Model comparison and error analysis
+  - block: 10
+    title: PCA, k-means, hierarchical clustering, DBSCAN, and validation
+    concepts: [DP-PCA-01, DP-CLU-01, DP-CLU-02, DP-CLU-03]
+    checkpoint: Unsupervised analysis with stability caveat
+  - block: 11
+    title: Vectorisation, memory, Parquet, Arrow, and query pushdown
+    concepts: [DP-PERF-01, DP-FMT-01, DP-SQL-01]
+    checkpoint: Runtime, memory, and storage comparison
+  - block: 12
+    title: Testing, FAIR documentation, privacy, responsible AI, and failure analysis
+    concepts: [DP-TST-01, DP-DOC-01, DP-AI-01, DP-GOV-01]
+    checkpoint: Datasheet, result card, AI log, and reproducibility manifest
+  - block: 13
+    title: Integrated mini-project clinic
+    concepts: [DP-FEAT-01, DP-SEARCH-01, DP-REP-01, DP-TST-01]
+    checkpoint: A2 project pull request and draft result card
+  - block: 14
+    title: Audit, individual verification, synthesis, and optional JAX bridge demonstration
+    concepts: [DP-EVAL-02, DP-INT-01, DP-JAX-01, DP-JAX-02, DP-JAX-03]
+    checkpoint: A3 Control 2 and course synthesis

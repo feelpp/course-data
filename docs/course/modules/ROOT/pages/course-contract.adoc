@@ -1,0 +1,37 @@
+= Course contract
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-FND-02, DP-AI-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 15
+:page-course-outcomes: LO1, LO10
+:page-course-prerequisites: None
+:page-course-assessed: yes
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
+
+This course prepares you to turn heterogeneous data into reproducible and defensible evidence for scientific and industrial decisions.
+
+== What you are expected to do
+
+* identify the unit of analysis, target, stakeholders, assumptions, and risks;
+* audit provenance, licence, privacy, schema, units, missingness, duplicates, anomalies, and representativeness;
+* implement validated transformations, joins, reshaping, grouping, and feature pipelines;
+* choose leakage-safe splits, baselines, metrics, thresholds, and uncertainty summaries;
+* test transformations and rerun the analysis from a clean checkout;
+* communicate limitations and declare AI assistance.
+
+== Assessment
+
+[cols="3,1,2"]
+|===
+|Assessment |Weight |Mode
+
+|Control 1: data audit and safe baseline |20% |Individual, no generative AI
+|Reproducible mini-project |25% |Pair work with individual verification
+|Control 2: audit a flawed analysis |15% |Individual, no generative AI
+|Final practical and written examination |40% |Individual, no generative AI
+|===
+
+All official material and submissions use English. Approved individual accommodations do not create a second public course version.
+

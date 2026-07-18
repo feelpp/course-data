@@ -1,0 +1,33 @@
+= Data Processing and Mining
+:page-course-language: en
+:page-course-concepts: DP-FND-02
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 10
+:page-course-outcomes: LO1, LO10
+:page-course-prerequisites: None
+:page-course-assessed: no
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
+
+Welcome to the CSMI course on trustworthy, reproducible, and performance-aware data processing.
+
+The course follows the complete path from a question and a raw dataset to a defensible result:
+
+question -> provenance -> validation -> transformation -> exploration -> modelling -> evaluation -> communication
+
+The emphasis is not only on obtaining a numerical answer. You will learn to make the data lineage, assumptions, transformations, failure modes, and limitations reviewable by another scientist or engineer.
+
+== Course format
+
+The course carries 3 ECTS and contains 28 contact hours in fourteen two-hour blocks. Each block combines a concise concept lesson, a guided demonstration, an executable lab, and an evidence-based checkpoint.
+
+== Importance labels
+
+P0 Essential:: Required for every student and eligible for individual assessment.
+P1 Core:: Taught, practised, and assessed at least once.
+P2 Extension:: Optional bridge or project material; never an unannounced prerequisite.
+P3 Deferred:: Assigned to another course or kept as background reading.
+
+Start with the xref:course-contract.adoc[course contract], then verify the xref:environment.adoc[computing environment].
+

@@ -1,0 +1,14 @@
+= Privacy policy
+:page-course-language: en
+:page-course-concepts: DP-GOV-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 5
+:page-course-outcomes: LO2, LO10
+:page-course-prerequisites: None
+:page-course-assessed: no
+
+The static course site does not require student accounts and does not intentionally collect personal data. Hosting and linked third-party services may process standard connection information according to their own policies.
+
+Do not place personal, confidential, sensitive, or research-restricted data in public issues, pull requests, notebooks, or datasets. Use approved university services and the course instructions for protected submissions.
+

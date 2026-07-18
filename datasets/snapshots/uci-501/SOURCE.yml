@@ -1,0 +1,22 @@
+schema_version: 1
+id: uci-501
+title: Beijing Multi-Site Air Quality
+role: semester_spine
+repository_url: https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data
+official_download_url: https://archive.ics.uci.edu/static/public/501/beijing+multi+site+air+quality+data.zip
+doi: 10.24432/C5RK5G
+creator: Song Chen
+introductory_paper_authors: Shuyi Zhang, Bin Guo, Anlan Dong, Jing He, Ziping Xu, S. Chen
+dataset_year: 2017
+licence: CC-BY-4.0
+licence_url: https://creativecommons.org/licenses/by/4.0/
+retrieved_at: 2026-07-18T12:34:00+02:00
+snapshot_file: source.zip
+snapshot_sha256: d1b9261c54132f04c374f762f1e5e512af19f95c95fd6bfa1e8ac7e927e3b0b8
+snapshot_size_bytes: 7959991
+snapshot_contents: 12 station CSV files nested under PRSA_Data_20130301-20170228
+integrity_check: zip_test_passed
+attribution: Beijing Multi-Site Air Quality, Song Chen, UCI Machine Learning Repository, DOI 10.24432/C5RK5G, CC BY 4.0.
+curation_note: >-
+  The official download retrieved on 2026-07-18 contained the genuine PRSA2017 archive plus two unrelated stock-price CSV files and an unrelated JPEG. The full official package is retained only in the ignored raw archive with SHA-256 b04da438b2f331ac0ffd45aebdfec0d20d2367feb5f6948c4b1f7ce1191e33c4. Only the nested PRSA2017 archive was promoted here. The unrelated files are excluded and their rights are not assumed to be CC BY 4.0.
+

@@ -1,0 +1,24 @@
+= Notebook workflow
+:page-course-language: en
+:page-course-concepts: DP-REP-01, DP-TST-01, DP-AI-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 15
+:page-course-outcomes: LO9, LO10
+:page-course-prerequisites: Computing environment installed
+:page-course-assessed: yes
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
+
+Student notebooks are generated from reviewed instructor sources. The generator removes solutions and instructor-only cells, clears outputs and execution counts, validates metadata, and writes deterministic notebook files.
+
+== Working rule
+
+. Download or regenerate the student notebook.
+. Complete the marked tasks without changing the data contract.
+. Restart the kernel and run all cells.
+. Check that results are deterministic and that paths are repository-relative.
+. Record any AI assistance according to the assessment mode.
+
+Never submit a notebook whose correctness depends on cells being run in a hidden order.
+

@@ -1,0 +1,14 @@
+= Cookie policy
+:page-course-language: en
+:page-course-concepts: DP-GOV-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 5
+:page-course-outcomes: LO10
+:page-course-prerequisites: None
+:page-course-assessed: no
+
+The course site does not intentionally set application cookies. GitHub Pages, content-delivery networks, or other linked services may apply their own storage or connection policies.
+
+This statement must be reviewed if analytics, embedded applications, authentication, or other stateful services are introduced.
+

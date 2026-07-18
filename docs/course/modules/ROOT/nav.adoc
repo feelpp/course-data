@@ -1,0 +1,7 @@
+* xref:index.adoc[Course home]
+* xref:course-contract.adoc[Course contract]
+* xref:environment.adoc[Computing environment]
+* Foundations
+** xref:foundations/data-lifecycle.adoc[Data lifecycle and audit]
+* xref:notebooks.adoc[Notebook workflow]
+

@@ -1,0 +1,21 @@
+schema_version: 1
+id: uci-601
+title: AI4I 2020 Predictive Maintenance Dataset
+role: industrial_classification
+repository_url: https://archive.ics.uci.edu/dataset/601/ai4i+2020+predictive+maintenance+dataset
+official_download_url: https://archive.ics.uci.edu/static/public/601/ai4i+2020+predictive+maintenance+dataset.zip
+doi: 10.24432/C5HS5C
+introductory_paper_author: S. Matzka
+dataset_year: 2020
+licence: CC-BY-4.0
+licence_url: https://creativecommons.org/licenses/by/4.0/
+retrieved_at: 2026-07-18T12:34:00+02:00
+snapshot_file: source.zip
+snapshot_sha256: f601f14294bcf190f9d720676b7f0aea46a26cde9ab8ebc7b4f8174d9d26b252
+snapshot_size_bytes: 522170
+snapshot_contents: ai4i2020.csv
+integrity_check: zip_test_passed
+attribution: AI4I 2020 Predictive Maintenance Dataset, S. Matzka, UCI Machine Learning Repository, DOI 10.24432/C5HS5C, CC BY 4.0.
+teaching_warning: >-
+  The data are synthetic. Failure-type indicator columns must not be used as predictors for the aggregate machine-failure target because doing so would leak the label construction.
+

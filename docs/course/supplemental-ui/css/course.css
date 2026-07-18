@@ -1,0 +1,18 @@
+.course-badge {
+  border-radius: 0.35rem;
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0 0.35rem 0.75rem 0;
+  padding: 0.2rem 0.55rem;
+}
+
+.priority-p0 { background: #8b1e1e; color: #fff; }
+.priority-p1 { background: #175f42; color: #fff; }
+.priority-p2 { background: #215a8a; color: #fff; }
+.priority-p3 { background: #5f6670; color: #fff; }
+.difficulty-d1 { background: #e9f5ec; color: #164b2b; }
+.difficulty-d2 { background: #fff4d6; color: #684c00; }
+.difficulty-d3 { background: #f5e5f4; color: #66235e; }
+

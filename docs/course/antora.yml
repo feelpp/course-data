@@ -1,0 +1,21 @@
+name: course-data
+title: Data Processing and Mining
+version: ~
+start_page: index.adoc
+nav:
+  - modules/ROOT/nav.adoc
+asciidoc:
+  attributes:
+    project_name: Data Processing and Mining
+    project_version: 2026-2027
+    python: Python
+    cpp: C++
+ext:
+  collector:
+    - run:
+        command: uv run python tools/generate_notebooks.py --mode student --output-dir build/notebooks/student
+      scan:
+        dir: build/notebooks/student
+        files: '**/*.ipynb'
+        base: modules/ROOT/attachments/notebooks
+

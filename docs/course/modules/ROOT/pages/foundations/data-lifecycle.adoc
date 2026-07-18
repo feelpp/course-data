@@ -1,0 +1,35 @@
+= Data lifecycle and first audit
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-FND-02, DP-GOV-01, DP-REP-01, DP-QLT-03
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 45
+:page-course-outcomes: LO1, LO2, LO9, LO10
+:page-course-prerequisites: Python functions and tabular data basics
+:page-course-assessed: yes
+:page-jupyter: true
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
+
+A reliable analysis starts before modelling. First define what one row represents, where the data came from, what may be missing or duplicated, and which values are impossible.
+
+== Audit sequence
+
+. State the decision or scientific question.
+. Define the unit of analysis and the target population.
+. Record the source, licence, retrieval time, and checksum.
+. Validate the schema, types, units, categories, and timestamps.
+. Quantify missing values and duplicates.
+. Test domain constraints and investigate anomalies.
+. Save the audit as executable checks, not only prose.
+
+== Lab
+
+The lab uses a deliberately small table with a duplicate identifier, a missing measurement, and an impossible negative value. Implement an audit function and explain which issue should block downstream analysis.
+
+xref:attachment$notebooks/foundations/data-lifecycle.ipynb[Download the student notebook].
+
+== Completion evidence
+
+Your notebook must produce a structured audit result, contain no hidden state, and distinguish an observation from a data-quality issue. A reviewer should be able to rerun it without editing paths or downloading data.
+

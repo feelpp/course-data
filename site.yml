@@ -1,0 +1,40 @@
+site:
+  title: CSMI Data Processing and Mining
+  url: https://feelpp.github.io/course-data
+  start_page: course-data::index.adoc
+
+content:
+  sources:
+    - url: .
+      branches: HEAD
+      start_path: docs/course
+
+ui:
+  bundle:
+    url: ./vendor/antora-ui/ui-bundle-v0.53.zip
+    snapshot: true
+  supplemental_files: ./docs/course/supplemental-ui
+
+output:
+  clean: true
+  dir: public
+
+antora:
+  extensions:
+    - '@antora/collector-extension'
+    - '@feelpp/antora-extensions'
+
+asciidoc:
+  attributes:
+    page-pagination: '@'
+    experimental: true
+    icons: font
+    source-highlighter: highlight.js
+    stem: latexmath
+    hide-uri-scheme: true
+    course-title: Data Processing and Mining
+    course-programme: CSMI
+    course-repository-url: https://github.com/feelpp/course-data
+  extensions:
+    - '@feelpp/asciidoctor-extensions'
+

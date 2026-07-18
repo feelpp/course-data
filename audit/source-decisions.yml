@@ -1,0 +1,470 @@
+schema_version: 1
+review_date: 2026-07-18
+
+defaults:
+  custodial_owner: CSMI Data Processing course lead
+  publication_status: quarantined
+  copyright_holder: unknown
+  licence_status: unknown
+  rights_action: Reuse concepts only; create original English text, code, exercises, and figures unless written permission is recorded.
+
+items:
+  - id: SRC-001
+    match: programme-de-data
+    topic: Historical course outline
+    material_type: instructor_planning
+    audience: instructor
+    language: French
+    priority_candidate: P3
+    disposition: historical_reference
+    destination: docs/analysis/source-audit.md
+    concepts: [DP-FND-02]
+    rationale: Useful evidence of the previous sequence, but superseded by curriculum.yml.
+
+  - id: SRC-002
+    match: 00-prof-cours-apprentissage-de-donnees
+    topic: Statistical learning foundations
+    material_type: instructor_notes
+    audience: instructor
+    language: French
+    priority_candidate: P1
+    disposition: split_and_rewrite
+    destination: modules/foundations
+    concepts: [DP-FND-01, DP-PROB-01, DP-GEN-01]
+    rationale: Valuable conceptual foundation, but externally hosted figures and French prose require replacement.
+
+  - id: SRC-003
+    match: 10-prof-lasso
+    topic: Lasso regularisation
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P1
+    disposition: rewrite
+    destination: modules/models/regularisation
+    concepts: [DP-REG-01, DP-NUM-01]
+    rationale: Compact numerical example worth rebuilding with a stable solver and explicit learning outcomes.
+
+  - id: SRC-004
+    match: 20-prof-cours-modelisation-probabiliste
+    topic: Probabilistic modelling
+    material_type: instructor_notes
+    audience: instructor
+    language: French
+    priority_candidate: P1
+    disposition: split_and_rewrite
+    destination: modules/models/probabilistic-modelling
+    concepts: [DP-PROB-01, DP-MET-01]
+    rationale: Core ideas fit the course; figures and examples require original English replacements.
+
+  - id: SRC-005
+    match: 30-prof-biais-variance
+    topic: Bias, variance, and overfitting
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P1
+    disposition: split_and_rewrite
+    destination: modules/evaluation/bias-variance
+    concepts: [DP-GEN-01, DP-CV-01, DP-EVAL-03]
+    rationale: Strong lab structure, but saved outputs and solution content must be separated and regenerated.
+
+  - id: SRC-006
+    match: 40-prof-arbre-de-decision
+    topic: Decision trees
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P1
+    disposition: split_and_rewrite
+    destination: modules/models/trees
+    concepts: [DP-TREE-01, DP-INT-01]
+    rationale: Relevant core topic; remove installation cells, rebuild figures, and split student and solution variants.
+
+  - id: SRC-007
+    match: 50-prof-foret-aleatoire
+    topic: Ensembles and random forests
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P1
+    disposition: split_and_rewrite
+    destination: modules/models/ensembles
+    concepts: [DP-ENS-01, DP-ENS-02, DP-INT-01]
+    rationale: Broad and useful coverage, but it needs substantial compression, provenance review, and clean execution.
+
+  - id: SRC-008
+    match: ancien-bases-de-pandas
+    topic: Pandas, tabular data, and geospatial examples
+    material_type: legacy_notebook
+    audience: mixed
+    language: French
+    priority_candidate: P0
+    disposition: mine_and_rewrite
+    destination: modules/tabular-data
+    concepts: [DP-TAB-01, DP-TAB-02, DP-TAB-03, DP-QLT-01]
+    rationale: Contains useful tabular patterns but is oversized, depends on missing assets and live downloads, and mixes optional geospatial material.
+
+  - id: SRC-009
+    match: ancien-principes-du-ml-part-a
+    topic: Introductory machine-learning principles
+    material_type: legacy_notebook
+    audience: mixed
+    language: French
+    priority_candidate: P1
+    disposition: concepts_only
+    destination: modules/foundations
+    concepts: [DP-FND-01, DP-EVAL-03, DP-GEN-01]
+    rationale: Explicitly references external course repositories; retain only the topic map and independently author replacements.
+
+  - id: SRC-010
+    match: ancien-principes-du-ml-part-b-technique-sklearn
+    topic: Scikit-learn workflow
+    material_type: legacy_notebook
+    audience: mixed
+    language: French
+    priority_candidate: P0
+    disposition: concepts_only
+    destination: modules/pipelines
+    concepts: [DP-PIPE-01, DP-EVAL-01, DP-EVAL-03]
+    rationale: Workflow remains relevant, but APIs, data sources, and attribution require a clean-room rewrite.
+
+  - id: SRC-011
+    match: ancien-regression-sur-le-prix-des-maisons-par-zone
+    topic: End-to-end housing regression
+    material_type: legacy_notebook
+    audience: mixed
+    language: French
+    priority_candidate: P1
+    disposition: concepts_only
+    destination: modules/integrated-case-study
+    concepts: [DP-PIPE-01, DP-LIN-01, DP-MET-01, DP-FEAT-01]
+    rationale: Closely follows the Hands-On Machine Learning housing example; do not republish code, data-fetch logic, or prose.
+
+  - id: SRC-012
+    match: ancien-stats-descriptives
+    topic: Descriptive statistics and data cleaning
+    material_type: legacy_notebook
+    audience: mixed
+    language: French
+    priority_candidate: P0
+    disposition: mine_and_rewrite
+    destination: modules/data-quality-and-eda
+    concepts: [DP-QLT-02, DP-QLT-03, DP-QLT-04, DP-EDA-01]
+    rationale: Useful anomaly and cleaning exercises, but missing local files, a saved error, and unattributed examples prevent reuse.
+
+  - id: SRC-013
+    match: ancien-variantes-d-architectures-de-reseaux-de-neurones
+    topic: Neural-network architecture variants
+    material_type: legacy_notebook
+    audience: mixed
+    language: French
+    priority_candidate: P3
+    disposition: defer_to_sciml
+    destination: scientific-machine-learning-course
+    concepts: [DP-NN-01, DP-DL-01]
+    rationale: Out of scope, very large, TensorFlow-dependent, and assembled from numerous external sources.
+
+  - id: SRC-014
+    match: avec-jax-00-prof-tenseurs
+    topic: JAX arrays and vectorisation
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P2
+    disposition: split_and_rewrite
+    destination: modules/optional-jax-bridge
+    concepts: [DP-JAX-01, DP-JAX-03]
+    rationale: Retain a short optional bridge only; move framework mastery to Scientific Machine Learning.
+
+  - id: SRC-015
+    match: avec-jax-10-prof-auto-diff
+    topic: Automatic differentiation
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P2
+    disposition: split_and_rewrite
+    destination: modules/optional-jax-bridge
+    concepts: [DP-JAX-02]
+    rationale: Useful optional bridge if reduced to gradient verification and independently rewritten.
+
+  - id: SRC-016
+    match: avec-jax-20-prof-descente-de-gradient-et-adam
+    topic: Gradient descent and Adam
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P3
+    disposition: defer_to_sciml
+    destination: scientific-machine-learning-course
+    concepts: [DP-JAX-02, DP-NN-01]
+    rationale: Optimiser internals exceed this course contract and belong with optimisation and Scientific Machine Learning.
+
+  - id: SRC-017
+    match: avec-jax-30-prof-creer-un-model
+    topic: Neural-network model construction
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P3
+    disposition: defer_to_sciml
+    destination: scientific-machine-learning-course
+    concepts: [DP-NN-01]
+    rationale: Neural-network construction is explicitly deferred.
+
+  - id: SRC-018
+    match: avec-jax-40-prof-pytree
+    topic: JAX PyTrees
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P3
+    disposition: defer_to_sciml
+    destination: scientific-machine-learning-course
+    concepts: [DP-NN-02]
+    rationale: Framework-specific architecture belongs in Scientific Machine Learning.
+
+  - id: SRC-019
+    match: avec-jax-50-prof-entrainer-un-petit-modele-a-la-main
+    topic: Manual JAX training loop
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P3
+    disposition: defer_to_sciml
+    destination: scientific-machine-learning-course
+    concepts: [DP-NN-01, DP-NN-02]
+    rationale: Training-loop implementation is not required for the data-processing outcomes.
+
+  - id: SRC-020
+    match: avec-jax-60-prof-entrainer-un-gros-modele-avec-optax
+    topic: Optax training architecture
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P3
+    disposition: defer_to_sciml
+    destination: scientific-machine-learning-course
+    concepts: [DP-NN-02]
+    rationale: Extensionless notebook must first be renamed in derived material; content belongs in Scientific Machine Learning.
+
+  - id: SRC-021
+    match: avec-jax-70-prof-reglages-des-hyperparametres
+    topic: Hyperparameter optimisation and experiment state
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P1
+    disposition: concepts_only
+    destination: modules/evaluation/model-selection
+    concepts: [DP-SEARCH-01, DP-CV-01, DP-OPS-01]
+    rationale: Retain search and experiment-design concepts, but replace the complex JAX, Hyperopt, pickle, and filesystem implementation.
+
+  - id: SRC-022
+    match: avec-jax-75-prof-cours-les-losses-de-classification
+    topic: Classification losses
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P1
+    disposition: split_and_rewrite
+    destination: modules/models/classification
+    concepts: [DP-CLS-01, DP-MET-02, DP-NUM-01]
+    rationale: Core mathematics is valuable; rebuild with framework-neutral examples before the optional JAX bridge.
+
+  - id: SRC-023
+    match: avec-jax-80-prof-classification-binaire-des-sentiments
+    topic: Binary sentiment classification
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P3
+    disposition: defer_to_sciml
+    destination: scientific-machine-learning-course
+    concepts: [DP-NN-01, DP-DL-01]
+    rationale: Deep-learning case study has external data, TensorFlow and JAX dependencies, and is outside the course scope.
+
+  - id: SRC-024
+    match: avec-jax-90-prof-les-classifications-multiclasses
+    topic: Multiclass classification with MNIST
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P1
+    disposition: concepts_only
+    destination: modules/models/classification
+    concepts: [DP-CLS-01, DP-MET-02]
+    rationale: Reuse only softmax, cross-entropy, and multiclass metric concepts; neural-network training moves elsewhere.
+
+  - id: SRC-025
+    match: avec-jax-100-prof-rappel-etudes-2d
+    topic: Two-dimensional decision studies
+    material_type: instructor_notebook
+    audience: instructor
+    language: French
+    priority_candidate: P2
+    disposition: mine_and_rewrite
+    destination: modules/optional-jax-bridge
+    concepts: [DP-JAX-01, DP-JAX-02, DP-INT-01]
+    rationale: Selected visual diagnostics may inspire a smaller original bridge exercise.
+
+  - id: SRC-026
+    match: exam-2023-2024-exam-classif-multi
+    topic: Multiclass classification examination
+    material_type: examination
+    audience: student
+    language: French
+    priority_candidate: P1
+    disposition: private_assessment_reference
+    destination: course-data-assessment/exam-bank
+    concepts: [DP-CLS-01, DP-MET-02]
+    rationale: Historical assessment; keep private and use only as evidence for question design.
+
+  - id: SRC-027
+    match: exam-2025-2026-prof-exam-de-data
+    topic: Code-refactoring examination brief
+    material_type: examination_brief
+    audience: instructor
+    language: French
+    priority_candidate: P2
+    disposition: private_assessment_reference
+    destination: course-data-assessment/exam-bank
+    concepts: [DP-REP-01, DP-TST-01, DP-JAX-01]
+    rationale: Current instructor assessment material must remain private and embargoed.
+
+  - id: SRC-028
+    match: exam-2025-2026-correction-de-l-exam-classif-multi
+    topic: Multiclass examination solution
+    material_type: examination_solution
+    audience: instructor
+    language: French
+    priority_candidate: P1
+    disposition: private_assessment_reference
+    destination: course-data-assessment/solutions
+    concepts: [DP-CLS-01, DP-MET-02]
+    rationale: Solution content is private and cannot enter the public repository.
+
+  - id: SRC-029
+    match: exam-anciens-2021-2022-exam-de-data
+    topic: Early-stopping examination
+    material_type: examination
+    audience: student
+    language: French
+    priority_candidate: P3
+    disposition: private_assessment_reference
+    destination: course-data-assessment/exam-bank
+    concepts: [DP-GEN-01, DP-NN-01]
+    rationale: Historical examination dominated by deferred neural-network content.
+
+  - id: SRC-030
+    match: exam-anciens-2021-2022-cor-csmi2
+    topic: Apartment classification examination solution
+    material_type: examination_solution
+    audience: instructor
+    language: French
+    priority_candidate: P1
+    disposition: private_assessment_reference
+    destination: course-data-assessment/solutions
+    concepts: [DP-CLS-01, DP-MET-02]
+    rationale: Contains solutions and external assets; keep private.
+
+  - id: SRC-031
+    match: exam-anciens-2021-2022-csmi2
+    topic: Apartment classification examination
+    material_type: examination
+    audience: student
+    language: French
+    priority_candidate: P1
+    disposition: private_assessment_reference
+    destination: course-data-assessment/exam-bank
+    concepts: [DP-CLS-01, DP-MET-02]
+    rationale: Historical examination depends on an external asset repository and remains private.
+
+  - id: SRC-032
+    match: exam-anciens-2021-2022-csmi2-rattrapage-covid
+    topic: Darts classification resit examination
+    material_type: examination
+    audience: student
+    language: French
+    priority_candidate: P1
+    disposition: private_assessment_reference
+    destination: course-data-assessment/exam-bank
+    concepts: [DP-CLS-01, DP-MET-02]
+    rationale: Historical resit depends on external data and remains private.
+
+  - id: SRC-033
+    match: exam-anciens-2021-2022-duas
+    topic: Optimisation and multiclass time-series examination
+    material_type: examination
+    audience: student
+    language: French
+    priority_candidate: P3
+    disposition: private_assessment_reference
+    destination: course-data-assessment/exam-bank
+    concepts: [DP-NN-01, DP-DL-01]
+    rationale: Historical assessment uses live TensorFlow data and mostly deferred content.
+
+  - id: SRC-034
+    match: exam-anciens-80-frontiere-de-decission
+    topic: Classifier decision boundaries
+    material_type: exercise_notebook
+    audience: mixed
+    language: French
+    priority_candidate: P1
+    disposition: private_assessment_reference
+    destination: course-data-assessment/question-bank
+    concepts: [DP-CLS-01, DP-TREE-01, DP-INT-01]
+    rationale: Useful visual question pattern, but provenance and external assets require a new private implementation.
+
+  - id: SRC-035
+    match: exam-anciens-fourier-series-synthesis-ufaz
+    topic: Fourier-series synthesis
+    material_type: examination
+    audience: student
+    language: English
+    priority_candidate: P3
+    disposition: archive_out_of_scope
+    destination: archive/raw
+    concepts: []
+    rationale: Not part of the Data Processing course contract.
+
+  - id: SRC-036
+    match: exam-anciens-exam-data-2020-2021
+    topic: Historical data examination
+    material_type: examination
+    audience: student
+    language: French
+    priority_candidate: P3
+    disposition: private_assessment_reference
+    destination: course-data-assessment/exam-bank
+    concepts: [DP-NN-01]
+    rationale: Sparse historical assessment centered on deferred TensorFlow material.
+
+  - id: SRC-037
+    match: exam-anciens-exam-de-data-rattrapage-sept-2021
+    topic: Historical data resit examination
+    material_type: examination
+    audience: student
+    language: French
+    priority_candidate: P3
+    disposition: private_assessment_reference
+    destination: course-data-assessment/exam-bank
+    concepts: [DP-NN-01]
+    rationale: Sparse historical resit centered on deferred TensorFlow material.
+
+  - id: SRC-038
+    match: biblio-lecture03-kernel-pdf
+    topic: Kernel regression lecture slides
+    material_type: third_party_pdf
+    audience: instructor
+    language: English
+    priority_candidate: P2
+    disposition: exclude_public
+    destination: archive/raw
+    concepts: [DP-KER-01]
+    rationale: Stanley Chan, Purdue University, 2020; every slide states All Rights Reserved.
+    copyright_holder: Stanley Chan
+    licence_status: all_rights_reserved
+    rights_action: Do not copy into either repository or distribute to students; link to an authorised source if needed.
+

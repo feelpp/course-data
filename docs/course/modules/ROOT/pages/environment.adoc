@@ -1,0 +1,35 @@
+= Computing environment
+:page-course-language: en
+:page-course-concepts: DP-REP-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 20
+:page-course-outcomes: LO9
+:page-course-prerequisites: Basic shell and Git use
+:page-course-assessed: yes
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
+
+The reference environment is CPython 3.12 on Ubuntu 24.04 LTS using CPU execution. macOS and Windows through WSL are supported, but a GPU is never required for P0 or P1 work.
+
+== Install the environment
+
+[source,shell]
+----
+uv sync --locked --all-groups
+npm ci
+----
+
+== Validate the repository
+
+[source,shell]
+----
+npm run check
+----
+
+This command validates curriculum and content metadata, generates clean student notebooks, executes the instructor reference notebook, runs tests and linting, builds the Antora site, and checks the generated site.
+
+== Reproducibility rule
+
+A result is complete only when it can be regenerated from a clean checkout using pinned dependencies and checksum-verified data. Saved notebook output alone is not evidence of reproducibility.
+

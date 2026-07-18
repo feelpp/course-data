@@ -1,0 +1,17 @@
+# Source material retained for provenance review; never publish or commit.
+/archive/raw/
+
+# Local execution and audit scratch space.
+/.audit-work/
+.DS_Store
+
+# Generated environments, notebooks, and site output.
+/.venv/
+/node_modules/
+/build/
+/public/
+/.pytest_cache/
+/.ruff_cache/
+/.coverage
+__pycache__/
+*.py[cod]

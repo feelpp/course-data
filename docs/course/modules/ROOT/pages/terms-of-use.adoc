@@ -1,0 +1,16 @@
+= Terms of use
+:page-course-language: en
+:page-course-concepts: DP-GOV-01, DP-AI-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 5
+:page-course-outcomes: LO10
+:page-course-prerequisites: None
+:page-course-assessed: no
+
+Course material is provided for education and research. Users must respect the licences and attributions stated in the repository, dataset source records, and individual pages.
+
+Live assessments, solutions, hidden tests, personal data, and embargoed material are not part of the public site. Attempts to obtain or distribute such material may violate university assessment rules.
+
+Material is provided without a guarantee that it is suitable for safety-critical, medical, legal, financial, or production decisions. Verify results independently and document limitations.
+

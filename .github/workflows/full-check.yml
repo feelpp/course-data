@@ -1,0 +1,33 @@
+name: Full notebook check
+
+on:
+  schedule:
+    - cron: '20 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notebooks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: uv sync --locked --all-groups
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm run validate
+      - run: npm run test
+      - run: npm run notebooks:test:full
+      - run: npm run site
+      - run: npm run site:check

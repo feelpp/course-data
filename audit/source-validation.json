@@ -1,0 +1,13 @@
+{
+  "status": "pass",
+  "review_date": "2026-07-18",
+  "expected_items": 38,
+  "inventoried_items": 38,
+  "decision_ids_unique": true,
+  "normalised_names_unique": true,
+  "curriculum_concept_references_valid": true,
+  "raw_items_quarantined": 38,
+  "raw_items_approved_for_publication": 0,
+  "archive_manifest_entries": 39,
+  "errors": []
+}

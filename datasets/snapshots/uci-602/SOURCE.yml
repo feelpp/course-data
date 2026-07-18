@@ -1,0 +1,19 @@
+schema_version: 1
+id: uci-602
+title: Dry Bean
+role: optional_multiclass_reserve
+repository_url: https://archive.ics.uci.edu/dataset/602/dry+bean+dataset
+official_download_url: https://archive.ics.uci.edu/static/public/602/dry+bean+dataset.zip
+doi: 10.24432/C50S4B
+introductory_paper_authors: M. Koklu, Ilker Ali Ozkan
+dataset_year: 2020
+licence: CC-BY-4.0
+licence_url: https://creativecommons.org/licenses/by/4.0/
+retrieved_at: 2026-07-18T12:34:00+02:00
+snapshot_file: source.zip
+snapshot_sha256: 0a64eff5be87f48c3dbbfc0a12a56c5d5b5167ef8e61cd45d69b3e7c7130c06f
+snapshot_size_bytes: 4738776
+snapshot_contents: Dry Bean data in ARFF and XLSX formats with dataset documentation
+integrity_check: zip_test_passed
+attribution: Dry Bean, M. Koklu and Ilker Ali Ozkan, UCI Machine Learning Repository, DOI 10.24432/C50S4B, CC BY 4.0.
+
