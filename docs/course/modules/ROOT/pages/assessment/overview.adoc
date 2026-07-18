@@ -1,0 +1,56 @@
+= Assessment guide
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-GOV-01, DP-EVAL-02, DP-TST-01, DP-AI-01
+:page-course-priority: P0
+:page-course-difficulty: D2
+:page-course-duration-minutes: 20
+:page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10
+:page-course-prerequisites: course contract
+:page-course-assessed: yes
+
+Assessment follows the complete evidence chain from question and data to reproducible conclusion. Predictive score alone can never earn most of the marks.
+
+== Components
+
+[cols="3,1,2,5",options="header"]
+|===
+|Component |Weight |Default AI mode |Direct evidence
+|Control 1 |20% |A |Individual data audit, validated join, quality checks, split, safe baseline, metric and limitations.
+|Mini-project |25% |B |Pair repository and report plus individual code/oral verification.
+|Control 2 |15% |A |Individual audit and repair of a deliberately flawed analysis.
+|Final exam |40% |A |Integrated data, method, implementation, evaluation, and governance competence.
+|===
+
+Mode A prohibits external generative AI. Mode B permits it with disclosure and independent verification. The assessment header is authoritative if a different mode is announced. Examination, hidden-test, confidential, personal, or embargoed material must never be uploaded to an external service.
+
+== Outcome coverage
+
+[cols="3,1,1,1,1",options="header"]
+|===
+|Evidence area |Control 1 |Project |Control 2 |Final
+|Question, unit, stakeholders |Direct |Pair + individual |Direct |Direct
+|Provenance, schema, quality, privacy |Direct |Pair + individual |Direct |Direct
+|Wrangling and validated joins |Direct |Pair + individual |Direct |Direct
+|EDA and visual communication |Quality/anomaly evidence |Pair + individual |Direct |Direct
+|Leakage-safe pipelines and evaluation |Direct |Pair + individual |Direct |Direct
+|P1 modelling and mining methods |Not required |Pair + individual |Audit/reasoning |Direct
+|Performance, memory, storage |Not required |Pair + individual |Audit/reasoning |Direct
+|Tests and clean execution |Direct |Pair + individual |Direct |Direct
+|Datasheet, result card, limitations, AI declaration |Concise record |Pair + individual |Direct |Direct
+|===
+
+Optional P2 and deferred P3 content is excluded from required assessment evidence.
+
+== Critical validity rule
+
+A serious P0 failure caps the affected criterion even if a final metric is high. Examples include a many-to-many join that changes the unit of analysis, fitting preprocessing on test data, target leakage, untraceable or impermissible data, fabricated evidence, or a workflow that cannot be rerun. The cap is local to the affected criterion unless academic-integrity rules require a wider decision.
+
+== Public specifications
+
+* xref:assessment/control-1-specimen.adoc[Specimen Control 1]
+* xref:assessment/mini-project.adoc[Mini-project specification]
+* xref:assessment/final-exam-specimen.adoc[Specimen final exam]
+* xref:assessment/rubric.adoc[Common analytic rubric]
+* xref:technical-contract.adoc[Execution and numerical contract]
+
+Control 2 uses a 55-minute flawed-analysis audit. Its 15 points are: defect identification 5, consequence 4, repair 4, and prioritisation/communication 2. Current papers, variants, solutions, hidden tests, and grading scripts remain in the private assessment repository.

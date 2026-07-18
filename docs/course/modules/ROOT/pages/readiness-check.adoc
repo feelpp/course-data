@@ -1,0 +1,66 @@
+= Readiness check and remediation
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-REP-01, DP-ARR-01, DP-TAB-01, DP-TAB-02
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 35
+:page-course-outcomes: LO1, LO3, LO8, LO9
+:page-course-prerequisites: introductory Python, basic linear algebra and statistics
+:page-course-assessed: no
+
+Complete this individual check before Block 2. It is diagnostic, carries no mark, and is designed to identify the shortest useful preparation route. Record commands, answers, and any error messages in one file.
+
+== Rules and scoring
+
+Allow 35 minutes without external AI assistance. Documentation for Python, NumPy, and pandas is allowed. Score each of the five domains out of four. The general readiness threshold is 15/20, but the environment domain requires 4/4. A low score is a routing signal, not a judgement about your ability to complete the course.
+
+== A. Environment and reproducible execution — 4 points
+
+. From a clean clone, run `uv sync --locked` and `npm ci`.
+. Run `uv run python -c "import numpy, pandas; print(numpy.__version__, pandas.__version__)"`.
+. Explain why a lock file and a clean run provide stronger evidence than “it works in my current notebook”.
+
+Award one point for each successful command and two points for a correct explanation mentioning both dependency identity and hidden state.
+
+== B. Core Python — 4 points
+
+Write a function `summarise(values)` that accepts numbers and `None`, returns the count of valid values and their arithmetic mean, and raises a clear exception when no valid value exists. Demonstrate it with one ordinary case and the empty-valid-data case.
+
+== C. NumPy arrays — 4 points
+
+Given `x = np.arange(12).reshape(4, 3)`:
+
+. state its shape and dtype;
+. select the rows whose first column is at least 6 without a Python loop;
+. subtract each column mean using broadcasting;
+. explain the shape of the mean used for broadcasting.
+
+== D. Tabular reasoning — 4 points
+
+Construct a small DataFrame with columns `station`, `timestamp`, `variable`, and `value`. Then:
+
+. identify the unit of analysis;
+. detect duplicate `(station, timestamp, variable)` keys;
+. calculate the mean value by station and variable;
+. reshape the result so variables become columns without silently aggregating duplicate keys.
+
+== E. Mathematical and quantitative reasoning — 4 points
+
+. Explain the difference between a scalar, a vector, and a matrix using shapes.
+. Compute the mean and population variance of `[1, 2, 3]`.
+. Explain why `log(a * b) = log(a) + log(b)` helps when multiplying many small probabilities.
+. State one reason a predictive association is not automatically a causal effect.
+
+== Remediation routes
+
+[cols="2,1,3,2",options="header"]
+|===
+|Domain below threshold |Target time |Required work |Completion evidence
+|Environment |45 min |Repeat xref:environment.adoc[the environment setup] from a clean clone. |Successful command summary; this route requires full completion.
+|Core Python |90 min |Functions, collections, exceptions, imports, and small tests. |Completed practice set with two tests per function.
+|NumPy arrays |90 min |Shapes, masks, broadcasting, reductions, dtypes, vectorisation. |Array practice set plus shape explanations.
+|Tables |120 min |Selection, safe assignment, grouping, key uniqueness, tidy/long and wide forms. |A transformed toy table with assertions.
+|Mathematics |60 min |Notation, vectors and matrices, logarithms, mean and variance. |Short written practice with checked calculations.
+|===
+
+Repeat only the affected domain after completing its route. If it remains below 70%, meet the instructor or teaching assistant before Block 3 for a supported plan. The course does not convert contact time into a general Python course, but early remediation is part of the course support contract.

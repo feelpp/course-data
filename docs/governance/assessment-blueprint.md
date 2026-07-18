@@ -5,6 +5,8 @@
 **Assessment language:** English  
 **Operational rule:** current assessments and solutions remain in `course-data-assessment`, a separate private repository
 
+Public student contracts and specimens are published in the Antora site under `assessment/`. Machine-readable outcome, concept, duration, and importance mappings live in `curriculum.yml`; [`blueprint-validation.md`](blueprint-validation.md) records the complete coverage check.
+
 ## Design principles
 
 Assessments measure the complete evidence chain:
@@ -193,3 +195,16 @@ For each assessed task, the private repository must contain:
 - post-assessment item analysis and issue log;
 - release/embargo date, if the assessment will later become public.
 
+## Execution and tolerance baseline
+
+- Reference environment: CPython 3.12, Ubuntu 24.04 LTS, two CPU cores, 8 GiB RAM, CPU-only.
+- Required peak memory: 4 GiB; wall-clock speed is not graded.
+- Final reference run: at most 15 minutes; prepared student compute path: at most 8 minutes.
+- Counts, identities, joins, schema decisions, and deterministic labels are exact.
+- Default deterministic floating tolerance: relative `1e-7`, absolute `1e-10`.
+- Default seeded metric tolerance: absolute `0.01`; explicitly stochastic results may use `0.02` with a stated repetition or uncertainty design.
+- Assessments use fixed data and iteration budgets and require no network or personal account.
+
+## Entry diagnostic
+
+The ungraded 35-minute readiness check must be completed before Block 2. It covers environment execution, core Python, NumPy, tabular reasoning, and mathematical notation. A 75% overall score is the normal threshold; environment evidence requires full completion. Targeted routes take 45–120 minutes and are repeated only for the affected domain. Persistent difficulty triggers supported review before Block 3.

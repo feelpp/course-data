@@ -1,0 +1,63 @@
+= Specimen final examination
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-GOV-01, DP-TAB-03, DP-QLT-03, DP-EDA-01, DP-EVAL-02, DP-PIPE-01, DP-MET-02, DP-TST-01, DP-PROB-01, DP-NUM-01, DP-REG-01, DP-GEN-01, DP-CV-01, DP-TREE-01, DP-PCA-01, DP-CLU-01, DP-CLU-03, DP-PERF-01, DP-FMT-01, DP-INT-01
+:page-course-priority: P0
+:page-course-difficulty: D3
+:page-course-duration-minutes: 165
+:page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10
+:page-course-prerequisites: Blocks 1–14
+:page-course-assessed: yes
+
+This public specimen fixes the structure, depth, and point balance. The live examination changes the context, values, and selected P1 method while preserving equivalence.
+
+== Conditions
+
+* 2 hours 45 minutes, individual, 40 points, AI Mode A.
+* CPU-only, self-contained and offline-capable environment.
+* Submit written responses, code, tests, and the generated `result.json`.
+* P2/P3 content is not required.
+
+== Scenario
+
+An environmental laboratory provides `samples.csv`, `sites.csv`, and a source card. Each sample has a site, collection time, instrument batch, numeric measurements, and a binary review outcome. The data contain one repeated sample key, a unit inconsistency, structured missingness, and a post-review field. The laboratory wants a reproducible screening analysis, not an autonomous operational decision.
+
+== A. Data audit and pipeline repair — 10 points, P0
+
+. State the unit, target, intended use, and one risk of the proposed use. (2)
+. Validate the site join and repair the repeated key/unit issue with executable evidence. (3)
+. Identify the post-review leakage and explain why deleting only its obvious name may be insufficient. (2)
+. Repair a provided workflow that globally imputes/scales before splitting. (3)
+
+== B. Mathematical and method reasoning — 10 points, P1
+
+. Derive or explain the link between one stated probabilistic assumption and its loss. (2)
+. A design matrix has nearly dependent columns. Explain why explicit inversion is unsafe and select a stable solver or regularised alternative. (2)
+. Interpret a Ridge/Lasso or bias–variance result and propose one controlled diagnostic. (2)
+. Answer one announced method question: tree regularisation, PCA/SVD interpretation, or clustering objective and limits. (4)
+
+The live paper selects one of the announced method families; it does not require every family in one sitting.
+
+== C. Implementation and tests — 10 points, P0/P1
+
+. Implement one transformation with a clear input/output contract. (3)
+. Place learned preprocessing and the estimator in a validation-safe pipeline. (3)
+. Write one toy-oracle unit test and one identity/schema test. (2)
+. Produce `result.json` with data ID, seed, split ID, model ID, primary metric, and assessed commit. (2)
+
+== D. Evaluation and interpretation — 6 points, P0/P1
+
+. Select a metric and, when relevant, threshold from the stated error consequences. (2)
+. Interpret a confusion matrix/residual or cluster-stability result. (2)
+. State one uncertainty or variation measure and two limits on generalisation. (2)
+
+== E. Reproducibility and governance — 4 points, P0
+
+. Check the provided source/licence card and state one privacy or purpose constraint. (1)
+. Explain how the lock, data checksum, seed, and assessed commit support rerunning the result. (2)
+. Complete the Mode A assistance declaration. (1)
+
+== Scoring safeguards
+
+Each section receives independent partial credit. A test-leaking workflow caps the pipeline item at one point until corrected. An invalid row-multiplying join caps its join item at one point. A high metric cannot compensate for these failures. Counts are exact; deterministic floats use `rtol=1e-7`, `atol=1e-10`; seeded model metrics use absolute tolerance 0.01.
+
+The complete reference run must remain under 15 minutes and the prepared student compute path under 8 minutes on the xref:technical-contract.adoc[reference environment]. Fixed data and iteration budgets are used; hardware speed is not graded.

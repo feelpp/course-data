@@ -18,4 +18,11 @@ ext:
         dir: build/notebooks/student
         files: '**/*.ipynb'
         base: modules/ROOT/attachments/notebooks
-
+    - scan:
+        dir: datasets/teaching
+        files: '**/*'
+        base: modules/ROOT/attachments/datasets
+    - scan:
+        dir: templates
+        files: '**/*'
+        base: modules/ROOT/attachments/templates

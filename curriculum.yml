@@ -1,5 +1,5 @@
-schema_version: 1
-decision_version: "2026-07-18-baseline"
+schema_version: 2
+decision_version: "2026-07-18-blueprint"
 
 course:
   id: course-data
@@ -17,6 +17,33 @@ course:
     python: "3.12"
     os: Ubuntu 24.04 LTS
     accelerator_required: false
+
+execution_contract:
+  reference_environment:
+    cpu_cores: 2
+    memory_gib: 8
+    architecture: x86_64
+    network_during_assessment: false
+    accelerator_required: false
+  limits:
+    fast_ci_minutes: 5
+    full_ci_minutes: 30
+    student_notebook_minutes: 10
+    final_reference_minutes: 15
+    final_student_compute_minutes: 8
+    peak_memory_gib: 4
+  tolerances:
+    deterministic_counts: exact
+    deterministic_float:
+      relative: 1.0e-7
+      absolute: 1.0e-10
+    seeded_metric_absolute: 0.01
+    stochastic_metric_absolute: 0.02
+  grading_rules:
+    - Wall-clock speed is never graded.
+    - Fixed data and iteration budgets replace timing competitions.
+    - A tolerance must be justified by numerical scale or controlled stochastic variation.
+    - CPU correctness is the baseline; accelerator use is optional.
 
 priority_definitions:
   P0:
@@ -109,24 +136,42 @@ assessments:
     mode: individual
     ai_mode: A
     contact_block: 8
+    duration_minutes: 70
+    points: 20
+    required_priorities: [P0, P1]
+    outcomes: [LO1, LO2, LO3, LO4, LO5, LO6, LO9, LO10]
+    public_specification: assessment/control-1-specimen.adoc
   - id: A2
     title: Reproducible scientific or industrial mini-project
     weight_percent: 25
     mode: pair_with_individual_verification
     ai_mode: B
     contact_block: 13
+    points: 25
+    required_priorities: [P0, P1]
+    outcomes: [LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10]
+    public_specification: assessment/mini-project.adoc
   - id: A3
     title: Control 2 - Audit a flawed analysis
     weight_percent: 15
     mode: individual
     ai_mode: A
     contact_block: 14
+    duration_minutes: 55
+    points: 15
+    required_priorities: [P0, P1]
+    outcomes: [LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10]
+    public_specification: assessment/overview.adoc
   - id: A4
     title: Final practical and written exam
     weight_percent: 40
     mode: individual
     ai_mode: A
     duration_minutes: 165
+    points: 40
+    required_priorities: [P0, P1]
+    outcomes: [LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10]
+    public_specification: assessment/final-exam-specimen.adoc
 
 datasets:
   spine:
@@ -145,8 +190,59 @@ datasets:
     doi: 10.24432/C50S4B
     licence: CC-BY-4.0
   synthetic_oracles:
+    id: synthetic-oracles
     generated: true
     versioned: true
+
+diagnostic:
+  duration_minutes: 35
+  completion_deadline: Before Block 2
+  mastery_threshold_percent: 75
+  domains:
+    - id: DG-ENV
+      title: Environment and reproducible execution
+      concepts: [DP-REP-01]
+      minimum_percent: 100
+      route: environment
+    - id: DG-PY
+      title: Core Python
+      concepts: [DP-ARR-01]
+      minimum_percent: 70
+      route: python
+    - id: DG-ARR
+      title: NumPy arrays and vectorisation
+      concepts: [DP-ARR-01]
+      minimum_percent: 70
+      route: arrays
+    - id: DG-TAB
+      title: Tabular reasoning
+      concepts: [DP-TAB-01, DP-TAB-02]
+      minimum_percent: 70
+      route: tables
+    - id: DG-MATH
+      title: Mathematical notation and quantitative reasoning
+      concepts: [DP-FND-01]
+      minimum_percent: 70
+      route: mathematics
+  routes:
+    environment:
+      expected_minutes: 45
+      evidence: Run the environment check and submit its successful summary.
+    python:
+      expected_minutes: 90
+      evidence: Complete the Python functions and collections practice set.
+    arrays:
+      expected_minutes: 90
+      evidence: Complete the shapes, masks, broadcasting, and reductions practice set.
+    tables:
+      expected_minutes: 120
+      evidence: Complete the selection, grouping, and tidy-table practice set.
+    mathematics:
+      expected_minutes: 60
+      evidence: Complete the notation, logarithm, vector, and mean/variance practice set.
+  escalation:
+    trigger: Any route still below its minimum after remediation
+    action: Meet the instructor or teaching assistant before Block 3 for a supported plan.
 
 concepts:
   - id: DP-FND-01
@@ -178,7 +274,7 @@ concepts:
     priority: P0
     difficulty: D1
     outcomes: [LO3, LO8]
-    assessed_in: [A1, A4]
+    assessed_in: [A4]
   - id: DP-TAB-01
     title: DataFrames, indexes, selection, and safe assignment
     priority: P0
@@ -316,19 +412,19 @@ concepts:
     priority: P1
     difficulty: D2
     outcomes: [LO7]
-    assessed_in: [A1, A2, A4]
+    assessed_in: [A2, A4]
   - id: DP-GEN-01
     title: Bias, variance, overfitting, and learning curves
     priority: P1
     difficulty: D3
     outcomes: [LO6, LO7]
-    assessed_in: [A1, A3, A4]
+    assessed_in: [A3, A4]
   - id: DP-CV-01
     title: Cross-validation with group and time constraints
     priority: P1
     difficulty: D3
     outcomes: [LO5, LO6]
-    assessed_in: [A1, A2, A3, A4]
+    assessed_in: [A2, A3, A4]
   - id: DP-SEARCH-01
     title: Grid and random hyperparameter search
     priority: P1
@@ -436,13 +532,13 @@ concepts:
     priority: P2
     difficulty: D2
     outcomes: [LO8]
-    assessed_in: [A2]
+    assessed_in: []
   - id: DP-OPS-01
     title: Experiment tracking, drift, and monitoring concepts
     priority: P2
     difficulty: D2
     outcomes: [LO9, LO10]
-    assessed_in: [A2]
+    assessed_in: []
   - id: DP-KER-01
     title: Kernel methods and kernel Ridge or SVM
     priority: P2
@@ -480,60 +576,290 @@ concepts:
     outcomes: [LO10]
     assessed_in: []
 
+learning_activities:
+  - id: E01
+    title: Reproducible first data audit
+    type: diagnostic_and_guided_lab
+    duration_minutes: 55
+    concepts: [DP-FND-01, DP-FND-02, DP-GOV-01, DP-REP-01, DP-ARR-01]
+    outcomes: [LO1, LO2, LO3, LO8, LO9, LO10]
+    datasets: [uci-501]
+    deliverable: Environment evidence, source record, and executable audit
+    acceptance_criteria:
+      - The documented command succeeds from a clean checkout.
+      - The source, licence, unit of analysis, and three quality risks are stated.
+  - id: E02
+    title: Tidy sensor observations
+    type: guided_lab_and_transfer_task
+    duration_minutes: 65
+    concepts: [DP-TAB-01, DP-TAB-02, DP-QLT-01]
+    outcomes: [LO2, LO3]
+    datasets: [uci-501]
+    deliverable: Typed tidy table and grouped summary with assertions
+    acceptance_criteria:
+      - Types, units, timestamp, and category semantics are explicit.
+      - Reshaping and aggregation preserve the stated unit of analysis.
+  - id: E03
+    title: Validate a multi-table quality repair
+    type: guided_lab_and_independent_exercise
+    duration_minutes: 70
+    concepts: [DP-TAB-03, DP-QLT-02, DP-QLT-03, DP-QLT-04]
+    outcomes: [LO2, LO3, LO4, LO5, LO9]
+    datasets: [uci-501]
+    deliverable: Join report, quality decisions, and executable data contract
+    acceptance_criteria:
+      - Join cardinality and row preservation are tested.
+      - Missing, duplicate, invalid, and anomalous values receive distinct justified treatment.
+  - id: E04
+    title: Evidence-based exploratory brief
+    type: independent_analysis
+    duration_minutes: 65
+    concepts: [DP-EDA-01, DP-SMP-01]
+    outcomes: [LO1, LO2, LO4, LO6]
+    datasets: [uci-501]
+    deliverable: One-page brief with three labelled figures and a representativeness warning
+    acceptance_criteria:
+      - Each figure answers a stated question without hiding missingness or scale.
+      - Population, sample, selection limits, and unsupported generalisations are explicit.
+  - id: E05
+    title: Repair a leaking baseline
+    type: guided_lab_and_code_review
+    duration_minutes: 75
+    concepts: [DP-EVAL-01, DP-EVAL-02, DP-PIPE-01, DP-EVAL-03]
+    outcomes: [LO5, LO6, LO9]
+    datasets: [uci-501, uci-601]
+    deliverable: Leakage-safe mixed-feature pipeline and dummy comparison
+    acceptance_criteria:
+      - The final test set influences no learned transform or selection decision.
+      - Group or temporal structure is respected and the baseline is interpreted.
+  - id: E06
+    title: Stable least-squares investigation
+    type: mathematical_lab
+    duration_minutes: 70
+    concepts: [DP-LIN-01, DP-PROB-01, DP-NUM-01, DP-MET-01]
+    outcomes: [LO6, LO7, LO8]
+    datasets: [synthetic-oracles, uci-501]
+    deliverable: Solver comparison, residual diagnosis, and likelihood explanation
+    acceptance_criteria:
+      - Stable solvers are compared without explicit matrix inversion in production code.
+      - Conditioning, residuals, MAE or RMSE, and assumptions are interpreted.
+  - id: E07
+    title: Cost-aware classification decisions
+    type: guided_lab_and_scenario_task
+    duration_minutes: 70
+    concepts: [DP-CLS-01, DP-MET-02, DP-THR-01]
+    outcomes: [LO6, LO7]
+    datasets: [uci-601]
+    deliverable: Stable classifier, metric table, threshold choice, and failure analysis
+    acceptance_criteria:
+      - Leakage-prone target relatives are excluded from predictors.
+      - Metric and threshold choices follow from prevalence and stated error costs.
+  - id: E08
+    title: Regularisation and generalisation study
+    type: controlled_experiment
+    duration_minutes: 50
+    concepts: [DP-REG-01, DP-GEN-01, DP-CV-01]
+    outcomes: [LO5, LO6, LO7]
+    datasets: [synthetic-oracles]
+    deliverable: Cross-validated Ridge or Lasso comparison and learning curve
+    acceptance_criteria:
+      - Tuning occurs inside appropriate cross-validation while the test set remains untouched.
+      - The bias-variance diagnosis is supported by controlled evidence.
+  - id: E09
+    title: Tree ensemble comparison
+    type: guided_lab_and_transfer_task
+    duration_minutes: 70
+    concepts: [DP-TREE-01, DP-ENS-01, DP-ENS-02, DP-INT-01]
+    outcomes: [LO6, LO7, LO10]
+    datasets: [uci-601]
+    deliverable: Baseline, tree, forest, and boosting comparison with interpretation limits
+    acceptance_criteria:
+      - Complexity controls and validation are reported for every model.
+      - Predictive importance is not presented as a causal effect.
+  - id: E10
+    title: Unsupervised structure under challenge
+    type: guided_lab_and_independent_exercise
+    duration_minutes: 75
+    concepts: [DP-PCA-01, DP-CLU-01, DP-CLU-02, DP-CLU-03]
+    outcomes: [LO6, LO7, LO8]
+    datasets: [uci-501, uci-602, synthetic-oracles]
+    deliverable: PCA and clustering comparison with stability and domain validation
+    acceptance_criteria:
+      - Scaling and dimensionality choices are fitted without evaluation leakage.
+      - Clusters are challenged across seeds, samples, or algorithms and are not called true labels.
+  - id: E11
+    title: Measured columnar data workflow
+    type: performance_lab
+    duration_minutes: 65
+    concepts: [DP-PERF-01, DP-FMT-01, DP-SQL-01]
+    outcomes: [LO8]
+    datasets: [uci-501]
+    deliverable: Reproducible CSV, Parquet, and query-before-materialisation comparison
+    acceptance_criteria:
+      - Runtime, memory, storage size, and selected columns or rows are measured fairly.
+      - The conclusion distinguishes algorithmic improvement from engine-specific effects.
+  - id: E12
+    title: Reproducibility and responsibility audit
+    type: documentation_and_test_lab
+    duration_minutes: 65
+    concepts: [DP-TST-01, DP-DOC-01, DP-AI-01, DP-GOV-01]
+    outcomes: [LO2, LO9, LO10]
+    datasets: [uci-501, uci-601]
+    deliverable: Datasheet, result card, AI declaration, tests, and rerun manifest
+    acceptance_criteria:
+      - Toy-oracle and smoke tests pass from a clean environment.
+      - Provenance, permitted use, limitations, and assistance are traceable.
+  - id: E13
+    title: Integrated project review
+    type: synthesis_clinic
+    duration_minutes: 80
+    concepts: [DP-FEAT-01, DP-SEARCH-01, DP-REP-01, DP-TST-01]
+    outcomes: [LO5, LO6, LO7, LO9]
+    datasets: [uci-501, uci-601, uci-602]
+    deliverable: Reviewable project pull request and draft result card
+    acceptance_criteria:
+      - Feature and model selection are nested inside the validation design.
+      - CI, tests, environment lock, data identifiers, and result claims agree.
+  - id: E14
+    title: Professional audit and synthesis
+    type: individual_audit_and_debrief
+    duration_minutes: 55
+    concepts: [DP-EVAL-02, DP-INT-01]
+    optional_concepts: [DP-JAX-01, DP-JAX-02, DP-JAX-03]
+    outcomes: [LO5, LO6, LO10]
+    optional_outcomes: [LO11]
+    datasets: [synthetic-oracles]
+    deliverable: Prioritised defect report, correct repairs, and course synthesis
+    acceptance_criteria:
+      - Critical validity defects are identified before presentation defects.
+      - Repairs are specific, reproducible, and proportionate to the consequence.
+
 schedule:
   - block: 1
     title: Course contract, data lifecycle, diagnostic, and reproducible repository
     concepts: [DP-FND-01, DP-FND-02, DP-GOV-01, DP-REP-01, DP-ARR-01]
+    outcomes: [LO1, LO2, LO3, LO8, LO9, LO10]
+    prerequisites: []
+    datasets: [uci-501]
+    activities: [E01]
+    assessment_evidence: [A1, A2, A3, A4]
     checkpoint: Environment check, diagnostic, and source/licence record
   - block: 2
     title: DataFrames, types, units, tidy data, reshape, and grouping
     concepts: [DP-TAB-01, DP-TAB-02, DP-QLT-01]
+    outcomes: [LO2, LO3]
+    prerequisites: [DP-ARR-01]
+    datasets: [uci-501]
+    activities: [E02]
+    assessment_evidence: [A1, A2, A4]
     checkpoint: Clean transformation notebook with assertions
   - block: 3
     title: Joins, schemas, missing values, duplicates, and anomalies
     concepts: [DP-TAB-03, DP-QLT-02, DP-QLT-03, DP-QLT-04]
+    outcomes: [LO2, LO3, LO4, LO5, LO9]
+    prerequisites: [DP-TAB-01, DP-TAB-02, DP-QLT-01]
+    datasets: [uci-501]
+    activities: [E03]
+    assessment_evidence: [A1, A2, A3, A4]
     checkpoint: Data-quality report and tests
   - block: 4
     title: EDA, sampling, representativeness, and visual communication
     concepts: [DP-EDA-01, DP-SMP-01]
+    outcomes: [LO1, LO2, LO4, LO6]
+    prerequisites: [DP-QLT-02, DP-QLT-03]
+    datasets: [uci-501]
+    activities: [E04]
+    assessment_evidence: [A1, A2, A3, A4]
     checkpoint: One-page evidence-based EDA brief
   - block: 5
     title: Splits, leakage, preprocessing pipelines, and baselines
     concepts: [DP-EVAL-01, DP-EVAL-02, DP-PIPE-01, DP-EVAL-03]
+    outcomes: [LO5, LO6, LO9]
+    prerequisites: [DP-SMP-01, DP-QLT-02]
+    datasets: [uci-501, uci-601]
+    activities: [E05]
+    assessment_evidence: [A1, A2, A3, A4]
     checkpoint: Leakage-safe mixed-feature pipeline
   - block: 6
     title: Regression, stable least squares, likelihood, and residuals
     concepts: [DP-LIN-01, DP-PROB-01, DP-NUM-01, DP-MET-01]
+    outcomes: [LO6, LO7, LO8]
+    prerequisites: [DP-EVAL-01, DP-EVAL-03, DP-ARR-01]
+    datasets: [synthetic-oracles, uci-501]
+    activities: [E06]
+    assessment_evidence: [A2, A3, A4]
     checkpoint: Solver and conditioning experiment
   - block: 7
     title: Logistic and softmax models, losses, metrics, and thresholds
     concepts: [DP-CLS-01, DP-MET-02, DP-THR-01]
+    outcomes: [LO6, LO7]
+    prerequisites: [DP-PROB-01, DP-EVAL-01, DP-EVAL-03]
+    datasets: [uci-601]
+    activities: [E07]
+    assessment_evidence: [A1, A2, A3, A4]
     checkpoint: Metric and threshold justified from consequences
   - block: 8
     title: Ridge, Lasso, bias-variance, cross-validation, and Control 1
     concepts: [DP-REG-01, DP-GEN-01, DP-CV-01]
+    outcomes: [LO5, LO6, LO7]
+    prerequisites: [DP-LIN-01, DP-PIPE-01, DP-EVAL-01]
+    datasets: [synthetic-oracles, uci-501]
+    activities: [E08]
+    assessment_evidence: [A1, A2, A3, A4]
     checkpoint: A1 Control 1
   - block: 9
     title: Trees, random forests, boosting, and interpretation limits
     concepts: [DP-TREE-01, DP-ENS-01, DP-ENS-02, DP-INT-01]
+    outcomes: [LO6, LO7, LO10]
+    prerequisites: [DP-CV-01, DP-MET-02]
+    datasets: [uci-601]
+    activities: [E09]
+    assessment_evidence: [A2, A3, A4]
     checkpoint: Model comparison and error analysis
   - block: 10
     title: PCA, k-means, hierarchical clustering, DBSCAN, and validation
     concepts: [DP-PCA-01, DP-CLU-01, DP-CLU-02, DP-CLU-03]
+    outcomes: [LO6, LO7, LO8]
+    prerequisites: [DP-NUM-01, DP-CV-01]
+    datasets: [uci-501, uci-602, synthetic-oracles]
+    activities: [E10]
+    assessment_evidence: [A2, A3, A4]
     checkpoint: Unsupervised analysis with stability caveat
   - block: 11
     title: Vectorisation, memory, Parquet, Arrow, and query pushdown
     concepts: [DP-PERF-01, DP-FMT-01, DP-SQL-01]
+    outcomes: [LO8]
+    prerequisites: [DP-ARR-01, DP-TAB-02]
+    datasets: [uci-501]
+    activities: [E11]
+    assessment_evidence: [A2, A3, A4]
     checkpoint: Runtime, memory, and storage comparison
   - block: 12
     title: Testing, FAIR documentation, privacy, responsible AI, and failure analysis
     concepts: [DP-TST-01, DP-DOC-01, DP-AI-01, DP-GOV-01]
+    outcomes: [LO2, LO9, LO10]
+    prerequisites: [DP-REP-01, DP-QLT-03]
+    datasets: [uci-501, uci-601]
+    activities: [E12]
+    assessment_evidence: [A2, A3, A4]
     checkpoint: Datasheet, result card, AI log, and reproducibility manifest
   - block: 13
     title: Integrated mini-project clinic
     concepts: [DP-FEAT-01, DP-SEARCH-01, DP-REP-01, DP-TST-01]
+    outcomes: [LO5, LO6, LO7, LO9]
+    prerequisites: [DP-CV-01, DP-PIPE-01, DP-DOC-01]
+    datasets: [uci-501, uci-601, uci-602]
+    activities: [E13]
+    assessment_evidence: [A2, A4]
     checkpoint: A2 project pull request and draft result card
   - block: 14
     title: Audit, individual verification, synthesis, and optional JAX bridge demonstration
-    concepts: [DP-EVAL-02, DP-INT-01, DP-JAX-01, DP-JAX-02, DP-JAX-03]
+    concepts: [DP-EVAL-02, DP-INT-01]
+    optional_concepts: [DP-JAX-01, DP-JAX-02, DP-JAX-03]
+    outcomes: [LO5, LO6, LO10]
+    optional_outcomes: [LO11]
+    prerequisites: [DP-TST-01, DP-DOC-01, DP-CV-01]
+    datasets: [synthetic-oracles]
+    activities: [E14]
+    assessment_evidence: [A3, A4]
     checkpoint: A3 Control 2 and course synthesis

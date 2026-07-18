@@ -5,6 +5,8 @@
   "description": "CSMI Data Processing and Mining course site",
   "scripts": {
     "clean": "node tools/clean.mjs",
+    "data:build": "uv run python tools/build_teaching_data.py",
+    "notebooks:source": "uv run python tools/build_foundation_notebooks.py",
     "validate": "uv run python tools/validate_repository.py",
     "notebooks:generate": "uv run python tools/generate_notebooks.py",
     "notebooks:test": "uv run python -m tools.execute_notebooks --profile fast",

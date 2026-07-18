@@ -20,6 +20,13 @@ npm ci
 npm run check
 ```
 
+Rebuild deterministic teaching tables or canonical foundation notebooks:
+
+```sh
+npm run data:build
+npm run notebooks:source
+```
+
 Serve the generated site locally:
 
 ```sh
@@ -35,6 +42,8 @@ Then open `http://localhost:8080`.
 - `notebooks/instructor`: reviewed notebook sources containing tagged solutions.
 - `build/notebooks/student`: generated output-free student notebooks.
 - `datasets/snapshots`: checksum-pinned and attributed source datasets.
+- `datasets/teaching`: deterministic classroom tables, manifests, and datasheets.
+- `templates`: datasheet, result-card, data-contract, reproducibility, and AI-log starters.
 - `tools`: generation and validation commands.
 - `docs/governance`: course contract and settled decisions.
 - `docs/analysis`: source audit and production roadmap.

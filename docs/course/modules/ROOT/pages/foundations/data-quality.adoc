@@ -1,0 +1,46 @@
+= Data quality, schemas, missingness, and anomalies
+:page-course-language: en
+:page-course-concepts: DP-QLT-01, DP-QLT-02, DP-QLT-03, DP-QLT-04, DP-TST-01
+:page-course-priority: P0
+:page-course-difficulty: D2
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO2, LO3, LO4, LO5, LO9
+:page-course-prerequisites: arrays, tidy tables, and validated joins
+:page-course-assessed: yes
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
+
+Data quality is fitness for a stated use, not a generic “clean/dirty” label. The same extreme measurement may be a sensor failure, a rare event of scientific interest, or an influential but valid observation.
+
+== Audit dimensions
+
+[cols="2,4,4",options="header"]
+|===
+|Dimension |Question |Executable evidence
+|Identity |Is each unit represented exactly as intended? |Non-null/unique key and join-cardinality checks.
+|Completeness |What is missing, where, and under what process? |Missingness by time, station, group, target, and feature.
+|Validity |Do values obey type, unit, category, and domain rules? |Schema assertions and explicit conversion rules.
+|Consistency |Do related fields and tables agree? |Cross-field, temporal, and referential checks.
+|Plausibility |Are extremes errors, rare valid events, or influential cases? |Domain review, robust summaries, sensitivity analysis.
+|Timeliness/provenance |Does the artifact represent the intended version and decision time? |Source, checksum, retrieval/version, event-time record.
+|===
+
+== Missing values
+
+First report the pattern and context. Do not replace missing values merely to satisfy an API. Dropping can change the population; constant or statistical imputation changes distributions; predictive imputation adds modelling assumptions. Any learned imputer is fitted only on training folds through the pipeline. The target is not silently imputed.
+
+== Duplicates and anomalies
+
+Separate exact ingestion duplicates from repeated events and conflicting records. Never call `drop_duplicates()` without a declared identity and resolution policy. Likewise, never delete an outlier only because a boxplot labels it: verify unit, sensor range, event context, leverage, and conclusion sensitivity.
+
+== Laboratory and transfer
+
+The notebook introduces a controlled duplicate, missing value, invalid category, unit mismatch, and rare extreme into the reviewed air-quality slice. Build an audit table and a data contract, repair what is justified, and quarantine what requires domain review.
+
+xref:attachment$notebooks/foundations/data-quality.ipynb[Download the student notebook].
+
+Transfer the contract to a second station/day. Your checks should fail before repair and pass afterwards without hard-coding the expected number of rows.
+
+== Acceptance criteria
+
+At least one identity, referential, type/unit, missingness, and semantic-range check is executable. The report distinguishes error from anomaly, states what was not repaired, and keeps learned imputation outside the data-cleaning function.

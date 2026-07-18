@@ -22,3 +22,13 @@ Student notebooks are generated from reviewed instructor sources. The generator 
 
 Never submit a notebook whose correctness depends on cells being run in a hidden order.
 
+== Foundation notebooks
+
+* xref:attachment$notebooks/foundations/data-lifecycle.ipynb[Data lifecycle and first audit]
+* xref:attachment$notebooks/foundations/tabular-data.ipynb[Arrays, tidy tables, and validated joins]
+* xref:attachment$notebooks/foundations/data-quality.ipynb[Data quality, missingness, and anomalies]
+* xref:attachment$notebooks/foundations/eda-sampling.ipynb[Exploratory analysis and sampling]
+* xref:attachment$notebooks/foundations/safe-pipelines.ipynb[Leakage-safe pipelines and baselines]
+* xref:attachment$notebooks/foundations/metrics-errors.ipynb[Metrics, thresholds, and error analysis]
+
+Notebooks locate data automatically when run inside the course clone. If you download one notebook independently, also download its linked CSV files into the same directory. All required foundation notebooks run on CPU in the fast CI profile.

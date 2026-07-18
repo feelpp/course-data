@@ -1,0 +1,114 @@
+= Course map
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-FND-02, DP-REP-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 20
+:page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10
+:page-course-prerequisites: none
+:page-course-assessed: yes
+
+The course contains fourteen two-hour blocks. P0 and P1 material is the binding course contract: it is taught, practised, and assessed. P2 demonstrations are optional and cannot be required in a control or examination.
+
+== Sequence and evidence
+
+[cols="1,3,1,2,3",options="header"]
+|===
+|Block |Focus |Importance |Practice evidence |Assessment connection
+
+|1
+|Question, data lifecycle, provenance, reproducible environment, readiness check
+|P0
+|Environment evidence, source record, executable first audit
+|Controls, project, final
+
+|2
+|DataFrames, types, units, tidy data, reshaping, grouping
+|P0
+|Typed tidy sensor table with assertions
+|Control 1, project, final
+
+|3
+|Validated joins, schemas, missing values, duplicates, anomalies
+|P0
+|Join report, justified repair, executable data contract
+|Both controls, project, final
+
+|4
+|Exploratory analysis, sampling, representativeness, truthful figures
+|P0
+|One-page evidence brief with a representativeness warning
+|Control 2, project, final
+
+|5
+|Splits, leakage, fitted preprocessing, baselines
+|P0
+|Repaired leakage-safe heterogeneous pipeline
+|Both controls, project, final
+
+|6
+|Stable least squares, likelihood, conditioning, regression metrics
+|P1
+|Solver and residual investigation on oracle data
+|Project, Control 2, final
+
+|7
+|Logistic/softmax models, classification metrics, thresholds and costs
+|P0/P1
+|Cost-aware industrial classification decision
+|Both controls, project, final
+
+|8
+|Ridge/Lasso, bias–variance, learning curves, cross-validation
+|P1
+|Controlled regularisation experiment; Control 1
+|Controls, project, final
+
+|9
+|Trees, forests, boosting, interpretation limits
+|P1
+|Validated ensemble comparison and error analysis
+|Control 2, project, final
+
+|10
+|PCA, k-means, hierarchical clustering, DBSCAN, validation
+|P1
+|Unsupervised analysis challenged across seeds or algorithms
+|Control 2, project, final
+
+|11
+|Vectorisation, memory, Parquet/Arrow, analytical query pushdown
+|P1
+|Measured storage, runtime, and memory comparison
+|Control 2, project, final
+
+|12
+|Tests, FAIR documentation, privacy, responsible AI, failure analysis
+|P0
+|Datasheet, result card, AI declaration, tests, rerun manifest
+|Control 2, project, final
+
+|13
+|Integrated mini-project clinic
+|P0/P1
+|Reviewable pull request and draft result card
+|Mini-project, final
+
+|14
+|Professional audit, synthesis, individual verification
+|P0/P1
+|Prioritised defect report and correct repairs; optional JAX demonstration
+|Control 2, final
+|===
+
+== Recurring datasets
+
+The Beijing Multi-Site Air Quality snapshot is the semester spine. AI4I 2020 supplies a compact industrial classification context, Dry Bean is a reserve multiclass dataset, and versioned synthetic generators provide mathematical oracles. No normal class activity or assessment depends on a live download.
+
+== How to read the map
+
+* *Importance* says whether a concept is required: P0 Essential, P1 Core, P2 Extension, or P3 Deferred.
+* *Difficulty* says how independently it must be used: D1 Guided, D2 Independent, or D3 Synthesis.
+* xref:assessment/overview.adoc[Assessment design] shows where evidence is graded.
+* xref:technical-contract.adoc[Execution contract] fixes the supported hardware, runtime, and tolerance rules.
+* xref:readiness-check.adoc[Readiness check] provides the entry diagnostic and remediation route.

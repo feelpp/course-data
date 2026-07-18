@@ -1,0 +1,22 @@
+schema_version: 1
+result_id: replace-me
+code:
+  repository: replace-me
+  commit: replace-me
+data:
+  dataset_id: replace-me
+  checksum: replace-me
+  split_id: replace-me
+environment:
+  python: "3.12"
+  lock_file: uv.lock
+execution:
+  command: replace-me
+  seed: 0
+  expected_runtime_minutes: 10
+artifacts:
+  - path: replace-me
+    purpose: replace-me
+ai_assistance:
+  mode: B
+  log: ai-notes/README.md

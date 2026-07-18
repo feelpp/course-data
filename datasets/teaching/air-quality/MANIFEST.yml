@@ -1,0 +1,14 @@
+schema_version: 1
+source_id: uci-501
+licence: CC-BY-4.0
+generated_by: tools/build_teaching_data.py
+note: First fourteen days of March 2013 for three stations; values are unmodified.
+files:
+- path: observations.csv
+  rows: 1008
+  sha256: ac5859de33327f798a6c961e2775c1fa6ea7c5a1a4991c9f707a39494cd7e038
+  size_bytes: 87040
+- path: stations.csv
+  rows: 3
+  sha256: 18e4b67c064b3331ec23791a9835b2060a322a5e233fd2903031cd58de1e2bf2
+  size_bytes: 212

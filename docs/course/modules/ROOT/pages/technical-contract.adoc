@@ -1,0 +1,45 @@
+= Execution and numerical contract
+:page-course-language: en
+:page-course-concepts: DP-REP-01, DP-TST-01, DP-NUM-01, DP-PERF-01
+:page-course-priority: P0
+:page-course-difficulty: D2
+:page-course-duration-minutes: 15
+:page-course-outcomes: LO7, LO8, LO9
+:page-course-prerequisites: computing environment
+:page-course-assessed: yes
+
+This contract makes runtime and numerical expectations predictable across ordinary laptops, CI, controls, and examinations.
+
+== Reference environment
+
+The reference target is CPython 3.12 on Ubuntu 24.04 LTS, CPU-only, with two CPU cores and 8 GiB of memory. Linux, WSL2, and macOS are supported for coursework. Required P0/P1 work must not need a GPU. Assessments are offline after the environment and data bundle have been prepared.
+
+Required workflows must remain below 4 GiB peak memory. Students are not penalised for slower hardware when their method meets the fixed data and iteration budget.
+
+== Runtime budgets
+
+[cols="3,1,4",options="header"]
+|===
+|Workflow |Budget |Interpretation
+|Pull-request fast checks |5 min |Small deterministic notebooks, tests, validation, and site build.
+|Scheduled full checks |30 min |All supported CPU notebooks and larger reviewed samples.
+|One student notebook |10 min |End-to-end ordinary lab rerun on the reference environment.
+|Final reference solution |15 min |Complete instructor execution, including tests and artifact generation.
+|Prepared final student compute path |8 min |Expected machine time; the remaining examination time is for reasoning and writing.
+|===
+
+An assessment uses fixed rows, folds, seeds, iterations, or estimators. Wall-clock speed is never a scoring criterion.
+
+== Result tolerances
+
+* Counts, keys, join cardinalities, schema decisions, and deterministic labels are exact.
+* Deterministic floating-point oracle checks default to `rtol=1e-7` and `atol=1e-10` unless the problem scale justifies another value.
+* Seeded model metrics normally use an absolute tolerance of `0.01`.
+* Explicitly stochastic comparisons may use an absolute tolerance of `0.02` and must state the repetition or uncertainty procedure.
+* A rubric may widen a tolerance only when it states the numerical or statistical reason before the assessment.
+
+Tolerances are not target scores. A model inside a metric interval can still be invalid because of leakage, a bad join, inappropriate sampling, or unsupported interpretation.
+
+== Failure and fallback rules
+
+If optional compilation or accelerator code fails, the CPU implementation remains the required baseline. If a provided environment or dataset bundle is defective, the instructor records the incident and applies an equitable adjustment; students do not repair infrastructure under examination time pressure. Network access, personal accounts, and external services are never required in a control or final examination.

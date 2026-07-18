@@ -1,0 +1,64 @@
+= Mini-project specification
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-GOV-01, DP-REP-01, DP-EDA-01, DP-EVAL-02, DP-PIPE-01, DP-EVAL-03, DP-DOC-01, DP-TST-01, DP-AI-01, DP-CV-01, DP-FEAT-01, DP-SEARCH-01, DP-INT-01
+:page-course-priority: P0
+:page-course-difficulty: D3
+:page-course-duration-minutes: 600
+:page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10
+:page-course-prerequisites: Blocks 1–12
+:page-course-assessed: yes
+
+Pairs deliver a reproducible scientific or industrial analysis in a private GitHub Classroom repository. The project is worth 25%: 23 pair points and 2 individual-verification points. Block 13 provides an 80-minute clinic; most production work is outside contact time.
+
+== Choice and scope
+
+Choose one approved route:
+
+* a supervised question using the Beijing air-quality or AI4I snapshot;
+* an unsupervised station/profile question using Beijing or Dry Bean;
+* an instructor-approved scientific dataset satisfying the same licence, privacy, offline, and size contract.
+
+Define one primary question, unit of analysis, stakeholder or scientific use, success evidence, and explicit non-goal. A larger model catalogue is not a substitute for a defensible question and evaluation design.
+
+== Required repository artifacts
+
+* `README.md`: question, scope, commands, expected runtime, repository map, assessed commit;
+* locked Python environment and passing CI;
+* data registry entry, checksum, attribution, licence, schema and concise datasheet;
+* reusable transformations and evaluation functions outside hidden notebook state;
+* tests for key/cardinality, semantic constraints, one toy oracle, and one end-to-end smoke path;
+* notebook or report with EDA, baseline, validation, method comparison, uncertainty/variation, failure analysis, and limitations;
+* concise result/model card with intended and out-of-scope uses;
+* `ai-notes/` record, or an explicit declaration that no AI assistance was used;
+* tagged release built from the assessed commit.
+
+== Method contract
+
+The project must use at least one P1 method appropriate to its question and compare it with a P0 baseline. Learned preprocessing, feature selection, and search belong inside the validation design. The final test data are used once for the final selected workflow. Optional P2 tools may be explored, but the required result and clean run must remain complete without them.
+
+== Pair rubric — 23 points
+
+[cols="4,1,5",options="header"]
+|===
+|Criterion |Points |Required evidence
+|Question, unit, stakeholders, success criterion |2 |Specific, answerable, bounded question and consequence-aware evidence.
+|Provenance, licence, datasheet, privacy/ethics |3 |Stable source/data ID, permitted use, schema, limitations.
+|Quality checks, transformations, joins, EDA |4 |Executable contracts, justified treatments, truthful figures.
+|Leakage-safe pipeline, baseline, method |4 |Protected evaluation, baseline comparison, assumptions and tuning design.
+|Evaluation, uncertainty, failures, limits |4 |Appropriate metrics/stability, variation, error analysis, calibrated claims.
+|Tests, CI, environment, clean rerun |4 |Oracle and smoke tests; successful documented run from the tag.
+|Technical communication and result card |2 |Concise traceable report, labelled artifacts, intended/out-of-scope uses.
+|===
+
+== Individual verification — 2 points
+
+Each student receives 5–8 minutes to explain, test, or modify a selected repository element. Full credit requires a correct explanation of the evidence chain and a safe small change. The verification may produce an individual adjustment when authorship or understanding differs materially within the pair.
+
+== Delivery checkpoints
+
+. Question, data source, licence, roles, and split design approved.
+. Pull request with the baseline, quality contract, and first tests.
+. Block 13 review with draft result card and reproducibility evidence.
+. Tagged release and individual verification.
+
+The assessed release should execute within 10 minutes and below 4 GiB on the reference environment. Timing itself earns no marks.

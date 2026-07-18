@@ -1,0 +1,41 @@
+= Splits, leakage-safe pipelines, and baselines
+:page-course-language: en
+:page-course-concepts: DP-EVAL-01, DP-EVAL-02, DP-PIPE-01, DP-EVAL-03, DP-QLT-02, DP-SMP-01, DP-TST-01
+:page-course-priority: P0
+:page-course-difficulty: D3
+:page-course-duration-minutes: 150
+:page-course-outcomes: LO2, LO5, LO6, LO9
+:page-course-prerequisites: data quality and sampling
+:page-course-assessed: yes
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d3]#D3 Synthesis#
+
+Evaluation data must simulate genuinely unseen use. Leakage occurs whenever training or selection uses information that would not be available for the future case being evaluated.
+
+== Four boundaries
+
+. *Feature-time boundary:* use only information available at the stated decision time. A failure-mode or post-review field is not a predictor of the aggregate failure outcome.
+. *Split boundary:* create train/validation/test roles before fitting imputation, scaling, encoding, feature selection, PCA, or thresholds.
+. *Dependence boundary:* keep related groups or future time periods together when rows are not exchangeable.
+. *Selection boundary:* use validation/cross-validation for choices; keep the final test untouched until one final evaluation.
+
+`Pipeline` and `ColumnTransformer` encode the fitted transformation graph. They do not choose the correct split for you: group and temporal reasoning still precede the API.
+
+== Baselines and sanity checks
+
+Compare with a dummy/constant rule and one simple interpretable method. Check target prevalence, train/test population differences, shuffled-label behaviour where suitable, and whether an implausibly high score indicates a proxy or duplicate. A sophisticated model that does not beat a defensible baseline has not established value.
+
+== Industrial laboratory
+
+The AI4I table is synthetic and contains five failure-type columns used to construct `Machine failure`. Those columns are label leakage for the aggregate target. Build a stratified split, exclude target-derived fields, place numeric/categorical preprocessing in one pipeline, and compare logistic regression with a dummy classifier.
+
+* xref:attachment$datasets/predictive-maintenance/observations.csv[Predictive-maintenance observations]
+* xref:attachment$notebooks/foundations/safe-pipelines.ipynb[Download the student notebook]
+
+== Independent transfer
+
+Inspect a deliberately flawed solution that imputes globally and retains a failure indicator. Name each violated boundary, repair it, and write one test or inspection that would prevent recurrence. Then explain why a random stratified split is acceptable for this synthetic row-level exercise but would not prove future factory performance.
+
+== Acceptance criteria
+
+The final test is used once; all learned transformations live inside the pipeline; leaking/post-outcome features are excluded by role, not only by one spelling; the baseline shares the same split and metric; seeds and feature roles are recorded; the result is described as synthetic exercise evidence.

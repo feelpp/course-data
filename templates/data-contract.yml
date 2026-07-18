@@ -1,0 +1,19 @@
+schema_version: 1
+table: replace-me
+unit_of_analysis: replace-me
+primary_key: [replace-me]
+columns:
+  replace-me:
+    type: string
+    nullable: false
+    role: identifier
+checks:
+  - id: unique-key
+    severity: error
+    rule: Primary key is unique and non-null.
+  - id: join-cardinality
+    severity: error
+    rule: Every join declares and validates its expected cardinality.
+  - id: semantic-range
+    severity: error
+    rule: Units and valid ranges are checked before modelling.
