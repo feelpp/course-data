@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
+from scipy.io import arff
 
 ROOT = Path(__file__).resolve().parents[1]
 SNAPSHOTS = ROOT / "datasets" / "snapshots"
@@ -93,10 +94,30 @@ def build_predictive_maintenance() -> None:
     )
 
 
+def build_dry_bean() -> None:
+    destination = OUTPUT / "dry-bean"
+    destination.mkdir(parents=True, exist_ok=True)
+    archive_path = SNAPSHOTS / "uci-602" / "source.zip"
+    with zipfile.ZipFile(archive_path) as archive:
+        source = archive.read("DryBeanDataset/Dry_Bean_Dataset.arff")
+    records, _ = arff.loadarff(io.StringIO(source.decode("utf-8")))
+    frame = pd.DataFrame(records)
+    frame["Class"] = frame["Class"].str.decode("utf-8")
+    output_path = destination / "observations.csv"
+    frame.to_csv(output_path, index=False, lineterminator="\n")
+    write_manifest(
+        destination,
+        "uci-602",
+        [output_path],
+        "Complete upstream feature table converted losslessly from ARFF to UTF-8 CSV.",
+    )
+
+
 def main() -> None:
     build_air_quality()
     build_predictive_maintenance()
-    print("Built reviewed teaching tables for uci-501 and uci-601")
+    build_dry_bean()
+    print("Built reviewed teaching tables for uci-501, uci-601, and uci-602")
 
 
 if __name__ == "__main__":

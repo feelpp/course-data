@@ -220,6 +220,50 @@ def validate_blueprint(curriculum: dict[str, Any], errors: list[str]) -> None:
         if course.get("priority") != "P0" or course.get("execution_profile") != "fast":
             errors.append(f"Foundation notebook must be P0 and fast: {relative}")
 
+    analytical = curriculum["analytical_release"]
+    analytical_paths = [
+        *analytical["pages"],
+        *analytical["notebooks"],
+        *analytical["teaching_data"],
+        analytical["project_specification"],
+        analytical["final_specification"],
+    ]
+    for relative in analytical_paths:
+        if not (ROOT / relative).exists():
+            errors.append(f"Analytical release artifact is missing: {relative}")
+    expected_p1 = {item["id"] for item in curriculum["concepts"] if item["priority"] == "P1"}
+    declared_p1 = set(analytical["concepts"])
+    if declared_p1 != expected_p1:
+        errors.append(f"Analytical concept inventory mismatch: {sorted(expected_p1 ^ declared_p1)}")
+    page_p1: set[str] = set()
+    for relative in analytical["pages"]:
+        path = ROOT / relative
+        if not path.exists():
+            continue
+        attrs = parse_header(path)
+        if attrs.get("page-course-priority") != "P1":
+            errors.append(f"Analytical page must be P1: {relative}")
+        source = path.read_text(encoding="utf-8")
+        if "== Guided laboratory" not in source or "== Independent transfer" not in source:
+            errors.append(f"Analytical page lacks guided/transfer evidence: {relative}")
+        page_p1.update(set(split_values(attrs.get("page-course-concepts", ""))) & expected_p1)
+    notebook_p1: set[str] = set()
+    for relative in analytical["notebooks"]:
+        path = ROOT / relative
+        if not path.exists():
+            continue
+        course = nbformat.read(path, as_version=4).metadata.get("course", {})
+        if course.get("priority") != "P1" or course.get("execution_profile") != "full":
+            errors.append(f"Analytical notebook must be P1 and full: {relative}")
+        notebook_p1.update(set(course.get("concept_ids", [])) & expected_p1)
+    if page_p1 != expected_p1:
+        errors.append(f"P1 page coverage gap: {sorted(expected_p1 - page_p1)}")
+    if notebook_p1 != expected_p1:
+        errors.append(f"P1 notebook coverage gap: {sorted(expected_p1 - notebook_p1)}")
+    question_ids = analytical["question_bank_ids"]
+    if len(question_ids) != len(set(question_ids)) or len(question_ids) < len(analytical["pages"]):
+        errors.append("Analytical question-bank identifiers are incomplete or duplicated")
+
 
 def load_curriculum(errors: list[str]) -> tuple[dict[str, Any], set[str], set[str]]:
     curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))

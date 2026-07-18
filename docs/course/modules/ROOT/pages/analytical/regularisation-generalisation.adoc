@@ -1,0 +1,33 @@
+= Ridge, Lasso, bias–variance, and learning curves
+:page-course-language: en
+:page-course-concepts: DP-REG-01, DP-GEN-01, DP-CV-01, DP-NUM-01
+:page-course-priority: P1
+:page-course-difficulty: D3
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO5, LO6, LO7
+:page-course-prerequisites: stable linear regression, protected evaluation split
+:page-course-assessed: yes
+
+[.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d3]#D3 Synthesis#
+
+Regularisation trades training fit for constrained model complexity and stability. Ridge shrinks correlated coefficients continuously; Lasso can set coefficients to zero but its selected feature among correlated alternatives may be unstable.
+
+== Generalisation diagnosis
+
+Bias and variance describe expected error behaviour across possible training samples, not a visual slogan about one curve. Learning curves compare training and validation evidence as sample size changes. Hyperparameters are selected inside cross-validation; the final test remains outside the entire selection process.
+
+Scale features inside the fitted pipeline before applying coefficient penalties. Report coefficient paths as conditional predictive behaviour, not automatic causal importance.
+
+== Guided laboratory
+
+Generate polynomial data with known signal/noise. Compare unregularised, Ridge, and Lasso pipelines across penalty values using cross-validation. Plot coefficient paths and learning curves, quantify test error once, and repeat the sample seed to expose selection instability.
+
+xref:attachment$notebooks/analytical/regularisation-generalisation.ipynb[Download the student notebook].
+
+== Independent transfer
+
+Use correlated Dry Bean shape features for one-vs-rest classification or regression on a declared feature. Compare Ridge/Lasso-style penalties with nested selection. Report whether selected features remain stable across folds/seeds and explain why predictive sparsity is not a causal feature-discovery result.
+
+== Assessment evidence
+
+Students must identify under/overfitting from controlled evidence, place scaling and tuning inside CV, preserve the final test, interpret shrinkage/sparsity, and propose a remedy consistent with the observed bias/variance pattern.

@@ -1,0 +1,10 @@
+schema_version: 1
+source_id: uci-602
+licence: CC-BY-4.0
+generated_by: tools/build_teaching_data.py
+note: Complete upstream feature table converted losslessly from ARFF to UTF-8 CSV.
+files:
+- path: observations.csv
+  rows: 13611
+  sha256: 53bc1eb01fdaf11e42482c52d51c33522784870d584b1f03c651c2d20225d2cc
+  size_bytes: 3868569

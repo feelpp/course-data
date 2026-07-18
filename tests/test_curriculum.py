@@ -88,3 +88,17 @@ def test_foundation_release_inventory_is_complete() -> None:
     for group in ("pages", "notebooks", "templates", "teaching_data"):
         assert all((ROOT / path).exists() for path in release[group])
     assert (ROOT / release["public_specimen"]).exists()
+
+
+def test_analytical_release_covers_every_core_concept() -> None:
+    curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))
+    release = curriculum["analytical_release"]
+    expected = {concept["id"] for concept in curriculum["concepts"] if concept["priority"] == "P1"}
+    assert release["implementation_status"] == "complete"
+    assert set(release["concepts"]) == expected
+    assert len(release["pages"]) == len(release["notebooks"]) == 7
+    assert len(set(release["question_bank_ids"])) == 7
+    for group in ("pages", "notebooks", "teaching_data"):
+        assert all((ROOT / path).exists() for path in release[group])
+    assert (ROOT / release["project_specification"]).exists()
+    assert (ROOT / release["final_specification"]).exists()

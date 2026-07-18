@@ -1,0 +1,33 @@
+= Logistic and softmax losses with numerical stability
+:page-course-language: en
+:page-course-concepts: DP-CLS-01, DP-PROB-01, DP-NUM-01, DP-MET-02, DP-THR-01
+:page-course-priority: P1
+:page-course-difficulty: D3
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO6, LO7
+:page-course-prerequisites: probability, logarithms, classification metrics
+:page-course-assessed: yes
+
+[.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d3]#D3 Synthesis#
+
+Logistic and softmax regression model class scores/logits and convert them to probabilities through a normalised exponential family. Cross-entropy is the categorical negative log-likelihood; it is not a synonym for classification error.
+
+== Stable computation
+
+Direct `exp(logit)` overflows for large logits. Subtract the row maximum before exponentiating, or use `logsumexp`/a maintained library loss. Softmax is invariant to adding the same constant to every class logit. Binary logistic loss should use a stable `logaddexp` formulation.
+
+The loss trains probability scores; a threshold or argmax creates a decision. Calibration, prevalence, and asymmetric costs determine whether the default decision rule is suitable.
+
+== Guided laboratory
+
+Implement stable row-wise softmax and multiclass cross-entropy on toy logits with a hand-computed oracle. Demonstrate overflow in the naive expression, verify shift invariance, and compare the result with scikit-learn/SciPy. Fit multinomial logistic regression to a stratified Dry Bean subset and inspect confusion by class.
+
+xref:attachment$notebooks/analytical/classification-losses.ipynb[Download the student notebook].
+
+== Independent transfer
+
+Create an imbalanced three-class synthetic problem. Compare accuracy, macro-F1, per-class recall, and log loss. Explain one case where log loss improves while the argmax confusion matrix is unchanged, and one case where a class-weight change improves minority recall but worsens probability interpretation.
+
+== Assessment evidence
+
+Required evidence includes the likelihood/loss link, stable formula, shape/label encoding, oracle test, class-conditional interpretation, and separation of score, probability, and decision. Framework-specific neural-network mechanics are not required.

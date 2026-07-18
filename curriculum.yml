@@ -76,6 +76,61 @@ foundation_release:
     - datasets/teaching/predictive-maintenance/MANIFEST.yml
   public_specimen: docs/course/modules/ROOT/pages/assessment/control-1-specimen.adoc
 
+analytical_release:
+  implementation_status: complete
+  pages:
+    - docs/course/modules/ROOT/pages/analytical/linear-probabilistic.adoc
+    - docs/course/modules/ROOT/pages/analytical/classification-losses.adoc
+    - docs/course/modules/ROOT/pages/analytical/regularisation-generalisation.adoc
+    - docs/course/modules/ROOT/pages/analytical/model-selection.adoc
+    - docs/course/modules/ROOT/pages/analytical/tree-ensembles.adoc
+    - docs/course/modules/ROOT/pages/analytical/pca-clustering.adoc
+    - docs/course/modules/ROOT/pages/analytical/performance-columnar.adoc
+  notebooks:
+    - notebooks/instructor/analytical/linear-probabilistic.ipynb
+    - notebooks/instructor/analytical/classification-losses.ipynb
+    - notebooks/instructor/analytical/regularisation-generalisation.ipynb
+    - notebooks/instructor/analytical/model-selection.ipynb
+    - notebooks/instructor/analytical/tree-ensembles.ipynb
+    - notebooks/instructor/analytical/pca-clustering.ipynb
+    - notebooks/instructor/analytical/performance-columnar.ipynb
+  concepts:
+    - DP-LIN-01
+    - DP-PROB-01
+    - DP-CLS-01
+    - DP-NUM-01
+    - DP-REG-01
+    - DP-GEN-01
+    - DP-CV-01
+    - DP-SEARCH-01
+    - DP-FEAT-01
+    - DP-TREE-01
+    - DP-ENS-01
+    - DP-ENS-02
+    - DP-THR-01
+    - DP-PCA-01
+    - DP-CLU-01
+    - DP-CLU-02
+    - DP-CLU-03
+    - DP-PERF-01
+    - DP-FMT-01
+    - DP-SQL-01
+    - DP-INT-01
+  question_bank_ids:
+    - QB-LIN-01
+    - QB-CLS-01
+    - QB-REG-01
+    - QB-CV-01
+    - QB-TREE-01
+    - QB-CLU-01
+    - QB-PERF-01
+  teaching_data:
+    - datasets/teaching/air-quality/MANIFEST.yml
+    - datasets/teaching/predictive-maintenance/MANIFEST.yml
+    - datasets/teaching/dry-bean/MANIFEST.yml
+  project_specification: docs/course/modules/ROOT/pages/assessment/mini-project.adoc
+  final_specification: docs/course/modules/ROOT/pages/assessment/final-exam-specimen.adoc
+
 priority_definitions:
   P0:
     label: Essential

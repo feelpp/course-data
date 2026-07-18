@@ -1,0 +1,29 @@
+= PCA, clustering, and validation limits
+:page-course-language: en
+:page-course-concepts: DP-PCA-01, DP-CLU-01, DP-CLU-02, DP-CLU-03, DP-NUM-01
+:page-course-priority: P1
+:page-course-difficulty: D3
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO6, LO7, LO8
+:page-course-prerequisites: scaling, SVD, exploratory analysis
+:page-course-assessed: yes
+
+[.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d3]#D3 Synthesis#
+
+PCA finds orthogonal directions of maximum centred variance through SVD. Components depend on scale, sample, and measurement process; explained variance is not automatically scientific importance.
+
+K-means minimises within-cluster squared Euclidean distance and favours roughly spherical, similarly scaled groups. Hierarchical linkage encodes another geometry; DBSCAN identifies density-connected regions and noise but depends strongly on scale and neighbourhood parameters.
+
+== Guided laboratory
+
+Standardise Dry Bean shape features without using `Class`, fit PCA, inspect reconstruction/explained variance, and compare k-means, agglomerative clustering, and DBSCAN on a controlled subset. Challenge k-means across seeds and bootstrap samples; use silhouette only as one internal diagnostic. Reveal class labels only for post-hoc interpretation.
+
+xref:attachment$notebooks/analytical/pca-clustering.ipynb[Download the student notebook].
+
+== Independent transfer
+
+Create spherical, anisotropic, varying-density, and noisy oracle datasets. Predict which algorithm should fail, test the prediction, and compare stability under resampling. Then cluster air-quality station/day profiles and obtain domain evidence before naming a cluster.
+
+== Assessment evidence
+
+Students must state scaling/centring, objective and geometry, distinguish transformation fitting from visualisation, quantify stability, challenge internal scores, and avoid calling clusters true classes. Class/target labels cannot enter fitting.

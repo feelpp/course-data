@@ -20,6 +20,7 @@ The snapshots are immutable preparation inputs. Reviewed classroom tables are ge
 |---|---|---|
 | `teaching/air-quality` | `uci-501` | First fourteen days of March 2013 for Aotizhongxin, Changping, and Dingling, plus a source-file station registry. |
 | `teaching/predictive-maintenance` | `uci-601` | Complete 10,000-row synthetic industrial table. Failure-mode fields are explicitly target-derived leakage for the aggregate failure outcome. |
+| `teaching/dry-bean` | `uci-602` | Complete 13,611-row numerical shape-feature table for multiclass, PCA, and clustering transfer work. |
 
 The air-quality slice is not representative of all Beijing stations, seasons, current conditions, or another city. AI4I is synthetic and cannot establish performance in a real factory. These limits must remain in student reports and result cards.
 

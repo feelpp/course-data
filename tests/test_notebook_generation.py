@@ -52,3 +52,13 @@ def test_built_foundation_notebooks_have_deterministic_cell_ids() -> None:
         assert [cell.id for cell in notebook.cells] == [
             deterministic_cell_id(name, index) for index in range(len(notebook.cells))
         ]
+
+
+def test_built_analytical_notebooks_have_deterministic_cell_ids() -> None:
+    analytical = ROOT / "notebooks/instructor/analytical"
+    for path in analytical.glob("*.ipynb"):
+        notebook = nbformat.read(path, as_version=4)
+        assert [cell.id for cell in notebook.cells] == [
+            deterministic_cell_id(f"analytical/{path.name}", index)
+            for index in range(len(notebook.cells))
+        ]

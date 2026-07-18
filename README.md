@@ -20,7 +20,7 @@ npm ci
 npm run check
 ```
 
-Rebuild deterministic teaching tables or canonical foundation notebooks:
+Rebuild deterministic teaching tables or all canonical notebooks:
 
 ```sh
 npm run data:build

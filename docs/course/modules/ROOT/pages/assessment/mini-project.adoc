@@ -36,6 +36,19 @@ Define one primary question, unit of analysis, stakeholder or scientific use, su
 
 The project must use at least one P1 method appropriate to its question and compare it with a P0 baseline. Learned preprocessing, feature selection, and search belong inside the validation design. The final test data are used once for the final selected workflow. Optional P2 tools may be explored, but the required result and clean run must remain complete without them.
 
+=== Approved P1 evidence routes
+
+[cols="3,4,4",options="header"]
+|===
+|Route |Required method evidence |Required challenge
+|Stable regression |Stable least squares plus Ridge/Lasso or a probabilistic loss link. |Conditioning, residual structure, regularisation/generalisation stability.
+|Classification/ensembles |Logistic baseline plus a controlled tree/forest/boosting comparison. |Class-conditional errors, threshold consequences, importance non-causality.
+|PCA/clustering |Scaled PCA plus at least two clustering geometries. |Seed/resample stability, internal-score limits, domain interpretation.
+|Performance-aware analysis |Typed Parquet artifact and projected/filtered analytical query. |Memory estimate, fair equality-tested benchmark, bounded engine conclusion.
+|===
+
+Feature selection/search may support any route, but it must remain inside the validation design. Each pair also answers one independent P1 verification prompt selected from a different method family.
+
 == Pair rubric — 23 points
 
 [cols="4,1,5",options="header"]

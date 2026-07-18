@@ -33,3 +33,15 @@ Never submit a notebook whose correctness depends on cells being run in a hidden
 * xref:attachment$notebooks/foundations/baseline-synthesis.ipynb[End-to-end baseline synthesis]
 
 Notebooks locate data automatically when run inside the course clone. If you download one notebook independently, also download its linked CSV files into the same directory. All required foundation notebooks run on CPU in the fast CI profile.
+
+== Analytical notebooks
+
+* xref:attachment$notebooks/analytical/linear-probabilistic.ipynb[Stable linear regression and probability]
+* xref:attachment$notebooks/analytical/classification-losses.ipynb[Stable classification losses]
+* xref:attachment$notebooks/analytical/regularisation-generalisation.ipynb[Regularisation and generalisation]
+* xref:attachment$notebooks/analytical/model-selection.ipynb[Cross-validation and search]
+* xref:attachment$notebooks/analytical/tree-ensembles.ipynb[Trees, forests, and boosting]
+* xref:attachment$notebooks/analytical/pca-clustering.ipynb[PCA and clustering]
+* xref:attachment$notebooks/analytical/performance-columnar.ipynb[Columnar performance]
+
+The analytical notebooks are P1 Core and execute in the full scheduled/release workflow. Each contains a guided reference path, public checks, and an independent transfer task.

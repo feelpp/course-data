@@ -1,0 +1,33 @@
+= Cross-validation, feature selection, and search
+:page-course-language: en
+:page-course-concepts: DP-CV-01, DP-SEARCH-01, DP-FEAT-01, DP-EVAL-02, DP-PIPE-01
+:page-course-priority: P1
+:page-course-difficulty: D3
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO5, LO6, LO7, LO9
+:page-course-prerequisites: fitted pipelines and one final untouched test
+:page-course-assessed: yes
+
+[.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d3]#D3 Synthesis#
+
+Cross-validation estimates a selection procedure only when each fold reproduces the complete fitted workflow. Imputation, scaling, feature construction/selection, PCA, and threshold tuning belong inside the folds.
+
+== Choose folds from dependence
+
+Use stratification for class prevalence, groups when related observations must remain together, and forward/blocked time splits when future information is unavailable. Random row folds are not a neutral default for repeated entities or autocorrelated measurements.
+
+Grid search is appropriate for a small structured space; random search explores more dimensions under a fixed budget. Record distributions across folds, not only the best mean. Nested CV is required when the outer estimate must include the uncertainty introduced by model/hyperparameter selection.
+
+== Guided laboratory
+
+Create grouped synthetic observations where ordinary stratified CV leaks group identity. Compare it with `GroupKFold`, place scaling and univariate selection inside a pipeline, and run a small random search with a fixed candidate budget. Preserve a group-held-out final test.
+
+xref:attachment$notebooks/analytical/model-selection.ipynb[Download the student notebook].
+
+== Independent transfer
+
+On the air-quality table, compare random-row and chronological validation for a PM2.5 model. Explain the different estimands, implement the defensible split, and show how one globally selected feature or imputed statistic changes fold evidence. Produce a compact search table with candidate, fold mean/spread, fit budget, and selection rationale.
+
+== Assessment evidence
+
+Required answers name the data dependency, choose folds accordingly, show every learned step inside the pipeline, preserve the final test, and interpret search uncertainty/budget. A larger search without a valid design earns no additional credit.

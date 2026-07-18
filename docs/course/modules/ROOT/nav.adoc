@@ -13,6 +13,14 @@
 ** xref:foundations/metrics-errors.adoc[Metrics and error analysis]
 ** xref:foundations/reproducible-delivery.adoc[Reproducible delivery]
 ** xref:foundations/baseline-synthesis.adoc[Baseline synthesis]
+* Analytical core
+** xref:analytical/linear-probabilistic.adoc[Linear and probabilistic modelling]
+** xref:analytical/classification-losses.adoc[Classification losses]
+** xref:analytical/regularisation-generalisation.adoc[Regularisation and generalisation]
+** xref:analytical/model-selection.adoc[Model selection]
+** xref:analytical/tree-ensembles.adoc[Tree ensembles]
+** xref:analytical/pca-clustering.adoc[PCA and clustering]
+** xref:analytical/performance-columnar.adoc[Columnar performance]
 * xref:notebooks.adoc[Notebook workflow]
 * Assessment
 ** xref:assessment/overview.adoc[Assessment guide]
