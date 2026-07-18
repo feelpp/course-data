@@ -51,6 +51,7 @@ A serious P0 failure caps the affected criterion even if a final metric is high.
 * xref:assessment/mini-project.adoc[Mini-project specification]
 * xref:assessment/final-exam-specimen.adoc[Specimen final exam]
 * xref:assessment/rubric.adoc[Common analytic rubric]
+* xref:assessment/delivery.adoc[Delivery, submission, and variant fairness]
 * xref:technical-contract.adoc[Execution and numerical contract]
 
 Control 2 uses a 55-minute flawed-analysis audit. Its 15 points are: defect identification 5, consequence 4, repair 4, and prioritisation/communication 2. Current papers, variants, solutions, hidden tests, and grading scripts remain in the private assessment repository.

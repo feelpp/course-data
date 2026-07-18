@@ -24,6 +24,7 @@
 * xref:notebooks.adoc[Notebook workflow]
 * Assessment
 ** xref:assessment/overview.adoc[Assessment guide]
+** xref:assessment/delivery.adoc[Delivery and submission]
 ** xref:assessment/rubric.adoc[Common rubric]
 ** xref:assessment/control-1-specimen.adoc[Specimen Control 1]
 ** xref:assessment/mini-project.adoc[Mini-project]
