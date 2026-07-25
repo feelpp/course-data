@@ -26,3 +26,7 @@ ext:
         dir: templates
         files: '**/*'
         base: modules/ROOT/attachments/templates
+    - scan:
+        dir: node_modules/katex/dist
+        files: '**/*'
+        base: modules/ROOT/attachments/vendor/katex

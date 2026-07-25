@@ -8,9 +8,9 @@
 :page-course-prerequisites: none
 :page-course-assessed: yes
 
-The course contains fourteen two-hour blocks. P0 and P1 material is the binding course contract: it is taught, practised, and assessed. P2 demonstrations are optional and cannot be required in a control or examination.
+The course contains fourteen two-hour blocks. Essential (P0) and Core (P1) material is the binding course contract: it is taught, practised, and assessed. Extension (P2) demonstrations are optional and cannot be required in a control or examination.
 
-Before or alongside Blocks 1--5, study xref:foundations/mathematical-background.adoc[Mathematical background and error estimation]. Its notation, risk definitions, uncertainty calculations, and error ledger recur in every analytical chapter.
+The site navigation is the recommended student sequence. After the first three data-handling foundations and before exploratory analysis, complete the mathematical pathway in order: xref:foundations/mathematical-background.adoc[Mathematical background and error estimation], xref:foundations/probability-distributions-moments.adoc[Probability distributions and statistical moments], xref:foundations/quantiles-exceedance-risk.adoc[Quantiles, exceedance probabilities, and risk], and xref:foundations/mean-uncertainty.adoc[Mean estimation and sampling uncertainty]. Their notation, probability summaries, uncertainty calculations, and error ledgers recur in the exploratory and analytical chapters.
 
 == Sequence and evidence
 
@@ -20,85 +20,85 @@ Before or alongside Blocks 1--5, study xref:foundations/mathematical-background.
 
 |1
 |Question, data lifecycle, provenance, reproducible environment, readiness check
-|P0
+|Essential (P0)
 |Environment evidence, source record, executable first audit
 |Controls, project, final
 
 |2
 |DataFrames, types, units, tidy data, reshaping, grouping
-|P0
+|Essential (P0)
 |Typed tidy sensor table with assertions
 |Control 1, project, final
 
 |3
 |Validated joins, schemas, missing values, duplicates, anomalies
-|P0
+|Essential (P0)
 |Join report, justified repair, executable data contract
 |Both controls, project, final
 
 |4
 |Exploratory analysis, sampling, representativeness, truthful figures
-|P0
+|Essential (P0)
 |One-page evidence brief with a representativeness warning
 |Control 2, project, final
 
 |5
 |Splits, leakage, fitted preprocessing, baselines
-|P0
+|Essential (P0)
 |Repaired leakage-safe heterogeneous pipeline
 |Both controls, project, final
 
 |6
 |Stable least squares, likelihood, conditioning, regression metrics
-|P1
+|Core (P1)
 |Solver and residual investigation on oracle data
 |Project, Control 2, final
 
 |7
 |Logistic/softmax models, classification metrics, thresholds and costs
-|P0/P1
+|Essential/Core (P0/P1)
 |Cost-aware industrial classification decision
 |Both controls, project, final
 
 |8
 |Ridge/Lasso, bias–variance, learning curves, cross-validation
-|P1
+|Core (P1)
 |Controlled regularisation experiment; Control 1
 |Controls, project, final
 
 |9
 |Trees, forests, boosting, interpretation limits
-|P1
+|Core (P1)
 |Validated ensemble comparison and error analysis
 |Control 2, project, final
 
 |10
 |PCA, k-means, hierarchical clustering, DBSCAN, validation
-|P1
+|Core (P1)
 |Unsupervised analysis challenged across seeds or algorithms
 |Control 2, project, final
 
 |11
 |Vectorisation, memory, Parquet/Arrow, analytical query pushdown
-|P1
+|Core (P1)
 |Measured storage, runtime, and memory comparison
 |Control 2, project, final
 
 |12
 |Tests, FAIR documentation, privacy, responsible AI, failure analysis
-|P0
+|Essential (P0)
 |Datasheet, result card, AI declaration, tests, rerun manifest
 |Control 2, project, final
 
 |13
 |Integrated mini-project clinic
-|P0/P1
+|Essential/Core (P0/P1)
 |Reviewable pull request and draft result card
 |Mini-project, final
 
 |14
 |Professional audit, synthesis, individual verification
-|P0/P1
+|Essential/Core (P0/P1)
 |Prioritised defect report and correct repairs; optional JAX demonstration
 |Control 2, final
 |===
@@ -115,7 +115,7 @@ Use xref:extensions/downstream-paths.adoc[the downstream CSMI map] to carry the 
 
 == How to read the map
 
-* *Importance* says whether a concept is required: P0 Essential, P1 Core, P2 Extension, or P3 Deferred.
+* *Importance* says whether a concept is required: Essential (P0), Core (P1), Extension (P2), or Deferred (P3).
 * *Difficulty* says how independently it must be used: D1 Guided, D2 Independent, or D3 Synthesis.
 * xref:assessment/overview.adoc[Assessment design] shows where evidence is graded.
 * xref:technical-contract.adoc[Execution contract] fixes the supported hardware, runtime, and tolerance rules.

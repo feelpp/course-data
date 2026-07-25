@@ -7,6 +7,19 @@
 :page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10
 :page-course-prerequisites: Blocks 1–12
 :page-course-assessed: yes
+:page-jupyter:
+:page-course-execution-profile: fast
+:page-course-assessment-id: A2
+:page-course-exercise-id: A2-SPECIMEN
+:page-course-exercise-kind: project-brief
+:page-course-task-ids: A2-T1, A2-T2, A2-T3, A2-T4, A2-T5, A2-T6, A2-T7, A2-T8
+:page-course-task-priorities: A2-T1=P0; A2-T2=P0; A2-T3=P0; A2-T4=P0+P1; A2-T5=P0+P1; A2-T6=P0; A2-T7=P0; A2-T8=P0+P1
+:page-course-task-points: A2-T1=2; A2-T2=3; A2-T3=4; A2-T4=4; A2-T5=4; A2-T6=4; A2-T7=2; A2-T8=2
+:page-course-hint-policy: public-checkpoints-and-rubric
+:page-course-ai-mode: B
+:page-course-allowed-resources: course-site, approved-datasets, github-classroom, disclosed-ai-services
+:page-course-submission-evidence: tagged-repository, report-or-notebook, tests, result-card, ai-notes, individual-verification
+:page-course-rubric-criteria: R1, R2, R3, R4, R5, R6, R7
 
 Pairs deliver a reproducible scientific or industrial analysis in a private GitHub Classroom repository. The project is worth 25%: 23 pair points and 2 individual-verification points. Block 13 provides an 80-minute clinic; most production work is outside contact time.
 
@@ -34,9 +47,9 @@ Define one primary question, unit of analysis, stakeholder or scientific use, su
 
 == Method contract
 
-The project must use at least one P1 method appropriate to its question and compare it with a P0 baseline. Learned preprocessing, feature selection, and search belong inside the validation design. The final test data are used once for the final selected workflow. Optional P2 tools may be explored, but the required result and clean run must remain complete without them.
+The project must use at least one Core (P1) method appropriate to its question and compare it with an Essential (P0) baseline. Learned preprocessing, feature selection, and search belong inside the validation design. The final test data are used once for the final selected workflow. Optional Extension (P2) tools may be explored, but the required result and clean run must remain complete without them.
 
-=== Approved P1 evidence routes
+=== Approved Core (P1) evidence routes
 
 [cols="3,4,4",options="header"]
 |===
@@ -47,25 +60,25 @@ The project must use at least one P1 method appropriate to its question and comp
 |Performance-aware analysis |Typed Parquet artifact and projected/filtered analytical query. |Memory estimate, fair equality-tested benchmark, bounded engine conclusion.
 |===
 
-Feature selection/search may support any route, but it must remain inside the validation design. Each pair also answers one independent P1 verification prompt selected from a different method family.
+Feature selection/search may support any route, but it must remain inside the validation design. Each pair also answers one independent Core (P1) verification prompt selected from a different method family.
 
 == Pair rubric — 23 points
 
 [cols="4,1,5",options="header"]
 |===
 |Criterion |Points |Required evidence
-|Question, unit, stakeholders, success criterion |2 |Specific, answerable, bounded question and consequence-aware evidence.
-|Provenance, licence, datasheet, privacy/ethics |3 |Stable source/data ID, permitted use, schema, limitations.
-|Quality checks, transformations, joins, EDA |4 |Executable contracts, justified treatments, truthful figures.
-|Leakage-safe pipeline, baseline, method |4 |Protected evaluation, baseline comparison, assumptions and tuning design.
-|Evaluation, uncertainty, failures, limits |4 |Appropriate metrics/stability, variation, error analysis, calibrated claims.
-|Tests, CI, environment, clean rerun |4 |Oracle and smoke tests; successful documented run from the tag.
-|Technical communication and result card |2 |Concise traceable report, labelled artifacts, intended/out-of-scope uses.
+|A2-T1 — Question, unit, stakeholders, success criterion — Essential (P0) |2 |Specific, answerable, bounded question and consequence-aware evidence.
+|A2-T2 — Provenance, licence, datasheet, privacy/ethics — Essential (P0) |3 |Stable source/data ID, permitted use, schema, limitations.
+|A2-T3 — Quality checks, transformations, joins, EDA — Essential (P0) |4 |Executable contracts, justified treatments, truthful figures.
+|A2-T4 — Leakage-safe pipeline, baseline, method — Essential/Core (P0/P1) |4 |Protected evaluation, baseline comparison, assumptions and tuning design.
+|A2-T5 — Evaluation, uncertainty, failures, limits — Essential/Core (P0/P1) |4 |Appropriate metrics/stability, variation, error analysis, calibrated claims.
+|A2-T6 — Tests, CI, environment, clean rerun — Essential (P0) |4 |Oracle and smoke tests; successful documented run from the tag.
+|A2-T7 — Technical communication and result card — Essential (P0) |2 |Concise traceable report, labelled artifacts, intended/out-of-scope uses.
 |===
 
 == Individual verification — 2 points
 
-Each student receives 5–8 minutes to explain, test, or modify a selected repository element. Full credit requires a correct explanation of the evidence chain and a safe small change. The verification may produce an individual adjustment when authorship or understanding differs materially within the pair.
+*A2-T8 — Individual verification — 2 points, Essential/Core (P0/P1).* Each student receives 5–8 minutes to explain, test, or modify a selected repository element. Full credit requires a correct explanation of the evidence chain and a safe small change. The verification may produce an individual adjustment when authorship or understanding differs materially within the pair.
 
 == Delivery checkpoints
 

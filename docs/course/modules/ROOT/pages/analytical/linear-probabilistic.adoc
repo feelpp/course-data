@@ -7,6 +7,14 @@
 :page-course-outcomes: LO6, LO7, LO8
 :page-course-prerequisites: arrays, leakage-safe evaluation, regression metrics
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: full
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d2]#D2 Independent#
 
@@ -102,7 +110,19 @@ For protected test losses stem:[\ell_i=(y_i-\widehat y_i)^2], estimate mean-squa
 
 only when the test units are independent. A block bootstrap is more appropriate for serially correlated air-quality observations.
 
-== Worked example
+== Worked example: exact fit versus coefficient stability
+
+[.worked-example-context#worked-linear-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+An exact training fit is often presented as evidence that a linear model has solved the problem. This example separates residual fit, numerical coefficient stability, and future prediction by starting with an exact line and then introducing a nearly collinear design.
+
+[.worked-example-method#worked-linear-method]
+=== Method
+
+*Importance:* Core (P1)
 
 .Example: Exact line and residual error
 [.examp#ex:exact-line]
@@ -117,11 +137,98 @@ X=\begin{bmatrix}1&0\\1&1\\1&2\end{bmatrix}.
 The vector stem:[\widehat\beta=(1,2)^\top] gives stem:[X\widehat\beta=y], so the residual norm and training RMSE are zero. This does not imply zero future error: three noiseless collinear points contain no evidence about curvature, changing noise, or a new population. If the last response becomes stem:[5.3], the fitted coefficient and residual uncertainty must be recomputed rather than treating stem:[(1,2)] as exact truth.
 ****
 
-== Guided laboratory
+.Mathematical insight — conditioning controls coefficient sensitivity
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
 
-Construct a nearly collinear synthetic design with known coefficients. Compare explicit normal-equation inversion, `numpy.linalg.lstsq`, and Ridge across perturbations. Connect the squared-error objective to Gaussian negative log-likelihood and report MAE, RMSE, condition number, and coefficient instability.
+*Core (P1).* If stem:[X=U\Sigma V^\top], least squares divides data components by singular values. A small stem:[\sigma_{\min}] amplifies perturbations, and forming stem:[X^\top X] squares the 2-norm condition number: stem:[\kappa_2(X^\top X)=\kappa_2(X)^2]. Zero residual error therefore says nothing about coefficient stability. SVD-based least squares avoids the squared-conditioning computation but cannot create information in a weakly identified direction.
+====
 
-xref:attachment$notebooks/analytical/linear-probabilistic.ipynb[Download the student notebook].
+[.worked-example-implementation#worked-linear-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The hand calculation is exact because the small design identifies its two coefficients. The executable extension changes one condition: it creates two nearly collinear predictors with known coefficients. It compares explicit normal-equation inversion, `numpy.linalg.lstsq`, and Ridge and reports coefficients, training RMSE, condition number, residuals, and singular values. Read the table before the figure: similar prediction errors need not imply stable coefficient estimates.
+
+[#linear-conditioning-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Stable and unstable fits for a nearly collinear design",table-description="Rows compare an explicit normal-equation solve, singular-value least squares, and Ridge. Columns report two slope coefficients, training RMSE, and the design condition number."]
+----
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import Ridge
+
+# Fix the random generator so webpage and notebook evidence are reproducible.
+rng = np.random.default_rng(20260722)
+n = 250
+x1 = rng.normal(size=n)
+x2 = x1 + 1.0e-7 * rng.normal(size=n)
+X = np.column_stack([np.ones(n), x1, x2])
+y = 2.0 + 3.0 * x1 - 3.0 * x2 + 0.05 * rng.normal(size=n)
+
+
+def rmse(beta: np.ndarray) -> float:
+    """Compute training RMSE only for this numerical sensitivity experiment."""
+    return float(np.sqrt(np.mean((y - X @ beta) ** 2)))
+
+
+# The normal-equation solve is included as a diagnostic counterexample, not advice.
+beta_normal = np.linalg.solve(X.T @ X, X.T @ y)
+beta_lstsq, _, rank, singular_values = np.linalg.lstsq(X, y, rcond=None)
+ridge = Ridge(alpha=1.0e-3, fit_intercept=False).fit(X, y)
+condition = float(np.linalg.cond(X))
+assert rank == X.shape[1]
+assert condition > 1.0e6
+
+fit_summary = pd.DataFrame(
+    {
+        "method": ["normal equations", "SVD least squares", "Ridge α=10⁻³"],
+        "coefficient x1": [beta_normal[1], beta_lstsq[1], ridge.coef_[1]],
+        "coefficient x2": [beta_normal[2], beta_lstsq[2], ridge.coef_[2]],
+        "training RMSE": [rmse(beta_normal), rmse(beta_lstsq), rmse(ridge.coef_)],
+        "κ₂(X)": [condition, condition, condition],
+    }
+).set_index("method")
+fit_summary
+----
+
+Nearly cancelling coefficients are poorly identified even though predictions and RMSE can remain stable. Ridge changes the estimand by adding shrinkage; it is not merely a numerically clever way to obtain the unregularised coefficients.
+
+[#linear-residual-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Two panels show least-squares residuals against fitted values and singular values on a logarithmic scale; residuals form a roughly horizontal cloud while the smallest singular value is many orders below the others",figure-caption="Residual and singular-value diagnostics for the deterministic nearly collinear design. The residual panel challenges mean and variance structure; the singular-value panel exposes numerical sensitivity.",result-interpretation="A visually unstructured residual cloud does not remove the conditioning problem. The tiny third singular value explains why individual slopes are unstable although fitted responses remain accurate on the observed design."]
+----
+import matplotlib.pyplot as plt
+
+# Use the stable least-squares fit for diagnostics; do not form an explicit inverse.
+fitted = X @ beta_lstsq
+residuals = y - fitted
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.8), constrained_layout=True)
+axes[0].scatter(fitted, residuals, s=18, alpha=0.65)
+axes[0].axhline(0.0, color="black", linewidth=1)
+axes[0].set(title="Residual check", xlabel="Fitted response", ylabel="Residual")
+axes[1].semilogy(np.arange(1, len(singular_values) + 1), singular_values, "o-")
+axes[1].set(title="Design singular values", xlabel="Ordered component", ylabel="Singular value (log scale)")
+axes[1].set_xticks(np.arange(1, len(singular_values) + 1))
+plt.show()
+----
+
+[.worked-example-results#worked-linear-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The exact three-point problem has zero residual norm, while the nearly collinear experiment has condition number above stem:[10^6]. The table shows that methods can have similar training RMSE but radically different individual slopes. The singular-value panel identifies the weak direction even when the residual panel appears unstructured.
+
+[.worked-example-conclusion#worked-linear-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+An exact or low-RMSE fit does not establish stable coefficients or future predictive validity. RMSE checks agreement on observed responses, the residual plot challenges mean and variance structure, and the singular values diagnose coefficient sensitivity. Ridge changes the estimand through shrinkage rather than recovering the unstable unregularised coefficients. None of these diagnostics estimates performance on a new population; the generator fixes one noise law and one collinearity mechanism, so this is a numerical experiment rather than evidence that a real dataset obeys the Gaussian model.
+
+Use the page toolbar to download the generated notebook. Re-execute it before changing the perturbation scale, seed, or Ridge penalty.
 
 == Independent transfer
 

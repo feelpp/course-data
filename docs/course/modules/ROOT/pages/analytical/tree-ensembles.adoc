@@ -7,6 +7,14 @@
 :page-course-outcomes: LO6, LO7, LO10
 :page-course-prerequisites: classification pipelines, cross-validation, error analysis
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: full
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d2]#D2 Independent#
 
@@ -89,7 +97,19 @@ Permutation importance for feature stem:[j] estimates a loss increase
 
 Its uncertainty depends on the test sample and permutations. Correlated features can substitute for one another, dividing or hiding importance. Neither impurity nor permutation importance identifies an intervention effect.
 
-== Worked example
+== Worked example: from a Gini split to protected evidence
+
+[.worked-example-context#worked-tree-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+A tree can make a locally pure split without producing reliable future predictions. Compute the local Gini gain exactly, then compare a depth-controlled tree and two ensembles with a prevalence baseline on protected cases.
+
+[.worked-example-method#worked-tree-method]
+=== Method
+
+*Importance:* Core (P1)
 
 .Example: Gini split
 [.examp#ex:gini-split]
@@ -106,11 +126,145 @@ G(t_R)=1-(1/4)^2-(3/4)^2=3/8,
 and stem:[\Delta G=1/2-(2/6)0-(4/6)(3/8)=1/4]. This calculation explains the local criterion; it does not establish generalisation.
 ****
 
-== Guided laboratory
+.Mathematical insight — impurity gain is local empirical optimisation
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
 
-On AI4I pre-outcome features, compare a depth-controlled tree, random forest with OOB score, and histogram gradient boosting against the logistic/dummy baselines. Use fixed budgets, inspect class-conditional errors, and compare impurity importance with held-out permutation importance.
+*Core (P1).* Gini gain measures the weighted reduction of label impurity for one candidate split on the training sample. Repeated greedy gains can drive training error down even when variance rises. Bagging reduces variance by averaging imperfectly correlated trees; boosting instead builds a sequential additive correction. Neither mechanism turns a local gain into protected-test evidence.
+====
 
-xref:attachment$notebooks/analytical/tree-ensembles.ipynb[Download the student notebook].
+[.worked-example-implementation#worked-tree-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The six-observation calculation explains exactly why the proposed split gains stem:[1/4] Gini impurity. The executable extension asks whether a local training improvement survives as useful prediction: on AI4I pre-outcome features, it compares a depth-controlled tree, random forest, and histogram gradient boosting with a prevalence baseline under fixed budgets. The table reports protected-test PR-AUC and the forest OOB diagnostic; the figure exposes the baseline comparison.
+
+[#ensemble-comparison-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Protected-test evidence for tree-based classifiers and a prevalence baseline",table-description="Rows compare a prior dummy, depth-controlled tree, random forest, and histogram gradient boosting. Columns report protected-test PR-AUC, deterministic seed, model budget, and forest out-of-bag accuracy where applicable."]
+----
+from pathlib import Path
+
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
+from sklearn.metrics import average_precision_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.tree import DecisionTreeClassifier
+
+def course_file(relative: str) -> Path:
+    """Locate canonical data in a repository checkout or student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+data_path = course_file("datasets/teaching/predictive-maintenance/observations.csv")
+data = pd.read_csv(data_path)
+features = [
+    "Type", "Air temperature [K]", "Process temperature [K]",
+    "Rotational speed [rpm]", "Torque [Nm]", "Tool wear [min]",
+]
+X_train, X_test, y_train, y_test = train_test_split(
+    data[features],
+    data["Machine failure"],
+    test_size=0.25,
+    random_state=20260722,
+    stratify=data["Machine failure"],
+)
+preprocess = ColumnTransformer(
+    [("type", OneHotEncoder(handle_unknown="ignore", sparse_output=False), ["Type"])],
+    remainder="passthrough",
+)
+estimators = {
+    "depth-controlled tree": DecisionTreeClassifier(
+        max_depth=5, min_samples_leaf=20, class_weight="balanced", random_state=20260722
+    ),
+    "random forest": RandomForestClassifier(
+        n_estimators=80,
+        min_samples_leaf=5,
+        class_weight="balanced",
+        oob_score=True,
+        n_jobs=1,
+        random_state=20260722,
+    ),
+    "histogram boosting": HistGradientBoostingClassifier(
+        max_iter=80,
+        max_leaf_nodes=15,
+        learning_rate=0.08,
+        class_weight="balanced",
+        random_state=20260722,
+    ),
+}
+scores: dict[str, float] = {}
+fitted: dict[str, Pipeline] = {}
+for name, estimator in estimators.items():
+    pipeline = Pipeline([("preprocess", preprocess), ("model", estimator)]).fit(
+        X_train, y_train
+    )
+    scores[name] = float(
+        average_precision_score(y_test, pipeline.predict_proba(X_test)[:, 1])
+    )
+    fitted[name] = pipeline
+
+dummy = DummyClassifier(strategy="prior").fit(X_train, y_train)
+dummy_ap = float(average_precision_score(y_test, dummy.predict_proba(X_test)[:, 1]))
+forest_oob = float(fitted["random forest"].named_steps["model"].oob_score_)
+assert max(scores.values()) > dummy_ap
+assert 0.0 < forest_oob < 1.0
+
+ensemble_summary = pd.DataFrame(
+    {
+        "protected-test PR-AUC": [dummy_ap, *scores.values()],
+        "seed": ["not stochastic", 20260722, 20260722, 20260722],
+        "budget": ["prior only", "depth 5", "80 trees", "80 iterations"],
+        "OOB accuracy": [pd.NA, pd.NA, forest_oob, pd.NA],
+    },
+    index=["prior dummy", *scores.keys()],
+)
+ensemble_summary
+----
+
+[#ensemble-comparison-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Four hatched horizontal bars compare protected-test PR-AUC for a prior dummy, one tree, a random forest, and histogram boosting; all fitted models exceed the prevalence baseline",figure-caption="Protected-test PR-AUC under fixed model and compute budgets. Hatch patterns and direct value labels duplicate colour.",result-interpretation="The comparison establishes predictive ranking evidence only for the deterministic synthetic split. OOB accuracy and protected-test PR-AUC use different metrics and sampling mechanisms, so numerical agreement is not expected and disagreement should be investigated."]
+----
+import matplotlib.pyplot as plt
+
+plot_scores = pd.Series({"prior dummy": dummy_ap, **scores})
+plt.style.use("tableau-colorblind10")
+fig, ax = plt.subplots(figsize=(8.2, 4.2), constrained_layout=True)
+bars = ax.barh(plot_scores.index, plot_scores.values)
+for bar, hatch, value in zip(bars, ["//", "..", "xx", "++"], plot_scores.values, strict=True):
+    bar.set_hatch(hatch)
+    ax.text(value + 0.008, bar.get_y() + bar.get_height() / 2, f"{value:.3f}", va="center")
+ax.set(xlabel="Protected-test PR-AUC", title="Tree and ensemble comparison")
+ax.set_xlim(0.0, min(1.0, float(plot_scores.max()) + 0.12))
+ax.grid(axis="x", alpha=0.25)
+plt.show()
+----
+
+[.worked-example-results#worked-tree-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The six-observation calculation gives Gini gain stem:[1/4]. In the protected experiment, every fitted tree-based model exceeds the prior PR-AUC baseline under fixed budgets, and the forest also reports an out-of-bag accuracy diagnostic. The labelled bar chart makes the baseline comparison visible without equating OOB accuracy with PR-AUC.
+
+[.worked-example-conclusion#worked-tree-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The fitted tree models provide ranking evidence beyond prevalence on this protected synthetic split, but the local Gini gain is not the reason that generalisation is established. Impurity gain is a training criterion, PR-AUC is protected-test ranking evidence, and OOB accuracy is a resampling diagnostic with a different metric. They should not be conflated. Class rarity, threshold costs, subgroup failures, fit variance, and population shift remain outside the bar chart.
+
+Use the page toolbar to download the generated notebook. Repeated seeds are a stability analysis and must rerun the whole fit, not only redraw a tree diagram.
 
 == Independent transfer
 

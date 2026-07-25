@@ -7,6 +7,14 @@
 :page-course-outcomes: LO6, LO7
 :page-course-prerequisites: probability, logarithms, classification metrics
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: full
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d3]#D3 Synthesis#
 
@@ -82,7 +90,19 @@ For recall stem:[r=TP/(TP+FN)] with stem:[m_+=TP+FN] independent positive cases,
 
 Use a group or block bootstrap when cases share machines, patients, sites, or time dependence. Threshold selection and probability calibration must occur before final evaluation; otherwise the uncertainty estimate omits selection optimism.
 
-== Worked example
+== Worked example: same decision, different probability loss
+
+[.worked-example-context#worked-classification-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+A probability classifier is used both to rank cases and to support later decisions. Determine why two predictions that produce the same class at threshold stem:[0.5] can still have very different probabilistic quality, then verify a numerically stable multiclass implementation.
+
+[.worked-example-method#worked-classification-method]
+=== Method
+
+*Importance:* Core (P1)
 
 .Example: Same decision, different log loss
 [.examp#ex:log-loss-confidence]
@@ -99,11 +119,145 @@ For a positive case, probabilities stem:[0.6] and stem:[0.9] both predict class 
 The confusion matrix is unchanged while log loss rewards the better probability assignment. If the true class were 0, the losses would instead be stem:[-\log(0.4)\approx0.916] and stem:[-\log(0.1)\approx2.303]; overconfidence is penalised strongly.
 ****
 
-== Guided laboratory
+.Mathematical insight — proper loss evaluates the probability, not only the class
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
 
-Implement stable row-wise softmax and multiclass cross-entropy on toy logits with a hand-computed oracle. Demonstrate overflow in the naive expression, verify shift invariance, and compare the result with scikit-learn/SciPy. Fit multinomial logistic regression to a stratified Dry Bean subset and inspect confusion by class.
+*Core (P1).* Log loss is a strictly proper scoring rule: in expectation it is minimised by reporting the true conditional probability. Threshold accuracy discards the distance from the decision boundary, whereas stem:[-\log p_y] rewards honest probability information and strongly penalises confident errors. Stable `logsumexp` computation preserves this mathematical objective without overflowing.
+====
 
-xref:attachment$notebooks/analytical/classification-losses.ipynb[Download the student notebook].
+[.worked-example-implementation#worked-classification-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The two-case calculation shows why a hard decision discards probability information. The executable extension implements stable row-wise softmax and multiclass cross-entropy on declared toy logits, checks the result against a hand-computed oracle and SciPy, and then fits multinomial logistic regression to a protected Dry Bean split. The result table separates numerical identities from empirical protected-test loss; the figure shows how log loss changes continuously even when the threshold decision does not.
+
+[#classification-stability-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Numerical and empirical classification-loss checks",table-description="Rows report probability normalisation error, softmax shift-invariance error, stable toy cross-entropy, and protected Dry Bean multiclass log loss."]
+----
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from scipy.special import logsumexp
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import log_loss
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+
+def stable_softmax(logits: np.ndarray) -> np.ndarray:
+    """Normalise row logits after subtracting their maximum."""
+    shifted = logits - logits.max(axis=1, keepdims=True)
+    exponentials = np.exp(shifted)
+    return exponentials / exponentials.sum(axis=1, keepdims=True)
+
+
+def cross_entropy(logits: np.ndarray, labels: np.ndarray) -> float:
+    """Compute mean categorical negative log-likelihood without log(softmax)."""
+    log_normaliser = logsumexp(logits, axis=1)
+    selected_logits = logits[np.arange(len(labels)), labels]
+    return float(np.mean(log_normaliser - selected_logits))
+
+
+# These logits overflow in a naive exp(logit) implementation.
+toy_logits = np.array([[1000.0, 1001.0, 999.0], [-1000.0, -1001.0, -999.0]])
+toy_labels = np.array([1, 2])
+toy_probability = stable_softmax(toy_logits)
+toy_loss = cross_entropy(toy_logits, toy_labels)
+normalisation_error = float(np.max(np.abs(toy_probability.sum(axis=1) - 1.0)))
+shift_error = float(
+    np.max(np.abs(toy_probability - stable_softmax(toy_logits + 12345.0)))
+)
+assert np.isfinite(toy_probability).all() and np.isfinite(toy_loss)
+assert normalisation_error < 1.0e-14
+assert shift_error < 1.0e-12
+
+# Locate the canonical file both in a repository checkout and in a student bundle.
+def course_file(relative: str) -> Path:
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+# Test the same loss family on a stratified, bounded Dry Bean subset.
+data_path = course_file("datasets/teaching/dry-bean/observations.csv")
+beans = pd.read_csv(data_path).groupby("Class", group_keys=False).sample(
+    n=180, random_state=20260722
+)
+X_train, X_test, y_train, y_test = train_test_split(
+    beans.drop(columns="Class"),
+    beans["Class"],
+    test_size=0.25,
+    random_state=20260722,
+    stratify=beans["Class"],
+)
+model = make_pipeline(
+    StandardScaler(), LogisticRegression(max_iter=1500, random_state=20260722)
+).fit(X_train, y_train)
+bean_log_loss = float(log_loss(y_test, model.predict_proba(X_test), labels=model.classes_))
+assert bean_log_loss < 0.8
+
+pd.DataFrame(
+    {
+        "value": [normalisation_error, shift_error, toy_loss, bean_log_loss],
+        "required interpretation": [
+            "probabilities sum to one",
+            "common logit shifts do not change probabilities",
+            "extreme logits remain finite",
+            "protected-sample probabilistic error",
+        ],
+    },
+    index=[
+        "maximum row-sum error",
+        "maximum shift-invariance error",
+        "toy cross-entropy",
+        "Dry Bean log loss",
+    ],
+)
+----
+
+[#classification-loss-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Two labelled curves show binary logistic loss against logit from minus twelve to twelve; the positive-class loss decreases as the logit increases while the negative-class loss increases",figure-caption="Stable binary logistic losses computed with logaddexp. The two target classes use different line styles as well as colour.",result-interpretation="Classification decisions depend only on which side of a threshold the score falls, while log loss continues to distinguish confidence. Extreme wrong-sign logits receive an approximately linear penalty without numerical overflow."]
+----
+import matplotlib.pyplot as plt
+
+# logaddexp(0, eta) is a stable implementation of softplus(eta).
+eta = np.linspace(-12.0, 12.0, 400)
+loss_y0 = np.logaddexp(0.0, eta)
+loss_y1 = np.logaddexp(0.0, eta) - eta
+plt.style.use("tableau-colorblind10")
+fig, ax = plt.subplots(figsize=(7.5, 4.2), constrained_layout=True)
+ax.plot(eta, loss_y0, linestyle="--", label="target y=0")
+ax.plot(eta, loss_y1, linestyle="-", label="target y=1")
+ax.axvline(0.0, color="black", linewidth=1, alpha=0.6)
+ax.set(xlabel="Logit η", ylabel="Binary cross-entropy", title="Stable logistic loss")
+ax.legend()
+ax.grid(alpha=0.25)
+plt.show()
+----
+
+[.worked-example-results#worked-classification-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The hand calculation gives losses stem:[0.511] and stem:[0.105] for two correct positive predictions that share the same hard decision. The executable table verifies probability normalisation, invariance to a common logit shift, finite extreme-logit cross-entropy, and a bounded protected Dry Bean log loss. The figure confirms that loss changes continuously on both sides of the class boundary.
+
+[.worked-example-conclusion#worked-classification-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The stem:[0.9] prediction is the better probability assignment for the positive case even though both predictions make the same class decision. Softmax normalisation, shift invariance, and cross-entropy agreement are implementation checks; protected-test log loss is sampling evidence for one deterministic split. Neither establishes calibration in a new population, and a lower average loss can conceal severe loss for a rare class. Inspect class-conditional counts and reliability before turning probabilities into a decision threshold.
+
+Use the page toolbar to download the notebook generated from this complete example.
 
 == Independent transfer
 

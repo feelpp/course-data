@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://feelpp.github.io/course-data/schemas/asciidoc-notebook-metadata.schema.json",
+  "title": "CSMI generated notebook course metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_kind",
+    "artifact_variant",
+    "solutions_included",
+    "source_resource_id",
+    "source_path",
+    "source_sha256",
+    "source_page_url",
+    "language",
+    "priority",
+    "difficulty",
+    "duration_minutes",
+    "concept_ids",
+    "outcomes",
+    "execution_profile",
+    "accessibility",
+    "generator"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "source_kind": { "const": "asciidoc" },
+    "artifact_variant": { "const": "student" },
+    "solutions_included": { "const": false },
+    "source_resource_id": { "type": "string", "minLength": 1 },
+    "source_path": { "type": "string", "pattern": "\\.adoc$" },
+    "source_sha256": { "$ref": "#/$defs/sha256" },
+    "source_page_url": { "type": "string", "minLength": 1 },
+    "language": { "const": "en" },
+    "priority": { "enum": ["P0", "P1", "P2", "P3"] },
+    "difficulty": { "enum": ["D1", "D2", "D3"] },
+    "duration_minutes": { "type": "integer", "minimum": 1 },
+    "concept_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "execution_profile": { "enum": ["fast", "full", "optional"] },
+    "accessibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["keyboard_only", "colour_alone_forbidden", "required_figure_contract"],
+      "properties": {
+        "keyboard_only": { "const": true },
+        "colour_alone_forbidden": { "const": true },
+        "required_figure_contract": { "type": "string", "minLength": 1 }
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asciidoctor_jupyter", "feelpp_antora_extensions", "feelpp_asciidoctor_extensions"],
+      "properties": {
+        "asciidoctor_jupyter": { "type": "string", "minLength": 1 },
+        "feelpp_antora_extensions": { "type": "string", "minLength": 1 },
+        "feelpp_asciidoctor_extensions": { "type": "string", "minLength": 1 }
+      }
+    },
+    "exercise": { "$ref": "#/$defs/exercise" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "task_priorities": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": { "enum": ["P0", "P1", "P2", "P3"] }
+      }
+    },
+    "task_points": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "number", "exclusiveMinimum": 0 }
+    },
+    "exercise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assessment_id",
+        "exercise_id",
+        "kind",
+        "task_ids",
+        "task_priorities",
+        "task_points",
+        "hint_policy",
+        "ai_mode",
+        "allowed_resources",
+        "submission_evidence",
+        "rubric_criteria"
+      ],
+      "properties": {
+        "assessment_id": { "type": "string", "pattern": "^A[0-9]+$" },
+        "exercise_id": { "type": "string", "pattern": "^A[0-9]+-[A-Z0-9-]+$" },
+        "kind": { "enum": ["timed-specimen", "project-brief", "practice"] },
+        "task_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^A[0-9]+-T[0-9]+$" }
+        },
+        "task_priorities": { "$ref": "#/$defs/task_priorities" },
+        "task_points": { "$ref": "#/$defs/task_points" },
+        "hint_policy": {
+          "enum": ["specification-only", "public-checkpoints-and-rubric", "progressive-public-hints"]
+        },
+        "ai_mode": { "enum": ["A", "B", "C"] },
+        "allowed_resources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "submission_evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "rubric_criteria": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^R[1-9][0-9]*$" }
+        }
+      }
+    }
+  }
+}

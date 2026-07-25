@@ -7,6 +7,14 @@
 :page-course-outcomes: LO3, LO8, LO9
 :page-course-prerequisites: DataFrames, dtypes, grouping, reproducible measurement
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: full
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d2]#D2 Independent#
 
@@ -67,7 +75,19 @@ d_i=\log\frac{T_{A,i}}{T_{B,i}}.
 
 The exponentiated mean/median describes a relative factor. A performance conclusion must be bounded to the tested data, query, machine, versions, and cache state. Runtime remains ungraded.
 
-== Worked example
+== Worked example: memory estimate and columnar evidence
+
+[.worked-example-context#worked-performance-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+A processing task must fit within a 4 GiB memory budget while selecting only seven columns from a much wider table. Estimate feasibility before execution, then test whether typed columnar storage and projection preserve the result on a bounded workload.
+
+[.worked-example-method#worked-performance-method]
+=== Method
+
+*Importance:* Core (P1)
 
 .Example: Memory estimate before execution
 [.examp#ex:memory-estimate]
@@ -83,11 +103,138 @@ A table has stem:[n=10^7] rows, four `float64` columns, two `int32` columns, and
 Reading the complete 40-column table, creating a boolean mask, and copying filtered rows can exceed a 4 GiB budget even though the seven-column payload fits. Projection before materialisation changes the feasibility of the workflow.
 ****
 
-== Guided laboratory
+.Mathematical insight — payload is a lower bound on peak memory
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
 
-Expand the air-quality slice deterministically to a moderate benchmark table. Compare CSV and Parquet size, read time, dtypes, selected-column reads, and filtered DuckDB aggregation. Use repeated measurements after a warm-up, verify identical results, and distinguish storage/parsing gains from algorithmic changes.
+*Core (P1).* The sum stem:[n\sum_j b_j] counts only raw selected values. Peak memory also includes validity bitmaps, offsets, indexes, decoded strings, masks, copies, and intermediates. Projection and predicate pushdown reduce terms before materialisation; a faster file format cannot compensate for an algorithm that constructs an unnecessarily large intermediate relation.
+====
 
-xref:attachment$notebooks/analytical/performance-columnar.ipynb[Download the student notebook].
+[.worked-example-implementation#worked-performance-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The hand estimate establishes that the seven selected raw columns require approximately 391 MiB before container and temporary-object overhead. The executable extension scales the air-quality slice to a bounded workload, writes CSV and Parquet, projects three columns, and verifies a filtered DuckDB aggregation against pandas. The table reports bytes and result equality; the figure compares artifact sizes without pretending that file size is a timing benchmark.
+
+[#columnar-evidence-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Bounded CSV, Parquet, projection, and query evidence",table-description="Rows report expanded row count, CSV and Parquet bytes, Parquet-to-CSV size ratio, projected columns, DuckDB result rows, and exact rounded agreement with the pandas aggregate."]
+----
+import tempfile
+from pathlib import Path
+
+import duckdb
+import pandas as pd
+
+def course_file(relative: str) -> Path:
+    """Locate canonical data in a repository checkout or student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+data_path = course_file("datasets/teaching/air-quality/observations.csv")
+source = pd.read_csv(data_path)
+
+# Replication creates a deterministic moderate workload without printing the table.
+expanded = pd.concat(
+    [source.assign(replicate=index) for index in range(50)], ignore_index=True
+)
+expanded["observation_id"] = range(len(expanded))
+
+
+def columnar_evidence(frame: pd.DataFrame) -> dict[str, object]:
+    """Compare bounded artifacts and verify query-result equivalence."""
+    with tempfile.TemporaryDirectory() as directory_name:
+        directory = Path(directory_name)
+        csv_path = directory / "air.csv"
+        parquet_path = directory / "air.parquet"
+        frame.to_csv(csv_path, index=False)
+        frame.to_parquet(parquet_path, index=False)
+
+        # Projection avoids materialising unused pollutant and weather columns.
+        projected_columns = ["station", "PM2.5", "replicate"]
+        projected = pd.read_parquet(parquet_path, columns=projected_columns)
+        pandas_result = (
+            projected.query("station == 'Dingling'")
+            .groupby("replicate")["PM2.5"]
+            .mean()
+            .sort_index()
+        )
+        query = """
+            SELECT replicate, avg("PM2.5") AS mean_pm25
+            FROM read_parquet(?)
+            WHERE station = 'Dingling'
+            GROUP BY replicate
+            ORDER BY replicate
+        """
+        duck_result = (
+            duckdb.execute(query, [str(parquet_path)])
+            .fetchdf()
+            .set_index("replicate")["mean_pm25"]
+        )
+        csv_bytes = csv_path.stat().st_size
+        parquet_bytes = parquet_path.stat().st_size
+        return {
+            "rows": len(frame),
+            "CSV bytes": csv_bytes,
+            "Parquet bytes": parquet_bytes,
+            "Parquet / CSV": parquet_bytes / csv_bytes,
+            "projected columns": ", ".join(projected_columns),
+            "query result rows": len(duck_result),
+            "rounded results equal": bool(
+                pd.Series(pandas_result).round(10).equals(duck_result.round(10))
+            ),
+        }
+
+
+storage_evidence = columnar_evidence(expanded)
+assert storage_evidence["rows"] == 50_400
+assert storage_evidence["Parquet bytes"] < storage_evidence["CSV bytes"]
+assert storage_evidence["rounded results equal"]
+pd.DataFrame.from_dict(storage_evidence, orient="index", columns=["value"])
+----
+
+[#columnar-storage-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Two hatched bars compare CSV and Parquet artifact sizes in mebibytes; the Parquet bar is substantially shorter",figure-caption="Artifact sizes for the deterministic 50,400-row teaching workload. Hatching and direct labels duplicate colour; this is storage evidence, not a timing benchmark.",result-interpretation="The smaller Parquet artifact and projected read reduce bytes parsed and materialised for this schema. They do not prove a universal speedup; timing claims require warm-up, repeated paired measurements, environment identity, and result equality."]
+----
+import matplotlib.pyplot as plt
+
+formats = ["CSV", "Parquet"]
+sizes_mib = [
+    storage_evidence["CSV bytes"] / 2**20,
+    storage_evidence["Parquet bytes"] / 2**20,
+]
+plt.style.use("tableau-colorblind10")
+fig, ax = plt.subplots(figsize=(6.5, 4.2), constrained_layout=True)
+bars = ax.bar(formats, sizes_mib)
+for bar, hatch, value in zip(bars, ["//", "xx"], sizes_mib, strict=True):
+    bar.set_hatch(hatch)
+    ax.text(bar.get_x() + bar.get_width() / 2, value, f"{value:.2f} MiB", ha="center", va="bottom")
+ax.set(ylabel="Artifact size (MiB)", title="Typed columnar storage footprint")
+ax.grid(axis="y", alpha=0.25)
+plt.show()
+----
+
+[.worked-example-results#worked-performance-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The hand estimate gives a raw seven-column payload of stem:[4.1\times10^8] bytes, approximately stem:[391] MiB. For the bounded 50,400-row workload, the result table verifies that Parquet is smaller than CSV, only three columns are projected, and DuckDB and pandas aggregates agree after declared rounding. The figure supports a storage-footprint comparison, not a runtime claim.
+
+[.worked-example-conclusion#worked-performance-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+Projection makes the selected payload compatible with the stated memory budget, and Parquet reduces storage for this controlled schema. The hand calculation remains a lower bound because runtime structures and temporaries add memory. A smaller Parquet file does not prove a universal speedup; timing evidence additionally requires warm-up, repeated paired measurements, environment identity, and exact result agreement. Large intermediate tables remain intentionally unrendered.
+
+Use the page toolbar to download the notebook and add controlled repeated timings only after keeping the equality assertion.
 
 == Independent transfer
 

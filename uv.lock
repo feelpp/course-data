@@ -118,6 +118,7 @@ extensions = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "jsonschema" },
     { name = "pytest" },
     { name = "ruff" },
 ]
@@ -142,6 +143,7 @@ provides-extras = ["extensions"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "jsonschema", specifier = "==4.26.0" },
     { name = "pytest", specifier = "==8.4.1" },
     { name = "ruff", specifier = "==0.12.4" },
 ]

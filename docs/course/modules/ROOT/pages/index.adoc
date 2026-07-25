@@ -24,10 +24,10 @@ The course carries 3 ECTS and contains 28 contact hours in fourteen two-hour blo
 
 == Importance labels
 
-P0 Essential:: Required for every student and eligible for individual assessment.
-P1 Core:: Taught, practised, and assessed at least once.
-P2 Extension:: Optional bridge or project material; never an unannounced prerequisite.
-P3 Deferred:: Assigned to another course or kept as background reading.
+Essential (P0):: Required for every student and eligible for individual assessment.
+Core (P1):: Taught, practised, and assessed at least once.
+Extension (P2):: Optional bridge or project material; never an unannounced prerequisite.
+Deferred (P3):: Assigned to another course or kept as background reading.
 
 Start with the xref:course-contract.adoc[course contract], review the xref:course-map.adoc[course map], verify the xref:environment.adoc[computing environment], and complete the xref:readiness-check.adoc[readiness check].
 
@@ -35,6 +35,6 @@ The xref:accessibility.adoc[accessibility guide] explains keyboard, figure, and 
 
 The first complete learning path is available under *Foundations*. It starts with a mathematical background and error-estimation chapter, then connects each concept to seven executable notebooks, an integrated baseline-synthesis checkpoint, reviewed teaching tables, public acceptance checks, and delivery templates. Current assessment solutions and hidden tests remain outside this public site.
 
-The *Analytical core* adds seven P1 notebooks covering stable/probabilistic regression, classification losses, regularisation, model selection, tree ensembles, PCA/clustering, and columnar performance. The full core CPU workflow executes all fourteen required notebooks.
+The *Analytical core* adds seven Core (P1) notebooks covering stable/probabilistic regression, classification losses, regularisation, model selection, tree ensembles, PCA/clustering, and columnar performance. The full core CPU workflow executes all fourteen required notebooks.
 
 The *Extensions* section provides optional bridges to JAX transformations, kernels, probability calibration, modern dataframe engines, experiment tracking, drift monitoring, and downstream CSMI courses. Its one additional notebook uses a separate dependency extra and is never required for assessment.

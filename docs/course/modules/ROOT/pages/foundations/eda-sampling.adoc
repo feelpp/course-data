@@ -7,6 +7,14 @@
 :page-course-outcomes: LO1, LO2, LO4, LO6
 :page-course-prerequisites: validated and documented table
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: fast
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
 
@@ -15,6 +23,8 @@ Exploration is a disciplined search for structure, quality problems, assumptions
 Use xref:foundations/mathematical-background.adoc[Mathematical background and error estimation] for the distinction between population quantities, estimators, and uncertainty.
 
 == Distribution summaries
+
+Use xref:foundations/probability-distributions-moments.adoc[Probability distributions and statistical moments] for mass, density, support, and moment definitions. Use xref:foundations/quantiles-exceedance-risk.adoc[Quantiles, exceedance probabilities, and risk] for CDF inversion and tail uncertainty. This section applies their empirical counterparts during exploration.
 
 For observations stem:[x_1,\ldots,x_n], the empirical cumulative distribution function is
 
@@ -59,7 +69,7 @@ Under independent sampling, stem:[\widehat{\operatorname{SE}}(\bar X)=s/\sqrt n]
 
 so positive within-group correlation makes the independent-row formula too small. Match resampling to the population claim: resample stations for a station population, days or contiguous blocks for a temporal claim, and complete subjects or machines for repeated measures. Variation across the three observed stations is not a reliable estimate of variation across all stations.
 
-== Worked example
+== Hand calculation: effective information under clustering
 
 .Example: Effective information under clustering
 [.examp#ex:cluster-information]
@@ -81,11 +91,116 @@ Construct two groups in which stem:[x] and stem:[y] have a positive within-group
 For an air-quality claim about future days at the same stations, identify the observational unit, resampling unit, target population, and one source of bias that a confidence interval cannot repair.
 ****
 
-== Laboratory
+== Worked example: distribution and sampling diagnostics
 
-Audit missingness and coverage, plot station/time distributions, compare within- and between-station variation, and write one supported and one unsupported claim.
+[.worked-example-context#worked-eda-context]
+=== Context
 
-xref:attachment$notebooks/foundations/eda-sampling.ipynb[Download the student notebook].
+*Importance:* Essential (P0)
+
+The question is: _How did recorded daily mean PM2.5 vary across the three stations during the reviewed 14-day period?_ The observational unit is an hourly station record; the plotted unit is a station-day.
+
+[.worked-example-method#worked-eda-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+For station stem:[s] and day stem:[d], the plotted value is stem:[\bar x_{sd}=n_{sd}^{-1}\sum_{i\in(s,d)}x_i], where stem:[n_{sd}] counts valid PM2.5 observations. The method constructs timestamps, preserves missing values, aggregates by this declared key, checks coverage, and then presents the numerical range and time pattern.
+
+.Mathematical insight — aggregation changes the analysis unit
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* The daily mean gives equal weight to each valid hourly record within a station-day, while a later summary of daily means can give equal weight to days. These are different weighting rules when coverage varies. Missing hours therefore affect both uncertainty and the implicit estimand; aggregation does not make missingness disappear.
+====
+
+[.worked-example-implementation#worked-eda-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The same `daily` table drives both the bounded numerical summary and the diagnostic figure, preventing the plotted and reported quantities from drifting apart.
+
+[#eda-summary-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Station-level summary of the plotted daily PM2.5 values",table-description="Rows are stations. Columns give the number of represented days and the minimum, mean, and maximum daily mean PM2.5 concentration in micrograms per cubic metre."]
+----
+from pathlib import Path
+
+import pandas as pd
+
+# Build exactly the station-day quantity named in the worked question.
+def course_file(relative: str) -> Path:
+    """Locate canonical data in a repository checkout or student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+data_path = course_file("datasets/teaching/air-quality/observations.csv")
+air = pd.read_csv(data_path)
+air["timestamp"] = pd.to_datetime(air[["year", "month", "day", "hour"]])
+air["date"] = air["timestamp"].dt.floor("D")
+daily = (
+    air.groupby(["station", "date"], observed=True, as_index=False)
+    .agg(pm25_mean=("PM2.5", "mean"), valid_pm25=("PM2.5", "count"))
+)
+assert daily["station"].nunique() == 3
+assert daily["date"].nunique() == 14
+
+# Show bounded numerical context before asking students to read the time plot.
+daily.groupby("station")["pm25_mean"].agg(
+    represented_days="count", minimum="min", mean="mean", maximum="max"
+).round(2)
+----
+
+.Diagnostic figure
+
+The executable figure uses the same declared aggregation. Labelled axes and units, redundant line styles and markers, a caption, alternative text, and a bounded interpretation are part of the evidence contract.
+
+[#eda-coverage-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Three station series show daily mean PM2.5 across fourteen March 2013 days using distinct colours, line styles, and markers; gaps indicate days with no valid observations",figure-caption="Daily mean PM2.5 in the reviewed three-station teaching slice. Aggregation is by station and calendar day after preserving missing values; line style and marker duplicate the colour encoding.",result-interpretation="The figure describes only the recorded stations and period. Differences combine station, time, weather, missingness, and measurement processes; they do not identify a causal station effect or represent all Beijing air quality."]
+----
+import matplotlib.pyplot as plt
+
+plt.style.use("tableau-colorblind10")
+fig, ax = plt.subplots(figsize=(9, 4.5), constrained_layout=True)
+styles = [("-", "o"), ("--", "s"), (":", "^")]
+for (station, group), (line_style, marker) in zip(
+    daily.groupby("station", observed=True), styles, strict=True
+):
+    ax.plot(
+        group["date"],
+        group["pm25_mean"],
+        label=station,
+        linestyle=line_style,
+        marker=marker,
+        markersize=4,
+    )
+ax.set(title="Daily mean PM2.5 by station", xlabel="Date (March 2013)", ylabel="PM2.5 (µg/m³)")
+ax.legend(title="Station")
+ax.grid(alpha=0.25)
+plt.show()
+----
+
+[.worked-example-results#worked-eda-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The table establishes the station-specific scale and range across 14 represented days. The figure shows temporal co-movement, peaks, and any coverage gaps using the same station-day estimates, so visual claims can be checked against the declared aggregation.
+
+[.worked-example-conclusion#worked-eda-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+Recorded daily PM2.5 varies across stations and time in this reviewed 14-day slice, with some movements shared across stations. Agreement may reflect shared weather rather than station equivalence. These summaries describe recorded values only: they do not correct informative missingness, quantify serial dependence, or represent unobserved stations and months. Consequently they support an exploratory description, not a causal station comparison or a city-wide generalisation.
+
+Use the page toolbar to download the generated notebook. Its code is the code shown here, with empty outputs so students must execute and inspect the evidence themselves.
 
 == Independent evidence brief
 

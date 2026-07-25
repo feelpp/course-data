@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "converter_version": "0.7.0",
+  "constructs": [
+    {
+      "node": "video",
+      "status": "unsupported",
+      "required_action": "reject on required pages or provide an accessible static alternative"
+    },
+    {
+      "node": "pass",
+      "status": "intentionally_omitted",
+      "required_action": "do not rely on raw HTML for notebook learning content"
+    },
+    {
+      "node": "antora_xref",
+      "status": "semantic_adapter_required",
+      "required_action": "rewrite Antora resource identities to notebook-portable links"
+    },
+    {
+      "node": "source_block_metadata",
+      "status": "adapter_or_upstream_change_required",
+      "required_action": "map approved block IDs and roles to stable cell IDs and tags"
+    },
+    {
+      "node": "code_callout",
+      "status": "adapter_or_upstream_change_required",
+      "required_action": "remove AsciiDoc callout markers from notebook code while preserving the explanatory list"
+    }
+  ]
+}

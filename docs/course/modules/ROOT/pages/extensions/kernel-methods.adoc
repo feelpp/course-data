@@ -7,42 +7,264 @@
 :page-course-outcomes: LO6, LO7, LO8
 :page-course-prerequisites: Ridge regularisation, cross-validation, feature scaling
 :page-course-assessed: no
+:page-jupyter: true
+:page-course-execution-profile: full
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p2]#P2 Extension# [.course-badge.difficulty-d3]#D3 Synthesis#
 
-Kernel methods express similarity through a positive-semidefinite Gram matrix. They provide a useful bridge between linear regularisation, nonlinear prediction, numerical conditioning, and scientific priors without requiring a neural network.
+Kernel methods express similarity through a positive-semidefinite Gram matrix. They connect linear regularisation, nonlinear prediction, numerical conditioning, and scientific priors without requiring a neural network.
 
-== Core construction
+This optional lesson is generated as a notebook from this page. It uses only the required CPU environment, is excluded from assessment, and may be omitted without losing the Essential/Core (P0/P1) course.
 
-For observations stem:[x_i], choose a kernel stem:[k(x_i,x_j)] and form stem:[K_{ij}=k(x_i,x_j)]. Kernel Ridge solves
+== Learning objectives
+
+After this lesson you should be able to:
+
+* construct and interpret a Gram matrix;
+* explain the roles of the RBF length scale and Ridge regularisation;
+* select kernel hyperparameters without leaking test information;
+* quantify memory, conditioning, and perturbation limits;
+* decide when a simpler linear model or a scalable approximation is preferable.
+
+== From features to similarities
+
+.Definition: Positive-semidefinite kernel
+[.def#def:psd-kernel]
+****
+A symmetric function stem:[k:\mathcal X\times\mathcal X\to\mathbb R] is positive semidefinite when, for every finite sample stem:[x_1,\ldots,x_n] and every stem:[a\in\mathbb R^n],
 
 [stem]
 ++++
-(K + \alpha I)c = y,
+a^\top K a\ge 0,
+\qquad K_{ij}=k(x_i,x_j).
 ++++
 
-then predicts stem:[f(x)=\sum_i c_i k(x_i,x)]. Solve the linear system; do not form an explicit inverse. The regularisation stem:[\alpha] controls stability and fit, while an RBF kernel's stem:[\gamma] controls locality. Both must be selected inside the validation design.
+The matrix stem:[K] is the Gram matrix. Positive semidefiniteness makes it behave like an inner-product matrix, possibly in a feature space that is never constructed explicitly.
+****
 
-== Guided comparison
+For the radial-basis-function kernel,
 
-. Standardise numeric inputs inside a pipeline.
-. Compare linear Ridge with `KernelRidge(kernel="rbf")` on a small nonlinear oracle.
-. Search a modest joint grid for `alpha` and `gamma` with the correct group or time split.
-. Report the baseline, validation design, uncertainty across folds, and residual structure.
-. Repeat after rescaling one feature to expose why distance-based kernels need scale discipline.
+[stem]
+++++
+k_\gamma(x,z)=\exp\!\left(-\gamma\lVert x-z\rVert_2^2\right),
+++++
 
-The official https://scikit-learn.org/stable/modules/kernel_ridge.html[scikit-learn Kernel Ridge documentation] describes the estimator contract. The page is original course material; the restricted legacy kernel PDF is not redistributed or used as a student dependency.
+large stem:[\gamma] makes similarity very local, while small stem:[\gamma] makes many observations look alike. Scaling therefore changes the model, not merely the presentation of the inputs.
+
+== Kernel Ridge and its spectral filter
+
+Kernel Ridge solves
+
+[stem]
+++++
+(K+\alpha I)c=y,
+\qquad
+\widehat f(x)=\sum_{i=1}^{n}c_i k(x_i,x),
+++++
+
+with stem:[\alpha>0]. Solve the linear system; never form stem:[(K+\alpha I)^{-1}] explicitly.
+
+If stem:[K=Q\Lambda Q^\top] with eigenvalues stem:[\lambda_j\ge0], then
+
+[stem]
+++++
+c
+=Q(\Lambda+\alpha I)^{-1}Q^\top y
+=\sum_j\frac{q_j^\top y}{\lambda_j+\alpha}q_j.
+++++
+
+Regularisation limits amplification in weak spectral directions. For a response perturbation stem:[\delta y],
+
+[stem]
+++++
+\lVert\delta c\rVert_2
+\le
+\frac{\lVert\delta y\rVert_2}{\lambda_{\min}(K)+\alpha}
+\le
+\frac{\lVert\delta y\rVert_2}{\alpha}.
+++++
+
+This is a stability bound on coefficients for a fixed Gram matrix. It is not a generalisation guarantee and does not account for uncertainty in the observations or kernel choice.
+
+== Error estimation
+
+The validation split must contain the complete selection of stem:[\alpha], stem:[\gamma], preprocessing, and kernel family. Fold scores estimate performance of that selection procedure on populations represented by the resampling design; they do not justify an independent-and-identically-distributed claim when groups or time dependence are ignored.
+
+For fold losses stem:[L_1,\ldots,L_K], a descriptive standard error is
+
+[stem]
+++++
+\widehat{\operatorname{se}}(\bar L)
+=
+\frac{s_L}{\sqrt K}.
+++++
+
+Because validation folds overlap in their training data, this is not generally an exact inferential standard error. Preserve an untouched final set, report fold dispersion, and inspect residual structure.
+
+== Worked example: nonlinear oracle with a linear baseline
+
+[.worked-example-context#worked-kernel-context]
+=== Context
+
+*Importance:* Extension (P2)
+
+A small sensor response has a smooth nonlinear component. We compare a standardised linear Ridge baseline with an RBF Kernel Ridge model. The held-out test set is used once, after a five-fold search on the training set.
+
+[.worked-example-method#worked-kernel-method]
+=== Method
+
+*Importance:* Extension (P2)
+
+Generate stem:[y=0.6x+\sin(2.2x)+\varepsilon], with stem:[\varepsilon\sim\mathcal N(0,0.18^2)]. Fit both models through pipelines so scaling is learned inside each validation fold. Search a small joint grid for stem:[\alpha] and stem:[\gamma], then compare test root mean squared error.
+
+.Mathematical insight — regularisation bounds spectral amplification
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Extension (P2).* The eigen-direction stem:[q_j] is multiplied by stem:[1/(\lambda_j+\alpha)]. Adding stem:[\alpha] therefore places a finite upper bound stem:[1/\alpha] on response-noise amplification in the coefficient vector. This explains a numerical benefit of regularisation, but neither chooses the scientifically appropriate kernel nor proves predictive validity.
+====
+
+[.worked-example-implementation#worked-kernel-implementation]
+=== Implementation
+
+*Importance:* Extension (P2)
+
+The table reports the untouched test error and the regularised Gram-matrix condition number. The figure shows both fitted response curves; the test metric, not visual smoothness, supplies the comparison.
+
+[#kernel-methods-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Linear and RBF Kernel Ridge diagnostics",table-description="Rows compare the selected regularisation, RBF scale where applicable, untouched test RMSE, and the regularised Gram-matrix condition number."]
+----
+import numpy as np
+import pandas as pd
+from sklearn.kernel_ridge import KernelRidge
+from sklearn.linear_model import Ridge
+from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics.pairwise import rbf_kernel
+from sklearn.model_selection import GridSearchCV, KFold, train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+rng = np.random.default_rng(20260724)
+x = rng.uniform(-3.0, 3.0, size=180)
+y = 0.6 * x + np.sin(2.2 * x) + rng.normal(0.0, 0.18, size=x.size)
+X = x.reshape(-1, 1)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.30, random_state=20260724
+)
+
+folds = KFold(n_splits=5, shuffle=True, random_state=20260724)
+linear_search = GridSearchCV(
+    Pipeline([("scale", StandardScaler()), ("model", Ridge())]),
+    {"model__alpha": [0.01, 0.1, 1.0, 10.0]},
+    scoring="neg_root_mean_squared_error",
+    cv=folds,
+)
+kernel_search = GridSearchCV(
+    Pipeline([("scale", StandardScaler()), ("model", KernelRidge(kernel="rbf"))]),
+    {
+        "model__alpha": [0.001, 0.01, 0.1, 1.0],
+        "model__gamma": [0.1, 0.3, 1.0, 3.0],
+    },
+    scoring="neg_root_mean_squared_error",
+    cv=folds,
+)
+linear_search.fit(X_train, y_train)
+kernel_search.fit(X_train, y_train)
+
+linear_rmse = root_mean_squared_error(y_test, linear_search.predict(X_test))
+kernel_rmse = root_mean_squared_error(y_test, kernel_search.predict(X_test))
+best_alpha = kernel_search.best_params_["model__alpha"]
+best_gamma = kernel_search.best_params_["model__gamma"]
+scaled_train = kernel_search.best_estimator_.named_steps["scale"].transform(X_train)
+gram = rbf_kernel(scaled_train, gamma=best_gamma)
+eigenvalues = np.linalg.eigvalsh(gram)
+regularised_condition = (eigenvalues[-1] + best_alpha) / (eigenvalues[0] + best_alpha)
+
+assert kernel_rmse < linear_rmse
+assert np.isfinite(regularised_condition)
+
+kernel_diagnostics = pd.DataFrame(
+    {
+        "alpha": [
+            linear_search.best_params_["model__alpha"],
+            best_alpha,
+        ],
+        "gamma": ["not applicable", best_gamma],
+        "test RMSE": [linear_rmse, kernel_rmse],
+        "regularised Gram condition": ["not applicable", regularised_condition],
+    },
+    index=["linear Ridge", "RBF Kernel Ridge"],
+)
+kernel_diagnostics
+----
+
+[#kernel-methods-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Scatter plot of noisy nonlinear observations with a nearly straight Ridge prediction and a curved RBF Kernel Ridge prediction following the sinusoidal response",figure-caption="Predictions from the selected linear and RBF Kernel Ridge models. The test observations remain visually distinguished from training observations.",result-interpretation="The RBF model captures the controlled nonlinear signal and has lower untouched test RMSE. This one oracle does not establish that the same kernel or hyperparameters will work for a new scientific dataset."]
+----
+import matplotlib.pyplot as plt
+
+grid = np.linspace(-3.1, 3.1, 400).reshape(-1, 1)
+plt.style.use("tableau-colorblind10")
+fig, ax = plt.subplots(figsize=(7.2, 4.8), constrained_layout=True)
+ax.scatter(X_train[:, 0], y_train, s=18, alpha=0.45, marker="o", label="training")
+ax.scatter(X_test[:, 0], y_test, s=28, alpha=0.8, marker="x", label="test")
+ax.plot(grid[:, 0], linear_search.predict(grid), linestyle="--", label="linear Ridge")
+ax.plot(grid[:, 0], kernel_search.predict(grid), linewidth=2.0, label="RBF Kernel Ridge")
+ax.set(
+    xlabel="standard input x",
+    ylabel="response y",
+    title="Linear and kernel predictions on a nonlinear oracle",
+)
+ax.grid(alpha=0.2)
+ax.legend()
+plt.show()
+----
+
+[.worked-example-results#worked-kernel-results]
+=== Results
+
+*Importance:* Extension (P2)
+
+The RBF model should reduce the held-out RMSE on this controlled nonlinear oracle. Its regularised condition number remains finite because stem:[\alpha>0]. The selected numerical values are evidence for this split and grid, not universal kernel defaults.
+
+[.worked-example-conclusion#worked-kernel-conclusion]
+=== Conclusion
+
+*Importance:* Extension (P2)
+
+Kernel Ridge is justified here by a nonlinear signal, leakage-safe selection, a simpler baseline, and final test evidence. Residual risk remains from finite sampling, grid choice, and the match between the RBF similarity assumption and the real measurement process. For large stem:[n], the stem:[n^2] storage and near-stem:[n^3] direct solve motivate approximations or another model family.
 
 == Scaling boundary
 
-The Gram matrix stores stem:[n^2] pairwise similarities and a direct solve can approach stem:[n^3] work. Kernel methods can be excellent for hundreds or a few thousands of observations and inappropriate for millions. Before using one, estimate matrix memory, fit complexity, prediction cost, and the consequence of hyperparameter search.
+A dense Gram matrix stores stem:[n^2] values. With 64-bit floats its payload alone is approximately
 
-== Failure modes
+[stem]
+++++
+8n^2\ \text{bytes},
+++++
 
-* Leakage from scaling or kernel selection before cross-validation.
-* A `gamma` so large that each observation becomes isolated, or so small that the model becomes nearly constant.
-* Treating a kernel score as causal evidence.
-* Comparing a tuned kernel model with an untuned or differently split baseline.
-* Ignoring ill-conditioning because the final metric appears acceptable.
+before workspace and cross-validation copies. A direct dense solve can approach stem:[O(n^3)] work, and prediction against all training observations costs stem:[O(n)] kernel evaluations per new case.
 
-Continue to xref:extensions/downstream-paths.adoc[the downstream map] for optimisation and SciML connections.
+== Exercises
+
+.Exercise: Spectral shrinkage
+[.exer#ex:kernel-spectrum]
+****
+For Gram eigenvalues stem:[100,1,10^{-5}], compare the amplification factors stem:[1/(\lambda_j+\alpha)] for stem:[\alpha=10^{-6},10^{-3},1]. State which directions are stabilised and what the calculation does not say about test error.
+****
+
+.Exercise: Scale sensitivity
+[.exer#ex:kernel-scaling]
+****
+Rescale one input feature by stem:[10^3]. Compare the RBF Gram matrix and validation result with and without a scaling pipeline. Explain why selecting stem:[\gamma] after inspecting the test set would be leakage.
+****
+
+Continue to xref:extensions/downstream-paths.adoc[the downstream map] for scalable approximations, optimisation, and SciML connections.

@@ -1,0 +1,339 @@
+= Quantiles, exceedance probabilities, and risk
+:page-course-language: en
+:page-course-concepts: DP-EDA-01, DP-SMP-01, DP-PROB-01, DP-REP-01
+:page-course-priority: P0
+:page-course-difficulty: D2
+:page-course-duration-minutes: 75
+:page-course-outcomes: LO1, LO4, LO6, LO7, LO9
+:page-course-prerequisites: Probability distributions, cumulative distribution functions, and basic Python arrays
+:page-course-assessed: yes
+:page-course-execution-profile: fast
+:page-course-figure-contract: Alternative text, caption, labelled axes and units, and non-colour encoding
+:page-jupyter:
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+:jupyter-language-name: python
+:jupyter-language-version: 3.12
+:jupyter-kernel-name: python3
+:jupyter-kernel-language: python
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
+
+Means and variances describe centre and dispersion, but many decisions ask a different question: how large is a high but plausible outcome, or how often will a consequential limit be exceeded? This lesson develops quantiles and exceedance probabilities from the cumulative distribution function, then separates population variation from estimation uncertainty.
+
+== Learning outcomes
+
+After this lesson, you should be able to:
+
+. calculate and interpret a CDF, survival probability, and generalized quantile;
+. distinguish stem:[X>u] from stem:[X\geq u] for distributions with point masses;
+. estimate an exceedance probability and its sampling uncertainty;
+. explain why extreme quantiles require substantially more data than central summaries;
+. distinguish an outcome threshold from a classifier decision threshold and a prediction interval from a confidence interval.
+
+== Cumulative and survival probabilities
+
+Let stem:[X] have cumulative distribution function stem:[F].
+
+.Definition: CDF and survival function
+[.def#def:cdf-survival]
+****
+[stem]
+++++
+F(x)=\mathbb P(X\leq x),
+\qquad
+S(x)=\mathbb P(X>x)=1-F(x).
+++++
+
+For a threshold stem:[u], stem:[S(u)] is the *strict exceedance probability*. If the event is stem:[X\geq u], then
+
+[stem]
+++++
+\mathbb P(X\geq u)=1-F(u^-),
+\qquad
+F(u^-)=\lim_{x\uparrow u}F(x).
+++++
+****
+
+The distinction between stem:[>] and stem:[\geq] disappears for a continuous distribution but matters for counts, rounded measurements, detection limits, and mixed distributions. Every operational requirement must state the convention.
+
+For a density stem:[f], the CDF and survival probability are integrals:
+
+[stem]
+++++
+F(u)=\int_{-\infty}^{u}f(x)\,dx,
+\qquad
+S(u)=\int_u^{\infty}f(x)\,dx.
+++++
+
+Numerical libraries often implement `sf` directly. In far tails it can be more accurate than subtracting a CDF value extremely close to one from one.
+
+== Quantiles are inverse probability statements
+
+.Definition: Generalized quantile
+[.def#def:generalized-quantile]
+****
+For stem:[0<p<1], the lower stem:[p]-quantile is
+
+[stem]
+++++
+Q(p)=\inf\{x\in\mathbb R:F(x)\geq p\}.
+++++
+****
+
+This generalized inverse works for continuous and discrete distributions. For a continuous strictly increasing CDF, stem:[F(Q(p))=p]. With jumps or flat regions, equality and uniqueness can fail; the definition still selects a valid lower quantile. The median is stem:[Q(0.5)], and the interquartile range is stem:[Q(0.75)-Q(0.25)].
+
+Quantiles preserve order under a continuous strictly increasing transformation stem:[g]:
+
+[stem]
+++++
+Q_{g(X)}(p)=g\!\left(Q_X(p)\right).
+++++
+
+This is one reason quantiles are useful for skewed measurements and nonlinear unit changes. In contrast, stem:[\mathbb E(g(X))] is generally not stem:[g(\mathbb E(X))].
+
+*Interpreting a quantile as a probability boundary is an essential concept (P0).* A 0.95 quantile is not “a value that occurs with 95% probability”; approximately 95% of the distribution lies at or below it under the declared convention.
+
+== Empirical estimation and uncertainty
+
+For observations stem:[X_1,\ldots,X_n], the empirical CDF is
+
+[stem]
+++++
+\widehat F_n(x)=\frac1n\sum_{i=1}^{n}\mathbf 1\{X_i\leq x\}.
+++++
+
+The empirical strict exceedance rate at stem:[u] is
+
+[stem]
+++++
+\widehat p_u=\frac1n\sum_{i=1}^{n}\mathbf 1\{X_i>u\}.
+++++
+
+If observations are independent and identically distributed, each indicator is Bernoulli with probability stem:[p_u], giving
+
+[stem]
+++++
+\operatorname{SE}(\widehat p_u)
+=\sqrt{\frac{p_u(1-p_u)}{n}}
+\approx
+\sqrt{\frac{\widehat p_u(1-\widehat p_u)}{n}}.
+++++
+
+The approximation is unreliable when the number of observed exceedances is small. Exact or score-based binomial intervals are preferable to an unqualified symmetric interval near zero or one. Dependence, unequal exposure, censoring, and threshold selection require a design-specific analysis.
+
+Under a smooth positive density stem:[f] near the population quantile stem:[q_p=Q(p)], an empirical quantile has the large-sample approximation
+
+[stem]
+++++
+\operatorname{SE}(\widehat q_p)
+\approx
+\frac{\sqrt{p(1-p)}}{\sqrt n\,f(q_p)}.
+++++
+
+Tail quantiles are difficult because stem:[p(1-p)] and, especially, the density stem:[f(q_p)] in the denominator determine precision. A sparse tail, clustering, or distribution shift can dominate the nominal sampling calculation. *Extreme quantile estimation is a core concept (P1), not a reliable extrapolation from a small convenience sample.*
+
+== Visual connection between density, CDF, quantile, and exceedance
+
+The example uses a lognormal model for a positive, right-skewed duration. The parameter values are illustrative and do not validate a lognormal model for any real process.
+
+.Quantile and exceedance probability for a positive skewed distribution
+[#quantile-exceedance-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Two labelled panels show a lognormal density with its upper tail shaded beyond a threshold and a cumulative distribution with a marked 90 percent quantile",figure-caption="A threshold maps to a tail area, whereas a probability level maps through the inverse CDF to a quantile. The same distribution underlies both views.",result-interpretation="The shaded density area answers the exceedance question for a fixed eight-hour limit. The marked cumulative-distribution intersection answers the inverse question for a fixed probability level of 0.90."]
+----
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import stats
+
+# Declare one positive, skewed reference model using SciPy's shape and scale convention.
+shape = 0.55
+scale = 4.0
+duration_model = stats.lognorm(s=shape, scale=scale)
+x = np.linspace(0.01, 14.0, 700)
+
+# Map a probability level to a quantile and an operational limit to a tail probability.
+probability_level = 0.90
+q90 = duration_model.ppf(probability_level)
+limit = 8.0
+exceedance_probability = duration_model.sf(limit)
+print(f"90% quantile: {q90:.2f} hours")
+print(f"P(duration > {limit:.1f} hours): {exceedance_probability:.3f}")
+
+# Show the tail area in density space and the quantile in cumulative-probability space.
+fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.0), constrained_layout=True)
+axes[0].plot(x, duration_model.pdf(x), color="#1f4e79", linestyle="-", label="density")
+tail = x > limit
+axes[0].fill_between(x[tail], duration_model.pdf(x[tail]), color="#b22222", alpha=0.35)
+axes[0].axvline(limit, color="#b22222", linestyle="--", label="8-hour limit")
+axes[0].set(title="Exceedance is a tail area", xlabel="duration (hours)", ylabel="probability density")
+axes[0].legend()
+
+axes[1].plot(x, duration_model.cdf(x), color="#1f4e79", linestyle="-", label="CDF")
+axes[1].axhline(probability_level, color="#444444", linestyle=":", label="probability 0.90")
+axes[1].axvline(q90, color="#b22222", linestyle="--", label="90% quantile")
+axes[1].plot([q90], [probability_level], marker="o", color="black")
+axes[1].set(title="A quantile inverts the CDF", xlabel="duration (hours)", ylabel="cumulative probability")
+axes[1].legend()
+
+plt.show()
+----
+
+Changing the threshold changes the tail probability. Changing the probability level changes the quantile. These are inverse questions, not interchangeable inputs.
+
+== Applications and the quantity that answers them
+
+[cols="2,2,3,3,1",options="header"]
+|===
+|Question |Mathematical quantity |Company application |Research application |Importance
+
+|What value contains a declared fraction of outcomes below it?
+|stem:[Q(p)]
+|Delivery-time service target, capacity percentile, high-latency budget
+|Reference interval, high simulation response, exposure percentile
+|Essential (P0)
+
+|What fraction crosses a physical or contractual limit?
+|stem:[\mathbb P(X>u)] or stem:[\mathbb P(X\geq u)]
+|SLA violation, stock-out, overload, warranty or maintenance trigger
+|Safety limit, pollutant exceedance, clinical endpoint, reliability requirement
+|Essential (P0)
+
+|How uncertain is the estimated exceedance rate?
+|Binomial, weighted, group, or block uncertainty for stem:[\widehat p_u]
+|Expected alarm volume and staffing uncertainty
+|Precision of an incidence or rare-event estimate
+|Essential (P0)
+
+|Can an unobserved extreme tail be inferred?
+|Tail model plus explicit extrapolation assumptions
+|Severe-loss planning and exceptional loads
+|Rare physical events and reliability extremes
+|Extension (P2)
+|===
+
+== Three different intervals and thresholds
+
+Prediction interval:: A range intended to contain a future observation with a declared probability under the model. It describes outcome variation plus relevant predictive uncertainty.
+Confidence interval:: A procedure for estimating an unknown parameter or estimand; its repeated-sampling coverage concerns the procedure, not the probability that a fixed parameter moves after the data are observed.
+Central quantile interval:: The population range stem:[[Q(\alpha/2),Q(1-\alpha/2)]]. For a continuous distribution it contains probability stem:[1-\alpha]; point masses can make the contained probability larger. It describes distributional spread and is not automatically a prediction interval for a fitted model.
+
+[IMPORTANT]
+====
+An *outcome threshold* stem:[u] defines an event such as stem:[X>u]. A *classifier decision threshold* converts a model score into an action and is selected from error costs, capacity, and validation evidence. Classifier thresholds are developed in xref:foundations/metrics-errors.adoc[Metrics, thresholds, and error analysis]. Do not use the two meanings interchangeably.
+====
+
+== Worked example: an empirical service-limit exceedance
+
+[.worked-example-context#worked-exceedance-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+Among stem:[n=600] protected transactions, 18 exceed a service limit fixed in advance at stem:[u=8] seconds. Estimate the exceedance probability stem:[p_8=P(X>8)] and its finite-sample uncertainty. The first calculation treats transactions as independent and representative; the interpretation will revisit those assumptions.
+
+[.worked-example-method#worked-exceedance-method]
+=== Method
+
+*Importance:* Core (P1)
+
+The indicator stem:[I_i=\mathbf 1\{X_i>8\}] converts the threshold question into a Bernoulli mean. Therefore
+
+[stem]
+++++
+\widehat p_8=\frac{18}{600}=0.030,
+\qquad
+\widehat{\operatorname{SE}}(\widehat p_8)
+=\sqrt{\frac{0.030(0.970)}{600}}
+\approx0.0070.
+++++
+
+The symmetric large-sample interval is
+
+[stem]
+++++
+0.030\pm1.96(0.0070)
+=0.030\pm0.0137
+\approx[0.016,0.044].
+++++
+
+.Mathematical insight — exceedance estimation is Bernoulli estimation
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Core (P1).* Once the service limit is fixed independently of these data, each observation contributes the indicator stem:[I_i]. The empirical exceedance rate is therefore a sample mean with variance approximately stem:[p(1-p)/n] under independence. Choosing the threshold after seeing the same sample changes the problem and invalidates this simple uncertainty calculation.
+====
+
+[.worked-example-implementation#worked-exceedance-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The executable check derives every reported quantity from the declared threshold, count, and denominator and records the units explicitly.
+
+[#exceedance-worked-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Service-limit exceedance calculation",table-description="The table exposes the threshold, protected sample size, exceedance count, empirical exceedance rate, plug-in standard error, and rough symmetric 95 percent limits."]
+----
+import numpy as np
+import pandas as pd
+
+# Compute every reported quantity from the declared count and denominator.
+threshold_seconds = 8.0
+sample_size = 600
+exceedances = 18
+rate = exceedances / sample_size
+standard_error = np.sqrt(rate * (1.0 - rate) / sample_size)
+lower, upper = rate + np.array([-1.0, 1.0]) * 1.96 * standard_error
+assert np.isclose(rate, 0.03)
+
+pd.DataFrame(
+    {
+        "value": [threshold_seconds, sample_size, exceedances, rate, standard_error, lower, upper],
+        "unit": ["seconds", "transactions", "transactions", "proportion", "proportion", "proportion", "proportion"],
+    },
+    index=["threshold", "sample size", "exceedances", "rate", "standard error", "95% lower", "95% upper"],
+).round(4)
+----
+
+[.worked-example-results#worked-exceedance-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The empirical exceedance rate is stem:[18/600=0.030], with plug-in standard error approximately stem:[0.0070]. The rough symmetric 95% interval is stem:[[0.016,0.044]], so the finite protected sample does not support reporting the rate as an exact stem:[3\%].
+
+[.worked-example-conclusion#worked-exceedance-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+About stem:[3\%] of the protected transactions exceeded the predeclared eight-second limit, with substantial finite-sample uncertainty relative to that rate. A score or exact binomial interval is preferable for production reporting. A traffic surge, repeated customer sessions, population shift, or choosing the threshold after inspecting these same observations invalidates the simple independent-binomial interpretation.
+
+== Error ledger
+
+[cols="2,3,3",options="header"]
+|===
+|Source |What can go wrong? |Evidence or response
+|Measurement |Rounding, censoring, detection limits, or unit errors move observations across stem:[u]. |Audit units and resolution; perform threshold sensitivity analysis.
+|Sampling |Few tail observations make stem:[\widehat p_u] and stem:[\widehat q_p] unstable. |Report counts and intervals; justify sample size from the tail question.
+|Dependence |Bursts, repeated units, sites, or adjacent times reduce effective information. |Use cluster- or block-aware intervals and resampling.
+|Threshold selection |Choosing stem:[u] after seeing the same data makes the reported probability selectively optimistic or pessimistic. |Predeclare the threshold or account for the selection procedure.
+|Model approximation |A light-tailed family can severely understate rare events. |Compare empirical and fitted tails; challenge support and extrapolation.
+|Population shift |The future operating regime may have a different tail. |Stratify by time and regime; define monitoring and revalidation conditions.
+|Numerical error |Computing stem:[1-F(u)] can lose precision in an extreme tail. |Use a tested survival-function implementation.
+|===
+
+== Check your understanding
+
+. Prove from the definition of stem:[F] that stem:[\mathbb P(a<X\leq b)=F(b)-F(a)]. State how the formula changes for other endpoint conventions.
+. A Poisson count has stem:[\mathbb P(X=5)>0]. Explain why stem:[\mathbb P(X>5)] and stem:[\mathbb P(X\geq5)] differ.
+. For 12 exceedances among 400 independent observations, compute the empirical rate and its plug-in standard error. Explain why the count 12 is essential context.
+. Use the code to compare the 0.90, 0.95, and 0.99 quantiles. Then hold the threshold fixed and vary the lognormal shape. Explain the operational difference between the two experiments.
+. Identify whether each statement needs a quantile, an exceedance probability, a prediction interval, or a confidence interval: “95% of delivery times,” “probability of violating 8 hours,” “uncertainty in the mean response,” and “range for a future response.”
+
+Download the xref:attachment$foundations/quantiles-exceedance-risk.ipynb[generated notebook] and run it from top to bottom. Its outputs are intentionally cleared during generation so that a clean execution remains observable.

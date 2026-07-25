@@ -10,6 +10,7 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 import nbformat
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BUNDLE = ROOT / "build/release/course-data-student-bundle.zip"
@@ -29,6 +30,11 @@ REQUIRED_PATHS = {
     "notebooks/foundations/data-lifecycle.ipynb",
     "notebooks/foundations/baseline-synthesis.ipynb",
     "notebooks/analytical/linear-probabilistic.ipynb",
+    "notebooks/extensions/jax-transformations.ipynb",
+    "notebooks/assessment/control-1-specimen.ipynb",
+    "notebooks/assessment/mini-project.ipynb",
+    "notebooks/assessment/control-2-specimen.ipynb",
+    "notebooks/assessment/final-exam-specimen.ipynb",
     "datasets/teaching/air-quality/MANIFEST.yml",
     "datasets/teaching/predictive-maintenance/MANIFEST.yml",
     "templates/result-card.md",
@@ -39,6 +45,30 @@ REQUIRED_PATHS = {
 
 def digest(content: bytes) -> str:
     return hashlib.sha256(content).hexdigest()
+
+
+def expected_notebooks(curriculum: dict) -> tuple[set[str], dict[str, str]]:
+    page_root = Path("docs/course/modules/ROOT/pages")
+    page_sources = [
+        *curriculum["foundation_release"]["notebook_sources"],
+        *curriculum["analytical_release"]["notebook_sources"],
+        *curriculum["enrichment_release"]["page_notebook_sources"],
+        *[specimen["source"] for specimen in curriculum["exercise_release"]["public_specimens"]],
+    ]
+    expected = {
+        (Path("notebooks") / Path(source).relative_to(page_root).with_suffix(".ipynb")).as_posix()
+        for source in page_sources
+    }
+    native_sources: dict[str, str] = {}
+    native_root = Path("notebooks/instructor")
+    for exception in curriculum["enrichment_release"]["source_contract"][
+        "notebook_native_exceptions"
+    ]:
+        relative = Path(exception["artifact"]).relative_to(native_root)
+        bundle_path = (Path("notebooks") / relative).as_posix()
+        expected.add(bundle_path)
+        native_sources[bundle_path] = relative.as_posix()
+    return expected, native_sources
 
 
 def validate_bundle(bundle: Path = DEFAULT_BUNDLE) -> list[str]:
@@ -65,6 +95,15 @@ def validate_bundle(bundle: Path = DEFAULT_BUNDLE) -> list[str]:
             )
         if "MANIFEST.json" not in names:
             return errors
+        curriculum = yaml.safe_load(archive.read("curriculum.yml"))
+        expected_notebook_paths, native_sources = expected_notebooks(curriculum)
+        actual_notebook_paths = {name for name in names if name.endswith(".ipynb")}
+        if actual_notebook_paths != expected_notebook_paths:
+            errors.append(
+                "Notebook inventory disagrees with declared generated/public sources: "
+                f"missing={sorted(expected_notebook_paths - actual_notebook_paths)}, "
+                f"unexpected={sorted(actual_notebook_paths - expected_notebook_paths)}"
+            )
         payload = json.loads(archive.read("MANIFEST.json"))
         records = {record["path"]: record for record in payload.get("files", [])}
         expected_names = set(names) - {"MANIFEST.json"}
@@ -80,12 +119,37 @@ def validate_bundle(bundle: Path = DEFAULT_BUNDLE) -> list[str]:
             if not name.endswith(".ipynb"):
                 continue
             notebook = nbformat.reads(archive.read(name).decode(), as_version=4)
+            course = notebook.metadata.get("course", {})
+            source_kind = course.get("source_kind")
+            if source_kind not in {"asciidoc", "notebook-native"}:
+                errors.append(f"Notebook has no declared source-of-truth kind: {name}")
+            if source_kind == "asciidoc" and (
+                course.get("artifact_variant") != "student"
+                or course.get("solutions_included") is not False
+            ):
+                errors.append(f"AsciiDoc notebook is not solution-free student material: {name}")
+            if source_kind == "notebook-native" and (
+                course.get("generated_variant") != "student"
+                or course.get("source_path") != native_sources.get(name)
+            ):
+                errors.append(
+                    f"Notebook-native artifact is not the declared student variant: {name}"
+                )
+            exercise = course.get("exercise")
+            prompt_task_ids: list[str] = []
             for cell in notebook.cells:
                 tags = set(cell.metadata.get("tags", []))
                 if {"solution", "instructor-only", "remove-cell"} & tags:
                     errors.append(f"Private notebook tag in {name}")
                 if cell.cell_type == "code" and (cell.outputs or cell.execution_count is not None):
                     errors.append(f"Notebook output or execution state in {name}")
+                if "exercise-prompt" in tags:
+                    prompt_task_ids.extend(cell.metadata.get("course", {}).get("task_ids", []))
+            if exercise and (
+                set(prompt_task_ids) != set(exercise.get("task_ids", []))
+                or len(prompt_task_ids) != len(exercise.get("task_ids", []))
+            ):
+                errors.append(f"Exercise prompt inventory mismatch in {name}")
     return errors
 
 

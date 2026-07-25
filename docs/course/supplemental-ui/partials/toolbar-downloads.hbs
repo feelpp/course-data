@@ -7,10 +7,11 @@
         <img class="pdf-file-icon icon" src="{{uiRootPath}}/img/pdf.svg" alt=""/> .pdf
       </a>
     </li>
-    {{#if page.attributes.jupyter}}
+    {{#if (and (eq page.attributes.jupyter-status 'generated') page.attributes.jupyter-url)}}
       <li>
-        <a href="{{relativize (resolveResourceURL (replace (join 'attachment$' page.relativeSrcPath) '.adoc' '.ipynb'))}}"
-           title="Download Jupyter Notebook" data-toggle="tooltip" data-placement="left" class="jupyter-download">
+        <a href="{{relativize page.attributes.jupyter-url}}"
+           title="Download Jupyter Notebook" aria-label="Download Jupyter Notebook"
+           data-toggle="tooltip" data-placement="left" class="jupyter-download">
           <img class="jupyter-file-icon icon" src="{{uiRootPath}}/img/jupyter-logo.svg" alt=""/> .ipynb
         </a>
       </li>

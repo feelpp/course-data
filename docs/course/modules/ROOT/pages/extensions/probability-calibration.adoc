@@ -7,27 +7,278 @@
 :page-course-outcomes: LO6, LO7, LO10
 :page-course-prerequisites: Classification losses, cross-validation, threshold selection
 :page-course-assessed: no
+:page-jupyter: true
+:page-course-execution-profile: full
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p2]#P2 Extension# [.course-badge.difficulty-d3]#D3 Synthesis#
 
-A classifier can rank cases well while its reported probabilities are unreliable. Calibration asks whether cases assigned probability stem:[p] occur at approximately rate stem:[p] over a relevant population. It is different from discrimination and different again from choosing a decision threshold.
+A classifier can rank cases well while its reported probabilities are unreliable. Calibration asks whether cases assigned probability stem:[p] occur at approximately rate stem:[p] in the deployment population. It is different from discrimination and different again from choosing a decision threshold.
 
-== Evidence to collect
+This optional lesson is generated as a notebook from this page. It uses only the required CPU environment and is excluded from controls and examinations.
 
-* A reliability diagram with bin counts or uncertainty, not only a smooth line.
-* A proper scoring rule such as log loss or Brier score.
-* A discrimination measure appropriate to the class balance.
-* The operational threshold and consequence model, selected without touching the final test.
-* Results by relevant site, time period, or group when pooled calibration can hide failures.
+== Learning objectives
+
+After this lesson you should be able to:
+
+* distinguish calibration, discrimination, and decision utility;
+* interpret reliability diagrams together with bin counts and uncertainty;
+* compare Brier score, log loss, and ROC AUC without treating them as interchangeable;
+* fit a calibrator without leaking final-test information;
+* explain when sigmoid or isotonic calibration may fail.
+
+== Calibration and proper scores
+
+.Definition: Population calibration
+[.def#def:population-calibration]
+****
+For a binary outcome stem:[Y\in\{0,1\}] and reported probability stem:[P], perfect calibration means
+
+[stem]
+++++
+\mathbb E[Y\mid P=p]=p
+++++
+
+for probability values represented in the target population. In finite data this conditional relationship must be estimated by bins, smoothing, or another model.
+****
+
+The Brier score and binary log loss are
+
+[stem]
+++++
+\operatorname{BS}
+=\frac1n\sum_{i=1}^{n}(p_i-y_i)^2,
+\qquad
+\operatorname{LogLoss}
+=-\frac1n\sum_{i=1}^{n}
+\left[y_i\log p_i+(1-y_i)\log(1-p_i)\right].
+++++
+
+Both are proper scoring rules: in expectation, a forecaster minimises the score by reporting its true conditional probability. ROC AUC instead measures ranking. A monotone recalibration can leave AUC nearly unchanged while improving probability accuracy.
+
+== Error estimation: reliability evidence and uncertainty
+
+For a bin stem:[B_b] containing stem:[m_b] cases, define
+
+[stem]
+++++
+\bar p_b=\frac1{m_b}\sum_{i\in B_b}p_i,
+\qquad
+\bar y_b=\frac1{m_b}\sum_{i\in B_b}y_i.
+++++
+
+The vertical difference stem:[\bar y_b-\bar p_b] is a calibration diagnostic. Conditional on a fixed bin and independent Bernoulli outcomes, an approximate standard error for the observed rate is
+
+[stem]
+++++
+\widehat{\operatorname{se}}(\bar y_b)
+=
+\sqrt{\frac{\bar y_b(1-\bar y_b)}{m_b}}.
+++++
+
+Small bins are intrinsically noisy. Binning choices, dependence, repeated use of the same test set, and subgroup selection add uncertainty not represented by this formula.
 
 == Leakage-safe calibration
 
-Fit the base estimator on training data. Learn Platt/sigmoid or isotonic calibration from held-out predictions or through cross-validation, never from the final test. Isotonic regression is flexible but can overfit small calibration sets; sigmoid calibration is more constrained. Preserve an untouched final evaluation set for the complete estimator-plus-calibrator decision.
+Fit the base estimator on training data. Learn sigmoid/Platt or isotonic calibration from held-out predictions or through a declared cross-validation procedure, never from the final test. Isotonic regression is flexible but can overfit small calibration sets; sigmoid calibration is more constrained and can be misspecified.
 
-Use https://scikit-learn.org/stable/modules/calibration.html[scikit-learn's calibration guide] for the supported estimator API and cross-validation behaviour.
+The https://scikit-learn.org/stable/modules/calibration.html[scikit-learn calibration guide] documents supported estimator workflows. The split logic and final evidence remain the author's responsibility.
 
-== Independent transfer
+== Worked example: repair deliberately overconfident probabilities
 
-Create an imbalanced binary oracle whose logits are deliberately overconfident. Compare the uncalibrated model, sigmoid calibration, and isotonic calibration across at least three seeds. Report Brier score, log loss, discrimination, reliability evidence, and the threshold consequence. Explain why selecting the lowest Brier score does not automatically select the best operational decision.
+[.worked-example-context#worked-calibration-context]
+=== Context
 
-Calibration does not repair dataset shift, label bias, an invalid split, or target leakage. Continue with xref:extensions/drift-monitoring.adoc[drift and monitoring] for post-release evidence.
+*Importance:* Extension (P2)
+
+A binary oracle produces valid event probabilities, but a fictional scoring system stretches its logits and becomes overconfident. We reserve one calibration set to learn two correction maps and one untouched test set to evaluate them.
+
+[.worked-example-method#worked-calibration-method]
+=== Method
+
+*Importance:* Extension (P2)
+
+Compare raw probabilities with sigmoid and isotonic calibration. Report Brier score and log loss for probability quality, ROC AUC for ranking, and fixed-bin reliability evidence with counts. Do not select a decision threshold from the final test.
+
+.Mathematical insight — calibration can change probabilities without changing ranking
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Extension (P2).* Any strictly increasing calibration map preserves pairwise score order, so it preserves ROC AUC apart from ties. It can nevertheless change Brier score, log loss, and every probability-based decision. Discrimination therefore cannot certify probability validity, and better calibration does not by itself identify the best operational threshold.
+====
+
+[.worked-example-implementation#worked-calibration-implementation]
+=== Implementation
+
+*Importance:* Extension (P2)
+
+The computation uses independent calibration and test partitions. Sigmoid calibration fits a logistic map to the raw logit; isotonic calibration fits a monotone piecewise-constant map to the raw probability.
+
+[#probability-calibration-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Untouched-test probability diagnostics",table-description="Rows compare raw overconfident probabilities, sigmoid calibration, and isotonic calibration using Brier score, log loss, and ROC AUC."]
+----
+import numpy as np
+import pandas as pd
+from scipy.special import expit
+from sklearn.isotonic import IsotonicRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
+
+rng = np.random.default_rng(20260724)
+n = 6000
+x = rng.normal(size=n)
+true_logit = -0.7 + 1.3 * x
+true_probability = expit(true_logit)
+y = rng.binomial(1, true_probability)
+order = rng.permutation(n)
+calibration_ids = order[:3000]
+test_ids = order[3000:]
+
+# This score preserves ranking but is deliberately too extreme and slightly shifted.
+raw_logit = 2.4 * true_logit + 0.35
+raw_probability = expit(raw_logit)
+
+sigmoid = LogisticRegression(C=1e6, solver="lbfgs")
+sigmoid.fit(raw_logit[calibration_ids, None], y[calibration_ids])
+isotonic = IsotonicRegression(out_of_bounds="clip")
+isotonic.fit(raw_probability[calibration_ids], y[calibration_ids])
+
+test_y = y[test_ids]
+test_probabilities = {
+    "raw overconfident": raw_probability[test_ids],
+    "sigmoid calibrated": sigmoid.predict_proba(raw_logit[test_ids, None])[:, 1],
+    "isotonic calibrated": isotonic.predict(raw_probability[test_ids]),
+}
+calibration_metrics = pd.DataFrame(
+    {
+        "Brier score": {
+            name: brier_score_loss(test_y, probability)
+            for name, probability in test_probabilities.items()
+        },
+        "log loss": {
+            name: log_loss(test_y, probability)
+            for name, probability in test_probabilities.items()
+        },
+        "ROC AUC": {
+            name: roc_auc_score(test_y, probability)
+            for name, probability in test_probabilities.items()
+        },
+    }
+)
+assert calibration_metrics.loc["sigmoid calibrated", "Brier score"] < calibration_metrics.loc[
+    "raw overconfident", "Brier score"
+]
+assert abs(
+    calibration_metrics.loc["sigmoid calibrated", "ROC AUC"]
+    - calibration_metrics.loc["raw overconfident", "ROC AUC"]
+) < 1e-12
+calibration_metrics
+----
+
+[#probability-calibration-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Reliability diagram with a diagonal ideal line; raw overconfident probabilities deviate strongly while sigmoid and isotonic points lie closer to the diagonal, with marker size proportional to bin count",figure-caption="Fixed-width reliability bins on the untouched test set. Marker area encodes bin count so sparse tail estimates are visibly distinguished.",result-interpretation="Sigmoid and isotonic maps improve reliability for this controlled score while ranking remains essentially unchanged. Tail bins contain fewer observations and therefore support weaker rate estimates."]
+----
+import matplotlib.pyplot as plt
+
+def reliability_rows(name, probability, outcome, bins=10):
+    bin_id = np.minimum((probability * bins).astype(int), bins - 1)
+    frame = pd.DataFrame({"bin": bin_id, "probability": probability, "outcome": outcome})
+    summary = frame.groupby("bin", observed=True).agg(
+        mean_probability=("probability", "mean"),
+        observed_rate=("outcome", "mean"),
+        count=("outcome", "size"),
+    )
+    summary["model"] = name
+    return summary.reset_index()
+
+reliability = pd.concat(
+    [
+        reliability_rows(name, probability, test_y)
+        for name, probability in test_probabilities.items()
+    ],
+    ignore_index=True,
+)
+plt.style.use("tableau-colorblind10")
+fig, ax = plt.subplots(figsize=(6.4, 5.2), constrained_layout=True)
+ax.plot([0, 1], [0, 1], color="black", linestyle=":", label="ideal calibration")
+markers = {"raw overconfident": "x", "sigmoid calibrated": "o", "isotonic calibrated": "s"}
+for name, group in reliability.groupby("model", sort=False):
+    ax.plot(
+        group["mean_probability"],
+        group["observed_rate"],
+        marker=markers[name],
+        linewidth=1.5,
+        label=name,
+    )
+    ax.scatter(
+        group["mean_probability"],
+        group["observed_rate"],
+        s=np.maximum(18, group["count"] / 5),
+        alpha=0.35,
+    )
+ax.set(
+    xlim=(0, 1),
+    ylim=(0, 1),
+    xlabel="mean reported probability in bin",
+    ylabel="observed event rate",
+    title="Reliability on the untouched test set",
+)
+ax.grid(alpha=0.2)
+ax.legend(fontsize="small")
+plt.show()
+----
+
+[.worked-example-results#worked-calibration-results]
+=== Results
+
+*Importance:* Extension (P2)
+
+The calibrated probabilities should improve Brier score and log loss on this oracle while ROC AUC remains unchanged for the strictly monotone sigmoid map. The reliability figure makes sparse bins visible rather than presenting every point as equally precise.
+
+[.worked-example-conclusion#worked-calibration-conclusion]
+=== Conclusion
+
+*Importance:* Extension (P2)
+
+Calibration repairs a controlled probability distortion when it is learned on separate data and evaluated once on an untouched population. Residual errors include finite calibration-set size, binning variation, calibrator misspecification, and future population shift. Calibration does not repair target leakage, label bias, or an invalid deployment sample.
+
+== Decision thresholds remain separate
+
+For false-positive cost stem:[C_\mathrm{FP}] and false-negative cost stem:[C_\mathrm{FN}], a threshold is chosen to minimise an empirical consequence such as
+
+[stem]
+++++
+\widehat R(t)
+=
+n^{-1}\sum_{i=1}^n
+\left[
+C_\mathrm{FP}\mathbf 1(p_i\ge t,y_i=0)
++
+C_\mathrm{FN}\mathbf 1(p_i<t,y_i=1)
+\right].
+++++
+
+Probability calibration affects this decision, but the costs, capacity constraints, and threshold-selection sample remain additional assumptions.
+
+== Exercises
+
+.Exercise: Reliability uncertainty
+[.exer#ex:calibration-bin]
+****
+A reliability bin contains stem:[m=25] cases and stem:[8] events with mean reported probability stem:[0.20]. Compute the observed rate and its approximate binomial standard error. Explain why this single bin cannot establish population-wide miscalibration.
+****
+
+.Exercise: Shift challenge
+[.exer#ex:calibration-shift]
+****
+Repeat the worked example after changing the test prevalence or the relationship between stem:[X] and stem:[Y]. Compare Brier score, log loss, AUC, and reliability. State which evidence would justify recalibration rather than retraining or data-pipeline repair.
+****
+
+Continue with xref:extensions/drift-monitoring.adoc[drift and monitoring] for post-release evidence.

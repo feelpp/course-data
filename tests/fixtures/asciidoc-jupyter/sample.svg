@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="120" viewBox="0 0 240 120" role="img" aria-labelledby="title desc">
+  <title id="title">Two deterministic observations</title>
+  <desc id="desc">A labelled horizontal axis with observations at two and six.</desc>
+  <line x1="30" y1="90" x2="220" y2="90" stroke="#222" stroke-width="2"/>
+  <line x1="30" y1="15" x2="30" y2="90" stroke="#222" stroke-width="2"/>
+  <circle cx="90" cy="65" r="6" fill="#0072b2"/>
+  <rect x="164" y="39" width="12" height="12" fill="#d55e00"/>
+  <text x="205" y="108" font-size="12">x</text>
+  <text x="12" y="20" font-size="12">y</text>
+</svg>

@@ -7,6 +7,14 @@
 :page-course-outcomes: LO2, LO3, LO8
 :page-course-prerequisites: readiness check
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: fast
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
 
@@ -66,7 +74,7 @@ If group stem:[g] has stem:[n_g] observations and mean stem:[\bar x_g], the glob
 
 not the unweighted mean of group means unless all group sizes are equal or the target population gives groups equal weight. Standard deviation describes variation among observations; standard error describes uncertainty of an estimator. Aggregating hourly measurements to daily means changes both the observational unit and the dependence structure.
 
-== Worked example
+== Hand calculation: join amplification
 
 .Example: Join amplification
 [.examp#ex:join-amplification]
@@ -88,13 +96,117 @@ Groups of sizes stem:[10] and stem:[90] have means stem:[2] and stem:[8]. Comput
 Given key multiplicities stem:[m_L=(2,1,3)] and stem:[m_R=(1,4,0)], predict the inner-join row count. Identify the cardinality contract and assertions needed if the right table is intended as unique metadata.
 ****
 
-== Guided laboratory
+== Worked example: a validated observation-to-station join
 
-Use the three-station teaching slice to construct timestamps, select variables, move between long and wide form, aggregate by station/day, and join the source-file registry.
+[.worked-example-context#worked-tabular-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+The objective is to attach source-file provenance to every hourly observation without changing the observation unit or silently multiplying rows. The example uses the three-station teaching slice and its station registry. The declared relation is many observations to one registry row per station.
+
+[.worked-example-method#worked-tabular-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+. Construct the timestamp and assert that stem:[(\text{station},\text{timestamp})] is unique.
+. Reshape three pollutant columns to long form and predict stem:[3n] output rows.
+. Assert one registry row per station, then request a `many_to_one` join.
+. Compare the complete observation-key set before and after the join.
+. Display a bounded result table containing both measurement and provenance.
 
 * xref:attachment$datasets/air-quality/observations.csv[Air-quality observations]
 * xref:attachment$datasets/air-quality/stations.csv[Station/source registry]
-* xref:attachment$notebooks/foundations/tabular-data.ipynb[Download the student notebook]
+
+.Mathematical insight — join cardinality is a conservation law
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* For a many-to-one enrichment join, each observation key should map to exactly one registry row. The key set and row count are invariants: unexpected multiplication proves that the declared relation is false or the registry key is not unique. A successful SQL or pandas call is not evidence of semantic correctness without these cardinality checks.
+====
+
+[.worked-example-implementation#worked-tabular-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The implementation checks the observation key, predicts tidy multiplicity, requests a `many_to_one` join, and compares the complete key set before presenting any enriched rows.
+
+[#validated-join-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Validated observation-to-station join",table-description="The first five joined rows retain the station and timestamp key, PM2.5 measurement, and source-file provenance after a declared many-to-one join."]
+----
+from pathlib import Path
+
+import pandas as pd
+
+# These Antora attachment references become notebook-relative dataset paths.
+def course_file(relative: str) -> Path:
+    """Locate canonical data in a repository checkout or student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+observations_path = course_file("datasets/teaching/air-quality/observations.csv")
+stations_path = course_file("datasets/teaching/air-quality/stations.csv")
+observations = pd.read_csv(observations_path)
+stations = pd.read_csv(stations_path)
+
+
+def prepare_tables(
+    observations: pd.DataFrame, stations: pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Construct the observation key, tidy pollutants, and validate provenance join."""
+    frame = observations.copy()
+    frame["timestamp"] = pd.to_datetime(frame[["year", "month", "day", "hour"]])
+    key = ["station", "timestamp"]
+    if frame.duplicated(key).any():
+        raise ValueError("Observation key is not unique")
+
+    pollutants = frame.melt(
+        id_vars=key,
+        value_vars=["PM2.5", "PM10", "NO2"],
+        var_name="pollutant",
+        value_name="concentration",
+    )
+    before = set(map(tuple, frame[key].itertuples(index=False, name=None)))
+    joined = frame.merge(
+        stations, on="station", how="left", validate="many_to_one", indicator=True
+    )
+    after = set(map(tuple, joined[key].itertuples(index=False, name=None)))
+    if before != after or not joined["_merge"].eq("both").all():
+        raise ValueError("Join changed or failed to match observation keys")
+    return joined.drop(columns="_merge"), pollutants
+
+
+joined, pollutants = prepare_tables(observations, stations)
+assert joined[["station", "timestamp"]].duplicated().sum() == 0
+assert len(joined) == len(observations)
+assert set(pollutants["pollutant"]) == {"PM2.5", "PM10", "NO2"}
+assert len(pollutants) == 3 * len(observations)
+joined[["station", "timestamp", "PM2.5", "source_file"]].head()
+----
+
+[.worked-example-results#worked-tabular-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The join preserves every observation key and row, matches every station, and attaches source-file provenance. The long-form pollutant table has exactly three times the observation count, matching the declared three-measurement reshape rather than an accidental Cartesian product.
+
+[.worked-example-conclusion#worked-tabular-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The registry enrichment is structurally valid for the declared many-to-one relation. The assertions are part of the evidence, not optional debugging: they establish key uniqueness, row preservation, expected tidy multiplicity, and complete registry matching. They do not prove that the measurements are physically valid, representative, or free from upstream duplication.
+
+Use the page toolbar to download the notebook generated from this page.
 
 == Independent transfer task
 

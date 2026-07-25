@@ -18,7 +18,7 @@ The course is designed for keyboard, screen-reader, magnification, and colour-vi
 * All interactive controls must expose a visible keyboard focus indicator.
 * Headings follow a logical hierarchy, tables have header cells, and meaningful images require alternative text and a caption.
 * Mathematical symbols are defined in nearby prose. Displayed equations are accompanied by an operational interpretation.
-* Importance is communicated by the text labels P0--P3, never by badge colour alone.
+* Importance is communicated by the text labels Essential (P0), Core (P1), Extension (P2), and Deferred (P3), never by badge colour alone.
 
 == Notebooks and figures
 

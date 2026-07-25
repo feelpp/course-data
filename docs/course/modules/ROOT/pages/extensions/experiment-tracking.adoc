@@ -7,12 +7,41 @@
 :page-course-outcomes: LO9, LO10
 :page-course-prerequisites: Reproducibility manifest, result card, cross-validation
 :page-course-assessed: no
+:page-jupyter: true
+:page-course-execution-profile: full
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 1048576
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p2]#P2 Extension# [.course-badge.difficulty-d2]#D2 Independent#
 
 Experiment tracking is a structured record of what produced a result. It does not require a cloud service or personal account. Begin with a local, versioned record that another person can inspect and reproduce.
 
+This optional lesson is generated as a notebook from this page. Its example is account-free, deterministic, and uses no external service.
+
+== Learning objectives
+
+After this lesson you should be able to:
+
+* identify the minimum provenance needed to reproduce and compare runs;
+* separate configuration, validation evidence, and untouched final evidence;
+* build a deterministic run identifier from canonical content;
+* validate a local record before indexing it;
+* explain what checksums, trackers, and service platforms do not prove.
+
 == Minimum run record
+
+A useful run can be represented as
+
+[stem]
+++++
+r=(d,s,c,e,h,m,a),
+++++
+
+where stem:[d] is the dataset version, stem:[s] the split, stem:[c] the code revision, stem:[e] the environment, stem:[h] the hyperparameters, stem:[m] the metrics, and stem:[a] the artifact references.
 
 [source,json]
 ----
@@ -22,23 +51,169 @@ Experiment tracking is a structured record of what produced a result. It does no
   "environment_lock_sha256": "<checksum>",
   "dataset_id": "uci-501-teaching-v1",
   "split_id": "chronological-cutoff-2016-01-01",
-  "seed": 20260718,
+  "seed": 20260724,
   "parameters": {"model": "ridge", "alpha": 1.0},
   "metrics": {"validation_mae": 18.2},
-  "artifacts": ["result-card.md", "residuals.parquet"]
+  "artifacts": [{"path": "result-card.md", "sha256": "<checksum>"}]
 }
 ----
 
 The record must distinguish configuration chosen before fitting, validation evidence used for selection, and untouched final evidence. A tracker cannot rescue an invalid split or a missing dataset licence.
 
-== Exercise
+== Identity, integrity, and limitations
 
-Wrap one core notebook experiment with a local JSON run record. Validate it against a small schema, calculate checksums for the environment lock and result artifact, and write an index that compares runs without overwriting them. Restart from a clean clone and reproduce one selected run.
+Let stem:[\operatorname{canon}(r)] be a documented canonical JSON serialisation. A content fingerprint is
 
-Do not commit access tokens, direct personal identifiers, confidential paths, or unrestricted copies of large artifacts. Use the university-approved storage boundary where data cannot be published.
+[stem]
+++++
+u(r)=\operatorname{SHA256}(\operatorname{canon}(r)).
+++++
+
+The same declared content should produce the same fingerprint. A changed byte should produce a different fingerprint. This supports integrity checking and deduplication; it does not prove that the record is true, that the code was reviewed, or that the artifact is scientifically valid. Authenticity additionally needs a trusted signing and access-control process.
+
+== Error estimation
+
+Tracking preserves error estimates; it does not create them. Store fold-level or replicate-level losses, the resampling unit, and the aggregation rule rather than only a rounded mean. If stem:[M] configurations were compared, the selected validation minimum is optimistically biased as an estimate of future performance. Preserve final evidence that was not used for selection.
+
+== Worked example: deterministic local run index
+
+[.worked-example-context#worked-tracking-context]
+=== Context
+
+*Importance:* Extension (P2)
+
+Two Ridge configurations are compared on the same declared dataset and chronological split. We want an append-only local index that detects incomplete records and assigns stable content fingerprints.
+
+[.worked-example-method#worked-tracking-method]
+=== Method
+
+*Importance:* Extension (P2)
+
+Define required fields, canonicalise each record with sorted JSON keys, hash the immutable configuration and evidence, and create a comparison table. The example deliberately keeps selection metrics separate from a final-test field.
+
+.Mathematical insight — selection evidence and final evidence are different random variables
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Extension (P2).* Taking the minimum validation loss across stem:[M] candidates makes that minimum depend on random validation fluctuations. Recording every candidate does not remove this selection bias. An untouched final evaluation estimates the performance of the completed selection procedure; it must not be silently reused for another round of tuning.
+====
+
+[.worked-example-implementation#worked-tracking-implementation]
+=== Implementation
+
+*Importance:* Extension (P2)
+
+The example performs no file or network writes. A production implementation would write one immutable JSON record per run and build the index from those validated records.
+
+[#experiment-tracking-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Validated local experiment index",table-description="Rows show two Ridge runs with dataset, split, regularisation, validation MAE, final-test status, and a shortened deterministic content fingerprint."]
+----
+import hashlib
+import json
+
+import pandas as pd
+
+required_fields = {
+    "code_commit",
+    "environment_lock_sha256",
+    "dataset_id",
+    "split_id",
+    "seed",
+    "parameters",
+    "validation",
+    "final_evidence",
+    "artifacts",
+}
+
+base_record = {
+    "code_commit": "teaching-example-4f21c7a",
+    "environment_lock_sha256": hashlib.sha256(b"locked-course-environment").hexdigest(),
+    "dataset_id": "uci-501-teaching-v1",
+    "split_id": "chronological-cutoff-2016-01-01",
+    "seed": 20260724,
+    "artifacts": [
+        {
+            "path": "result-card.md",
+            "sha256": hashlib.sha256(b"reviewed-result-card").hexdigest(),
+        }
+    ],
+}
+runs = [
+    {
+        **base_record,
+        "parameters": {"model": "ridge", "alpha": 0.1},
+        "validation": {"mae": 18.7, "fold_mae": [18.1, 19.2, 18.8]},
+        "final_evidence": {"status": "not opened", "mae": None},
+    },
+    {
+        **base_record,
+        "parameters": {"model": "ridge", "alpha": 1.0},
+        "validation": {"mae": 18.2, "fold_mae": [17.9, 18.5, 18.2]},
+        "final_evidence": {"status": "not opened", "mae": None},
+    },
+]
+
+def fingerprint(record):
+    missing = required_fields - set(record)
+    if missing:
+        raise ValueError(f"missing required fields: {sorted(missing)}")
+    canonical = json.dumps(record, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return hashlib.sha256(canonical.encode()).hexdigest()
+
+index_rows = []
+for record in runs:
+    run_fingerprint = fingerprint(record)
+    index_rows.append(
+        {
+            "run fingerprint": run_fingerprint[:12],
+            "dataset": record["dataset_id"],
+            "split": record["split_id"],
+            "alpha": record["parameters"]["alpha"],
+            "validation MAE": record["validation"]["mae"],
+            "final evidence": record["final_evidence"]["status"],
+        }
+    )
+
+run_index = pd.DataFrame(index_rows).set_index("run fingerprint")
+assert run_index.index.is_unique
+assert set(run_index["final evidence"]) == {"not opened"}
+run_index
+----
+
+[.worked-example-results#worked-tracking-results]
+=== Results
+
+*Importance:* Extension (P2)
+
+Both rows share the declared dataset, split, seed, code, and environment but have distinct fingerprints because their hyperparameters and validation evidence differ. The final-test field remains explicitly unopened, so the index does not confuse selection evidence with final evidence.
+
+[.worked-example-conclusion#worked-tracking-conclusion]
+=== Conclusion
+
+*Importance:* Extension (P2)
+
+A small local record already supports comparison, integrity checking, and review when its schema and write policy are explicit. Residual risks include false metadata, mutable external artifacts, missing code state, selective reporting, and an invalid evaluation design. Add a shared service only when collaboration, retention, search, access control, and governance requirements justify it.
 
 == When a service is justified
 
-A shared service becomes useful when several people need search, lineage, access control, artifact retention, and comparison across many runs. The selection must follow privacy, security, cost, export, and deletion requirements. Full deployment orchestration remains P3 and is outside this course.
+A shared service becomes useful when several people need search, lineage, access control, artifact retention, and comparison across many runs. Selection must follow privacy, security, cost, export, and deletion requirements. Full deployment orchestration remains Deferred (P3) and is outside this course.
+
+Do not commit access tokens, direct personal identifiers, confidential paths, or unrestricted copies of large artifacts. Use the university-approved storage boundary where data cannot be published.
+
+== Exercises
+
+.Exercise: Append-only record
+[.exer#ex:tracking-record]
+****
+Wrap one core notebook experiment with a local JSON run record. Validate it, calculate checksums for the environment lock and result artifact, and build an index without overwriting prior runs. Reproduce one selected run from a clean clone.
+****
+
+.Exercise: Selection audit
+[.exer#ex:tracking-selection]
+****
+Create five candidate records with fold-level validation losses. Select one configuration, then design the separate final record. Explain why hashing every record does not eliminate validation-selection bias.
+****
 
 Continue with xref:extensions/drift-monitoring.adoc[drift monitoring] and xref:extensions/downstream-paths.adoc[Project hand-off].

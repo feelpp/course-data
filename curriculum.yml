@@ -50,6 +50,9 @@ foundation_release:
   external_academic_review: pending
   pages:
     - docs/course/modules/ROOT/pages/foundations/mathematical-background.adoc
+    - docs/course/modules/ROOT/pages/foundations/probability-distributions-moments.adoc
+    - docs/course/modules/ROOT/pages/foundations/quantiles-exceedance-risk.adoc
+    - docs/course/modules/ROOT/pages/foundations/mean-uncertainty.adoc
     - docs/course/modules/ROOT/pages/foundations/data-lifecycle.adoc
     - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
@@ -58,14 +61,17 @@ foundation_release:
     - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc
     - docs/course/modules/ROOT/pages/foundations/reproducible-delivery.adoc
     - docs/course/modules/ROOT/pages/foundations/baseline-synthesis.adoc
-  notebooks:
-    - notebooks/instructor/foundations/data-lifecycle.ipynb
-    - notebooks/instructor/foundations/tabular-data.ipynb
-    - notebooks/instructor/foundations/data-quality.ipynb
-    - notebooks/instructor/foundations/eda-sampling.ipynb
-    - notebooks/instructor/foundations/safe-pipelines.ipynb
-    - notebooks/instructor/foundations/metrics-errors.ipynb
-    - notebooks/instructor/foundations/baseline-synthesis.ipynb
+  notebook_sources:
+    - docs/course/modules/ROOT/pages/foundations/data-lifecycle.adoc
+    - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
+    - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
+    - docs/course/modules/ROOT/pages/foundations/probability-distributions-moments.adoc
+    - docs/course/modules/ROOT/pages/foundations/quantiles-exceedance-risk.adoc
+    - docs/course/modules/ROOT/pages/foundations/mean-uncertainty.adoc
+    - docs/course/modules/ROOT/pages/foundations/eda-sampling.adoc
+    - docs/course/modules/ROOT/pages/foundations/safe-pipelines.adoc
+    - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc
+    - docs/course/modules/ROOT/pages/foundations/baseline-synthesis.adoc
   templates:
     - templates/dataset-datasheet.md
     - templates/result-card.md
@@ -87,14 +93,15 @@ analytical_release:
     - docs/course/modules/ROOT/pages/analytical/tree-ensembles.adoc
     - docs/course/modules/ROOT/pages/analytical/pca-clustering.adoc
     - docs/course/modules/ROOT/pages/analytical/performance-columnar.adoc
-  notebooks:
-    - notebooks/instructor/analytical/linear-probabilistic.ipynb
-    - notebooks/instructor/analytical/classification-losses.ipynb
-    - notebooks/instructor/analytical/regularisation-generalisation.ipynb
-    - notebooks/instructor/analytical/model-selection.ipynb
-    - notebooks/instructor/analytical/tree-ensembles.ipynb
-    - notebooks/instructor/analytical/pca-clustering.ipynb
-    - notebooks/instructor/analytical/performance-columnar.ipynb
+  notebooks: []
+  notebook_sources:
+    - docs/course/modules/ROOT/pages/analytical/linear-probabilistic.adoc
+    - docs/course/modules/ROOT/pages/analytical/classification-losses.adoc
+    - docs/course/modules/ROOT/pages/analytical/regularisation-generalisation.adoc
+    - docs/course/modules/ROOT/pages/analytical/model-selection.adoc
+    - docs/course/modules/ROOT/pages/analytical/tree-ensembles.adoc
+    - docs/course/modules/ROOT/pages/analytical/pca-clustering.adoc
+    - docs/course/modules/ROOT/pages/analytical/performance-columnar.adoc
   concepts:
     - DP-LIN-01
     - DP-PROB-01
@@ -132,6 +139,55 @@ analytical_release:
   project_specification: docs/course/modules/ROOT/pages/assessment/mini-project.adoc
   final_specification: docs/course/modules/ROOT/pages/assessment/final-exam-specimen.adoc
 
+worked_example_release:
+  implementation_status: complete
+  human_review_status: pending_instructor_and_real_student_review
+  required_structure: [Context, Method, Implementation, Results, Conclusion]
+  required_importance_meanings: [Essential, Core]
+  authoring_contract: docs/governance/worked-example-contract.md
+  validation_record: docs/reviews/20260723_worked-example-review.md
+  pages:
+    - docs/course/modules/ROOT/pages/foundations/mathematical-background.adoc
+    - docs/course/modules/ROOT/pages/foundations/probability-distributions-moments.adoc
+    - docs/course/modules/ROOT/pages/foundations/quantiles-exceedance-risk.adoc
+    - docs/course/modules/ROOT/pages/foundations/mean-uncertainty.adoc
+    - docs/course/modules/ROOT/pages/foundations/data-lifecycle.adoc
+    - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
+    - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
+    - docs/course/modules/ROOT/pages/foundations/eda-sampling.adoc
+    - docs/course/modules/ROOT/pages/foundations/safe-pipelines.adoc
+    - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc
+    - docs/course/modules/ROOT/pages/foundations/reproducible-delivery.adoc
+    - docs/course/modules/ROOT/pages/foundations/baseline-synthesis.adoc
+    - docs/course/modules/ROOT/pages/analytical/linear-probabilistic.adoc
+    - docs/course/modules/ROOT/pages/analytical/classification-losses.adoc
+    - docs/course/modules/ROOT/pages/analytical/regularisation-generalisation.adoc
+    - docs/course/modules/ROOT/pages/analytical/model-selection.adoc
+    - docs/course/modules/ROOT/pages/analytical/tree-ensembles.adoc
+    - docs/course/modules/ROOT/pages/analytical/pca-clustering.adoc
+    - docs/course/modules/ROOT/pages/analytical/performance-columnar.adoc
+  notebook_sources:
+    - docs/course/modules/ROOT/pages/foundations/probability-distributions-moments.adoc
+    - docs/course/modules/ROOT/pages/foundations/quantiles-exceedance-risk.adoc
+    - docs/course/modules/ROOT/pages/foundations/mean-uncertainty.adoc
+    - docs/course/modules/ROOT/pages/foundations/data-lifecycle.adoc
+    - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
+    - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
+    - docs/course/modules/ROOT/pages/foundations/eda-sampling.adoc
+    - docs/course/modules/ROOT/pages/foundations/safe-pipelines.adoc
+    - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc
+    - docs/course/modules/ROOT/pages/foundations/baseline-synthesis.adoc
+    - docs/course/modules/ROOT/pages/analytical/linear-probabilistic.adoc
+    - docs/course/modules/ROOT/pages/analytical/classification-losses.adoc
+    - docs/course/modules/ROOT/pages/analytical/regularisation-generalisation.adoc
+    - docs/course/modules/ROOT/pages/analytical/model-selection.adoc
+    - docs/course/modules/ROOT/pages/analytical/tree-ensembles.adoc
+    - docs/course/modules/ROOT/pages/analytical/pca-clustering.adoc
+    - docs/course/modules/ROOT/pages/analytical/performance-columnar.adoc
+  page_only:
+    - docs/course/modules/ROOT/pages/foundations/mathematical-background.adoc
+    - docs/course/modules/ROOT/pages/foundations/reproducible-delivery.adoc
+
 assessment_hardening:
   implementation_status: complete
   live_release_status: pending_human_signoff_and_physical_pilot
@@ -156,6 +212,102 @@ assessment_hardening:
     - fresh-account lifecycle rehearsal
     - independently runnable retake
 
+exercise_release:
+  implementation_status: complete
+  assessment_custodian_status: pending_human_signoff
+  conventions_page: docs/course/modules/ROOT/pages/assessment/exercise-contract.adoc
+  validation_record: docs/governance/exercise-assessment-variants.md
+  private_repository: course-data-assessment
+  forbidden_public_material:
+    - live assessment variants
+    - reference solutions
+    - hidden tests and point keys
+    - moderation records
+    - embargoed data
+  rubric:
+    source: docs/course/modules/ROOT/pages/assessment/rubric.adoc
+    criteria:
+      - R1
+      - R2
+      - R3
+      - R4
+      - R5
+      - R6
+      - R7
+  ai_modes:
+    A:
+      external_generative_ai: prohibited
+      disclosure_required: true
+    B:
+      external_generative_ai: permitted_with_disclosure
+      disclosure_required: true
+    C:
+      external_generative_ai: required_as_object_of_critique
+      disclosure_required: true
+  public_specimens:
+    - assessment_id: A1
+      exercise_id: A1-SPECIMEN
+      kind: timed-specimen
+      source: docs/course/modules/ROOT/pages/assessment/control-1-specimen.adoc
+      notebook_path: assessment/control-1-specimen.ipynb
+      hint_policy: specification-only
+      ai_mode: A
+      allowed_resources: [provided-offline-bundle, bundled-documentation]
+      submission_evidence: [response-notebook, audit.json]
+      tasks:
+        - {id: A1-T1, priorities: [P0], points: 4, rubric_criteria: [R1, R2]}
+        - {id: A1-T2, priorities: [P0], points: 4, rubric_criteria: [R2]}
+        - {id: A1-T3, priorities: [P0], points: 3, rubric_criteria: [R6]}
+        - {id: A1-T4, priorities: [P0], points: 5, rubric_criteria: [R3, R4]}
+        - {id: A1-T5, priorities: [P0], points: 4, rubric_criteria: [R5, R7]}
+    - assessment_id: A2
+      exercise_id: A2-SPECIMEN
+      kind: project-brief
+      source: docs/course/modules/ROOT/pages/assessment/mini-project.adoc
+      notebook_path: assessment/mini-project.ipynb
+      hint_policy: public-checkpoints-and-rubric
+      ai_mode: B
+      allowed_resources: [course-site, approved-datasets, github-classroom, disclosed-ai-services]
+      submission_evidence: [tagged-repository, report-or-notebook, tests, result-card, ai-notes, individual-verification]
+      tasks:
+        - {id: A2-T1, priorities: [P0], points: 2, rubric_criteria: [R1]}
+        - {id: A2-T2, priorities: [P0], points: 3, rubric_criteria: [R2]}
+        - {id: A2-T3, priorities: [P0], points: 4, rubric_criteria: [R2]}
+        - {id: A2-T4, priorities: [P0, P1], points: 4, rubric_criteria: [R3, R4]}
+        - {id: A2-T5, priorities: [P0, P1], points: 4, rubric_criteria: [R5]}
+        - {id: A2-T6, priorities: [P0], points: 4, rubric_criteria: [R6]}
+        - {id: A2-T7, priorities: [P0], points: 2, rubric_criteria: [R7]}
+        - {id: A2-T8, priorities: [P0, P1], points: 2, rubric_criteria: [R6, R7]}
+    - assessment_id: A3
+      exercise_id: A3-SPECIMEN
+      kind: timed-specimen
+      source: docs/course/modules/ROOT/pages/assessment/control-2-specimen.adoc
+      notebook_path: assessment/control-2-specimen.ipynb
+      hint_policy: specification-only
+      ai_mode: A
+      allowed_resources: [provided-offline-bundle, bundled-documentation]
+      submission_evidence: [response-notebook, audit.json]
+      tasks:
+        - {id: A3-T1, priorities: [P0, P1], points: 5, rubric_criteria: [R1, R2, R3, R4, R5, R6, R7]}
+        - {id: A3-T2, priorities: [P0, P1], points: 4, rubric_criteria: [R2, R3, R4, R5, R7]}
+        - {id: A3-T3, priorities: [P0, P1], points: 4, rubric_criteria: [R2, R3, R4, R5, R6]}
+        - {id: A3-T4, priorities: [P0], points: 2, rubric_criteria: [R7]}
+    - assessment_id: A4
+      exercise_id: A4-SPECIMEN
+      kind: timed-specimen
+      source: docs/course/modules/ROOT/pages/assessment/final-exam-specimen.adoc
+      notebook_path: assessment/final-exam-specimen.ipynb
+      hint_policy: specification-only
+      ai_mode: A
+      allowed_resources: [provided-offline-bundle, bundled-documentation]
+      submission_evidence: [response-notebook, written-responses, tests, result.json, assistance-declaration]
+      tasks:
+        - {id: A4-T1, priorities: [P0], points: 10, rubric_criteria: [R1, R2, R3]}
+        - {id: A4-T2, priorities: [P1], points: 10, rubric_criteria: [R4]}
+        - {id: A4-T3, priorities: [P0, P1], points: 10, rubric_criteria: [R3, R6]}
+        - {id: A4-T4, priorities: [P0, P1], points: 6, rubric_criteria: [R5, R7]}
+        - {id: A4-T5, priorities: [P0], points: 4, rubric_criteria: [R2, R6, R7]}
+
 enrichment_release:
   implementation_status: complete
   required_contact_hours: 0
@@ -177,13 +329,55 @@ enrichment_release:
     - docs/course/modules/ROOT/pages/extensions/experiment-tracking.adoc
     - docs/course/modules/ROOT/pages/extensions/drift-monitoring.adoc
     - docs/course/modules/ROOT/pages/extensions/downstream-paths.adoc
+  page_notebook_sources:
+    - docs/course/modules/ROOT/pages/extensions/kernel-methods.adoc
+    - docs/course/modules/ROOT/pages/extensions/probability-calibration.adoc
+    - docs/course/modules/ROOT/pages/extensions/experiment-tracking.adoc
+    - docs/course/modules/ROOT/pages/extensions/drift-monitoring.adoc
   notebooks:
     - notebooks/instructor/extensions/jax-transformations.ipynb
+  source_contract:
+    asciidoc_notebook:
+      - docs/course/modules/ROOT/pages/extensions/kernel-methods.adoc
+      - docs/course/modules/ROOT/pages/extensions/probability-calibration.adoc
+      - docs/course/modules/ROOT/pages/extensions/experiment-tracking.adoc
+      - docs/course/modules/ROOT/pages/extensions/drift-monitoring.adoc
+    notebook_native_exceptions:
+      - id: EXT-JAX-NB
+        page: docs/course/modules/ROOT/pages/extensions/jax-transformations.adoc
+        artifact: notebooks/instructor/extensions/jax-transformations.ipynb
+        reason: Optional JAX execution and retained student/instructor cell transformations must not become dependencies of the required Antora build.
+        owner: Data Processing maintainer with the Scientific Machine Learning 1 liaison
+        environment: Locked extensions extra on CPython 3.12 with the CPU backend and no accelerator
+        maintenance_policy: Execute the full profile and compare page, instructor, and solution-free student variants after JAX or converter changes.
+        page_authority: Canonical English learning narrative, mathematics, environment boundary, and transfer task
+        artifact_authority: Canonical executable JAX lab, solution tags, and student-source transformations
+        parity_contract: Concepts, outcomes, priority, duration, prerequisites, numerical method, and exclusions must agree.
+    page_only_exceptions:
+      - id: EXT-ENG-PAGE
+        page: docs/course/modules/ROOT/pages/extensions/dataframe-engines.adoc
+        reason: A fair three-engine comparison requires optional Polars and machine-specific timing and memory evidence that must not be presented as a portable build result.
+        owner: Data Processing maintainer with the Database and High Performance Computing liaisons
+        environment: Core CPU environment for pandas and DuckDB; locked extensions extra for Polars
+        maintenance_policy: Re-run the declared protocol on a named reference machine after engine, Arrow, or Parquet updates and keep timings out of P0/P1 claims.
+      - id: EXT-PATH-PAGE
+        page: docs/course/modules/ROOT/pages/extensions/downstream-paths.adoc
+        reason: The learning object is a programme ownership and prerequisite map with no executable method or result.
+        owner: Data Processing maintainer with the Scientific Machine Learning 1, High Performance Computing, Database, and Project owners
+        environment: English Antora page with no Python runtime
+        maintenance_policy: Review the ownership map against the CSMI programme and named downstream owners before each annual release.
+  optional_failure_policy:
+    required_notebook_profile: fast
+    extension_notebook_profile: full
+    required_environment_excludes_optional_extra: true
+    optional_runtime_imports_forbidden_in_p0_p1: [jax, polars]
   dependency_extra: extensions
   pinned_optional_dependencies:
     jax: "0.10.2"
     polars: "1.42.1"
   validation_record: docs/governance/enrichment-validation.md
+  source_contract_record: docs/governance/optional-extension-contract.md
+  review_record: docs/reviews/20260724_optional-extension-review.md
   downstream_record: docs/governance/sciml-handoff.md
   downstream_owners:
     - Scientific Machine Learning 1
@@ -212,6 +406,7 @@ operational_release:
     - docs/governance/accessibility-validation.md
     - docs/governance/release-readiness.md
     - docs/governance/course-operations.md
+    - docs/governance/release-qualification.md
   operational_templates:
     - templates/pilot-observation.md
     - templates/block-feedback.csv
@@ -233,6 +428,43 @@ operational_release:
     accessibility_signoff_required: true
     data_steward_signoff_required: true
     assessment_custodian_signoff_required: true
+
+release_qualification:
+  implementation_status: complete
+  source_of_truth_status: unambiguous
+  technical_candidate_status: qualified
+  human_release_status: pending_pilot_and_named_signoff
+  repeated_clean_builds: 2
+  qualification_command: npm run release:qualify
+  qualification_tool: tools/qualify_release.py
+  generated_report: build/release/reproducibility-report.json
+  governance_record: docs/governance/release-qualification.md
+  walkthrough_record: docs/reviews/20260725_release-walkthrough.md
+  required_reviews:
+    automated_accessibility: pass
+    automated_offline_runtime: pass
+    automated_english_contract: pass
+    automated_mathematics_contract: pass
+    technical_representative_walkthrough: pass
+    named_academic_review: pending
+    named_accessibility_review: pending
+    named_english_review: pending
+    representative_students_or_alumni: pending
+    data_steward_review: pending
+    assessment_custodian_review: pending
+  retained_notebook_native_exceptions: [EXT-JAX-NB]
+  upstream_dependencies:
+    antora_ui_bundle: vendor/antora-ui/ui-bundle-v0.53.zip
+    antora_extension: "@feelpp/antora-extensions@1.0.0-rc.7-dev.3"
+    asciidoctor_extension: "@feelpp/asciidoctor-extensions@1.0.0-rc.18-dev.2"
+    notebook_converter: "asciidoctor-jupyter@0.7.0"
+    mathematics_renderer: "katex@0.16.22"
+  retired_paths:
+    - tools/build_foundation_notebooks.py
+    - tools/build_analytical_notebooks.py
+    - tools/build_extension_notebooks.py
+    - notebooks/instructor/foundations
+    - notebooks/instructor/analytical
 
 priority_definitions:
   P0:
@@ -350,7 +582,7 @@ assessments:
     points: 15
     required_priorities: [P0, P1]
     outcomes: [LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10]
-    public_specification: assessment/overview.adoc
+    public_specification: assessment/control-2-specimen.adoc
   - id: A4
     title: Final practical and written exam
     weight_percent: 40

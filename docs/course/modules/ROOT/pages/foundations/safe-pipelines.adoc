@@ -7,6 +7,14 @@
 :page-course-outcomes: LO2, LO5, LO6, LO9
 :page-course-prerequisites: data quality and sampling
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: fast
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d3]#D3 Synthesis#
 
@@ -66,7 +74,7 @@ Under independent cases, the standard error of the paired difference is stem:[s_
 
 The evaluation claim inherits every boundary assumption. A narrow confidence interval cannot repair leakage, a population mismatch, post-outcome features, or a split that breaks dependence.
 
-== Worked example
+== Hand calculation: leakage through global standardisation
 
 .Example: Leakage through global standardisation
 [.examp#ex:global-scaling]
@@ -88,12 +96,149 @@ Draw the information flow for imputation, scaling, feature selection, hyperparam
 A table contains 100 measurements from each of 20 machines. Compare the estimand and likely bias of random-row, group-by-machine, and future-time splits for three intended uses: another reading from a known machine, a new machine, and next month's readings.
 ****
 
-== Industrial laboratory
+== Worked example: a leakage-safe predictive pipeline
+
+[.worked-example-context#worked-safe-pipeline-context]
+=== Context
+
+*Importance:* Essential (P0)
 
 The AI4I table is synthetic and contains five failure-type columns used to construct `Machine failure`. Those columns are label leakage for the aggregate target. Build a stratified split, exclude target-derived fields, place numeric/categorical preprocessing in one pipeline, and compare logistic regression with a dummy classifier.
 
 * xref:attachment$datasets/predictive-maintenance/observations.csv[Predictive-maintenance observations]
-* xref:attachment$notebooks/foundations/safe-pipelines.ipynb[Download the student notebook]
+
+[.worked-example-method#worked-safe-pipeline-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+. Separate the target and remove identifiers plus the five target-derived failure fields.
+. Create one protected stratified split before learning any preprocessing statistic.
+. Put imputation, scaling, and categorical encoding inside the fitted pipeline.
+. Fit logistic regression only on training rows and compare it with a prior-only dummy on exactly the same protected rows.
+. Report PR-AUC beside positive prevalence and assert that no forbidden field entered the predictors.
+
+With stem:[n=10{,}000] rows and a 25% protected split, the evidence set has stem:[m=2{,}500] rows. The prior ranking baseline is the protected prevalence stem:[\widehat\pi=m^{-1}\sum_{i=1}^{m}y_i]; model and dummy PR-AUC must use those same stem:[m] cases.
+
+.Mathematical insight — leakage changes the information set
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* A predictive risk estimate is meaningful only for features available at the declared prediction time. Target-derived fields condition the model on information from after or inside the outcome, so the resulting score estimates a different and usually unusable problem. No resampling formula can repair a violated feature-time boundary.
+====
+
+[.worked-example-implementation#worked-safe-pipeline-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The implementation makes one protected split before fitting transformations and encodes exclusions, preprocessing, model fitting, baseline fitting, and assertions in a single pipeline contract.
+
+[#safe-pipeline-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Leakage-safe model and prevalence baseline on one protected split",table-description="Rows compare a logistic pipeline and a prior-only dummy classifier. Columns report protected-test PR-AUC, the positive prevalence reference, and whether target-derived failure fields entered the predictors."]
+----
+from pathlib import Path
+
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.dummy import DummyClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import average_precision_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+def course_file(relative: str) -> Path:
+    """Locate canonical data in a repository checkout or student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+data_path = course_file("datasets/teaching/predictive-maintenance/observations.csv")
+machines = pd.read_csv(data_path)
+target = "Machine failure"
+target_relatives = ["TWF", "HDF", "PWF", "OSF", "RNF"]
+excluded = ["UDI", "Product ID", target, *target_relatives]
+X = machines.drop(columns=excluded)
+y = machines[target]
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=20260718, stratify=y
+)
+assert not set([target, *target_relatives]) & set(X_train.columns)
+
+numeric = [
+    "Air temperature [K]", "Process temperature [K]",
+    "Rotational speed [rpm]", "Torque [Nm]", "Tool wear [min]",
+]
+preprocessing = ColumnTransformer(
+    [
+        (
+            "numeric",
+            Pipeline(
+                [
+                    ("impute", SimpleImputer(strategy="median")),
+                    ("scale", StandardScaler()),
+                ]
+            ),
+            numeric,
+        ),
+        (
+            "category",
+            Pipeline(
+                [
+                    ("impute", SimpleImputer(strategy="most_frequent")),
+                    ("encode", OneHotEncoder(handle_unknown="ignore")),
+                ]
+            ),
+            ["Type"],
+        ),
+    ]
+)
+model = Pipeline(
+    [
+        ("preprocess", preprocessing),
+        ("model", LogisticRegression(max_iter=1000, class_weight="balanced")),
+    ]
+).fit(X_train, y_train)
+dummy = DummyClassifier(strategy="prior").fit(X_train, y_train)
+
+model_ap = average_precision_score(y_test, model.predict_proba(X_test)[:, 1])
+dummy_ap = average_precision_score(y_test, dummy.predict_proba(X_test)[:, 1])
+prevalence = float(y_test.mean())
+assert model_ap > dummy_ap
+
+pipeline_evidence = pd.DataFrame(
+    {
+        "protected-test PR-AUC": [model_ap, dummy_ap],
+        "positive prevalence": [prevalence, prevalence],
+        "target-derived fields used": [False, False],
+    },
+    index=["logistic pipeline", "prior dummy"],
+)
+pipeline_evidence
+----
+
+[.worked-example-results#worked-safe-pipeline-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The result table confirms that no target-derived field enters either predictor set and that the logistic pipeline's protected-test PR-AUC exceeds the prevalence/prior baseline on the same 2,500 cases. The assertion makes the information boundary a tested invariant rather than a prose promise.
+
+[.worked-example-conclusion#worked-safe-pipeline-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The leakage-safe pipeline demonstrates useful ranking beyond the prior baseline on this deterministic protected split. It tests implementation and evidence discipline, but it does not estimate performance for future machines, a new factory, or a later time period. Those uses require group/time boundaries and repeated outer evaluation; split variation, calibration, threshold cost, and population shift remain.
+
+Use the page toolbar to download the generated notebook.
 
 == Independent transfer
 

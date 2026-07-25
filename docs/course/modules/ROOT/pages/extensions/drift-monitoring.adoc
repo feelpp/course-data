@@ -7,29 +7,223 @@
 :page-course-outcomes: LO2, LO6, LO9, LO10
 :page-course-prerequisites: Sampling, metrics, error analysis, result cards
 :page-course-assessed: no
+:page-jupyter: true
+:page-course-execution-profile: full
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p2]#P2 Extension# [.course-badge.difficulty-d3]#D3 Synthesis#
 
 Monitoring asks whether the data pipeline, input population, predictions, outcomes, and operational consequences still support the original result claim. A change detector is an alerting component, not an automatic retraining command.
 
+This optional lesson is generated as a notebook from this page. It uses the required CPU environment, synthetic data, and no external monitoring service.
+
+== Learning objectives
+
+After this lesson you should be able to:
+
+* distinguish data-quality failure, covariate shift, prediction shift, label shift, and concept drift;
+* state what labels are needed to diagnose;
+* select a reference/current comparison and quantify sampling uncertainty;
+* account for repeated signals and multiple testing;
+* connect an alert to a diagnostic owner and safe response.
+
 == Distinguish the changes
 
 Data-quality failure:: Schema, unit, range, missingness, join, or freshness contracts fail.
-Covariate shift:: The distribution of observed inputs changes.
-Prediction shift:: The distribution of model outputs or decisions changes.
-Label/prior shift:: Outcome prevalence changes.
-Concept drift:: The relationship between inputs and outcomes changes; labels are required to establish it.
+Covariate shift:: stem:[P_t(X)\ne P_0(X)] while the conditional relationship may remain useful.
+Prediction shift:: The distribution of model scores or decisions changes.
+Label/prior shift:: stem:[P_t(Y)\ne P_0(Y)].
+Concept drift:: stem:[P_t(Y\mid X)\ne P_0(Y\mid X)]; labels or a trusted outcome proxy are required to establish it.
 
-An input-distribution alert alone cannot prove concept drift. Delayed or selectively observed labels can also make performance monitoring biased.
+An input-distribution alert alone cannot prove concept drift. Conversely, stable inputs do not prove a stable conditional relationship. Delayed or selectively observed labels can bias performance monitoring.
+
+== Statistics answer narrow questions
+
+For one numeric feature, a standardised mean difference is
+
+[stem]
+++++
+\operatorname{SMD}
+=
+\frac{\bar x_t-\bar x_0}
+{\sqrt{(s_t^2+s_0^2)/2}}.
+++++
+
+The two-sample Kolmogorov–Smirnov statistic is
+
+[stem]
+++++
+D_{n,m}
+=
+\sup_x\left|\widehat F_n(x)-\widehat G_m(x)\right|.
+++++
+
+These statistics detect particular distributional differences. They do not measure operational harm, identify a root cause, or establish concept drift. A domain tolerance can be more useful than a tiny p-value from a very large sample.
+
+== Error estimation and multiple signals
+
+If stem:[M] independent or dependent tests are each run at level stem:[\alpha], the Bonferroni union bound gives
+
+[stem]
+++++
+\Pr(\text{at least one false rejection})
+\le
+M\alpha.
+++++
+
+Testing many features, windows, groups, and thresholds therefore needs a declared family, multiplicity policy, and alert budget. Repeated overlapping windows also induce dependence. Confidence intervals and minimum effect sizes should accompany p-values; neither replaces an operational consequence model.
 
 == Monitoring record
 
-For every signal, declare the reference window, current window, population filters, statistic, minimum sample size, threshold rationale, multiple-testing policy, owner, and response. Monitor data contracts before model metrics. Break results down by scientifically or operationally relevant groups, subject to privacy and sample-size constraints.
+For every signal, declare the reference window, current window, population filters, statistic, effect-size threshold, minimum sample size, multiplicity policy, owner, and response. Monitor data contracts before model metrics. Break results down by scientifically or operationally relevant groups only when privacy and sample size permit.
 
-== Independent transfer
+== Worked example: separate input shift from concept drift
 
-Generate six monthly windows from the air-quality teaching table. Introduce one unit error, one station-composition change, and one conditional outcome change. Design checks that distinguish these events. For each alert, write one diagnostic action and one safe operational response; include a false-alert and missing-label scenario.
+[.worked-example-context#worked-drift-context]
+=== Context
 
-Useful statistics include proportion/rate differences with intervals, quantile changes, two-sample tests, and domain-specific tolerances. Population Stability Index may be a descriptive signal, but arbitrary universal thresholds are not evidence of operational harm.
+*Importance:* Extension (P2)
+
+A reference binary model is evaluated on three later windows: a stable window, a covariate-shift window with a changed input distribution, and a concept-drift window with stable inputs but a reversed outcome relationship.
+
+[.worked-example-method#worked-drift-method]
+=== Method
+
+*Importance:* Extension (P2)
+
+Fit one logistic model on the reference data and do not refit it. For each window report input KS distance, average prediction, event rate, Brier score, and ROC AUC. Input-only statistics should identify covariate shift; label-based metrics should identify the conditional failure.
+
+.Mathematical insight — input stability and predictive validity are logically distinct
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Extension (P2).* A detector for stem:[P_t(X)\ne P_0(X)] tests a marginal distribution. Predictive validity depends on stem:[P_t(Y\mid X)] and the consequence model. Stable marginals can coexist with concept drift, while covariate shift can occur without a loss of conditional performance. Monitoring must therefore preserve the distinction between what is observed and what is inferred.
+====
+
+[.worked-example-implementation#worked-drift-implementation]
+=== Implementation
+
+*Importance:* Extension (P2)
+
+The table combines input-only and label-dependent evidence. The empirical-CDF figure deliberately shows the concept-drift input curve overlapping the reference curve.
+
+[#drift-monitoring-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Reference and current-window monitoring evidence",table-description="Rows compare reference, stable, covariate-shift, and concept-drift windows using input KS distance, mean prediction, event rate, Brier score, and ROC AUC."]
+----
+import numpy as np
+import pandas as pd
+from scipy.special import expit
+from scipy.stats import ks_2samp
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import brier_score_loss, roc_auc_score
+
+def make_window(seed, n, location=0.0, scale=1.0, slope=1.4):
+    local_rng = np.random.default_rng(seed)
+    feature = local_rng.normal(location, scale, size=n)
+    probability = expit(-0.3 + slope * feature)
+    outcome = local_rng.binomial(1, probability)
+    return feature, outcome
+
+n_window = 3000
+x_reference, y_reference = make_window(20260724, n_window)
+x_stable, y_stable = make_window(20260725, n_window)
+x_covariate, y_covariate = make_window(
+    20260726, n_window, location=0.65, scale=1.10
+)
+x_concept, y_concept = make_window(20260727, n_window, slope=-1.0)
+
+monitor_model = LogisticRegression().fit(x_reference[:, None], y_reference)
+windows = {
+    "reference": (x_reference, y_reference),
+    "stable": (x_stable, y_stable),
+    "covariate shift": (x_covariate, y_covariate),
+    "concept drift": (x_concept, y_concept),
+}
+monitor_rows = []
+for name, (feature, outcome) in windows.items():
+    predicted = monitor_model.predict_proba(feature[:, None])[:, 1]
+    ks_result = ks_2samp(x_reference, feature)
+    monitor_rows.append(
+        {
+            "window": name,
+            "input KS distance": ks_result.statistic,
+            "mean prediction": predicted.mean(),
+            "event rate": outcome.mean(),
+            "Brier score": brier_score_loss(outcome, predicted),
+            "ROC AUC": roc_auc_score(outcome, predicted),
+        }
+    )
+
+monitoring_evidence = pd.DataFrame(monitor_rows).set_index("window")
+assert monitoring_evidence.loc["covariate shift", "input KS distance"] > 0.20
+assert monitoring_evidence.loc["concept drift", "input KS distance"] < 0.06
+assert monitoring_evidence.loc["concept drift", "Brier score"] > (
+    monitoring_evidence.loc["stable", "Brier score"] + 0.10
+)
+monitoring_evidence
+----
+
+[#drift-monitoring-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Empirical cumulative distribution curves where the covariate-shift input is displaced, while the reference and concept-drift input curves nearly overlap",figure-caption="Empirical input distributions for the reference, covariate-shift, and concept-drift windows.",result-interpretation="The input detector clearly sees the covariate shift but cannot identify the concept drift, whose feature distribution was deliberately held stable. Label-based performance evidence is needed for the latter."]
+----
+import matplotlib.pyplot as plt
+
+def ecdf(values):
+    ordered = np.sort(values)
+    return ordered, np.arange(1, ordered.size + 1) / ordered.size
+
+plt.style.use("tableau-colorblind10")
+fig, ax = plt.subplots(figsize=(7.0, 4.8), constrained_layout=True)
+for name, values, linestyle in [
+    ("reference", x_reference, "-"),
+    ("covariate shift", x_covariate, "--"),
+    ("concept drift", x_concept, ":"),
+]:
+    ordered, cumulative = ecdf(values)
+    ax.plot(ordered, cumulative, linestyle=linestyle, linewidth=2.0, label=name)
+ax.set(
+    xlabel="monitored input x",
+    ylabel="empirical cumulative probability",
+    title="Input evidence cannot establish concept stability",
+)
+ax.grid(alpha=0.2)
+ax.legend()
+plt.show()
+----
+
+[.worked-example-results#worked-drift-results]
+=== Results
+
+*Importance:* Extension (P2)
+
+The covariate-shift window has a large input KS distance. The concept-drift window has an input distribution close to the reference but substantially worse Brier score and reversed ranking behaviour. No single column diagnoses every change type.
+
+[.worked-example-conclusion#worked-drift-conclusion]
+=== Conclusion
+
+*Importance:* Extension (P2)
+
+Monitoring is a layered evidence system: contracts first, then input and prediction signals, then label-based performance and consequence evidence when outcomes arrive. Residual error comes from finite windows, repeated tests, delayed or selective labels, unmonitored subgroups, and thresholds learned from past incidents. An alert should trigger diagnosis and an owned response, not automatic retraining.
+
+== Exercises
+
+.Exercise: Monitoring design
+[.exer#ex:drift-design]
+****
+Generate six monthly windows from the air-quality teaching table. Introduce one unit error, one station-composition change, and one conditional outcome change. For every check declare its reference, effect size, uncertainty, multiplicity family, owner, and safe response.
+****
+
+.Exercise: Missing labels
+[.exer#ex:drift-labels]
+****
+Assume outcomes arrive after three months and only for inspected cases. Identify which signals remain observable, why the labelled sample is selective, and what additional data collection or sensitivity analysis is needed before claiming concept drift.
+****
 
 Pair the record with xref:extensions/experiment-tracking.adoc[experiment lineage]. Production observability and distributed monitoring continue through xref:extensions/downstream-paths.adoc[the downstream courses].

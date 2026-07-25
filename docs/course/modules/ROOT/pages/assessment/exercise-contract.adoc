@@ -1,0 +1,47 @@
+= Exercise, hint, and assistance contract
+:page-course-language: en
+:page-course-concepts: DP-REP-01, DP-TST-01, DP-GOV-01, DP-AI-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 15
+:page-course-outcomes: LO2, LO9, LO10
+:page-course-prerequisites: course contract
+:page-course-assessed: yes
+
+Public exercises use the webpage as their canonical source. When a page offers a notebook download, Antora generates that notebook from the same AsciiDoc: task wording, identifiers, importance, points, resources, and evidence therefore have one source.
+
+== What every assessed exercise declares
+
+[cols="2,5",options="header"]
+|===
+|Field |Meaning
+|Task ID |A stable identifier such as `A1-T3`, present on the page and in notebook prompt metadata.
+|Importance |Essential (P0), Core (P1), or both. Extension (P2) and Deferred (P3) work cannot be required without an explicit optional label.
+|Points |The observable credit attached to the task. Task totals must equal the published assessment total.
+|AI mode |The permitted assistance mode for the complete assessment.
+|Allowed resources |A closed list such as the supplied offline bundle and bundled documentation.
+|Submission evidence |The files, declarations, tests, or verification needed for review.
+|Rubric mapping |One or more stable criteria `R1`–`R7` from the xref:assessment/rubric.adoc[common rubric].
+|===
+
+== Hint policy
+
+* `specification-only`: the public task gives requirements, acceptance rules, and numerical tolerances, but no task-specific solution path.
+* `public-checkpoints-and-rubric`: a longer project may publish planning checkpoints, evidence expectations, and rubric language. These are scaffolds, not answer fragments.
+* A later released practice exercise may use progressive hints, but each hint must be labelled and must not disclose a live or embargoed answer.
+
+Instructor solutions, hidden checks, point keys, and moderation notes are never embedded behind an AsciiDoc conditional in the public repository. They belong only in the private assessment repository.
+
+== AI-assistance modes
+
+* *Mode A:* external generative AI is prohibited. Complete the assistance declaration even when no assistance was used. Do not upload examination, hidden-test, confidential, personal, or embargoed material to an external service.
+* *Mode B:* external generative AI is permitted with disclosure. Record the tool, purpose, material supplied, material retained, verification performed, and the responsible human decision. Independent verification remains required.
+* *Mode C:* an AI system is an explicit object of critique. The brief states the required interaction and evidence; disclosure and independent validation still apply.
+
+The assessment header is authoritative. A tool permitted in one project is not automatically permitted in a control or examination.
+
+== Student notebook contract
+
+Generated public notebooks are student artifacts: `artifact_variant` is `student`, `solutions_included` is false, outputs and execution counts are empty, and prompt cells carry the `exercise-prompt` tag plus their task IDs. A missing declared prompt, a private cell tag, an unknown rubric criterion, or a page/notebook metadata mismatch fails the build.
+
+Students may add response cells without changing the published prompt identifiers. Before submission, restart the kernel, run permitted executable cells in order, inspect all evidence, and complete the declared assistance record.

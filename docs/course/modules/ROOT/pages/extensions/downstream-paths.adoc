@@ -5,12 +5,25 @@
 :page-course-difficulty: D2
 :page-course-duration-minutes: 20
 :page-course-outcomes: LO8, LO9, LO10, LO11
-:page-course-prerequisites: Complete P0/P1 course
+:page-course-prerequisites: Complete Essential/Core (P0/P1) course
 :page-course-assessed: no
 
 [.course-badge.priority-p2]#P2 Extension# [.course-badge.difficulty-d2]#D2 Independent#
 
-This course ends at a deliberate boundary. The P0/P1 path makes data, validation, evaluation, and results trustworthy; downstream courses deepen software engineering, numerical models, accelerators, databases, and distributed execution. See the https://csmi.cemosis.fr/en/csmi/csmi-2024-2028/index.html#_courses[CSMI 2024–2028 course map] for the programme context.
+This course ends at a deliberate boundary. The Essential/Core (P0/P1) path makes data, validation, evaluation, and results trustworthy; downstream courses deepen software engineering, numerical models, accelerators, databases, and distributed execution. See the https://csmi.cemosis.fr/en/csmi/csmi-2024-2028/index.html#_courses[CSMI 2024–2028 course map] for the programme context.
+
+== Source exception
+
+This hand-off is intentionally page-only: its learning object is an ownership and prerequisite map, not a computation.
+
+[cols="2,5",options="header"]
+|===
+|Field |Contract
+|Reason |No executable result exists; a generated notebook would duplicate a programme map without adding a method
+|Owner |Data Processing maintainer with the four named downstream course owners
+|Environment |English Antora page; no Python runtime
+|Maintenance |Review against the CSMI course map and named owner boundaries before each annual release
+|===
 
 [cols="2,4,4",options="header"]
 |===

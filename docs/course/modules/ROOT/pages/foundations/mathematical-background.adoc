@@ -187,11 +187,76 @@ An approximate large-sample 95% confidence interval is stem:[\bar x\pm1.96\,s/\s
 
 so positive covariance increases uncertainty. Use group-, block-, or time-aware resampling when the sampling unit is not a row.
 
+== Worked example: mean and standard error
+
+[.worked-example-context#worked-mathematical-background-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+Twenty-five independent observations have sample mean stem:[\bar x=12] and sample standard deviation stem:[s=5]. Estimate the uncertainty of the sample mean and construct the usual large-sample 95% interval. Independence and a representative sampling mechanism are assumptions, not consequences of having 25 rows.
+
+[.worked-example-method#worked-mathematical-background-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+Under independent sampling with finite variance, estimate the standard error of the mean by stem:[\widehat{\operatorname{SE}}(\bar X)=s/\sqrt n]. The usual large-sample interval is stem:[\bar x\pm1.96\,s/\sqrt n].
+
+.Mathematical insight — spread and estimator uncertainty are different
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* The sample standard deviation describes variation among individual observations; dividing by stem:[\sqrt n] estimates repeated-sample variation of the mean. The square-root law follows from stem:[\operatorname{Var}(\bar X)=\sigma^2/n] under independence. Dependence adds covariance terms and can destroy the advertised reduction.
+====
+
+[.worked-example-implementation#worked-mathematical-background-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+This example is intentionally implemented as a transparent hand calculation and semantic table; executable Python would not add evidence to the arithmetic.
+
 .Example: Mean and standard error
 [.examp#ex:mean-se]
 ****
 For stem:[n=25], stem:[\bar x=12], and stem:[s=5], the estimated standard error is stem:[5/\sqrt{25}=1]. The large-sample interval is stem:[12\pm1.96], or approximately stem:[[10.04,13.96]]. It quantifies repeated-sample uncertainty under the sampling assumptions; it does not include instrument bias or population mismatch.
 ****
+
+The calculation separates three quantities that students often conflate:
+
+[cols="2,1,3",options="header"]
+|===
+|Quantity |Value |Operational meaning
+
+|Sample standard deviation stem:[s]
+|stem:[5]
+|Observed spread among individual rows
+
+|Estimated standard error stem:[s/\sqrt n]
+|stem:[1]
+|Repeated-sample spread of the mean under independence
+
+|95% interval half-width
+|stem:[1.96]
+|Approximate uncertainty attached to this estimation procedure
+|===
+
+[.worked-example-results#worked-mathematical-background-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The estimated standard error is stem:[1], and the large-sample 95% interval is approximately stem:[[10.04,13.96]]. The result table keeps the observation spread stem:[s=5], the standard error stem:[1], and the interval half-width stem:[1.96] as separate quantities.
+
+[.worked-example-conclusion#worked-mathematical-background-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+Under the declared independent-sampling approximation, the sample mean is estimated with standard error stem:[1] and the interval reports finite-sample estimation uncertainty. If the 25 rows are repeated readings from five devices, the effective unit may be the device and the independence formula can be severely optimistic. Even a correctly computed interval excludes measurement bias and population mismatch. This is why the error ledger records data, sampling, model, and numerical errors separately.
 
 == Error estimation for predictive performance
 

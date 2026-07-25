@@ -63,3 +63,84 @@ input:focus-visible,
     transition-duration: 0.01ms !important;
   }
 }
+
+.dynamic-py-result-matplotlib .content {
+  overflow-x: auto;
+}
+
+.dynamic-py-result-matplotlib-grid .content {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
+}
+
+.dynamic-py-figure {
+  margin: 0.75rem auto;
+  max-width: 100%;
+}
+
+.dynamic-py-figure img {
+  display: block;
+  height: auto;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.dynamic-py-figure figcaption {
+  color: #555;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.dynamic-py-result-interpretation {
+  border-left: 0.25rem solid #175f42;
+  margin: 0.75rem 0;
+  padding: 0.35rem 0.75rem;
+}
+
+/* asciidoctor-jupyter drops custom admonition titles. The explicit label
+ * remains in notebook Markdown while the richer title labels the webpage. */
+.admonitionblock .notebook-insight-label {
+  display: none;
+}
+
+.dynamic-py-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.dynamic-py-result-table table {
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  width: 100%;
+}
+
+.dynamic-py-result-table caption {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.dynamic-py-result-table th,
+.dynamic-py-result-table td {
+  border: 1px solid #b8b8b8;
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.dynamic-py-result-table thead th {
+  background: #edf4f0;
+}
+
+.dynamic-py-static-fallback {
+  border: 1px solid #b8b8b8;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.dynamic-py-static-fallback img {
+  height: auto;
+  max-width: 100%;
+}

@@ -10,7 +10,7 @@
 
 [.course-badge.priority-p2]#P2 Extension# [.course-badge.difficulty-d2]#D2 Independent#
 
-This compact bridge translates familiar NumPy reasoning into JAX transformations. It is optional, CPU-compatible, and excluded from controls and examinations. Removing it leaves the complete 28-hour P0/P1 course unchanged.
+This compact bridge translates familiar NumPy reasoning into JAX transformations. It is optional, CPU-compatible, and excluded from controls and examinations. Removing it leaves the complete 28-hour Essential/Core (P0/P1) course unchanged.
 
 == Learning contract
 
@@ -23,6 +23,58 @@ After the lab you should be able to:
 * replace a Python batch loop with `vmap` and verify result equality.
 
 The lab does not teach neural-network construction, PyTrees, Optax, accelerator setup, or long training loops. Those belong to the xref:extensions/downstream-paths.adoc[Scientific Machine Learning hand-off].
+
+== Mathematical background
+
+For a differentiable scalar function stem:[f:\mathbb R^p\to\mathbb R], reverse-mode automatic differentiation evaluates the vector
+
+[stem]
+++++
+\nabla f(\theta)
+=
+\left(
+\frac{\partial f}{\partial\theta_1},
+\ldots,
+\frac{\partial f}{\partial\theta_p}
+\right)^\top
+++++
+
+by differentiating the program's primitive operations. It computes the derivative of the implemented program; it does not prove that the program represents the intended scientific model.
+
+A central finite-difference challenge for coordinate stem:[j] is
+
+[stem]
+++++
+g_j^{(h)}
+=
+\frac{f(\theta+h e_j)-f(\theta-h e_j)}{2h}.
+++++
+
+For a smooth function, truncation error is stem:[O(h^2)], while floating-point cancellation grows as stem:[h] becomes too small. Gradient verification therefore compares several plausible step sizes and uses absolute and relative tolerances.
+
+Vectorisation applies one pure function across a batch:
+
+[stem]
+++++
+\operatorname{vmap}(f)(x_1,\ldots,x_n)
+=
+\bigl(f(x_1),\ldots,f(x_n)\bigr),
+++++
+
+subject to the declared mapped axes. Equality with a small scalar loop is a useful oracle before performance claims.
+
+== Source and environment exception
+
+This is the one notebook-native enrichment exception. Executing JAX while Antora builds the required website would make an optional runtime part of the core publication environment. The reviewed instructor notebook also carries solution-removal metadata that the current AsciiDoc conversion contract does not encode.
+
+[cols="2,5",options="header"]
+|===
+|Field |Contract
+|Reason |Optional JAX runtime and retained student/instructor cell transformation
+|Owner |Data Processing maintainer with the Scientific Machine Learning 1 liaison
+|Environment |Locked `extensions` extra, CPython 3.12, CPU backend; no accelerator
+|Maintenance |Execute in the full profile after JAX or converter updates; compare the page, instructor notebook, and solution-free student artifact
+|===
 
 == Notebook
 
@@ -41,6 +93,18 @@ Automatic differentiation differentiates the program that was written. It does n
 
 Compilation timing is descriptive only. Warm up deliberately, synchronise asynchronous results when benchmarking, and never infer an algorithmic speedup from a single first call.
 
+== Error estimation
+
+For each checked coordinate, report the absolute discrepancy stem:[|g_j-g_j^{(h)}|] and a scale-aware relative discrepancy such as
+
+[stem]
+++++
+\frac{|g_j-g_j^{(h)}|}
+{\max(1,|g_j|,|g_j^{(h)}|)}.
+++++
+
+Passing this numerical check supports local implementation correctness for the selected point and steps. It does not establish differentiability everywhere, statistical validity, or correctness of the loss definition.
+
 == Transfer
 
-Implement the stable binary logistic loss from the P1 core with `jax.numpy`. Compute and verify one parameter gradient, vectorise per-example losses and gradients, and record the function's inputs, output shape, dtype, PRNG ownership, and compilation boundary.
+Implement the stable binary logistic loss from the Core (P1) curriculum with `jax.numpy`. Compute and verify one parameter gradient, vectorise per-example losses and gradients, and record the function's inputs, output shape, dtype, PRNG ownership, and compilation boundary.

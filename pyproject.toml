@@ -25,6 +25,7 @@ extensions = [
 
 [dependency-groups]
 dev = [
+  "jsonschema==4.26.0",
   "pytest==8.4.1",
   "ruff==0.12.4",
 ]
@@ -43,9 +44,7 @@ exclude = ["archive", "build", "public"]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
-"tools/build_foundation_notebooks.py" = ["E501"]
-"tools/build_analytical_notebooks.py" = ["E501"]
-"tools/build_extension_notebooks.py" = ["E501"]
+"tools/build_jax_notebook.py" = ["E501"]
 
 [tool.ruff.format]
 quote-style = "double"

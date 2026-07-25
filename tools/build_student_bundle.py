@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import subprocess
 import zipfile
 from pathlib import Path
@@ -53,8 +54,15 @@ Required P0/P1 work is CPU-only. After bundle preparation, assessments do not
 require network access, a personal service account, or a GPU. Verify every file
 against `MANIFEST.json`; the release page publishes the ZIP SHA-256.
 
+Optional kernel, calibration, tracking, and drift notebooks use the required
+CPU environment but are outside assessed completion. The optional JAX notebook
+requires `uv sync --locked --all-groups --extra extensions`; missing optional
+dependencies do not block required P0/P1 notebooks.
+
 The bundle intentionally excludes instructor solutions, hidden tests, live
 assessments, private review records, and quarantined raw source material.
+Public assessment specimens are generated from the same AsciiDoc as their
+webpages and carry solution-free exercise metadata.
 """
 
 
@@ -126,7 +134,21 @@ def write_entry(archive: zipfile.ZipFile, name: str, content: bytes) -> None:
 
 def build_bundle(output: Path = DEFAULT_OUTPUT) -> Path:
     student_root = ROOT / "build/notebooks/release-student"
+    if student_root.exists():
+        shutil.rmtree(student_root)
     generate(ROOT / "notebooks/instructor", student_root, "student")
+    manifest_path = (
+        ROOT / "public/course-data/_attachments/generated/asciidoc-notebook-manifest.json"
+    )
+    if not manifest_path.exists():
+        raise FileNotFoundError("Build the Antora site before preparing the student bundle")
+    generated_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    for entry in generated_manifest["entries"]:
+        source = ROOT / "public" / entry["notebook_url"].lstrip("/")
+        relative = Path(entry["source_path"]).with_suffix(".ipynb")
+        destination = student_root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
     files = collect_files(student_root)
     files["MANIFEST.json"] = manifest(files)
     output.parent.mkdir(parents=True, exist_ok=True)

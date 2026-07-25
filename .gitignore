@@ -1,5 +1,6 @@
 # Source material retained for provenance review; never publish or commit.
 /archive/raw/
+/docs/analysis/
 
 # Local execution and audit scratch space.
 /.audit-work/

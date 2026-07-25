@@ -33,25 +33,27 @@ Mode A prohibits external generative AI. Mode B permits it with disclosure and i
 |Wrangling and validated joins |Direct |Pair + individual |Direct |Direct
 |EDA and visual communication |Quality/anomaly evidence |Pair + individual |Direct |Direct
 |Leakage-safe pipelines and evaluation |Direct |Pair + individual |Direct |Direct
-|P1 modelling and mining methods |Not required |Pair + individual |Audit/reasoning |Direct
+|Core (P1) modelling and mining methods |Not required |Pair + individual |Audit/reasoning |Direct
 |Performance, memory, storage |Not required |Pair + individual |Audit/reasoning |Direct
 |Tests and clean execution |Direct |Pair + individual |Direct |Direct
 |Datasheet, result card, limitations, AI declaration |Concise record |Pair + individual |Direct |Direct
 |===
 
-Optional P2 and deferred P3 content is excluded from required assessment evidence.
+Optional Extension (P2) and Deferred (P3) content is excluded from required assessment evidence.
 
 == Critical validity rule
 
-A serious P0 failure caps the affected criterion even if a final metric is high. Examples include a many-to-many join that changes the unit of analysis, fitting preprocessing on test data, target leakage, untraceable or impermissible data, fabricated evidence, or a workflow that cannot be rerun. The cap is local to the affected criterion unless academic-integrity rules require a wider decision.
+A serious Essential (P0) failure caps the affected criterion even if a final metric is high. Examples include a many-to-many join that changes the unit of analysis, fitting preprocessing on test data, target leakage, untraceable or impermissible data, fabricated evidence, or a workflow that cannot be rerun. The cap is local to the affected criterion unless academic-integrity rules require a wider decision.
 
 == Public specifications
 
+* xref:assessment/exercise-contract.adoc[Exercise, hint, and assistance contract]
 * xref:assessment/control-1-specimen.adoc[Specimen Control 1]
 * xref:assessment/mini-project.adoc[Mini-project specification]
+* xref:assessment/control-2-specimen.adoc[Specimen Control 2]
 * xref:assessment/final-exam-specimen.adoc[Specimen final exam]
 * xref:assessment/rubric.adoc[Common analytic rubric]
 * xref:assessment/delivery.adoc[Delivery, submission, and variant fairness]
 * xref:technical-contract.adoc[Execution and numerical contract]
 
-Control 2 uses a 55-minute flawed-analysis audit. Its 15 points are: defect identification 5, consequence 4, repair 4, and prioritisation/communication 2. Current papers, variants, solutions, hidden tests, and grading scripts remain in the private assessment repository.
+Current papers, variants, solutions, hidden tests, and grading scripts remain in the private assessment repository.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build deterministic canonical notebooks for optional extension material."""
+"""Build the deterministic canonical JAX notebook-native exception."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 
 import nbformat
 
-from tools.build_foundation_notebooks import code, deterministic_cell_id, markdown, notebook
+from tools.notebook_helpers import code, deterministic_cell_id, markdown, notebook
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "notebooks" / "instructor" / "extensions"
@@ -144,7 +144,7 @@ def build_jax_bridge() -> None:
 def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     build_jax_bridge()
-    print("Built one optional JAX transformations notebook")
+    print("Built the JAX notebook-native source")
 
 
 if __name__ == "__main__":

@@ -7,6 +7,14 @@
 :page-course-outcomes: LO5, LO6, LO7, LO9
 :page-course-prerequisites: fitted pipelines and one final untouched test
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: full
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d3]#D3 Synthesis#
 
@@ -64,7 +72,19 @@ Use repeated group/time-respecting outer splits, or a block/group bootstrap of t
 
 Searching stem:[M] noisy candidates increases the chance that one looks good by luck. This multiple-comparisons effect is another reason to fix the search budget and use untouched outer or final evidence.
 
-== Worked example
+== Worked example: group leakage changes the estimated risk
+
+[.worked-example-context#worked-model-selection-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+A predictive system will be applied to machines that were not represented during training. Determine whether ordinary random-row cross-validation or group-held-out validation estimates that deployment risk when every machine contributes repeated rows.
+
+[.worked-example-method#worked-model-selection-method]
+=== Method
+
+*Importance:* Core (P1)
 
 .Example: Group leakage
 [.examp#ex:group-leakage]
@@ -72,13 +92,108 @@ Searching stem:[M] noisy candidates increases the chance that one looks good by 
 Suppose 30 machines each contribute 20 rows and the target is nearly constant within a machine. Random five-fold CV places rows from every machine in training and validation, allowing a machine identifier or proxy to predict the label. `GroupKFold` holds out complete machines and estimates transfer to unseen machines. Both procedures may be coded correctly, but they estimate different risks.
 
 With 600 rows, random folds have about 120 validation rows but nearly zero new-machine information. The effective sampling unit for the intended deployment is the 30 machines, not the 600 rows.
+
+Numerically, row-wise five-fold validation reports averages of the form stem:[\widehat R_{\mathrm{row}}=5^{-1}\sum_{k=1}^5 R_k] over about stem:[600/5=120] rows per fold, whereas group validation holds out stem:[30/5=6] complete machines per fold. The formulas look alike; the validation units and target risks differ.
 ****
 
-== Guided laboratory
+.Mathematical insight — the resampling unit defines the target risk
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
 
-Create grouped synthetic observations where ordinary stratified CV leaks group identity. Compare it with `GroupKFold`, place scaling and univariate selection inside a pipeline, and run a small random search with a fixed candidate budget. Preserve a group-held-out final test.
+*Core (P1).* Cross-validation is an estimator only after the data-generating and deployment units are defined. Random-row folds estimate performance on new rows from represented groups; `GroupKFold` estimates transfer to held-out groups. More rows within the same 30 machines improve within-machine precision but do not create 600 independent machines.
+====
 
-xref:attachment$notebooks/analytical/model-selection.ipynb[Download the student notebook].
+[.worked-example-implementation#worked-model-selection-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The numerical unit in the problem is 30 machines, not 600 exchangeable rows. The executable verification creates grouped observations with a declared group-specific shortcut and compares stratified row-wise CV with `GroupKFold`. Its table reports all five fold scores, their mean and spread, and the validation unit; the paired plot makes the estimand change visible rather than hiding it behind one average.
+
+[#fold-design-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Random-row and group-held-out cross-validation scores",table-description="Rows compare stratified random folds and GroupKFold. Columns report five fold accuracies, their mean and spread, and the effective validation unit."]
+----
+import numpy as np
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GroupKFold, StratifiedKFold, cross_val_score
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+# Each group has a nearly constant label. Treating rows as independent leaks group identity.
+rng = np.random.default_rng(20260722)
+groups = np.repeat(np.arange(30), 20)
+group_target = rng.integers(0, 2, size=30)
+y = group_target[groups]
+frame = pd.DataFrame(
+    {
+        "group": groups.astype(str),
+        "weak_signal": y + rng.normal(scale=2.5, size=len(y)),
+    }
+)
+preprocess = ColumnTransformer(
+    [
+        ("group", OneHotEncoder(handle_unknown="ignore"), ["group"]),
+        ("signal", StandardScaler(), ["weak_signal"]),
+    ]
+)
+model = Pipeline(
+    [("preprocess", preprocess), ("model", LogisticRegression(max_iter=1000))]
+)
+random_cv = StratifiedKFold(5, shuffle=True, random_state=20260722)
+group_cv = GroupKFold(5)
+random_scores = cross_val_score(model, frame, y, cv=random_cv, scoring="accuracy", n_jobs=1)
+group_scores = cross_val_score(
+    model, frame, y, groups=groups, cv=group_cv, scoring="accuracy", n_jobs=1
+)
+assert random_scores.mean() > group_scores.mean() + 0.15
+
+fold_summary = pd.DataFrame(
+    [
+        [*random_scores, random_scores.mean(), random_scores.std(), "rows"],
+        [*group_scores, group_scores.mean(), group_scores.std(), "complete groups"],
+    ],
+    index=["stratified random rows", "GroupKFold"],
+    columns=["fold 1", "fold 2", "fold 3", "fold 4", "fold 5", "mean", "spread", "unit"],
+)
+fold_summary
+----
+
+[#fold-design-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Five paired points compare validation accuracy for random-row and group-held-out folds; random-row scores are consistently much higher",figure-caption="Fold accuracies under two validation designs for grouped observations. Marker shape and horizontal position duplicate colour.",result-interpretation="The large score gap is not evidence that one estimator is intrinsically better. The random-row design answers performance on additional rows from known groups, whereas GroupKFold challenges transfer to unseen groups."]
+----
+import matplotlib.pyplot as plt
+
+fold_index = np.arange(1, 6)
+plt.style.use("tableau-colorblind10")
+fig, ax = plt.subplots(figsize=(7.5, 4.2), constrained_layout=True)
+ax.plot(fold_index - 0.05, random_scores, "o-", label="stratified random rows")
+ax.plot(fold_index + 0.05, group_scores, "s--", label="GroupKFold")
+ax.set(xticks=fold_index, xlabel="Validation fold", ylabel="Accuracy", title="Fold design changes the estimand")
+ax.set_ylim(0.0, 1.05)
+ax.legend()
+ax.grid(alpha=0.25)
+plt.show()
+----
+
+[.worked-example-results#worked-model-selection-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The random-row mean accuracy exceeds the group-held-out mean by more than stem:[0.15] in the controlled example. Each procedure reports five fold scores, but the random folds validate on rows from known machines while the group folds validate on six complete machines at a time. The paired figure shows that the difference is systematic across folds rather than caused by one isolated split.
+
+[.worked-example-conclusion#worked-model-selection-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+For deployment to unseen machines, group-held-out validation is the relevant evidence; random-row validation answers a different and easier question. The synthetic shortcut demonstrates the leakage mechanism but does not quantify leakage in a real factory. With only 30 groups, uncertainty across possible held-out machine sets remains material, and model selection would require an outer group-respecting evaluation.
+
+Use the page toolbar to download the generated notebook. Keep `n_jobs=1` and fixed split seeds for reference evidence; parallel search may change completion order without changing the mathematical contract.
 
 == Independent transfer
 

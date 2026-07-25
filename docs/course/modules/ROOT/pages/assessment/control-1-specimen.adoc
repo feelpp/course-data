@@ -7,6 +7,19 @@
 :page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO9, LO10
 :page-course-prerequisites: Blocks 1–7
 :page-course-assessed: yes
+:page-jupyter:
+:page-course-execution-profile: fast
+:page-course-assessment-id: A1
+:page-course-exercise-id: A1-SPECIMEN
+:page-course-exercise-kind: timed-specimen
+:page-course-task-ids: A1-T1, A1-T2, A1-T3, A1-T4, A1-T5
+:page-course-task-priorities: A1-T1=P0; A1-T2=P0; A1-T3=P0; A1-T4=P0; A1-T5=P0
+:page-course-task-points: A1-T1=4; A1-T2=4; A1-T3=3; A1-T4=5; A1-T5=4
+:page-course-hint-policy: specification-only
+:page-course-ai-mode: A
+:page-course-allowed-resources: provided-offline-bundle, bundled-documentation
+:page-course-submission-evidence: response-notebook, audit.json
+:page-course-rubric-criteria: R1, R2, R3, R4, R5, R6, R7
 
 This specimen fixes the task structure and expected depth. The live control uses different values and may use a regression rather than classification context, while preserving the same evidence and difficulty.
 
@@ -25,29 +38,29 @@ The source card states that the tables are synthetic, contain no personal data, 
 
 == Tasks and points
 
-=== 1. Problem and join contract — 4 points, P0
+=== A1-T1 — Problem and join contract — 4 points, Essential (P0)
 
 . State the unit of analysis, target, and expected key uniqueness in both tables. (1)
 . Predict the valid join cardinality before executing it. (1)
 . Implement a validated join and prove that it neither multiplies nor silently loses cycle rows. (2)
 
-=== 2. Data-quality decisions — 4 points, P0
+=== A1-T2 — Data-quality decisions — 4 points, Essential (P0)
 
 . Report type/unit, missing, duplicate, impossible-range, and anomalous-value findings. (2)
 . Apply justified repairs without converting rare valid events into errors. (2)
 
-=== 3. Executable checks — 3 points, P0
+=== A1-T3 — Executable checks — 3 points, Essential (P0)
 
 Write at least two focused assertions or tests. One must protect identity/cardinality and one must protect a semantic constraint such as units, range, category, or target role.
 
-=== 4. Leakage-safe baseline — 5 points, P0
+=== A1-T4 — Leakage-safe baseline — 5 points, Essential (P0)
 
 . Identify and exclude the failure-derived leaking column, explaining the consequence. (1)
 . Create the split before any learned imputation, encoding, or scaling. State whether stratification, grouping, or time order is required. (1)
 . Build numeric and categorical preprocessing inside a fitted pipeline. (2)
 . Compare with an appropriate dummy baseline. (1)
 
-=== 5. Metric, failure, and limits — 4 points, P0
+=== A1-T5 — Metric, failure, and limits — 4 points, Essential (P0)
 
 . Select a metric from the stated inspection/missed-failure consequences and interpret it in context. (2)
 . Identify one observed failure mode. (1)

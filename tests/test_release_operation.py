@@ -3,6 +3,7 @@ import zipfile
 from pathlib import Path
 
 from tools.build_student_bundle import build_bundle
+from tools.qualify_release import canonical_digest, tree_records
 from tools.summarise_course_evidence import summarise_feedback, summarise_items
 from tools.validate_student_bundle import validate_bundle
 
@@ -17,6 +18,17 @@ def test_student_bundle_is_complete_and_public(tmp_path: Path) -> None:
     assert "templates/assessment-item-statistics.csv" not in names
     first = bundle.read_bytes()
     assert build_bundle(bundle).read_bytes() == first
+
+
+def test_release_tree_fingerprint_is_path_order_independent(tmp_path: Path) -> None:
+    (tmp_path / "nested").mkdir()
+    (tmp_path / "nested/b.txt").write_text("beta\n", encoding="utf-8")
+    (tmp_path / "a.txt").write_text("alpha\n", encoding="utf-8")
+    first = tree_records(tmp_path)
+    assert [record["path"] for record in first] == ["a.txt", "nested/b.txt"]
+    assert canonical_digest(first) == canonical_digest(tree_records(tmp_path))
+    (tmp_path / "a.txt").write_text("changed\n", encoding="utf-8")
+    assert canonical_digest(first) != canonical_digest(tree_records(tmp_path))
 
 
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict]) -> None:

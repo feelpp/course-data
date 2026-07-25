@@ -12,6 +12,19 @@
 
 pandas, DuckDB, and Polars can express overlapping analytical workflows, but their execution models differ. This comparison is about choosing and validating a plan—not declaring a universal winner from one timing.
 
+== Source and environment exception
+
+This lesson remains page-only. A complete three-engine execution requires the optional Polars environment, and timing/memory results are meaningful only with a declared machine, storage state, data budget, and repetition policy. Publishing one build-machine result as though it were transferable would weaken the lesson.
+
+[cols="2,5",options="header"]
+|===
+|Field |Contract
+|Reason |Optional Polars runtime and environment-specific benchmarking evidence
+|Owner |Data Processing maintainer with the Database and HPC liaisons
+|Environment |Core CPU environment for pandas/DuckDB; locked `extensions` extra for Polars
+|Maintenance |Re-run the written protocol on a declared reference machine after an engine, Arrow, or Parquet update; do not promote timings to Essential (P0) or Core (P1) claims
+|===
+
 == Same question, three plans
 
 Use the teaching air-quality Parquet table and compute daily PM2.5 summaries for selected stations and dates.
@@ -33,6 +46,26 @@ The https://duckdb.org/docs/stable/data/parquet/overview.html[DuckDB Parquet doc
 . Record versions, files, columns, filters, repetitions, warm-up, and peak memory.
 . Use the same local file and fixed data budget.
 . Treat timing as evidence tied to this workload and machine, not as a grading target.
+
+== Mathematical limits
+
+If a plan must read stem:[B] bytes from storage with sustained bandwidth stem:[b], its elapsed time satisfies the physical lower bound
+
+[stem]
+++++
+T\ge \frac{B}{b}.
+++++
+
+Projection and predicate pushdown reduce the bytes that cross a storage or memory boundary. They cannot make a required scan cheaper than the selected bytes, and a lower scan volume does not guarantee a faster end-to-end query once parsing, compilation, aggregation, conversion, and cache effects are included.
+
+For a materialised table with stem:[n] rows and fixed-width column sizes stem:[w_1,\ldots,w_p], the raw payload is at least
+
+[stem]
+++++
+n\sum_{j=1}^{p}w_j\ \text{bytes},
+++++
+
+before validity bitmaps, offsets, object overhead, indexes, temporary arrays, and copies. Measure peak memory rather than quoting this lower bound as a complete forecast.
 
 == Selection rule
 

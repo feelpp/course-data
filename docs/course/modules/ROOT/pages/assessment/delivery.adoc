@@ -34,7 +34,7 @@ The submission exporter replaces institutional identity with a pseudonymous cand
 
 == Marking contract
 
-Automated checks report criterion-level evidence and support partial credit. Written justification, interpretation, limitations, and acceptable alternative methods remain subject to human grading. A safety-critical P0 error can activate the published local cap for its criterion.
+Automated checks report criterion-level evidence and support partial credit. Written justification, interpretation, limitations, and acceptable alternative methods remain subject to human grading. A safety-critical Essential (P0) error can activate the published local cap for its criterion.
 
 Runtime measurements are diagnostic only. Marks depend on correctness, validity, reasoning, and reproducibility under fixed data and iteration budgets—not on finishing a computation faster than another candidate. If an infrastructure or checker failure affects you, preserve the files, record the message and time, and notify the invigilator; a tool failure is not itself a marking penalty.
 
@@ -42,7 +42,7 @@ Runtime measurements are diagnostic only. Marks depend on correctness, validity,
 
 Each control has at least two equivalent variants. The final examination has three dataset variants, including an independently runnable retake. Equivalence means the same duration, point structure, concept importance, operation sequence, response schema, and tolerance policy; names, seeds, values, and contexts may differ.
 
-Required assessment content is restricted to announced P0 Essential and P1 Core concepts. P2 Extension and P3 Deferred material cannot become an unstated prerequisite.
+Required assessment content is restricted to announced Essential (P0) and Core (P1) concepts. Extension (P2) and Deferred (P3) material cannot become an unstated prerequisite.
 
 == Before a live sitting
 

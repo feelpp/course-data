@@ -11,8 +11,11 @@ permissions:
 jobs:
   notebooks:
     runs-on: ubuntu-24.04
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: '3.12'
@@ -26,9 +29,9 @@ jobs:
           cache: npm
       - run: uv sync --locked --all-groups --extra extensions
       - run: npm ci
-      - run: npm audit --audit-level=high
+      - run: npm run audit
       - run: npm run validate
+      - run: npm run site
       - run: npm run test
       - run: npm run notebooks:test:full
-      - run: npm run site
       - run: npm run site:check
