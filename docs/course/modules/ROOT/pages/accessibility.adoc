@@ -1,0 +1,38 @@
+= Accessibility and inclusive use
+:page-course-language: en
+:page-course-concepts: DP-DOC-01, DP-GOV-01, DP-REP-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 15
+:page-course-outcomes: LO9, LO10
+:page-course-prerequisites: None
+:page-course-assessed: no
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
+
+The course is designed for keyboard, screen-reader, magnification, and colour-vision-diverse use. Accessibility is part of correctness: a result that a collaborator cannot inspect is not fully communicated.
+
+== Web pages
+
+* Use the *Skip to main content* link to bypass repeated navigation.
+* All interactive controls must expose a visible keyboard focus indicator.
+* Headings follow a logical hierarchy, tables have header cells, and meaningful images require alternative text and a caption.
+* Mathematical symbols are defined in nearby prose. Displayed equations are accompanied by an operational interpretation.
+* Importance is communicated by the text labels Essential (P0), Core (P1), Extension (P2), and Deferred (P3), never by badge colour alone.
+
+== Notebooks and figures
+
+Run notebooks from top to bottom using standard Jupyter keyboard commands; no required task depends on dragging, hovering, or a mouse-only widget. Every required figure must include:
+
+* a descriptive title and labelled axes with units;
+* a caption stating the population/sample, observation count, missing-data rule, and one limitation;
+* line style, marker, label, or texture differences in addition to colour;
+* a short textual description of the pattern needed to answer the question.
+
+Do not encode “good/bad” or group identity using red/green alone. Prefer the colour-blind-safe Matplotlib `tableau-colorblind10` style and verify that the figure remains interpretable in greyscale.
+
+== Adjustments and problems
+
+Students may use assistive technology, increased zoom, high contrast, alternative keyboard mappings, or an equivalent non-visual representation without changing the learning outcome. Report an inaccessible page, notebook, dataset, or assessment through the institution-approved course channel. Include the artifact, task, assistive context, and blocking behaviour; do not include medical details in a public issue.
+
+Assessment adjustments are arranged through the university process. A technical accessibility defect in provided material is an infrastructure incident, not a student error.

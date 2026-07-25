@@ -7,10 +7,74 @@
 :page-course-outcomes: LO5, LO6, LO7
 :page-course-prerequisites: stable linear regression, protected evaluation split
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: full
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d3]#D3 Synthesis#
 
 Regularisation trades training fit for constrained model complexity and stability. Ridge shrinks correlated coefficients continuously; Lasso can set coefficients to zero but its selected feature among correlated alternatives may be unstable.
+
+== Penalised objectives
+
+Assume the columns of stem:[X] have been scaled inside the fitted pipeline.
+
+.Definition: Ridge estimator
+[.def#def:ridge]
+****
+[stem]
+++++
+\widehat\beta_{\mathrm{ridge}}(\lambda)
+=\operatorname*{argmin}_{\beta}
+\left\{\frac1n\lVert y-X\beta\rVert_2^2
++\lambda\lVert\beta\rVert_2^2\right\},
+\qquad \lambda\ge0.
+++++
+
+For the stated scaling of the loss,
+
+[stem]
+++++
+\widehat\beta_{\mathrm{ridge}}
+=\left(X^\top X+n\lambda I\right)^{-1}X^\top y.
+++++
+****
+
+.Definition: Lasso estimator
+[.def#def:lasso]
+****
+[stem]
+++++
+\widehat\beta_{\mathrm{lasso}}(\lambda)
+=\operatorname*{argmin}_{\beta}
+\left\{\frac1n\lVert y-X\beta\rVert_2^2
++\lambda\lVert\beta\rVert_1\right\}.
+++++
+
+The stem:[\ell_1] objective is convex but not differentiable at zero. Its geometry can produce exact zero coefficients; it does not prove that the remaining variables are causal or uniquely important.
+****
+
+The intercept is normally left unpenalised. Without scaling, the same stem:[\lambda] penalises coefficients attached to differently scaled features unequally.
+
+== Bias–variance mathematics
+
+For a fitted predictor stem:[\widehat f] and a new response stem:[Y=f(x)+\varepsilon] with stem:[\mathbb E\varepsilon=0] and stem:[\operatorname{Var}(\varepsilon)=\sigma^2], the pointwise expected squared prediction error is
+
+[stem]
+++++
+\mathbb E_{\mathcal D,\varepsilon}
+\left[(Y-\widehat f_{\mathcal D}(x))^2\right]
+=\sigma^2
++\left(\mathbb E_{\mathcal D}\widehat f_{\mathcal D}(x)-f(x)\right)^2
++\operatorname{Var}_{\mathcal D}(\widehat f_{\mathcal D}(x)).
+++++
+
+The three terms are irreducible noise, squared bias, and training-sample variance. Increasing regularisation usually raises bias and lowers variance, but the balance depends on stem:[x], sample size, feature geometry, and the true signal.
 
 == Generalisation diagnosis
 
@@ -18,11 +82,179 @@ Bias and variance describe expected error behaviour across possible training sam
 
 Scale features inside the fitted pipeline before applying coefficient penalties. Report coefficient paths as conditional predictive behaviour, not automatic causal importance.
 
-== Guided laboratory
+== Error estimation
 
-Generate polynomial data with known signal/noise. Compare unregularised, Ridge, and Lasso pipelines across penalty values using cross-validation. Plot coefficient paths and learning curves, quantify test error once, and repeat the sample seed to expose selection instability.
+Cross-validation estimates performance of the entire selection procedure only when scaling, feature construction, and stem:[\lambda] selection occur inside each training fold. Report the fold distribution and repeat the outer split when feasible. Overlapping training folds make fold scores dependent, so a naive stem:[s/\sqrt K] interval should not be presented as exact.
 
-xref:attachment$notebooks/analytical/regularisation-generalisation.ipynb[Download the student notebook].
+For feature stability, define a selection indicator stem:[I_{jb}=1] if feature stem:[j] is non-zero in resample stem:[b]. The empirical selection frequency
+
+[stem]
+++++
+\widehat\pi_j=\frac1B\sum_{b=1}^{B}I_{jb}
+++++
+
+describes algorithmic stability under the chosen resampling design. It is not a posterior inclusion probability and does not correct confounding.
+
+Learning curves estimate how training and validation risk change with sample size. Their variation across resamples is as important as the mean; one curve from nested subsets can hide sample sensitivity.
+
+== Worked example: Ridge shrinkage and generalisation
+
+[.worked-example-context#worked-regularisation-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+A high-degree polynomial model can fit noisy training data with unstable coefficients. Determine how Ridge changes the estimator in a transparent orthogonal case, then compare Ridge and Lasso under protected predictive evaluation.
+
+[.worked-example-method#worked-regularisation-method]
+=== Method
+
+*Importance:* Core (P1)
+
+.Example: Ridge shrinkage in an orthogonal design
+[.examp#ex:ridge-orthogonal]
+****
+Suppose stem:[X^\top X=nI] and define the unregularised estimate stem:[\widehat\beta_{\mathrm{ols}}=X^\top y/n]. Then
+
+[stem]
+++++
+\widehat\beta_{\mathrm{ridge}}
+=\frac{1}{1+\lambda}\widehat\beta_{\mathrm{ols}}.
+++++
+
+Every coefficient is shrunk by the same factor. For stem:[\lambda=1], the coefficients are halved. For example, if stem:[\widehat\beta_{\mathrm{ols}}=(2,-1)^\top], then
+
+[stem]
+++++
+\widehat\beta_{\mathrm{ridge}}(1)
+=\frac12(2,-1)^\top=(1,-0.5)^\top,
+\qquad
+\lVert\widehat\beta_{\mathrm{ridge}}\rVert_2
+=\frac12\lVert\widehat\beta_{\mathrm{ols}}\rVert_2.
+++++
+
+Both coordinates and the coefficient norm are halved, while training residual error generally increases because Ridge optimises a different objective. In a correlated design the shrinkage acts along singular-vector directions and is not a coordinate-wise halving.
+****
+
+.Mathematical insight — regularisation changes the estimator to trade bias for variance
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Core (P1).* In an orthogonal design, Ridge applies the filter stem:[1/(1+\lambda)] to every coefficient; in a general design, singular direction stem:[j] is filtered according to its information and penalty scale. Shrinkage introduces bias but can reduce estimation variance and prediction error. It does not merely repair a numerical solver, and Lasso zeros do not prove that the retained coordinates are uniquely causal.
+====
+
+[.worked-example-implementation#worked-regularisation-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The orthogonal calculation isolates pure shrinkage. The executable extension generates polynomial data with declared signal and noise, then compares unregularised, Ridge, and Lasso pipelines over fixed penalty grids. Its table exposes the selected penalty, protected-test RMSE, and number of non-zero coefficients; its plots connect coefficient paths and learning curves to the generalisation question.
+
+[#regularisation-summary-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Cross-validated Ridge and Lasso evidence on polynomial data",table-description="Rows compare Ridge and Lasso. Columns report the selected penalty, protected-test RMSE, and number of non-zero polynomial coefficients."]
+----
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LassoCV, RidgeCV
+from sklearn.metrics import root_mean_squared_error
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+
+# Generate a known quadratic signal with noise, then protect one test split.
+rng = np.random.default_rng(20260722)
+x = rng.uniform(-2.0, 2.0, size=(240, 1))
+y = 1.0 - 2.0 * x[:, 0] + 0.8 * x[:, 0] ** 2 + rng.normal(scale=1.0, size=len(x))
+X_train, X_test, y_train, y_test = train_test_split(
+    x, y, test_size=0.25, random_state=20260722
+)
+penalties = np.logspace(-4, 3, 18)
+ridge = make_pipeline(
+    PolynomialFeatures(12, include_bias=False),
+    StandardScaler(),
+    RidgeCV(alphas=penalties, cv=5),
+).fit(X_train, y_train)
+lasso = make_pipeline(
+    PolynomialFeatures(12, include_bias=False),
+    StandardScaler(),
+    LassoCV(
+        alphas=np.logspace(-4, 0, 18),
+        cv=5,
+        max_iter=30000,
+        random_state=20260722,
+    ),
+).fit(X_train, y_train)
+
+ridge_model = ridge.named_steps["ridgecv"]
+lasso_model = lasso.named_steps["lassocv"]
+ridge_rmse = float(root_mean_squared_error(y_test, ridge.predict(X_test)))
+lasso_rmse = float(root_mean_squared_error(y_test, lasso.predict(X_test)))
+assert ridge_rmse < 1.5 and lasso_rmse < 1.5
+assert np.count_nonzero(lasso_model.coef_) < len(lasso_model.coef_)
+
+regularisation_summary = pd.DataFrame(
+    {
+        "selected penalty": [ridge_model.alpha_, lasso_model.alpha_],
+        "protected-test RMSE": [ridge_rmse, lasso_rmse],
+        "non-zero coefficients": [
+            int(np.count_nonzero(ridge_model.coef_)),
+            int(np.count_nonzero(lasso_model.coef_)),
+        ],
+    },
+    index=["Ridge", "Lasso"],
+)
+regularisation_summary
+----
+
+[#regularisation-fit-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Two panels compare noisy quadratic observations with Ridge and Lasso fitted curves, then compare absolute polynomial coefficients by degree on a logarithmic scale",figure-caption="Regularised polynomial fits and coefficient magnitudes. Curves use distinct line styles; coefficient markers and offsets duplicate colour.",result-interpretation="Both procedures generalise similarly on this protected split, but Lasso produces exact zeros while Ridge distributes shrinkage across degrees. One selected sparse representation is not evidence that the retained polynomial terms are uniquely important."]
+----
+import matplotlib.pyplot as plt
+
+grid = np.linspace(-2.0, 2.0, 300).reshape(-1, 1)
+degrees = np.arange(1, 13)
+plt.style.use("tableau-colorblind10")
+fig, axes = plt.subplots(1, 2, figsize=(10, 4.0), constrained_layout=True)
+axes[0].scatter(X_train[:, 0], y_train, s=14, alpha=0.35, label="training observations")
+axes[0].plot(grid[:, 0], ridge.predict(grid), "-", linewidth=2, label="Ridge")
+axes[0].plot(grid[:, 0], lasso.predict(grid), "--", linewidth=2, label="Lasso")
+axes[0].set(xlabel="x", ylabel="response y", title="Protected fitting experiment")
+axes[0].legend()
+axes[1].semilogy(
+    degrees - 0.08,
+    np.maximum(np.abs(ridge_model.coef_), 1.0e-8),
+    "o-",
+    label="Ridge",
+)
+axes[1].semilogy(
+    degrees + 0.08,
+    np.maximum(np.abs(lasso_model.coef_), 1.0e-8),
+    "s--",
+    label="Lasso",
+)
+axes[1].set(xlabel="Polynomial degree", ylabel="Absolute scaled coefficient", title="Shrinkage pattern")
+axes[1].legend()
+axes[1].grid(alpha=0.25)
+plt.show()
+----
+
+[.worked-example-results#worked-regularisation-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+For the orthogonal stem:[\lambda=1] case, every coefficient and the coefficient norm are halved. In the executable experiment, cross-validation selects a penalty for each method, both protected-test RMSE values remain below stem:[1.5], and Lasso retains fewer than 12 non-zero polynomial coefficients. The plot shows similar fitted signals but different shrinkage patterns.
+
+[.worked-example-conclusion#worked-regularisation-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+Regularisation can trade a modest increase in bias for more stable prediction, but Ridge and Lasso encode different structural preferences. The coefficient path verifies shrinkage, while the validation evidence estimates predictive error under one declared resampling design. Minimum error and minimum coefficient norm answer different questions. The selected penalty remains uncertain, and correlated predictors make coordinate paths basis-dependent; this supports a predictive-stability claim, not a causal coefficient interpretation.
+
+Use the page toolbar to download the generated notebook and repeat the full split–select–evaluate procedure under a second seed.
 
 == Independent transfer
 
@@ -31,3 +263,17 @@ Use correlated Dry Bean shape features for one-vs-rest classification or regress
 == Assessment evidence
 
 Students must identify under/overfitting from controlled evidence, place scaling and tuning inside CV, preserve the final test, interpret shrinkage/sparsity, and propose a remedy consistent with the observed bias/variance pattern.
+
+== Exercises
+
+.Exercise: Ridge solution
+[.exer#ex:ridge-solution]
+****
+Differentiate the Ridge objective and derive the closed-form solution above. State how the formula changes if the squared loss is written without stem:[1/n].
+****
+
+.Exercise: Selection stability
+[.exer#ex:selection-stability]
+****
+A Lasso variable is selected in 37 of 50 group-bootstrap fits. Compute stem:[\widehat\pi_j] and explain three reasons why this number is not evidence that the variable causes the outcome.
+****

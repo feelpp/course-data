@@ -1,0 +1,51 @@
+= Assessment delivery and submission
+:page-course-language: en
+:page-course-concepts: DP-REP-01, DP-TST-01, DP-GOV-01
+:page-course-priority: P0
+:page-course-difficulty: D2
+:page-course-duration-minutes: 15
+:page-course-outcomes: LO2, LO9, LO10
+:page-course-prerequisites: computing environment, assessment guide
+:page-course-assessed: yes
+
+Assessment bundles are designed to work from a clean local directory without network access, a personal cloud account, or an accelerator. The specification distributed for a sitting is authoritative, but every bundle follows the same operational contract.
+
+== What the bundle contains
+
+* an English brief with duration, points, allowed resources, importance levels, and required evidence;
+* local CSV or JSON data with a checksum manifest;
+* a solution-free response template;
+* a public checker for file structure and completeness;
+* an explicit statement that wall-clock runtime does not earn marks.
+
+Reference answers, hidden checks, grading caps, current variants, and private moderation records are never included. The public checker helps you repair missing fields or an invalid submission shape; passing it does not imply that an answer is correct.
+
+== Candidate workflow
+
+. Copy or extract the bundle into a new local directory.
+. Verify the manifest and read the whole brief before changing files.
+. Work only in the declared response files and keep the unit of analysis explicit.
+. Restart the workflow and run it in order with network access disabled.
+. Run the public checker and inspect every message.
+. Export only the allow-listed response through the announced university route.
+. Keep the submission receipt and bundle checksum until marks are final.
+
+The submission exporter replaces institutional identity with a pseudonymous candidate code. The university grading system retains the protected mapping; the exported work and technical archive do not contain the direct identity.
+
+== Marking contract
+
+Automated checks report criterion-level evidence and support partial credit. Written justification, interpretation, limitations, and acceptable alternative methods remain subject to human grading. A safety-critical Essential (P0) error can activate the published local cap for its criterion.
+
+Runtime measurements are diagnostic only. Marks depend on correctness, validity, reasoning, and reproducibility under fixed data and iteration budgets—not on finishing a computation faster than another candidate. If an infrastructure or checker failure affects you, preserve the files, record the message and time, and notify the invigilator; a tool failure is not itself a marking penalty.
+
+== Variant fairness
+
+Each control has at least two equivalent variants. The final examination has three dataset variants, including an independently runnable retake. Equivalence means the same duration, point structure, concept importance, operation sequence, response schema, and tolerance policy; names, seeds, values, and contexts may differ.
+
+Required assessment content is restricted to announced Essential (P0) and Core (P1) concepts. Extension (P2) and Deferred (P3) material cannot become an unstated prerequisite.
+
+== Before a live sitting
+
+Technical rehearsal alone does not approve an assessment. The course team must also complete independent academic moderation for ambiguity, English, accessibility, validity, equivalence, and priority alignment, plus a timing pilot on the actual lower-spec student-machine profile.
+
+See also xref:assessment/overview.adoc[the assessment guide], xref:assessment/rubric.adoc[the common rubric], and xref:technical-contract.adoc[the execution contract].

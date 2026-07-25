@@ -12,7 +12,7 @@ This contract makes runtime and numerical expectations predictable across ordina
 
 == Reference environment
 
-The reference target is CPython 3.12 on Ubuntu 24.04 LTS, CPU-only, with two CPU cores and 8 GiB of memory. Linux, WSL2, and macOS are supported for coursework. Required P0/P1 work must not need a GPU. Assessments are offline after the environment and data bundle have been prepared.
+The reference target is CPython 3.12 on Ubuntu 24.04 LTS, CPU-only, with two CPU cores and 8 GiB of memory. Linux, WSL2, and macOS are supported for coursework. Required Essential/Core (P0/P1) work must not need a GPU. Assessments are offline after the environment and data bundle have been prepared.
 
 Required workflows must remain below 4 GiB peak memory. Students are not penalised for slower hardware when their method meets the fixed data and iteration budget.
 

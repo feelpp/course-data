@@ -10,7 +10,7 @@
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
 
-Student notebooks are generated from reviewed instructor sources. The generator removes solutions and instructor-only cells, clears outputs and execution counts, validates metadata, and writes deterministic notebook files.
+All foundation, analytical, assessment, and eligible optional notebooks are generated from their canonical AsciiDoc pages. One JAX notebook remains a documented notebook-native exception. Both paths clear outputs and execution counts, validate metadata, and write deterministic notebook files.
 
 == Working rule
 
@@ -22,26 +22,59 @@ Student notebooks are generated from reviewed instructor sources. The generator 
 
 Never submit a notebook whose correctness depends on cells being run in a hidden order.
 
-== Foundation notebooks
+== Foundation notebooks in teaching order
 
-* xref:attachment$notebooks/foundations/data-lifecycle.ipynb[Data lifecycle and first audit]
-* xref:attachment$notebooks/foundations/tabular-data.ipynb[Arrays, tidy tables, and validated joins]
-* xref:attachment$notebooks/foundations/data-quality.ipynb[Data quality, missingness, and anomalies]
-* xref:attachment$notebooks/foundations/eda-sampling.ipynb[Exploratory analysis and sampling]
-* xref:attachment$notebooks/foundations/safe-pipelines.ipynb[Leakage-safe pipelines and baselines]
-* xref:attachment$notebooks/foundations/metrics-errors.ipynb[Metrics, thresholds, and error analysis]
-* xref:attachment$notebooks/foundations/baseline-synthesis.ipynb[End-to-end baseline synthesis]
+* xref:attachment$foundations/data-lifecycle.ipynb[Data lifecycle and first audit]
+* xref:attachment$foundations/tabular-data.ipynb[Arrays, tidy tables, and validated joins]
+* xref:attachment$foundations/data-quality.ipynb[Data quality, missingness, and anomalies]
+* xref:attachment$foundations/probability-distributions-moments.ipynb[Probability distributions and statistical moments]
+* xref:attachment$foundations/quantiles-exceedance-risk.ipynb[Quantiles, exceedance probabilities, and risk]
+* xref:attachment$foundations/mean-uncertainty.ipynb[Mean estimation and sampling uncertainty]
+* xref:attachment$foundations/eda-sampling.ipynb[Exploratory analysis and sampling]
+* xref:attachment$foundations/safe-pipelines.ipynb[Leakage-safe pipelines and baselines]
+* xref:attachment$foundations/metrics-errors.ipynb[Metrics, thresholds, and error analysis]
+* xref:attachment$foundations/baseline-synthesis.ipynb[End-to-end baseline synthesis]
 
-Notebooks locate data automatically when run inside the course clone. If you download one notebook independently, also download its linked CSV files into the same directory. All required foundation notebooks run on CPU in the fast CI profile.
+Every foundation notebook is generated directly from its executable lesson page. Each page is the canonical source for its English narrative, STEM mathematics, Python code, accessibility metadata, and exercises. Generated notebooks have deterministic cell identifiers and cleared outputs, and the site exposes each download only after Antora confirms the attachment.
+
+Notebooks locate data automatically when run inside the course clone. If you download one independently, also download its linked CSV files into the same directory. All required foundation notebooks run on CPU in the fast CI profile.
 
 == Analytical notebooks
 
-* xref:attachment$notebooks/analytical/linear-probabilistic.ipynb[Stable linear regression and probability]
-* xref:attachment$notebooks/analytical/classification-losses.ipynb[Stable classification losses]
-* xref:attachment$notebooks/analytical/regularisation-generalisation.ipynb[Regularisation and generalisation]
-* xref:attachment$notebooks/analytical/model-selection.ipynb[Cross-validation and search]
-* xref:attachment$notebooks/analytical/tree-ensembles.ipynb[Trees, forests, and boosting]
-* xref:attachment$notebooks/analytical/pca-clustering.ipynb[PCA and clustering]
-* xref:attachment$notebooks/analytical/performance-columnar.ipynb[Columnar performance]
+* xref:attachment$analytical/linear-probabilistic.ipynb[Stable linear regression and probability]
+* xref:attachment$analytical/classification-losses.ipynb[Stable classification losses]
+* xref:attachment$analytical/regularisation-generalisation.ipynb[Regularisation and generalisation]
+* xref:attachment$analytical/model-selection.ipynb[Cross-validation and search]
+* xref:attachment$analytical/tree-ensembles.ipynb[Trees, forests, and boosting]
+* xref:attachment$analytical/pca-clustering.ipynb[PCA and clustering]
+* xref:attachment$analytical/performance-columnar.ipynb[Columnar performance]
 
-The analytical notebooks are P1 Core and execute in the full scheduled/release workflow. Each contains a guided reference path, public checks, and an independent transfer task.
+The analytical notebooks are generated from their canonical lesson pages and execute in the full scheduled/release workflow. Each contains the same mathematics, guided evidence, commented code, interpretation, and independent transfer task as its webpage.
+
+== Public exercise notebooks
+
+* xref:attachment$assessment/control-1-specimen.ipynb[Specimen Control 1]
+* xref:attachment$assessment/mini-project.ipynb[Mini-project brief]
+* xref:attachment$assessment/control-2-specimen.ipynb[Specimen Control 2]
+* xref:attachment$assessment/final-exam-specimen.ipynb[Specimen final examination]
+
+These notebooks are generated from the public assessment pages. They contain identical task IDs, importance levels, point allocations, AI mode, allowed-resource profile, submission evidence, and rubric mappings. They contain no solutions or instructor-only cells. See the xref:assessment/exercise-contract.adoc[exercise, hint, and assistance contract].
+
+== Optional extension notebooks
+
+Generated from the English lesson pages:
+
+* xref:attachment$extensions/kernel-methods.ipynb[Kernel methods]
+* xref:attachment$extensions/probability-calibration.ipynb[Probability calibration]
+* xref:attachment$extensions/experiment-tracking.ipynb[Local experiment tracking]
+* xref:attachment$extensions/drift-monitoring.ipynb[Drift and monitoring]
+
+These notebooks use only the required CPU environment but carry the `full` execution profile. They are not assessed and do not belong to the required 28-hour contact contract.
+
+Documented notebook-native exception:
+
+* xref:attachment$notebooks/extensions/jax-transformations.ipynb[JAX transformations: autodiff, JIT, and vectorisation]
+
+The JAX artifact retains its reviewed student/instructor cell transformation and optional runtime, so it is not executed by the required Antora build. Install its separate CPU dependencies with `npm run setup:extensions`.
+
+The comparative dataframe-engine lesson and downstream course map are page-only exceptions: one requires optional Polars and machine-specific benchmark evidence; the other has no executable method. Their reason, owner, environment, and maintenance policies are visible on the pages and governed by `curriculum.yml`. The normal course setup and all Essential/Core (P0/P1) notebooks remain independent of JAX and Polars.

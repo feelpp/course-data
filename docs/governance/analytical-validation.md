@@ -1,7 +1,7 @@
 # P1 analytical-core validation
 
-**Validation date:** 2026-07-18  
-**Implementation status:** complete  
+**Validation date:** 2026-07-22
+**Implementation status:** complete
 **Canonical inventory:** `curriculum.yml` → `analytical_release`
 
 ## Delivered core
@@ -16,7 +16,7 @@
 | PCA/clustering | `DP-PCA-01`, `DP-CLU-01`, `DP-CLU-02`, `DP-CLU-03` | `pca-clustering` | Geometry and bootstrap/seed challenge | `QB-CLU-01` |
 | Columnar performance | `DP-PERF-01`, `DP-FMT-01`, `DP-SQL-01` | `performance-columnar` | Memory-bounded projected/query transfer | `QB-PERF-01` |
 
-The union covers all 21 P1 concepts. Each page contains a guided laboratory, explicit independent transfer, assumptions/failure modes, and assessment evidence. Each canonical notebook has a tagged reference solution, public checks, deterministic cell IDs, P1 metadata, and the full CPU execution profile.
+The union covers all 21 P1 concepts. Each page contains mathematical definitions and derivations, error estimation, a worked example, commented executable evidence, an accessible diagnostic figure, explicit interpretation, independent transfer, and assessment evidence. Each public notebook is generated from that canonical page with deterministic cell IDs, cleared outputs, P1 metadata, and the full CPU execution profile.
 
 ## Data and dependency evidence
 
@@ -34,20 +34,20 @@ The public mini-project specification provides four P1 routes: stable regression
 
 Repository validation rejects:
 
-- a missing P1 page, notebook, teaching manifest, project specification, or final specification;
-- a P1 concept absent from the declared inventory, page metadata, or notebook metadata;
+- a missing P1 page/notebook source, teaching manifest, project specification, or final specification;
+- a P1 concept absent from the declared inventory or canonical page/notebook metadata;
 - an analytical page without both guided and independent-transfer evidence;
-- an analytical notebook outside the P1/full-CPU contract;
+- an analytical notebook source outside the P1/full-CPU contract;
 - duplicated or incomplete question-bank identifiers;
-- nondeterministic generated notebook cell IDs;
+- nondeterministic generated notebook cell IDs or non-empty generated outputs;
 - source/data checksum, public/private boundary, or learner-language failures.
 
 Current implementation evidence:
 
-- 13 repository, curriculum, release-inventory, data, and notebook-generation tests pass;
-- 7 P0 notebooks execute in the fast CPU profile;
-- all 14 P0/P1 notebooks execute in the full CPU profile;
-- 14 solution-free student notebooks are generated;
-- 31 Antora HTML pages build and pass generated-site link/asset checks.
+- 20 Python repository, curriculum, release-inventory, data, and notebook-generation tests pass;
+- all 10 P0 notebooks execute in the fast CPU profile;
+- all 17 P0/P1 notebooks plus the optional JAX notebook execute in the full CPU profile;
+- 17 P0/P1 student notebooks are generated from their canonical pages with cleared outputs;
+- 47 Antora HTML pages build and pass generated-site mathematics, rich-output, accessibility, link, and asset checks.
 
 Current live examination content, solutions, hidden tests, variants, and detailed marking keys remain in the private assessment repository.

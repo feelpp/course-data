@@ -1,0 +1,69 @@
+= Specimen Control 2: audit a flawed analysis
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-GOV-01, DP-TAB-03, DP-QLT-01, DP-QLT-03, DP-EDA-01, DP-EVAL-01, DP-EVAL-02, DP-PIPE-01, DP-EVAL-03, DP-MET-02, DP-TST-01, DP-INT-01, DP-CV-01, DP-FEAT-01
+:page-course-priority: P0
+:page-course-difficulty: D3
+:page-course-duration-minutes: 55
+:page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10
+:page-course-prerequisites: Blocks 1–13
+:page-course-assessed: yes
+:page-jupyter:
+:page-course-execution-profile: fast
+:page-course-assessment-id: A3
+:page-course-exercise-id: A3-SPECIMEN
+:page-course-exercise-kind: timed-specimen
+:page-course-task-ids: A3-T1, A3-T2, A3-T3, A3-T4
+:page-course-task-priorities: A3-T1=P0+P1; A3-T2=P0+P1; A3-T3=P0+P1; A3-T4=P0
+:page-course-task-points: A3-T1=5; A3-T2=4; A3-T3=4; A3-T4=2
+:page-course-hint-policy: specification-only
+:page-course-ai-mode: A
+:page-course-allowed-resources: provided-offline-bundle, bundled-documentation
+:page-course-submission-evidence: response-notebook, audit.json
+:page-course-rubric-criteria: R1, R2, R3, R4, R5, R6, R7
+
+This public specimen fixes the evidence structure and difficulty of the control. A live paper uses a different analysis, data slice, values, and defect combination while retaining the same point balance and response contract.
+
+== Conditions
+
+* 55 minutes, individual, 15 points, AI Mode A.
+* CPU-only provided environment and offline data bundle.
+* Bundled course and library documentation is allowed.
+* Submit the annotated response notebook and generated `audit.json`.
+
+== Scenario
+
+A short maintenance analysis claims that a new workflow predicts inspection events accurately and efficiently. Its report joins cycle and machine tables, preprocesses the combined data, tunes a classifier, reports accuracy, and recommends deployment. The supplied notebook runs, but running code is not evidence that the analysis is valid.
+
+The specimen may contain defects from the announced families below. The live paper will not necessarily contain every listed defect.
+
+* join amplification or an incorrect unit of analysis;
+* target, temporal, group, or preprocessing leakage;
+* a metric that conflicts with the stated error consequences;
+* repeated use of final test data during tuning;
+* missing provenance, licence, or unit evidence;
+* uncontrolled randomness, hidden state, or an irreproducible claim;
+* causal or performance claims that exceed the design and uncertainty evidence.
+
+== Tasks and points
+
+=== A3-T1 — Identify defects — 5 points, Essential/Core (P0/P1)
+
+Identify five distinct defects. For each one, cite the exact cell, statement, or artifact that provides the evidence. At least three defects must threaten validity rather than only style or efficiency.
+
+=== A3-T2 — Explain consequences — 4 points, Essential/Core (P0/P1)
+
+For four identified defects, explain what quantity, comparison, or conclusion becomes unreliable. Distinguish data, sampling/evaluation, modelling, numerical, and communication errors where relevant.
+
+=== A3-T3 — Propose and verify repairs — 4 points, Essential/Core (P0/P1)
+
+Give a technically specific repair for four defects. At least two repairs must include an executable check, revised split/pipeline operation, toy oracle, or recomputed evidence rather than prose alone.
+
+=== A3-T4 — Prioritise and communicate — 2 points, Essential (P0)
+
+Order the defects by risk to the decision. Write a four-sentence release recommendation that states what must be corrected before the result can be used and which limitations remain after repair.
+
+== Acceptance and boundaries
+
+Counts, identities, and schema checks are exact. Deterministic floating checks use `rtol=1e-7` and `atol=1e-10`; seeded metrics use absolute tolerance 0.01. Wall-clock speed is not graded. A plausible alternative defect or repair receives credit when it is tied to observable evidence and preserves the stated data and evaluation contract.
+
+This page and its downloadable notebook contain no answer key or task-specific hint. Current papers, solutions, hidden checks, point keys, and moderation records remain in the private assessment repository.

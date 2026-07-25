@@ -8,10 +8,25 @@
 :page-course-prerequisites: Python functions and tabular data basics
 :page-course-assessed: yes
 :page-jupyter: true
+:page-course-execution-profile: fast
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
 
 A reliable analysis starts before modelling. First define what one row represents, where the data came from, what may be missing or duplicated, and which values are impossible.
+
+.Definition: Estimand and estimate
+[.def#def:lifecycle-estimand]
+****
+An *estimand* is the population quantity stem:[\theta(P)] that answers the stated question. An *estimate* stem:[\widehat\theta(\mathcal D)] is the value computed from observed data stem:[\mathcal D]. The distinction forces three early questions: what is the target population stem:[P], how was stem:[\mathcal D] obtained, and which transformations connect the raw records to stem:[\widehat\theta]?
+****
+
+Read xref:foundations/mathematical-background.adoc[Mathematical background and error estimation] before the first modelling chapter; it defines the notation used across the site.
 
 == Audit sequence
 
@@ -23,13 +38,268 @@ A reliable analysis starts before modelling. First define what one row represent
 . Test domain constraints and investigate anomalies.
 . Save the audit as executable checks, not only prose.
 
+== First error ledger
+
+Before calculation, list at least one possible data, sampling, modelling, numerical, and communication error. A useful analysis records the transformation chain
+
+[stem]
+++++
+\mathcal D_{\mathrm{raw}}
+\xrightarrow{\text{validate/repair}}
+\mathcal D_{\mathrm{analysis}}
+\xrightarrow{\text{method}}
+\widehat\theta
+\xrightarrow{\text{report}}
+\text{decision claim}.
+++++
+
+Checks at one arrow do not validate the others. A schema-valid table can be unrepresentative; a numerically accurate estimate can answer the wrong population question.
+
+== Worked example: one question, two numerical answers
+
+[.worked-example-context#worked-lifecycle-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+An analyst is asked for “the mean temperature across three stations.” The available teaching slice contains the first six hourly readings from Aotizhongxin but only the first two readings from Changping and Dingling. The unequal row counts are deliberate: they expose the decision hidden inside the word _mean_.
+
+Let stem:[x_{sj}] be reading stem:[j] from station stem:[s], let stem:[n_s] be the number of observed readings from station stem:[s], and let stem:[S=3]. Two defensible questions are:
+
+. *What is the mean of the observed rows?* Every recorded hour receives weight stem:[1/n].
+. *What is the mean for an equally weighted station?* Every station receives weight stem:[1/S], regardless of its row count.
+
+The first target describes this unbalanced table. The second describes a population in which the three stations are equally important.
+
+[.worked-example-method#worked-lifecycle-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+The station summaries are
+
+[stem]
+++++
+\bar x_A=\frac{-0.7-1.1-1.1-1.4-2.0-2.2}{6}
+          =-1.417\ ^\circ\mathrm C,
+\qquad
+\bar x_C=\bar x_D=\frac{-2.3-2.5}{2}
+          =-2.400\ ^\circ\mathrm C.
+++++
+
+For the *observation-weighted estimand*, add all ten readings and divide by ten:
+
+[stem]
+++++
+\widehat\mu_{\mathrm{rows}}
+=\frac{6\bar x_A+2\bar x_C+2\bar x_D}{10}
+=\frac{-8.5-4.8-4.8}{10}
+=-1.810\ ^\circ\mathrm C.
+++++
+
+For the *equal-station estimand*, average the three station means:
+
+[stem]
+++++
+\widehat\mu_{\mathrm{stations}}
+=\frac{\bar x_A+\bar x_C+\bar x_D}{3}
+=\frac{-1.417-2.400-2.400}{3}
+=-2.072\ ^\circ\mathrm C.
+++++
+
+The difference is stem:[0.262\ ^\circ\mathrm C]. It is not rounding error or software disagreement: the two calculations estimate different quantities.
+
+.Mathematical insight — the estimand determines the weights
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* A mean is not defined by the arithmetic operation alone. It is defined by the target population and its weights. Changing from rows to equally weighted stations changes the estimand before any estimator or software choice is made; more decimal places cannot reconcile the two answers.
+====
+
+[.worked-example-implementation#worked-lifecycle-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The table below is generated from the reviewed course data. It exposes the row counts, station estimates, and weighting rule instead of printing only a final scalar.
+
+[#lifecycle-estimand-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Two temperature estimands from an intentionally unbalanced station sample",table-description="The first three rows give station counts and mean temperatures. The last two rows give the observation-weighted and equal-station estimates, which differ because Aotizhongxin contributes more observations."]
+----
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+# Read the reviewed teaching artifact through the same path used by the webpage
+# and the generated notebook.
+def course_file(relative: str) -> Path:
+    """Locate canonical data in a repository checkout or student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+data_path = course_file("datasets/teaching/air-quality/observations.csv")
+temperatures = pd.read_csv(data_path, usecols=["source_row", "station", "TEMP"])
+
+# Create a transparent unbalanced sample: six rows from the first station and
+# two rows from each of the other stations.
+sample_sizes = {"Aotizhongxin": 6, "Changping": 2, "Dingling": 2}
+sample = pd.concat(
+    [
+        temperatures.loc[temperatures["station"].eq(station)].head(count)
+        for station, count in sample_sizes.items()
+    ],
+    ignore_index=True,
+)
+
+# Compute each station mean first so the two weighting rules remain visible.
+station_summary = sample.groupby("station")["TEMP"].agg(
+    observations="size", estimate_celsius="mean"
+)
+row_weighted = float(sample["TEMP"].mean())
+equal_station = float(station_summary["estimate_celsius"].mean())
+
+evidence = station_summary.reset_index().rename(columns={"station": "quantity"})
+evidence["weighting"] = "within-station observations"
+evidence = pd.concat(
+    [
+        evidence,
+        pd.DataFrame(
+            {
+                "quantity": ["all observed rows", "equally weighted stations"],
+                "observations": [len(sample), len(station_summary)],
+                "estimate_celsius": [row_weighted, equal_station],
+                "weighting": ["1/10 per row", "1/3 per station"],
+            }
+        ),
+    ],
+    ignore_index=True,
+)
+
+# These assertions connect the executable result to the hand calculation.
+assert np.isclose(row_weighted, -1.810)
+assert np.isclose(equal_station, -2.0722222222)
+evidence.set_index("quantity").round({"estimate_celsius": 3})
+----
+
+[#lifecycle-estimand-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Three bars show mean temperature for Aotizhongxin, Changping, and Dingling; horizontal lines mark the row-weighted estimate at minus 1.810 degrees Celsius and the equal-station estimate at minus 2.072 degrees Celsius",figure-caption="The estimand changes the numerical answer. Aotizhongxin has three times as many rows as either other station, so it pulls the row-weighted mean upward.",result-interpretation="The separation between the two horizontal lines is caused entirely by unequal weighting. Neither line is universally correct: the scientific question determines whether rows or stations are the unit of analysis."]
+----
+import matplotlib.pyplot as plt
+
+# Plot station summaries and both overall estimates; labels duplicate colour.
+fig, ax = plt.subplots(figsize=(8.2, 4.4), constrained_layout=True)
+bars = ax.bar(station_summary.index, station_summary["estimate_celsius"])
+for bar, value in zip(bars, station_summary["estimate_celsius"], strict=True):
+    ax.text(
+        bar.get_x() + bar.get_width() / 2,
+        value - 0.06,
+        f"{value:.3f} °C",
+        ha="center",
+        va="top",
+    )
+ax.axhline(row_weighted, color="black", linestyle="--", label="row weighted: −1.810 °C")
+ax.axhline(equal_station, color="black", linestyle=":", label="equal station: −2.072 °C")
+ax.set(ylabel="Mean temperature (°C)", title="Unequal row counts imply unequal station weights")
+ax.legend()
+ax.grid(axis="y", alpha=0.25)
+plt.show()
+----
+
+.Implementation safeguard — audit before interpretation
+
+Before interpreting either estimate, audit the records used to compute it. The following check starts from the reviewed air-quality teaching data and introduces three controlled defects: one duplicate identifier, one missing PM2.5 value, and one impossible temperature. The defects are explicit because silently corrupting a teaching dataset would weaken provenance.
+
+[#lifecycle-audit]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="First audit of a deliberately contaminated teaching slice",table-description="Rows report the observation count and counts of duplicate identifiers, missing PM2.5 measurements, and impossible temperatures. The final column states whether each check blocks analysis."]
+----
+from pathlib import Path
+
+import pandas as pd
+
+# Antora resolves this attachment for the webpage. The generated notebook rewrites
+# the same reference to a path relative to the downloaded notebook.
+def course_file(relative: str) -> Path:
+    """Locate canonical data in a repository checkout or student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+data_path = course_file("datasets/teaching/air-quality/observations.csv")
+raw = pd.read_csv(data_path).head(12)
+
+# Keep only the fields needed for this audit, then add known teaching defects.
+audit_input = raw[["source_row", "station", "PM2.5", "TEMP"]].copy()
+audit_input = pd.concat([audit_input, audit_input.iloc[[0]]], ignore_index=True)
+audit_input.loc[2, "PM2.5"] = pd.NA
+audit_input.loc[3, "TEMP"] = -90.0
+
+
+def audit_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    """Return one row per reproducible quality check."""
+    duplicate_ids = int(frame.duplicated(["station", "source_row"]).sum())
+    missing_pm25 = int(frame["PM2.5"].isna().sum())
+    impossible_temperature = int((frame["TEMP"] < -60.0).sum())
+    return pd.DataFrame(
+        {
+            "check": ["rows", "duplicate identifier", "missing PM2.5", "TEMP < -60 °C"],
+            "count": [len(frame), duplicate_ids, missing_pm25, impossible_temperature],
+            "blocks analysis": [False, duplicate_ids > 0, missing_pm25 > 0, impossible_temperature > 0],
+        }
+    ).set_index("check")
+
+
+audit = audit_frame(audit_input)
+assert audit.loc["duplicate identifier", "count"] == 1
+assert audit.loc["missing PM2.5", "count"] == 1
+assert audit.loc["TEMP < -60 °C", "count"] == 1
+audit
+----
+
+[.worked-example-results#worked-lifecycle-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The row-weighted estimate is stem:[-1.810\ ^\circ\mathrm C], whereas the equal-station estimate is stem:[-2.072\ ^\circ\mathrm C]. The stem:[0.262\ ^\circ\mathrm C] separation is explained by the three-to-one row-count imbalance. The independent audit also detects the deliberately introduced duplicate, missing value, and impossible temperature before either estimate is accepted.
+
+[.worked-example-conclusion#worked-lifecycle-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The question “mean temperature across three stations” has no unique answer until the unit and weights are declared. The worked calculation establishes four distinct facts:
+
+* the answer changes when the unit changes from rows to stations;
+* a duplicate changes the implicit weights and can therefore change either estimate;
+* a missing value changes the effective sample, while an impossible value challenges the measurement process;
+* passing these checks is evidence about this table, not proof that the source population is representative.
+
+A justified repair policy must be recorded separately from detection. Sampling error and target-population mismatch remain: the sample is too small and too narrowly timed to support a city-wide temperature claim, and no confidence interval repairs the mismatched population.
+
+Use the *Download Jupyter notebook* action in the page toolbar to rerun and modify this canonical example.
+
 == Lab
 
-The lab uses a deliberately small table with a duplicate identifier, a missing measurement, and an impossible negative value. Implement an audit function and explain which issue should block downstream analysis.
-
-xref:attachment$notebooks/foundations/data-lifecycle.ipynb[Download the student notebook].
+Repeat the comparison with 12 readings from Aotizhongxin, four from Changping, and two from Dingling. Before running code, predict which estimand will move more. Then replace temperature by PM2.5, report both answers with units, and add one sampling limitation and one data-quality limitation to the error ledger.
 
 == Completion evidence
 
 Your notebook must produce a structured audit result, contain no hidden state, and distinguish an observation from a data-quality issue. A reviewer should be able to rerun it without editing paths or downloading data.
 
+== Exercise
+
+.Exercise: Declare the quantity
+[.exer#ex:declare-quantity]
+****
+Rewrite “estimate average pollution” as two distinct estimands: an observation-weighted mean and an equal-station mean. Give the formula, observational unit, population, and one error source for each.
+****

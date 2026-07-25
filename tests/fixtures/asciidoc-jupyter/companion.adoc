@@ -1,0 +1,3 @@
+= Companion page
+
+This file exists only to give the representative fixture a real cross-reference target.

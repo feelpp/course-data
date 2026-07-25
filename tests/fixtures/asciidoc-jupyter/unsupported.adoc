@@ -1,0 +1,12 @@
+= Unsupported-node inventory fixture
+:page-jupyter:
+
+The surrounding prose must survive even when a non-portable node is encountered.
+
+video::notebook-demo.mp4[]
+
+++++
+<div data-test="raw-pass">Raw HTML is deliberately omitted from notebooks.</div>
+++++
+
+The final paragraph must also survive conversion.

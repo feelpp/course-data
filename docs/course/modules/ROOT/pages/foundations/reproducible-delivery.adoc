@@ -12,6 +12,8 @@
 
 A result is a traceable bundle, not the state of one notebook. Another person must be able to identify the code, data, environment, split, method, and artifact—and understand what the result does not establish.
 
+The result should bind a point estimate to its error statement. Reporting stem:[\widehat\theta] without a sampling uncertainty, sensitivity range, numerical tolerance, or explicit “not estimated” entry leaves the evidence incomplete. Use the ledger in xref:foundations/mathematical-background.adoc[Mathematical background and error estimation].
+
 == Minimum evidence bundle
 
 * source, creator, DOI/URL, licence, purpose, snapshot/checksum, schema and privacy classification;
@@ -23,6 +25,127 @@ A result is a traceable bundle, not the state of one notebook. Another person mu
 * generated artifact paths and expected runtime.
 
 Tests protect contracts. A toy oracle proves a calculation on known input; a data contract protects key/schema/semantic invariants; a smoke test proves the workflow connects. A successful run does not by itself prove the scientific conclusion, and a notebook with stored outputs is not a reproducibility record.
+
+== Numerical reproducibility and tolerances
+
+Floating-point results should usually be compared using a scale-aware rule
+
+[stem]
+++++
+|a-b|\le \operatorname{atol}+\operatorname{rtol}|b|.
+++++
+
+The absolute tolerance controls behaviour near zero; the relative tolerance scales with the reference magnitude. A tolerance is justified by conditioning, floating-point arithmetic, solver termination, or controlled stochastic variation—not chosen after observing a failing result. Exact counts, keys, and category sets remain exact.
+
+Reproducibility is layered: *computational* reproduction reruns the same code and data; *statistical* replication studies variation under a valid new sample or seed; *scientific* replication asks whether the conclusion survives a new setting. One cannot substitute for another.
+
+== Error estimation record
+
+Every result card must classify each important uncertainty as quantified, bounded, diagnosed, or unknown. At minimum record:
+
+* finite-sample uncertainty or why it was not estimated;
+* sensitivity to split, seed, missingness, and preprocessing choices;
+* numerical residual/tolerance for iterative or ill-conditioned calculations;
+* population mismatch and plausible distribution shift;
+* the difference between statistical uncertainty and operational consequences.
+
+== Worked example: tolerance as an evidence contract
+
+[.worked-example-context#worked-tolerance-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+A reference computation gives stem:[b=10^{-8}], a candidate gives stem:[a=b+5\times10^{-11}], and a regression test must decide whether the discrepancy is acceptable. The numerical contract initially declares stem:[\operatorname{rtol}=10^{-6}] and no absolute tolerance.
+
+[.worked-example-method#worked-tolerance-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+Use the asymmetric comparison
+
+[stem]
++++
+|a-b|\leq \operatorname{atol}+\operatorname{rtol}|b|.
++++
+
+With no absolute tolerance, the permitted discrepancy is
+
+[stem]
+++++
+0+10^{-6}|10^{-8}|=10^{-14}.
+++++
+
+A candidate stem:[a=b+5\times10^{-11}] fails even though that discrepancy may be acceptable for the algorithm near zero. Declaring stem:[\operatorname{atol}=10^{-10}] changes the bound to
+
+[stem]
+++++
+10^{-10}+10^{-14}=1.0001\times10^{-10},
+++++
+
+so the candidate passes. Conversely, stem:[\operatorname{atol}=1] would also accept a candidate near stem:[a=0.5], hiding a materially wrong result.
+
+.Mathematical insight — tolerances encode scale and conditioning
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* Relative error loses discriminatory power when the reference is near zero, so a justified absolute scale is necessary. That scale should come from conditioning, discretisation, solver stopping criteria, measurement resolution, or a trusted oracle. Enlarging a tolerance after observing a failure changes the specification and can conceal forward error.
+====
+
+[.worked-example-implementation#worked-tolerance-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The decision table is the implementation artifact for this page-only example. It applies the same inequality to a justified near-zero scale and an intentionally unsafe scale.
+
+[cols="2,1,1,1,1",options="header"]
+|===
+|Case |stem:[\lvert a-b\rvert] |Permitted bound |Result |Meaning
+
+|Relative tolerance only
+|stem:[5\times10^{-11}]
+|stem:[10^{-14}]
+|Fail
+|Potentially too strict near zero
+
+|Declared near-zero scale
+|stem:[5\times10^{-11}]
+|stem:[1.0001\times10^{-10}]
+|Pass
+|Matches the stated numerical contract
+
+|Unjustified absolute tolerance
+|approximately stem:[0.5]
+|approximately stem:[1]
+|Pass
+|A real defect is concealed
+|===
+
+[.worked-example-results#worked-tolerance-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+Relative tolerance alone permits only stem:[10^{-14}], so the stem:[5\times10^{-11}] discrepancy fails. A justified stem:[10^{-10}] absolute tolerance permits stem:[1.0001\times10^{-10}] and accepts it. The stem:[\operatorname{atol}=1] counterexample demonstrates that passing a test is meaningless when the bound lacks a defensible scale.
+
+[.worked-example-conclusion#worked-tolerance-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The candidate is acceptable only under the explicitly justified near-zero absolute scale. Tolerance selection is part of method design, not a switch applied after a test fails. Sampling error, model adequacy, and specification error remain outside this calculation; two programs can also agree while implementing the same wrong quantity.
+
+== Exercise
+
+.Exercise: Complete an error record
+[.exer#ex:delivery-error-record]
+****
+Choose one notebook result. State its estimand, estimate, sampling uncertainty, numerical tolerance, sensitivity analysis, and one unknown error source. Identify which entry can be tested automatically and which requires domain review.
+****
 
 == Templates
 

@@ -7,10 +7,20 @@
 :page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO9, LO10
 :page-course-prerequisites: all foundation laboratories
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: fast
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d3]#D3 Synthesis#
 
-This exercise is the P0 completion checkpoint. It combines source/use review, executable quality checks, feature roles, an untouched evaluation split, fitted preprocessing, a dummy baseline, consequence-aware metrics, error counts, tests, and a bounded result claim.
+This exercise is the Essential (P0) completion checkpoint. It combines source/use review, executable quality checks, feature roles, an untouched evaluation split, fitted preprocessing, a dummy baseline, consequence-aware metrics, error counts, tests, and a bounded result claim.
+
+The checkpoint also tests the error language developed in xref:foundations/mathematical-background.adoc[Mathematical background and error estimation]. A model is not better merely because its point estimate is larger.
 
 == Question and evidence chain
 
@@ -26,9 +36,199 @@ Your evidence chain must identify:
 . a prevalence-aware primary metric, threshold error counts, and one failure pattern;
 . data/split/environment/code identities, tests, limitations, and AI declaration.
 
-== Notebook and delivery artifacts
+== Quantitative comparison
 
-xref:attachment$notebooks/foundations/baseline-synthesis.ipynb[Download the synthesis notebook].
+For protected cases stem:[i=1,\ldots,m], compare the baseline stem:[f_0] and fitted model stem:[\widehat f] using paired losses
+
+[stem]
+++++
+d_i=L(y_i,f_0(x_i))-L(y_i,\widehat f(x_i)),
+\qquad
+\widehat\Delta=\frac1m\sum_{i=1}^{m}d_i.
+++++
+
+Positive stem:[\widehat\Delta] favours the fitted model under the declared loss. For independent cases its estimated standard error is stem:[s_d/\sqrt m]; otherwise use a group- or block-aware design. Also report metric denominators, confusion counts, and variability across the permitted training resamples. Separate:
+
+* data and population mismatch;
+* estimation and split variation;
+* selection caused by tried pipelines and thresholds;
+* numerical or stochastic solver variation;
+* operational error costs not represented by the metric.
+
+== Hand calculation: improvement without decisive evidence
+
+.Example: Improvement without decisive evidence
+[.examp#ex:baseline-improvement]
+****
+If stem:[\widehat\Delta=0.012] loss units and stem:[\widehat{SE}(\widehat\Delta)=0.010], the point estimate favours the model, but the improvement is small relative to test-sample variation. This is not evidence of equality; it is evidence that the current evaluation does not precisely determine the improvement. More representative data may matter more than additional tuning.
+****
+
+== Exercise
+
+.Exercise: Synthesis error ledger
+[.exer#ex:synthesis-ledger]
+****
+Complete the five-part error ledger for the notebook result. Quantify at least estimation error and one threshold consequence; give a falsifiable diagnostic for the remaining entries.
+****
+
+== Worked example: end-to-end baseline evidence
+
+[.worked-example-context#worked-baseline-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+The task is to decide whether a leakage-safe logistic model provides useful failure ranking beyond prevalence on one declared protected split. The executable synthesis is deliberately a baseline, not a leaderboard entry. It applies the contracts from the preceding pages in one top-to-bottom run.
+
+[.worked-example-method#worked-baseline-method]
+=== Method
+
+*Importance:* Core (P1)
+
+. Validate the 10,000-row data identity and binary target.
+. Exclude identifiers and the five columns used to construct the aggregate target.
+. Make one stratified 75/25 split with a recorded seed.
+. Fit preprocessing and logistic regression on training rows only.
+. Evaluate the model and prior dummy on the same 2,500 protected rows.
+. Return one compact evidence record with PR-AUC, confusion counts, identities, exclusions, and a deployment limitation.
+
+.Mathematical insight — prevalence is the ranking baseline
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Core (P1).* For a constant score, average precision equals the positive prevalence on the evaluated sample. Comparing model PR-AUC with that prevalence asks whether the ranking contains information beyond class rarity. It does not select a threshold or establish probability calibration.
+====
+
+[.worked-example-implementation#worked-baseline-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The implementation keeps the split, preprocessing fit, model fit, baseline, metric, exclusions, and assertions in one auditable execution path.
+
+[#baseline-synthesis-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="End-to-end baseline evidence record",table-description="Rows report data and split identities, sample sizes, prevalence, dummy and model PR-AUC, confusion counts, excluded target-relative fields, and the deployment limitation."]
+----
+from pathlib import Path
+
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.dummy import DummyClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import average_precision_score, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+def course_file(relative: str) -> Path:
+    """Locate canonical data in a repository checkout or student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+data_path = course_file("datasets/teaching/predictive-maintenance/observations.csv")
+data = pd.read_csv(data_path)
+assert data["UDI"].notna().all() and data["UDI"].is_unique
+assert set(data["Machine failure"].unique()) <= {0, 1}
+
+
+def run_baseline(frame: pd.DataFrame) -> dict[str, object]:
+    """Run the declared split, leakage-safe pipeline, baseline, and evidence checks."""
+    target = "Machine failure"
+    target_relatives = ["TWF", "HDF", "PWF", "OSF", "RNF"]
+    identifiers = ["UDI", "Product ID"]
+    features = [
+        column
+        for column in frame.columns
+        if column not in [target, *target_relatives, *identifiers]
+    ]
+    X_train, X_test, y_train, y_test = train_test_split(
+        frame[features],
+        frame[target],
+        test_size=0.25,
+        random_state=20260718,
+        stratify=frame[target],
+    )
+    numeric = [column for column in features if column != "Type"]
+    preprocessing = ColumnTransformer(
+        [
+            (
+                "numeric",
+                Pipeline(
+                    [
+                        ("impute", SimpleImputer(strategy="median")),
+                        ("scale", StandardScaler()),
+                    ]
+                ),
+                numeric,
+            ),
+            (
+                "category",
+                Pipeline(
+                    [
+                        ("impute", SimpleImputer(strategy="most_frequent")),
+                        ("encode", OneHotEncoder(handle_unknown="ignore")),
+                    ]
+                ),
+                ["Type"],
+            ),
+        ]
+    )
+    model = Pipeline(
+        [
+            ("preprocess", preprocessing),
+            ("model", LogisticRegression(max_iter=1000, class_weight="balanced")),
+        ]
+    ).fit(X_train, y_train)
+    dummy = DummyClassifier(strategy="prior").fit(X_train, y_train)
+    scores = model.predict_proba(X_test)[:, 1]
+    dummy_scores = dummy.predict_proba(X_test)[:, 1]
+    prediction = scores >= 0.5
+    tn, fp, fn, tp = confusion_matrix(y_test, prediction, labels=[0, 1]).ravel()
+    return {
+        "data identity": "uci-601-teaching-v1",
+        "split identity": "stratified-test-0.25-seed-20260718",
+        "rows": int(len(frame)),
+        "protected test rows": int(len(y_test)),
+        "positive prevalence": float(y_test.mean()),
+        "dummy PR-AUC": float(average_precision_score(y_test, dummy_scores)),
+        "model PR-AUC": float(average_precision_score(y_test, scores)),
+        "confusion (TN, FP, FN, TP)": (int(tn), int(fp), int(fn), int(tp)),
+        "excluded target relatives": ", ".join(target_relatives),
+        "limitation": "Synthetic row-level evidence; not validated for a real factory.",
+    }
+
+
+result = run_baseline(data)
+assert result["rows"] == 10_000
+assert result["protected test rows"] == 2_500
+assert result["model PR-AUC"] > result["dummy PR-AUC"]
+assert sum(result["confusion (TN, FP, FN, TP)"]) == result["protected test rows"]
+assert "real factory" in result["limitation"]
+pd.DataFrame.from_dict(result, orient="index", columns=["value"])
+----
+
+[.worked-example-results#worked-baseline-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The bounded evidence record verifies 10,000 source rows, 2,500 protected rows, removal of all five target-relative fields, and a model PR-AUC above the prior baseline. The confusion counts sum to the protected-sample size, so the threshold evidence and the ranking evidence refer to the same cases.
+
+[.worked-example-conclusion#worked-baseline-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The logistic baseline provides useful ranking beyond prevalence on this declared protected split. The result supports only a reproducible comparison on the synthetic row-level split: it does not select an operating threshold, validate probabilities, or establish performance for new machines, factories, or time periods. The confusion counts make the stem:[0.5] threshold consequences auditable but do not make that threshold optimal. Sampling variation, split sensitivity, and population shift remain unquantified.
+
+Use the page toolbar to download the synthesis notebook generated from this page.
 
 Complete the five xref:foundations/reproducible-delivery.adoc[delivery templates] and include a clean command that runs the public checks. The notebook should be restartable without manual path edits when used in the course clone.
 

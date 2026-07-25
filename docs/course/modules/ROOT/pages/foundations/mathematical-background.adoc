@@ -1,0 +1,319 @@
+= Mathematical background and error estimation
+:page-course-language: en
+:page-course-concepts: DP-ARR-01, DP-SMP-01, DP-EVAL-03, DP-MET-01, DP-MET-02, DP-NUM-01, DP-GEN-01
+:page-course-priority: P0
+:page-course-difficulty: D2
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO1, LO4, LO6, LO7, LO8
+:page-course-prerequisites: Functions, vectors, matrices, derivatives, elementary probability
+:page-course-assessed: yes
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
+
+This chapter fixes the notation and error language used throughout the course. It is not a complete probability or linear-algebra course. Its purpose is to make every data-analysis claim mathematically explicit: what is observed, what is random, what is estimated, which loss is minimised, and how far the reported value may be from the target quantity.
+
+== Data, population, and notation
+
+Let stem:[Z] denote one observational unit drawn from a population distribution stem:[P]. In supervised learning stem:[Z=(X,Y)], where stem:[X\in\mathcal X] is the available information and stem:[Y\in\mathcal Y] is the response. A sample is
+
+[stem]
+++++
+\mathcal D_n = \{Z_i=(X_i,Y_i)\}_{i=1}^{n}.
+++++
+
+The notation does not imply that the stem:[Z_i] are independent. Repeated patients, machines, sites, or nearby times require a group or temporal dependence model.
+
+.Definition: Empirical mean
+[.def#def:empirical-mean]
+****
+For observed values stem:[x_1,\ldots,x_n], the empirical mean is
+
+[stem]
+++++
+\bar x = \frac{1}{n}\sum_{i=1}^{n}x_i.
+++++
+****
+
+.Definition: Empirical variance
+[.def#def:empirical-variance]
+****
+The unbiased sample variance for independent observations with a common finite variance is
+
+[stem]
+++++
+s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar x)^2.
+++++
+
+The divisor stem:[n-1] corrects the bias caused by estimating the population mean from the same sample. It does not correct selection bias, dependence, measurement error, or a changing population.
+****
+
+== Vectors, norms, and conditioning
+
+For stem:[x=(x_1,\ldots,x_p)^\top\in\mathbb R^p], the norms most often used here are
+
+[stem]
+++++
+\lVert x\rVert_1=\sum_{j=1}^{p}|x_j|,
+\qquad
+\lVert x\rVert_2=\left(\sum_{j=1}^{p}x_j^2\right)^{1/2},
+\qquad
+\lVert x\rVert_\infty=\max_j|x_j|.
+++++
+
+They encode different geometries. Ridge uses a squared stem:[\ell_2] penalty; Lasso uses an stem:[\ell_1] penalty. Distance-based methods depend on feature scale because rescaling one coordinate changes stem:[\lVert x-x'\rVert_2].
+
+.Definition: Condition number
+[.def#def:condition-number]
+****
+For an invertible matrix stem:[A], the normwise condition number is
+
+[stem]
+++++
+\kappa(A)=\lVert A\rVert\,\lVert A^{-1}\rVert.
+++++
+
+It measures sensitivity of the mathematical problem, not the quality of one implementation. For a small perturbation stem:[\delta b] in stem:[Ax=b], a first-order bound is
+
+[stem]
+++++
+\frac{\lVert\delta x\rVert}{\lVert x\rVert}
+\lesssim
+\kappa(A)\frac{\lVert\delta b\rVert}{\lVert b\rVert}.
+++++
+****
+
+For full-column-rank stem:[X], stem:[\kappa(X^\top X)=\kappa(X)^2] in the stem:[\ell_2] norm. This is why explicitly solving least squares through the normal-equation inverse can amplify numerical error.
+
+== Probability, expectation, and conditional quantities
+
+.Definition: Expectation and variance
+[.def#def:expectation-variance]
+****
+For an integrable random variable stem:[U],
+
+[stem]
+++++
+\mathbb E[U]=\int u\,dP(u),
+\qquad
+\operatorname{Var}(U)=\mathbb E\!\left[(U-\mathbb E[U])^2\right].
+++++
+
+Expectation is a population quantity. An empirical average estimates it only under a sampling design that connects the observed sample to that population.
+****
+
+Conditional expectation stem:[\mathbb E[Y\mid X=x]] is a function of stem:[x]. In squared-error regression it is the population-optimal prediction. Conditional probability stem:[P(Y=k\mid X=x)] is the target of probabilistic classification, not automatically the output of every classifier.
+
+== Estimators, bias, variance, and mean-squared error
+
+Let stem:[\theta(P)] be a population quantity and stem:[\widehat\theta=\widehat\theta(\mathcal D_n)] an estimator computed from the sample.
+
+.Definition: Estimator bias
+[.def#def:estimator-bias]
+****
+[stem]
+++++
+\operatorname{Bias}(\widehat\theta)
+=\mathbb E_{\mathcal D_n}[\widehat\theta]-\theta.
+++++
+****
+
+.Proposition: Bias–variance decomposition
+[.prop#prop:bias-variance]
+****
+For a scalar estimator with finite second moment,
+
+[stem]
+++++
+\mathbb E\!\left[(\widehat\theta-\theta)^2\right]
+=\operatorname{Var}(\widehat\theta)
++\operatorname{Bias}(\widehat\theta)^2.
+++++
+
+Proof: write stem:[\widehat\theta-\theta=(\widehat\theta-\mathbb E\widehat\theta)+(\mathbb E\widehat\theta-\theta)], expand the square, and use stem:[\mathbb E(\widehat\theta-\mathbb E\widehat\theta)=0].
+****
+
+Regularisation may increase bias while reducing variance. The useful question is whether the total expected error decreases for the target population and sample size.
+
+== Loss, risk, and generalisation
+
+Let stem:[f:\mathcal X\to\mathcal A] be a prediction rule and stem:[L(y,f(x))] a loss.
+
+.Definition: Population and empirical risk
+[.def#def:risk]
+****
+[stem]
+++++
+R(f)=\mathbb E_{(X,Y)\sim P}[L(Y,f(X))],
+\qquad
+\widehat R_n(f)=\frac{1}{n}\sum_{i=1}^{n}L(Y_i,f(X_i)).
+++++
+****
+
+Training minimises an empirical objective. Evaluation tries to estimate a population risk or another explicitly declared estimand. Reusing evaluation observations for model choice makes the estimate optimistically biased.
+
+Let stem:[f^*] minimise risk over all admissible rules, stem:[f^*_{\mathcal H}] minimise risk in a model class stem:[\mathcal H], stem:[\widehat f_{\mathcal H}] be the fitted empirical minimiser, and stem:[\widetilde f] the numerically computed result. One useful error ledger is
+
+[stem]
+++++
+\underbrace{R(\widetilde f)-R(f^*)}_{\text{total excess risk}}
+=
+\underbrace{R(f^*_{\mathcal H})-R(f^*)}_{\text{approximation}}
++
+\underbrace{R(\widehat f_{\mathcal H})-R(f^*_{\mathcal H})}_{\text{estimation}}
++
+\underbrace{R(\widetilde f)-R(\widehat f_{\mathcal H})}_{\text{optimisation/numerical}}.
+++++
+
+In practice there is also data error: measurement, linkage, missingness, sampling, and dataset shift can change the target problem itself.
+
+== Sampling uncertainty
+
+For independent observations with variance stem:[\sigma^2],
+
+[stem]
+++++
+\operatorname{Var}(\bar X)=\frac{\sigma^2}{n},
+\qquad
+\widehat{\operatorname{SE}}(\bar X)=\frac{s}{\sqrt n}.
+++++
+
+An approximate large-sample 95% confidence interval is stem:[\bar x\pm1.96\,s/\sqrt n]. This formula is invalid when rows are treated as independent despite strong temporal or group dependence. For correlated observations,
+
+[stem]
+++++
+\operatorname{Var}(\bar X)
+=\frac{1}{n^2}\sum_{i=1}^{n}\sum_{j=1}^{n}\operatorname{Cov}(X_i,X_j),
+++++
+
+so positive covariance increases uncertainty. Use group-, block-, or time-aware resampling when the sampling unit is not a row.
+
+== Worked example: mean and standard error
+
+[.worked-example-context#worked-mathematical-background-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+Twenty-five independent observations have sample mean stem:[\bar x=12] and sample standard deviation stem:[s=5]. Estimate the uncertainty of the sample mean and construct the usual large-sample 95% interval. Independence and a representative sampling mechanism are assumptions, not consequences of having 25 rows.
+
+[.worked-example-method#worked-mathematical-background-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+Under independent sampling with finite variance, estimate the standard error of the mean by stem:[\widehat{\operatorname{SE}}(\bar X)=s/\sqrt n]. The usual large-sample interval is stem:[\bar x\pm1.96\,s/\sqrt n].
+
+.Mathematical insight — spread and estimator uncertainty are different
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* The sample standard deviation describes variation among individual observations; dividing by stem:[\sqrt n] estimates repeated-sample variation of the mean. The square-root law follows from stem:[\operatorname{Var}(\bar X)=\sigma^2/n] under independence. Dependence adds covariance terms and can destroy the advertised reduction.
+====
+
+[.worked-example-implementation#worked-mathematical-background-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+This example is intentionally implemented as a transparent hand calculation and semantic table; executable Python would not add evidence to the arithmetic.
+
+.Example: Mean and standard error
+[.examp#ex:mean-se]
+****
+For stem:[n=25], stem:[\bar x=12], and stem:[s=5], the estimated standard error is stem:[5/\sqrt{25}=1]. The large-sample interval is stem:[12\pm1.96], or approximately stem:[[10.04,13.96]]. It quantifies repeated-sample uncertainty under the sampling assumptions; it does not include instrument bias or population mismatch.
+****
+
+The calculation separates three quantities that students often conflate:
+
+[cols="2,1,3",options="header"]
+|===
+|Quantity |Value |Operational meaning
+
+|Sample standard deviation stem:[s]
+|stem:[5]
+|Observed spread among individual rows
+
+|Estimated standard error stem:[s/\sqrt n]
+|stem:[1]
+|Repeated-sample spread of the mean under independence
+
+|95% interval half-width
+|stem:[1.96]
+|Approximate uncertainty attached to this estimation procedure
+|===
+
+[.worked-example-results#worked-mathematical-background-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The estimated standard error is stem:[1], and the large-sample 95% interval is approximately stem:[[10.04,13.96]]. The result table keeps the observation spread stem:[s=5], the standard error stem:[1], and the interval half-width stem:[1.96] as separate quantities.
+
+[.worked-example-conclusion#worked-mathematical-background-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+Under the declared independent-sampling approximation, the sample mean is estimated with standard error stem:[1] and the interval reports finite-sample estimation uncertainty. If the 25 rows are repeated readings from five devices, the effective unit may be the device and the independence formula can be severely optimistic. Even a correctly computed interval excludes measurement bias and population mismatch. This is why the error ledger records data, sampling, model, and numerical errors separately.
+
+== Error estimation for predictive performance
+
+If test losses stem:[\ell_i=L(Y_i,\widehat f(X_i))] are independent conditional on the fixed fitted model, then
+
+[stem]
+++++
+\widehat R_{\mathrm{test}}=\frac1m\sum_{i=1}^{m}\ell_i,
+\qquad
+\widehat{\operatorname{SE}}(\widehat R_{\mathrm{test}})
+=\frac{s_\ell}{\sqrt m}.
+++++
+
+The uncertainty includes finite test-sample variation but not training-sample variation. Repeating the complete split/fitting procedure, nested cross-validation, or an appropriate bootstrap can expose additional variability. Fold scores are correlated because training sets overlap; their naive standard deviation divided by stem:[\sqrt K] is not a universal confidence interval.
+
+For classification counts, report denominators. If stem:[r=TP/(TP+FN)] estimates recall from stem:[m_+=TP+FN] positive cases, a rough binomial standard error is
+
+[stem]
+++++
+\widehat{\operatorname{SE}}(r)
+=\sqrt{\frac{r(1-r)}{m_+}},
+++++
+
+but group dependence and threshold selection require a more appropriate resampling design.
+
+== Numerical, statistical, and modelling errors
+
+[cols="2,3,3",options="header"]
+|===
+|Error source |Question |Evidence
+|Data/measurement |Does the table represent the intended units and population? |Contracts, calibration records, sensitivity to repair
+|Approximation/model |Can the model class express the relevant relationship? |Residual structure, alternative model classes, domain argument
+|Estimation/sampling |Would another valid sample give a different result? |Standard errors, group/block bootstrap, repeated splits, learning curves
+|Selection |How much choice used validation evidence? |Nested evaluation, untouched test, candidate budget
+|Optimisation/numerical |Was the stated objective solved accurately and stably? |Residual/gradient norm, conditioning, tolerance and solver comparison
+|Monte Carlo |How much variation comes from finite random simulation? |Independent seeds, Monte Carlo standard error
+|Distribution shift |Does the evaluation population match intended use? |Time/site/group comparisons, drift and representativeness analysis
+|===
+
+Every result card should state which rows of this ledger were estimated, bounded, diagnosed qualitatively, or left unknown.
+
+== Exercises
+
+.Exercise: Bias and variance
+[.exer#ex:bias-variance]
+****
+Two estimators of stem:[\theta] have biases stem:[0] and stem:[0.5], and variances stem:[4] and stem:[1]. Compute their mean-squared errors. Explain why “unbiased” does not imply “better”.
+****
+
+.Exercise: Dependence
+[.exer#ex:dependence]
+****
+Derive stem:[\operatorname{Var}(\bar X)] when all observations have variance stem:[\sigma^2] and every distinct pair has covariance stem:[\rho\sigma^2]. What happens to the effective information as stem:[n\to\infty] for fixed stem:[\rho>0]?
+****
+
+.Exercise: Error ledger
+[.exer#ex:error-ledger]
+****
+For one course notebook, identify one data, approximation, estimation, selection, and numerical error. For each, propose either a quantitative estimate or a falsifiable diagnostic.
+****

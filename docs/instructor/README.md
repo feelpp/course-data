@@ -2,7 +2,16 @@
 
 ## Canonical sources
 
-Concise concept pages are authored directly in AsciiDoc under `docs/course`. Executable labs are authored as reviewed instructor notebooks under `notebooks/instructor`. Generated notebooks are disposable build artifacts and must not be edited by hand.
+English learning narratives, mathematics, worked examples, executable evidence,
+and exercises are authored in AsciiDoc under `docs/course`. The Antora build
+generates the corresponding solution-free notebook attachments; generated
+notebooks are disposable and must not be edited by hand.
+
+The sole notebook-native exception is
+`notebooks/instructor/extensions/jax-transformations.ipynb`. Its Antora page is
+authoritative for the English narrative, mathematics, environment boundary, and
+transfer task. The notebook is authoritative only for the optional executable
+JAX lab and student/instructor cell transformations.
 
 ## Notebook variants
 
@@ -13,7 +22,7 @@ Use these cell tags:
 - `remove-cell`: omitted from the student variant;
 - ordinary cells: retained in both variants.
 
-Generate both variants with:
+Generate both variants of the JAX exception with:
 
 ```sh
 npm run notebooks:generate
@@ -25,7 +34,9 @@ Execute the fast reference set with:
 npm run notebooks:test
 ```
 
-Scheduled CI executes the full reference set. Student notebooks are always output-free and have no execution counts.
+The site build generates the AsciiDoc-first notebooks. Scheduled CI executes
+the full reference set. Student notebooks are always output-free and have no
+execution counts.
 
 ## Assessment boundary
 
@@ -40,4 +51,3 @@ The public repository may contain rubrics, specimen questions, and released asse
 - Confirm data source, licence, checksum, schema, and attribution.
 - Inspect the generated student notebook for leaked solutions.
 - Build and visually inspect the Antora page and downloadable notebook.
-

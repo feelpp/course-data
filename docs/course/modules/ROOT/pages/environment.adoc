@@ -10,7 +10,7 @@
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
 
-The reference environment is CPython 3.12 on Ubuntu 24.04 LTS using CPU execution. macOS and Windows through WSL are supported, but a GPU is never required for P0 or P1 work.
+The reference environment is CPython 3.12 on Ubuntu 24.04 LTS using CPU execution. macOS and Windows through WSL are supported, but a GPU is never required for Essential (P0) or Core (P1) work.
 
 == Install the environment
 
@@ -32,4 +32,3 @@ This command validates curriculum and content metadata, generates clean student 
 == Reproducibility rule
 
 A result is complete only when it can be regenerated from a clean checkout using pinned dependencies and checksum-verified data. Saved notebook output alone is not evidence of reproducibility.
-

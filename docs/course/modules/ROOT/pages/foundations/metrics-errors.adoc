@@ -7,26 +7,242 @@
 :page-course-outcomes: LO4, LO6, LO10
 :page-course-prerequisites: leakage-safe baseline
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: fast
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
 
 A metric compresses consequences; it does not define them. Select the metric and decision threshold from the use, prevalence, scale, and costs before comparing many models.
 
+Use the notation and uncertainty rules from xref:foundations/mathematical-background.adoc[Mathematical background and error estimation]. Let stem:[y_i] be the observed response, stem:[\widehat y_i] a prediction, and stem:[e_i=y_i-\widehat y_i] the residual on stem:[n] protected evaluation cases.
+
 == Regression
 
-MAE is in target units and treats deviations linearly. RMSE penalises large residuals more strongly and is sensitive to scale/extremes. Always compare with a constant baseline and inspect residuals by predicted value, time, group, and relevant operating range. A lower aggregate error can hide systematic failure for one station or regime.
+.Definition: Common regression losses
+[.def#def:regression-losses]
+****
+[stem]
+++++
+\operatorname{MAE}=\frac1n\sum_{i=1}^{n}|e_i|,
+\qquad
+\operatorname{MSE}=\frac1n\sum_{i=1}^{n}e_i^2,
+\qquad
+\operatorname{RMSE}=\sqrt{\operatorname{MSE}}.
+++++
+****
+
+MAE is in target units and treats deviations linearly. RMSE is also in target units but penalises large residuals more strongly. MSE is the empirical risk associated with squared-error regression. All three depend on target scale.
+
+The coefficient of determination compares squared error with a constant-mean baseline:
+
+[stem]
+++++
+R^2=1-\frac{\sum_i(y_i-\widehat y_i)^2}{\sum_i(y_i-\bar y)^2}.
+++++
+
+It can be negative on new data. A negative test stem:[R^2] means the model is worse, under this loss and sample, than predicting the test-sample mean used by the formula. Always compare with a baseline fitted without test information and inspect residuals by predicted value, time, group, and operating range.
 
 == Classification
 
-The confusion matrix contains the operational counts. Precision conditions on predicted positives; recall conditions on actual positives; F1 encodes one symmetric trade-off. ROC-AUC ranks across thresholds but can look reassuring under severe imbalance; PR-AUC focuses on the positive class and must be compared with prevalence. Neither AUC selects the deployment threshold.
+For a declared positive class, the confusion matrix records true positives stem:[TP], false positives stem:[FP], true negatives stem:[TN], and false negatives stem:[FN].
 
-Choose a threshold using missed-event cost, false-alarm workload, or an explicit constraint. Do not tune the threshold on the final test. A score is not automatically a calibrated probability.
+.Definition: Rates derived from the confusion matrix
+[.def#def:classification-rates]
+****
+[stem]
+++++
+\operatorname{precision}=\frac{TP}{TP+FP},
+\quad
+\operatorname{recall}=\frac{TP}{TP+FN},
+\quad
+\operatorname{specificity}=\frac{TN}{TN+FP},
+\quad
+F_1=\frac{2\,\operatorname{precision}\,\operatorname{recall}}
+{\operatorname{precision}+\operatorname{recall}}.
+++++
+****
 
-== Laboratory
+Precision conditions on predicted positives; recall conditions on actual positives. They answer different questions and use different denominators. ROC-AUC estimates a ranking probability across thresholds. Under severe imbalance it can look reassuring while the positive predictions remain operationally poor. PR-AUC focuses on the positive class and must be compared with prevalence stem:[P(Y=1)], the expected average precision of an uninformative ranking. Neither AUC selects the deployment threshold.
 
-Using protected out-of-fold or validation predictions from the safe pipeline, compute the dummy baseline, confusion matrix, precision, recall, F1, ROC-AUC, and PR-AUC. Compare two thresholds and inspect the highest-confidence errors without using target-derived failure fields.
+== Thresholds and costs
 
-xref:attachment$notebooks/foundations/metrics-errors.ipynb[Download the student notebook].
+For a score stem:[s(x)] and threshold stem:[t], predict positive when stem:[s(x)\ge t]. If a false negative costs stem:[c_{FN}] and a false positive costs stem:[c_{FP}], empirical decision cost is
+
+[stem]
+++++
+\widehat C(t)=\frac{c_{FN}FN(t)+c_{FP}FP(t)}{n}.
+++++
+
+This formula makes the assumed exchange rate between missed events and false alarms visible. Capacity constraints can instead impose stem:[FP(t)\le B] for an inspection budget stem:[B]. Choose the threshold on training/validation evidence, then estimate its consequences once on the final test. A score is not automatically a calibrated probability.
+
+== Error estimation
+
+A reported metric is an estimate, not a property known exactly. For per-case losses stem:[\ell_i], estimate the sampling standard error by
+
+[stem]
+++++
+\widehat{\operatorname{SE}}(\bar\ell)=\frac{s_\ell}{\sqrt n}
+++++
+
+only when cases can reasonably be treated as independent. For recall stem:[r] evaluated on stem:[n_+=TP+FN] positive cases, a rough binomial standard error is
+
+[stem]
+++++
+\widehat{\operatorname{SE}}(r)=\sqrt{\frac{r(1-r)}{n_+}}.
+++++
+
+Use group or block bootstrap intervals when patients, machines, sites, or adjacent times are dependent. To compare two models, resample or analyse the paired loss differences stem:[d_i=\ell_{i,A}-\ell_{i,B}]; treating the two metric estimates as independent discards the pairing. Finite-test uncertainty does not include training instability, distribution shift, label error, or the uncertainty introduced by choosing the metric and threshold.
+
+== Hand calculation: counts, rates, and uncertainty
+
+.Example: Counts, rates, and uncertainty
+[.examp#ex:confusion-worked]
+****
+Suppose stem:[TP=36], stem:[FP=24], stem:[TN=920], and stem:[FN=20]. Then precision is stem:[36/60=0.60], recall is stem:[36/56\approx0.643], and specificity is stem:[920/944\approx0.975]. The recall standard error is approximately stem:[\sqrt{0.643(1-0.643)/56}\approx0.064]. Despite 95.6% accuracy, the classifier misses 20 of 56 events; the count is essential to the decision.
+****
+
+== Exercises
+
+.Exercise: Regression metric choice
+[.exer#ex:metric-choice]
+****
+For residuals stem:[(-1,-1,-1,5)], compute MAE and RMSE. Repeat after multiplying the target by 100. Which statements are invariant to the unit change, and which operational preference does each metric encode?
+****
+
+.Exercise: Threshold decision
+[.exer#ex:threshold-decision]
+****
+Threshold A gives stem:[FN=12,FP=30]; threshold B gives stem:[FN=5,FP=80]. Compare them for stem:[(c_{FN},c_{FP})=(10,1)] and stem:[(2,1)]. State which evidence would still be required before deployment.
+****
+
+== Worked example: metric and threshold evidence
+
+[.worked-example-context#worked-metrics-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+A maintenance team assigns cost stem:[c_{FN}=10] to a missed failure and stem:[c_{FP}=1] to an unnecessary inspection. Using protected predictions from the leakage-safe feature set, compare thresholds stem:[0.3], stem:[0.5], and stem:[0.7]. For each threshold compute the full confusion counts, precision, recall, and empirical cost per protected case.
+
+[.worked-example-method#worked-metrics-method]
+=== Method
+
+*Importance:* Core (P1)
+
+. Fit the model on training rows only and obtain one score per protected row.
+. Convert scores to decisions using the declared rule stem:[\widehat y_i(t)=\mathbf 1\{s_i\ge t\}].
+. Verify stem:[TN+FP+FN+TP=m] at every threshold.
+. Compute stem:[\widehat C(t)=(10FN(t)+FP(t))/m] and retain the counts needed to interpret it.
+. Compare thresholds as a sensitivity analysis, not as final-test optimisation.
+
+.Mathematical insight — a threshold encodes a decision problem
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Core (P1).* Scores become actions only after a threshold is combined with error costs and an evaluation population. The empirical cost stem:[\widehat C(t)] is a weighted risk estimate, not a property of the classifier alone. Selecting stem:[t] on the protected sample would minimise a noisy observed risk and introduce selection optimism.
+====
+
+[.worked-example-implementation#worked-metrics-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The implementation fits once, reuses the same protected scores for all three thresholds, and checks the confusion-count identity at each threshold.
+
+[#threshold-report-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Protected-sample consequences at three illustrative thresholds",table-description="Rows are score thresholds. Columns report true negatives, false positives, false negatives, true positives, precision, recall, and empirical cost per case when a false negative costs ten times a false positive."]
+----
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, precision_score, recall_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+def course_file(relative: str) -> Path:
+    """Locate canonical data in a repository checkout or student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+data_path = course_file("datasets/teaching/predictive-maintenance/observations.csv")
+data = pd.read_csv(data_path)
+features = [
+    "Type", "Air temperature [K]", "Process temperature [K]",
+    "Rotational speed [rpm]", "Torque [Nm]", "Tool wear [min]",
+]
+X_train, X_test, y_train, y_test = train_test_split(
+    data[features],
+    data["Machine failure"],
+    test_size=0.25,
+    random_state=20260718,
+    stratify=data["Machine failure"],
+)
+preprocessing = ColumnTransformer(
+    [
+        ("type", OneHotEncoder(handle_unknown="ignore"), ["Type"]),
+        ("numeric", StandardScaler(), features[1:]),
+    ]
+)
+model = make_pipeline(
+    preprocessing, LogisticRegression(max_iter=1000, class_weight="balanced")
+).fit(X_train, y_train)
+scores = model.predict_proba(X_test)[:, 1]
+
+
+def threshold_report(threshold: float) -> dict[str, float | int]:
+    """Return counts, rates, and a declared asymmetric empirical cost."""
+    prediction = np.asarray(scores) >= threshold
+    tn, fp, fn, tp = confusion_matrix(y_test, prediction, labels=[0, 1]).ravel()
+    return {
+        "threshold": threshold,
+        "TN": int(tn),
+        "FP": int(fp),
+        "FN": int(fn),
+        "TP": int(tp),
+        "precision": precision_score(y_test, prediction, zero_division=0),
+        "recall": recall_score(y_test, prediction, zero_division=0),
+        "cost per case (c_FN=10, c_FP=1)": (10 * fn + fp) / len(y_test),
+    }
+
+
+reports = pd.DataFrame([threshold_report(value) for value in (0.3, 0.5, 0.7)]).set_index(
+    "threshold"
+)
+assert (reports[["TN", "FP", "FN", "TP"]].sum(axis=1) == len(y_test)).all()
+reports
+----
+
+[.worked-example-results#worked-metrics-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The result table makes the trade-off auditable: increasing the threshold changes false positives, false negatives, precision, recall, and the declared empirical cost while leaving the protected cases fixed. The identity stem:[TN+FP+FN+TP=m] verifies that every reported row uses the same denominator.
+
+[.worked-example-conclusion#worked-metrics-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The table supports comparison of three predeclared decision rules under the stated ten-to-one cost ratio; it does not identify a universally optimal threshold. These thresholds are a sensitivity comparison, not a valid final-test selection procedure. In a deployment study the threshold and cost model must be chosen from training/validation evidence, then evaluated once on protected cases. Cost misspecification, sampling variation, calibration error, and population shift remain.
+
+Use the page toolbar to download the generated notebook.
 
 == Independent transfer
 

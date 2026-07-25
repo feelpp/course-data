@@ -5,16 +5,20 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
+import shutil
 from pathlib import Path
 from typing import Any
 
 import nbformat
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE = ROOT / "notebooks/instructor"
 DEFAULT_OUTPUT = ROOT / "build/notebooks"
 REQUIRED_METADATA = {
     "assessed",
+    "accessibility",
     "concept_ids",
     "difficulty",
     "duration_minutes",
@@ -40,6 +44,11 @@ def validate_source(notebook: Any, path: Path) -> None:
         raise ValueError(f"{path}: missing course metadata: {', '.join(missing)}")
     if course["language"] != "en":
         raise ValueError(f"{path}: student-facing notebook language must be en")
+    accessibility = course.get("accessibility", {})
+    if accessibility.get("keyboard_only") is not True:
+        raise ValueError(f"{path}: notebook must support keyboard-only completion")
+    if accessibility.get("colour_alone_forbidden") is not True:
+        raise ValueError(f"{path}: notebook must forbid colour-only meaning")
     for index, cell in enumerate(notebook.cells):
         tags = set(cell.metadata.get("tags", []))
         if "solution" in tags and not cell.metadata.get("course", {}).get("student_source"):
@@ -48,17 +57,19 @@ def validate_source(notebook: Any, path: Path) -> None:
 
 def generated_banner(source_path: Path, mode: str) -> Any:
     label = "student" if mode == "student" else "instructor"
-    return nbformat.v4.new_markdown_cell(
+    cell = nbformat.v4.new_markdown_cell(
         "\n".join(
             [
                 f"> **Generated {label} notebook.**",
                 "> Do not edit this generated file in the repository; "
-                "edit the reviewed instructor source.",
+                "edit the declared notebook-native source.",
                 f"> Source: `{source_path.as_posix()}`",
             ]
         ),
         metadata={"tags": ["generated-notice"]},
     )
+    cell["id"] = hashlib.sha256(f"banner:{mode}:{source_path}".encode()).hexdigest()[:8]
+    return cell
 
 
 def transform(source: Any, source_path: Path, mode: str) -> Any:
@@ -80,6 +91,8 @@ def transform(source: Any, source_path: Path, mode: str) -> Any:
         cells.append(cell)
     notebook.cells = [generated_banner(source_path, mode), *cells]
     notebook.metadata["course"]["generated_variant"] = mode
+    notebook.metadata["course"]["source_kind"] = "notebook-native"
+    notebook.metadata["course"]["source_path"] = source_path.as_posix()
     clear_execution(notebook)
     nbformat.validate(notebook)
     return notebook
@@ -88,7 +101,23 @@ def transform(source: Any, source_path: Path, mode: str) -> Any:
 def generate(source_dir: Path, output_dir: Path, mode: str) -> list[Path]:
     sources = sorted(source_dir.rglob("*.ipynb"))
     if not sources:
-        raise ValueError(f"No instructor notebooks found below {source_dir}")
+        raise ValueError(f"No notebook-native sources found below {source_dir}")
+    if source_dir.resolve() == DEFAULT_SOURCE.resolve():
+        curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))
+        declared = {
+            (ROOT / item["artifact"]).resolve()
+            for item in curriculum["enrichment_release"]["source_contract"][
+                "notebook_native_exceptions"
+            ]
+        }
+        discovered = {path.resolve() for path in sources}
+        if discovered != declared:
+            missing = sorted(path.relative_to(ROOT).as_posix() for path in declared - discovered)
+            extra = sorted(path.relative_to(ROOT).as_posix() for path in discovered - declared)
+            raise ValueError(
+                f"Notebook-native inventory disagrees with curriculum; "
+                f"missing={missing}, undeclared={extra}"
+            )
     outputs: list[Path] = []
     modes = ("student", "instructor") if mode == "both" else (mode,)
     for variant in modes:
@@ -114,6 +143,8 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    if args.output_dir.exists():
+        shutil.rmtree(args.output_dir)
     outputs = generate(args.source_dir, args.output_dir, args.mode)
     print(f"Generated {len(outputs)} notebook(s) in {args.output_dir}")
 

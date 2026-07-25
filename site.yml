@@ -22,7 +22,35 @@ output:
 antora:
   extensions:
     - '@antora/collector-extension'
-    - '@feelpp/antora-extensions'
+    - require: '@feelpp/antora-extensions'
+      jupyter:
+        include:
+          - foundations/data-lifecycle.adoc
+          - foundations/tabular-data.adoc
+          - foundations/data-quality.adoc
+          - foundations/eda-sampling.adoc
+          - foundations/safe-pipelines.adoc
+          - foundations/metrics-errors.adoc
+          - foundations/baseline-synthesis.adoc
+          - foundations/probability-distributions-moments.adoc
+          - foundations/quantiles-exceedance-risk.adoc
+          - foundations/mean-uncertainty.adoc
+          - analytical/linear-probabilistic.adoc
+          - analytical/classification-losses.adoc
+          - analytical/regularisation-generalisation.adoc
+          - analytical/model-selection.adoc
+          - analytical/tree-ensembles.adoc
+          - analytical/pca-clustering.adoc
+          - analytical/performance-columnar.adoc
+          - extensions/kernel-methods.adoc
+          - extensions/probability-calibration.adoc
+          - extensions/experiment-tracking.adoc
+          - extensions/drift-monitoring.adoc
+          - assessment/control-1-specimen.adoc
+          - assessment/mini-project.adoc
+          - assessment/control-2-specimen.adoc
+          - assessment/final-exam-specimen.adoc
+        asciidoctor-extension-version: 1.0.0-rc.18
 
 asciidoc:
   attributes:
@@ -31,10 +59,10 @@ asciidoc:
     icons: font
     source-highlighter: highlight.js
     stem: latexmath
+    sectanchors: false
     hide-uri-scheme: true
     course-title: Data Processing and Mining
     course-programme: CSMI
     course-repository-url: https://github.com/feelpp/course-data
   extensions:
     - '@feelpp/asciidoctor-extensions'
-

@@ -7,6 +7,14 @@
 :page-course-outcomes: LO6, LO7, LO8
 :page-course-prerequisites: scaling, SVD, exploratory analysis
 :page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: full
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
 
 [.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d3]#D3 Synthesis#
 
@@ -14,11 +22,223 @@ PCA finds orthogonal directions of maximum centred variance through SVD. Compone
 
 K-means minimises within-cluster squared Euclidean distance and favours roughly spherical, similarly scaled groups. Hierarchical linkage encodes another geometry; DBSCAN identifies density-connected regions and noise but depends strongly on scale and neighbourhood parameters.
 
-== Guided laboratory
+== Principal component analysis
 
-Standardise Dry Bean shape features without using `Class`, fit PCA, inspect reconstruction/explained variance, and compare k-means, agglomerative clustering, and DBSCAN on a controlled subset. Challenge k-means across seeds and bootstrap samples; use silhouette only as one internal diagnostic. Reveal class labels only for post-hoc interpretation.
+Let stem:[X\in\mathbb R^{n\times p}] be column-centred. Its singular-value decomposition is
 
-xref:attachment$notebooks/analytical/pca-clustering.ipynb[Download the student notebook].
+[stem]
+++++
+X=U\Sigma V^\top,
+\qquad
+\Sigma=\operatorname{diag}(\sigma_1,\ldots,\sigma_r),
+\quad \sigma_1\ge\cdots\ge\sigma_r>0.
+++++
+
+.Definition: Principal directions and scores
+[.def#def:pca]
+****
+The columns stem:[v_j] of stem:[V] are principal directions. The score of observation stem:[i] on component stem:[j] is stem:[z_{ij}=x_i^\top v_j]. The sample variance explained by component stem:[j] is
+
+[stem]
+++++
+\lambda_j=\frac{\sigma_j^2}{n-1},
+\qquad
+\operatorname{EVR}_j=\frac{\lambda_j}{\sum_{\ell=1}^{r}\lambda_\ell}.
+++++
+****
+
+.Theorem: Best rank-q reconstruction
+[.thm#thm:eckart-young]
+****
+The truncated SVD stem:[X_q=U_q\Sigma_qV_q^\top] minimises stem:[\lVert X-A\rVert_F] over matrices stem:[A] of rank at most stem:[q], and
+
+[stem]
+++++
+\lVert X-X_q\rVert_F^2=\sum_{j=q+1}^{r}\sigma_j^2.
+++++
+
+This is an approximation result in squared Euclidean geometry, not a guarantee that the retained components preserve a scientific target.
+****
+
+Standardisation replaces the covariance geometry by correlation-like geometry. It is appropriate when differing units should not determine variance dominance, but it also gives a noisy low-variance measurement the same marginal scale as a precise one.
+
+== Clustering objectives
+
+.Definition: K-means objective
+[.def#def:kmeans]
+****
+For assignments stem:[c_i\in\{1,\ldots,K\}] and centroids stem:[\mu_1,\ldots,\mu_K], K-means minimises
+
+[stem]
+++++
+J(c,\mu)=\sum_{i=1}^{n}\lVert x_i-\mu_{c_i}\rVert_2^2.
+++++
+
+Alternating assignment and centroid updates decrease stem:[J] but can converge to different local minima.
+****
+
+DBSCAN instead defines a neighbourhood stem:[N_\varepsilon(x)=\{x_i:\lVert x_i-x\rVert\le\varepsilon\}] and connects points whose neighbourhood contains at least `min_samples` observations. It can represent non-convex clusters but struggles when densities vary strongly.
+
+== Error estimation and stability
+
+PCA directions and cluster assignments are sample-dependent estimators. Refit across bootstrap samples or meaningful groups. Align PCA signs/directions before comparison; compare subspaces when eigenvalues are close because individual directions may rotate without changing the spanned space.
+
+For clustering, record objective variation, assignment agreement, and sensitivity to scaling, seed, stem:[K], distance, and algorithm. A stability score can compare pairs of co-clustered observations across fits, but high stability can still describe a stable artefact of sampling or preprocessing.
+
+Internal scores such as silhouette use the same geometry that defined the clusters. They do not prove external usefulness. If labels are revealed post hoc, keep them entirely outside fitting and state that agreement is evaluation, not discovery.
+
+== Worked example: variance, projection, and cluster evidence
+
+[.worked-example-context#worked-pca-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+A multivariate dataset is compressed before K-means clustering. Determine what a variance-retention rule guarantees, what it can discard, and which evidence is needed before interpreting a low-dimensional cluster plot.
+
+[.worked-example-method#worked-pca-method]
+=== Method
+
+*Importance:* Core (P1)
+
+.Example: Diagonal covariance
+[.examp#ex:pca-diagonal]
+****
+Suppose a centred two-feature sample has covariance
+
+[stem]
+++++
+S=\begin{bmatrix}9&0\\0&1\end{bmatrix}.
+++++
+
+The principal directions are the coordinate axes, with explained-variance ratios stem:[9/10] and stem:[1/10]. Retaining one component minimises squared reconstruction error, but if the second feature is a precisely measured safety variable, discarding it may still be scientifically unacceptable.
+****
+
+.Mathematical insight — PCA optimises reconstruction, not relevance
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Core (P1).* The leading stem:[k] eigenvectors solve the rank-stem:[k] least-squares reconstruction problem, and the discarded variance is the sum of omitted eigenvalues. This theorem concerns Euclidean reconstruction of the scaled features. It does not preserve low-variance targets, causal variables, rare regimes, or cluster identity; preprocessing and the scientific loss determine whether variance is an appropriate proxy for information.
+====
+
+[.worked-example-implementation#worked-pca-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The diagonal covariance example makes the eigenvalues, principal directions, and stem:[90\%] explained-variance ratio checkable by hand. The executable extension standardises Dry Bean shape features without using `Class`, fits PCA, and clusters a controlled subset. Its table reports retained dimension, cumulative explained variance, silhouette, stability across seeds, and a post-hoc comparison with withheld labels. The score plot visualises the fitted geometry but is not used as proof of natural classes.
+
+[#pca-clustering-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="PCA and K-means validation diagnostics",table-description="Rows report retained PCA dimension, cumulative explained variance, K-means silhouette, agreement across two fixed seeds, and post-hoc agreement with unused Dry Bean class labels."]
+----
+from pathlib import Path
+
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from sklearn.metrics import adjusted_rand_score, silhouette_score
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+def course_file(relative: str) -> Path:
+    """Locate canonical data in a repository checkout or student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+data_path = course_file("datasets/teaching/dry-bean/observations.csv")
+beans = pd.read_csv(data_path).groupby("Class", group_keys=False).sample(
+    n=160, random_state=20260722
+)
+X = beans.drop(columns="Class")
+class_labels = beans["Class"]
+
+# Class labels are not passed to scaling, PCA, or clustering.
+transform = make_pipeline(StandardScaler(), PCA(n_components=0.90, random_state=20260722))
+reduced = transform.fit_transform(X)
+clusters_a = KMeans(7, n_init=20, random_state=20260722).fit_predict(reduced)
+clusters_b = KMeans(7, n_init=20, random_state=20260723).fit_predict(reduced)
+pca = transform.named_steps["pca"]
+cumulative_variance = float(pca.explained_variance_ratio_.sum())
+silhouette = float(silhouette_score(reduced, clusters_a))
+seed_stability = float(adjusted_rand_score(clusters_a, clusters_b))
+posthoc_class_ari = float(adjusted_rand_score(class_labels, clusters_a))
+assert cumulative_variance >= 0.90
+assert reduced.shape[1] < X.shape[1]
+assert seed_stability > 0.80
+
+pd.DataFrame(
+    {
+        "value": [
+            reduced.shape[1],
+            cumulative_variance,
+            silhouette,
+            seed_stability,
+            posthoc_class_ari,
+        ],
+        "status": [
+            "selected by 90% variance rule",
+            "internal transformation diagnostic",
+            "internal geometry diagnostic",
+            "algorithmic stability diagnostic",
+            "post-hoc external comparison only",
+        ],
+    },
+    index=[
+        "retained components",
+        "cumulative explained variance",
+        "silhouette",
+        "ARI across seeds",
+        "ARI with withheld class",
+    ],
+)
+----
+
+[#pca-clustering-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="A two-dimensional PCA score plot shows seven K-means clusters using seven distinct marker shapes and colours; clusters overlap in several regions",figure-caption="First two standardised PCA scores coloured and marked by K-means assignment. Dry Bean class labels were not used in fitting this view.",result-interpretation="Separation in the first two components is a projection of the fitted geometry, not proof of seven natural classes. Overlap and seed sensitivity must be considered alongside silhouette, reconstruction, and domain evidence."]
+----
+import matplotlib.pyplot as plt
+import numpy as np
+
+markers = ["o", "s", "^", "D", "v", "P", "X"]
+plt.style.use("tableau-colorblind10")
+fig, ax = plt.subplots(figsize=(7.2, 5.2), constrained_layout=True)
+for cluster, marker in zip(range(7), markers, strict=True):
+    selected = clusters_a == cluster
+    ax.scatter(
+        reduced[selected, 0],
+        reduced[selected, 1],
+        s=20,
+        alpha=0.65,
+        marker=marker,
+        label=f"cluster {cluster + 1}",
+    )
+ax.set(xlabel="Principal component 1 score", ylabel="Principal component 2 score", title="K-means on standardised PCA scores")
+ax.legend(ncols=2, fontsize="small")
+ax.grid(alpha=0.2)
+plt.show()
+----
+
+[.worked-example-results#worked-pca-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The hand example retains stem:[90\%] of variance in one component. In the executable case, the table verifies at least stem:[90\%] cumulative explained variance, dimensional reduction, and K-means stability above stem:[0.80] adjusted Rand index across two seeds. Silhouette and post-hoc class agreement remain separate diagnostics, while the two-dimensional plot displays only the first two fitted directions.
+
+[.worked-example-conclusion#worked-pca-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The fitted transformation provides a compact and algorithmically stable representation for this controlled dataset, but it does not establish seven natural scientific classes. Explained variance measures reconstruction of the standardised feature space, silhouette measures internal separation under a chosen distance, and adjusted Rand index measures agreement between partitions. They are not interchangeable validation measures. The two-dimensional plot omits later components, and stability across two seeds is only a minimal algorithmic check; scientific cluster meaning requires external evidence.
+
+Use the page toolbar to download the generated notebook. Replace K-means only after stating which geometry or density assumption the alternative is meant to test.
 
 == Independent transfer
 
@@ -27,3 +247,17 @@ Create spherical, anisotropic, varying-density, and noisy oracle datasets. Predi
 == Assessment evidence
 
 Students must state scaling/centring, objective and geometry, distinguish transformation fitting from visualisation, quantify stability, challenge internal scores, and avoid calling clusters true classes. Class/target labels cannot enter fitting.
+
+== Exercises
+
+.Exercise: Reconstruction error
+[.exer#ex:pca-reconstruction]
+****
+A centred matrix has singular values stem:[10,4,1]. Compute the fraction of variance and squared Frobenius reconstruction error retained/omitted by rank one and rank two approximations.
+****
+
+.Exercise: K-means geometry
+[.exer#ex:kmeans-geometry]
+****
+Construct a two-dimensional dataset for which scaling one coordinate changes the preferred K-means partition. Explain which scientific unit decision the scaling represents.
+****

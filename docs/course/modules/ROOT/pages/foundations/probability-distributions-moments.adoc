@@ -1,0 +1,408 @@
+= Probability distributions and statistical moments
+:page-course-language: en
+:page-course-concepts: DP-EDA-01, DP-PROB-01, DP-REP-01
+:page-course-priority: P0
+:page-course-difficulty: D2
+:page-course-duration-minutes: 90
+:page-course-outcomes: LO4, LO7, LO9
+:page-course-prerequisites: Elementary probability, functions, integration, and basic Python arrays
+:page-course-assessed: yes
+:page-course-execution-profile: fast
+:page-course-figure-contract: Alternative text, caption, labelled axes and units, and non-colour encoding
+:page-jupyter:
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+:jupyter-language-name: python
+:jupyter-language-version: 3.12
+:jupyter-kernel-name: python3
+:jupyter-kernel-language: python
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
+
+A distribution is a mathematical model of possible outcomes and their probabilities. This lesson connects outcome type, support, probability mass or density, statistical moments, and a defensible choice of model family. The webpage and downloadable notebook are generated from this same AsciiDoc source.
+
+== Learning outcomes
+
+After this lesson, you should be able to:
+
+. distinguish a probability mass, a density, a distribution function, and an empirical distribution;
+. compute and interpret the first four standardized moment summaries when they exist;
+. explain why a few moments do not determine operational tail risk;
+. connect common distribution families to an outcome mechanism and identify a failed assumption;
+. use numerical plots and diagnostics without treating a named family as established fact.
+
+== Probability models and support
+
+Let stem:[X:\Omega\to\mathcal X] be a random variable defined on a probability space, and let stem:[P_X] denote its distribution. The *support* stem:[\mathcal X] is the set of values that the model allows. Support is a first modelling constraint: a Gaussian model permits negative values, whereas counts and waiting times do not.
+
+.Definition: Mass, density, and distribution function
+[.def#def:mass-density-cdf]
+****
+For a discrete random variable, the probability mass function is
+
+[stem]
+++++
+p_X(x)=\mathbb P(X=x),
+\qquad
+\sum_{x\in\mathcal X}p_X(x)=1.
+++++
+
+For an absolutely continuous random variable, a probability density stem:[f_X] satisfies
+
+[stem]
+++++
+\mathbb P(a<X\leq b)=\int_a^b f_X(x)\,dx,
+\qquad
+\int_{-\infty}^{\infty}f_X(x)\,dx=1.
+++++
+
+In both cases, the cumulative distribution function is
+
+[stem]
+++++
+F_X(x)=\mathbb P(X\leq x).
+++++
+****
+
+A mass is a probability. A density value is not: only an area under the density is a probability, and a density can exceed one. The CDF is non-decreasing, right-continuous, and tends to zero and one at the two extremes. It also represents discrete, continuous, and mixed distributions in one notation.
+
+*Distinguishing mass, density, and probability is an essential concept (P0).* Confusing a density height with an event probability produces incorrect scientific and operational conclusions.
+
+== Moments as distribution summaries
+
+.Definition: Raw and central moments
+[.def#def:moments]
+****
+When the relevant expectations are finite, the stem:[k]-th raw and central moments are
+
+[stem]
+++++
+m'_k=\mathbb E[X^k],
+\qquad
+\mu_k=\mathbb E\!\left[(X-\mathbb E[X])^k\right].
+++++
+****
+
+[cols="1,2,2,3,1",options="header"]
+|===
+|Order |Population quantity |Name |What it can and cannot say |Importance
+
+|1
+|stem:[m'_1=\mu=\mathbb E(X)]
+|Mean
+|Expected level or long-run average under repeated sampling. It need not be a typical observed value for a skewed or multimodal distribution.
+|Essential (P0)
+
+|2
+|stem:[\mu_2=\sigma^2]
+|Variance
+|Expected squared deviation from the mean. Standard deviation stem:[\sigma] restores the original unit but is still sensitive to extreme values.
+|Essential (P0)
+
+|3
+|stem:[\gamma_1=\mu_3/\sigma^3]
+|Skewness
+|Standardized signed third moment. Its sign is often associated with the direction of asymmetry, but it does not by itself order two distributions by tail probability.
+|Core (P1)
+
+|4
+|stem:[\gamma_2=\mu_4/\sigma^4-3]
+|Excess kurtosis
+|Standardized fourth moment relative to the Gaussian value. It measures fourth-power dispersion and is extremely outlier-sensitive; it is not simply “peakedness” or a complete measure of tail risk.
+|Core (P1)
+|===
+
+For observed values stem:[x_1,\ldots,x_n], sample moments replace expectations with empirical averages. Higher sample moments are unstable because large observations are cubed or raised to the fourth power. Some population moments do not exist: a Student stem:[t_\nu] distribution has a finite mean only for stem:[\nu>1], finite variance only for stem:[\nu>2], and finite fourth moment only for stem:[\nu>4].
+
+*Checking existence before interpreting a moment is a core concept (P1).* Software can return a finite sample variance or kurtosis even when the corresponding population moment is infinite.
+
+Moments compress a distribution but normally do not identify it. Even equal means and variances do not imply equal asymmetry, quantiles, exceedance probabilities, or decision risk. These distributional quantities are developed in xref:foundations/quantiles-exceedance-risk.adoc[Quantiles, exceedance probabilities, and risk].
+
+== Representative distribution families
+
+The family name is not a conclusion. It is a hypothesis about support, data-generating mechanism, dependence, and shape that must be checked against the intended use.
+
+[cols="2,2,2,3,1",options="header"]
+|===
+|Family |Type and support |Parameter convention here |Mechanism, use, and warning |Importance
+
+|Bernoulli / binomial
+|Discrete; stem:[\{0,1\}] or stem:[\{0,\ldots,m\}]
+|Success probability stem:[p]; binomial trial count stem:[m]
+|One binary trial or the number of successes in stem:[m] comparable independent trials. Dependence or varying stem:[p] invalidates the elementary binomial model.
+|Essential (P0)
+
+|Poisson
+|Discrete counts; stem:[\{0,1,2,\ldots\}]
+|Expected count stem:[\lambda] for a declared exposure; a rate model must include the exposure
+|Counts from a constant-rate independent-event model. The equality stem:[\mathbb E(X)=\operatorname{Var}(X)=\lambda] is restrictive; overdispersion requires investigation.
+|Core (P1)
+
+|Gaussian
+|Continuous; stem:[\mathbb R]
+|Mean stem:[\mu], standard deviation stem:[\sigma>0]
+|Symmetric, light-tailed measurement or approximation model. It conflicts with bounded support and may seriously understate tail risk.
+|Essential (P0)
+
+|Exponential / gamma
+|Continuous; stem:[(0,\infty)]
+|Exponential rate stem:[\lambda]; gamma shape stem:[k] and scale stem:[\theta]
+|Waiting times and positive skewed quantities. Exponential memorylessness and gamma parameter conventions must be stated rather than assumed.
+|Core (P1)
+
+|Student stem:[t]
+|Continuous; stem:[\mathbb R]
+|Location, scale, and degrees of freedom stem:[\nu]
+|Symmetric heavy-tailed variation. The scale is not the standard deviation, and low stem:[\nu] may make moments infinite.
+|Core (P1)
+
+|Empirical distribution
+|Discrete mass stem:[1/n] on each observation, with repeated values accumulating mass
+|Observed sample and optional design weights
+|Descriptive distribution and resampling model. It represents no values beyond the observations without additional assumptions.
+|Essential (P0)
+|===
+
+Other families become important when the support or mechanism requires them: categorical or multinomial outcomes, negative-binomial counts, beta proportions, and lognormal positive measurements. Learning a catalogue is less important than learning to justify support, parameterization, and assumptions.
+
+== Visual probability distribution zoo
+
+The following figure is a map of representative shapes, not evidence that real data follow any panel.
+
+.Probability distribution zoo
+[#distribution-zoo]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-alt="Eight labelled panels show Bernoulli, binomial, Poisson, empirical, Gaussian, exponential, gamma, and Student t distributions; discrete distributions use bars and continuous distributions use curves",figure-caption="Representative probability mass functions, an empirical distribution, and probability densities. Parameters are illustrative; vertical scales differ and should not be compared as probabilities across panels.",result-interpretation="Discrete models allocate probability to separated outcomes, whereas continuous models allocate probability through area. Support, skewness, and tail decay visibly differ even when panels use comparable horizontal ranges."]
+----
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import stats
+
+# Build probability masses for three named discrete models and one empirical model.
+empirical_values = np.array([0, 0, 1, 1, 1, 2, 2, 3, 4])
+empirical_x, empirical_counts = np.unique(empirical_values, return_counts=True)
+discrete_panels = [
+    ("Bernoulli (p=0.35)", np.arange(2), stats.bernoulli.pmf(np.arange(2), 0.35)),
+    ("Binomial (m=12, p=0.35)", np.arange(13), stats.binom.pmf(np.arange(13), 12, 0.35)),
+    ("Poisson (rate=4)", np.arange(13), stats.poisson.pmf(np.arange(13), 4)),
+    ("Empirical distribution", empirical_x, empirical_counts / empirical_counts.sum()),
+]
+
+# Evaluate continuous densities only on grids compatible with their support.
+x_real = np.linspace(-4, 4, 500)
+x_positive = np.linspace(0, 8, 500)
+continuous_panels = [
+    ("Gaussian (mean=0, sd=1)", x_real, stats.norm.pdf(x_real)),
+    ("Exponential (rate=1)", x_positive, stats.expon.pdf(x_positive, scale=1)),
+    ("Gamma (shape=2, scale=1)", x_positive, stats.gamma.pdf(x_positive, a=2, scale=1)),
+    ("Student t (3 df)", x_real, stats.t.pdf(x_real, df=3)),
+]
+
+# Bars encode probability masses; curves encode densities whose areas equal one.
+fig, axes = plt.subplots(2, 4, figsize=(13, 6.2), constrained_layout=True)
+for ax, (title, x, probability) in zip(axes[0], discrete_panels, strict=True):
+    ax.bar(x, probability, color="#4c78a8", edgecolor="black")
+    ax.set(title=title, xlabel="outcome", ylabel="probability mass")
+
+for ax, (title, x, density) in zip(axes[1], continuous_panels, strict=True):
+    ax.plot(x, density, color="#8b1e1e", linewidth=2, linestyle="-")
+    ax.fill_between(x, density, color="#d9a6a6", alpha=0.35)
+    ax.set(title=title, xlabel="value", ylabel="probability density")
+
+plt.show()
+----
+
+Read the figure by checking support, discreteness, symmetry, skewness, and tail decay. Do not compare curve heights across panels as though they were probabilities.
+
+== Computed moment reference
+
+The table below is generated from the canonical Python source. Its purpose is not to replace the definitions above, but to make parameter conventions and moment-existence restrictions executable and reviewable.
+
+.Selected theoretical moments and their interpretation
+[#distribution-moment-reference]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Selected theoretical distribution moments",table-description="Rows compare Gaussian, Poisson, exponential, gamma, and Student t families. Columns identify the parameter convention, mean, variance, and a practical warning."]
+----
+import pandas as pd
+
+# Keep parameter conventions in visible strings so the table is self-contained.
+moment_reference = pd.DataFrame(
+    [
+        {
+            "family": "Gaussian",
+            "parameters": "mean=0, sd=1",
+            "mean": "0",
+            "variance": "1",
+            "practical warning": "light tails and unbounded support",
+        },
+        {
+            "family": "Poisson",
+            "parameters": "rate=4 per exposure",
+            "mean": "4",
+            "variance": "4",
+            "practical warning": "mean-variance equality is restrictive",
+        },
+        {
+            "family": "Exponential",
+            "parameters": "rate=1",
+            "mean": "1",
+            "variance": "1",
+            "practical warning": "memorylessness is a strong assumption",
+        },
+        {
+            "family": "Gamma",
+            "parameters": "shape=2, scale=1",
+            "mean": "2",
+            "variance": "2",
+            "practical warning": "rate and scale conventions differ",
+        },
+        {
+            "family": "Student t",
+            "parameters": "df=3, location=0, scale=1",
+            "mean": "0",
+            "variance": "3",
+            "practical warning": "variance is infinite when df <= 2",
+        },
+    ]
+).set_index("family")
+
+# Leaving the DataFrame as the final expression emits text and semantic HTML MIME forms.
+moment_reference
+----
+
+The equality of numerical moments does not imply equality of distributions. Conversely, a distribution family may be useful even when a high-order moment does not exist, provided the chosen estimand and decision do not silently require it.
+
+== From mechanism to an adequate model
+
+[cols="2,3,3,1",options="header"]
+|===
+|Question |Company example |Research example |Useful first check
+
+|Is the outcome binary, a count, real-valued, bounded, or strictly positive?
+|Conversion, defect count, latency, utilization proportion
+|Clinical endpoint, detection count, concentration, bounded response
+|Compare observed values and units with the proposed support.
+
+|What mechanism could generate the observations?
+|Arrivals per machine-hour, time between failures, multiplicative transaction values
+|Event incidence, waiting time, additive measurement error
+|State exposure, independence, stationarity, and aggregation assumptions.
+
+|Which distributional features affect the decision?
+|Capacity planning, warranty cost, fraud investigation, service reliability
+|Precision, physical safety limits, reproducibility, rare-event frequency
+|Compare centre, dispersion, asymmetry, and the relevant tail region.
+
+|Does the fitted family fail visibly or numerically?
+|Count variance far exceeds its mean; residuals retain seasonality
+|Impossible support, multimodality, unexplained group structure
+|Use stratified plots, residual diagnostics, and protected predictive checks.
+|===
+
+[TIP]
+====
+Start from the outcome and decision, not a favourite distribution. A good model is adequate for a declared purpose; it is not certified by a familiar bell-shaped histogram.
+====
+
+== Worked example: a failed Poisson implication
+
+[.worked-example-context#worked-poisson-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+Weekly incident counts from comparable machines have sample mean stem:[\bar x=4.2] and sample variance stem:[s^2=11.5]. Assess the simplest constant-rate Poisson model. If stem:[X\sim\operatorname{Poisson}(\lambda)], then stem:[\operatorname E(X)=\operatorname{Var}(X)=\lambda]; estimating stem:[\lambda] by stem:[\bar x] therefore predicts variance stem:[4.2].
+
+[.worked-example-method#worked-poisson-method]
+=== Method
+
+*Importance:* Core (P1)
+
+Compare the observed and model-implied variance through the dispersion ratio:
+
+[stem]
+++++
+D=\frac{s^2}{\bar x}
+=\frac{11.5}{4.2}
+\approx 2.74,
+\qquad
+D_{\mathrm{Poisson}}=1.
+++++
+
+The observed variance is stem:[11.5-4.2=7.3] counts-squared above the plug-in Poisson implication and is about stem:[174\%] larger than that implication.
+
+.Mathematical insight — a distribution implies linked moments
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Core (P1).* A probability model is more than a curve-fitting label: it imposes testable relationships. The constant-rate Poisson identity stem:[\operatorname{Var}(X)=\operatorname E(X)] makes stem:[D=s^2/\bar x] a direct diagnostic. A large discrepancy falsifies this implication for the observed summaries, but it neither supplies a formal sampling test without stem:[n] nor identifies the cause.
+====
+
+[.worked-example-implementation#worked-poisson-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The executable check keeps the observed summaries separate from the fitted model implications and verifies the hand-computed dispersion ratio.
+
+[#poisson-diagnostic-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Observed moments and the fitted constant-rate Poisson implication",table-description="Rows compare sample mean, sample variance, and variance-to-mean ratio with values implied by a Poisson model whose rate is estimated by the sample mean."]
+----
+import numpy as np
+import pandas as pd
+
+# Keep observed summaries separate from model implications.
+observed_mean = 4.2
+observed_variance = 11.5
+poisson_rate = observed_mean
+diagnostic = pd.DataFrame(
+    {
+        "observed": [observed_mean, observed_variance, observed_variance / observed_mean],
+        "fitted Poisson implication": [poisson_rate, poisson_rate, 1.0],
+    },
+    index=["mean", "variance", "variance / mean"],
+)
+assert np.isclose(diagnostic.loc["variance / mean", "observed"], 2.7380952381)
+diagnostic.round(3)
+----
+
+[.worked-example-results#worked-poisson-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The fitted constant-rate Poisson model implies variance stem:[4.2] and dispersion ratio stem:[1], whereas the observed variance is stem:[11.5] and the ratio is approximately stem:[2.74]. The stem:[7.3] counts-squared discrepancy is too large to dismiss as rounding.
+
+[.worked-example-conclusion#worked-poisson-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The observed moments are inconsistent with the simplest constant-rate Poisson implication. The discrepancy is descriptive rather than a formal test because the number of weeks is not given, and it does not identify a cause. Rate heterogeneity, omitted exposure, clustering, serial dependence, or data errors can all create overdispersion. A negative-binomial model is one candidate to investigate, not an automatic repair.
+
+== Model and estimation error ledger
+
+[cols="2,3,3",options="header"]
+|===
+|Source |Question |Evidence
+|Measurement and coding |Are values, zeros, units, and category meanings correct? |Data contracts, calibration records, missingness and zero audits
+|Support and mechanism |Can the family generate the observed outcome type? |Range checks, exposure definition, scientific or process argument
+|Parameter estimation |How much would fitted parameters change in another valid sample? |Standard errors, group/block bootstrap, sensitivity across samples
+|Distributional approximation |Which shape, dependence, or tail feature is missed? |Residuals, empirical CDF, stratified diagnostics, predictive checks
+|Numerical implementation |Do parameter conventions and library calls represent the stated model? |Unit tests against known moments and probabilities
+|Population shift |Will rates or shapes change by time, site, or operating regime? |Temporal and group comparisons with a declared target population
+|===
+
+== Check your understanding
+
+. For each outcome—binary component failure, failures per 1,000 operating hours, repair duration, and bounded utilization—state its support and one plausible family. Then state one assumption that could fail.
+. Derive the mean and variance of stem:[Y=aX+b] from those of stem:[X]. Which standardized moments remain unchanged when stem:[a>0]?
+. Explain why observing finite sample kurtosis does not prove that the population fourth moment exists.
+. Change one parameter at a time in the distribution zoo. Explain which changes affect location, dispersion, support, skewness, or tail decay.
+. For the incident-count example, list two non-Poisson mechanisms and one data-quality explanation for the observed overdispersion.
+
+Download the xref:attachment$foundations/probability-distributions-moments.ipynb[generated notebook] and run it from top to bottom. Its outputs are intentionally cleared during generation so that a clean execution remains observable.

@@ -13,13 +13,13 @@ The same reasoning standards apply across controls, project work, and the final 
 [cols="3,1,4,4",options="header"]
 |===
 |Criterion |Typical share |Competent evidence |Critical or insufficient evidence
-|Problem and data understanding |10% |Correct unit, target, stakeholders, scope, assumptions, and success criterion. |Wrong unit of analysis or an answer to a different problem.
-|Data quality and provenance |15% |Traceable permitted data; checked schema, joins, types, units, missingness, duplicates, anomalies. |Untraceable data, invalid join, or silent unit/type error.
-|Pipeline and leakage control |20% |Splits protect evaluation; learned transformations and selection are fitted inside the training design. |Test-informed preprocessing or selection, target/temporal/group leakage.
-|Method and mathematical reasoning |15% |Baseline, assumptions, stable computation, and method choice are connected. |No baseline, incompatible assumptions, or numerically unsafe implementation without discussion.
-|Evaluation and uncertainty |15% |Consequences guide metrics and thresholds; failures, variation, and uncertainty are reported. |Accuracy alone under imbalance, repeated test tuning, no failure analysis.
-|Code, tests, and reproducibility |15% |Toy-oracle tests, smoke path, clean run, fixed environment, seeds and data identifiers. |Hidden notebook state, no executable checks, cannot run from the assessed commit.
-|Interpretation, limitations, communication, AI disclosure |10% |Claims match evidence; figures are labelled; non-causality and limits are explicit; assistance is disclosed. |Causal claims from association, material omissions, prohibited or undisclosed assistance.
+|R1 — Problem and data understanding |10% |Correct unit, target, stakeholders, scope, assumptions, and success criterion. |Wrong unit of analysis or an answer to a different problem.
+|R2 — Data quality and provenance |15% |Traceable permitted data; checked schema, joins, types, units, missingness, duplicates, anomalies. |Untraceable data, invalid join, or silent unit/type error.
+|R3 — Pipeline and leakage control |20% |Splits protect evaluation; learned transformations and selection are fitted inside the training design. |Test-informed preprocessing or selection, target/temporal/group leakage.
+|R4 — Method and mathematical reasoning |15% |Baseline, assumptions, stable computation, and method choice are connected. |No baseline, incompatible assumptions, or numerically unsafe implementation without discussion.
+|R5 — Evaluation and uncertainty |15% |Consequences guide metrics and thresholds; failures, variation, and uncertainty are reported. |Accuracy alone under imbalance, repeated test tuning, no failure analysis.
+|R6 — Code, tests, and reproducibility |15% |Toy-oracle tests, smoke path, clean run, fixed environment, seeds and data identifiers. |Hidden notebook state, no executable checks, cannot run from the assessed commit.
+|R7 — Interpretation, limitations, communication, AI disclosure |10% |Claims match evidence; figures are labelled; non-causality and limits are explicit; assistance is disclosed. |Causal claims from association, material omissions, prohibited or undisclosed assistance.
 |===
 
 == Performance levels
@@ -27,7 +27,7 @@ The same reasoning standards apply across controls, project work, and the final 
 * *Excellent:* correct, reproducible, well-tested evidence; choices follow from assumptions and consequences; uncertainty and limitations are explicit.
 * *Competent:* correct core pipeline and interpretation with minor omissions that do not invalidate the conclusion.
 * *Developing:* partial technical success, but validation, testing, or justification is incomplete and conclusions need qualification.
-* *Insufficient:* a critical P0 failure, non-reproducible evidence, major leakage/join error, untraceable data, or unsupported conclusion.
+* *Insufficient:* a critical Essential (P0) failure, non-reproducible evidence, major leakage/join error, untraceable data, or unsupported conclusion.
 
 == Fairness and partial credit
 

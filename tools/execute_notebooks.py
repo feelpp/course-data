@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 from pathlib import Path
 
 import nbformat
@@ -14,13 +15,24 @@ from tools.generate_notebooks import DEFAULT_SOURCE, generate
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "build/notebooks/instructor"
 EXECUTED = ROOT / "build/executed-notebooks"
+ASCIIDOC_GENERATED = ROOT / "public/course-data/_attachments"
 
 
 def execute(profile: str) -> list[Path]:
+    if GENERATED.exists():
+        shutil.rmtree(GENERATED)
     generate(DEFAULT_SOURCE, GENERATED, "instructor")
     outputs: list[Path] = []
     timeout = 180 if profile == "fast" else 900
-    for path in sorted(GENERATED.rglob("*.ipynb")):
+    native_paths = [("native", path) for path in sorted(GENERATED.rglob("*.ipynb"))]
+    asciidoc_paths = [
+        ("asciidoc", path)
+        for path in sorted(ASCIIDOC_GENERATED.rglob("*.ipynb"))
+        if "notebooks" not in path.relative_to(ASCIIDOC_GENERATED).parts
+    ]
+    if not asciidoc_paths:
+        raise RuntimeError("No AsciiDoc-generated notebooks found; run the site build first")
+    for source_kind, path in [*native_paths, *asciidoc_paths]:
         notebook = nbformat.read(path, as_version=4)
         notebook_profile = notebook.metadata["course"].get("execution_profile", "full")
         if profile == "fast" and notebook_profile != "fast":
@@ -31,8 +43,9 @@ def execute(profile: str) -> list[Path]:
             kernel_name="python3",
             resources={"metadata": {"path": str(path.parent)}},
         )
-        client.execute()
-        destination = EXECUTED / path.relative_to(GENERATED)
+        client.execute(cwd=str(path.parent))
+        source_root = GENERATED if source_kind == "native" else ASCIIDOC_GENERATED
+        destination = EXECUTED / source_kind / path.relative_to(source_root)
         destination.parent.mkdir(parents=True, exist_ok=True)
         nbformat.write(notebook, destination)
         outputs.append(destination)

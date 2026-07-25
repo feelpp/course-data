@@ -1,0 +1,49 @@
+= English–French glossary
+:page-course-language: en
+:page-course-concepts: DP-DOC-01, DP-FND-02
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 20
+:page-course-outcomes: LO1, LO10
+:page-course-prerequisites: None
+:page-course-assessed: no
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
+
+The course site, notebooks, and assessments are in English. This glossary connects recurring English terminology to common French usage; it does not replace the definitions and assumptions in the learning chapters.
+
+[cols="2,2,5",options="header"]
+|===
+|English term |French equivalent |Meaning in this course
+|Data processing |Traitement des données |The complete path from source and validation to transformation, analysis, and delivery.
+|Observational unit |Unité statistique / unité d'observation |The entity represented by one declared row or record.
+|Target population |Population cible |The population to which the result is intended to apply.
+|Sample |Échantillon |The observed units used to estimate a population quantity.
+|Estimand |Quantité cible / estimande |The precisely defined population quantity answering the question.
+|Estimator |Estimateur |A rule that maps a sample to an estimate.
+|Estimate |Estimation |The numerical value produced by an estimator on observed data.
+|Bias |Biais |The systematic difference between an estimator's expectation and its target.
+|Variance |Variance |Variation of an estimator or random quantity across repetitions.
+|Standard error |Erreur-type |Estimated sampling standard deviation of an estimator.
+|Loss |Fonction de perte |A numerical penalty for a prediction or decision.
+|Risk |Risque |Expected loss for a declared population.
+|Training set |Ensemble d'apprentissage |Data used to fit model and preprocessing parameters.
+|Validation set |Ensemble de validation |Data used for model, hyperparameter, or threshold choice.
+|Test set |Ensemble de test |Protected data used for final evaluation after choices are fixed.
+|Data leakage |Fuite de données |Use of information during fitting or selection that would be unavailable for the evaluated case.
+|Cross-validation |Validation croisée |Repeated validation across declared folds while preserving the relevant dependence structure.
+|Overfitting |Surapprentissage / sur-ajustement |Fitting sample-specific variation that does not generalise.
+|Underfitting |Sous-apprentissage / sous-ajustement |Using a model or fit too limited to represent relevant structure.
+|Regularisation |Régularisation |Constraining or penalising a fit to control complexity and instability.
+|Condition number |Nombre de conditionnement |Sensitivity of a mathematical problem to perturbations.
+|Missing value |Valeur manquante |An unavailable measurement whose mechanism and handling require documentation.
+|Outlier |Valeur aberrante / atypique |An unusual observation requiring contextual review, not automatic deletion.
+|Feature |Variable explicative / caractéristique |Input information available at the declared decision time.
+|Label / target |Étiquette / variable cible |The response to predict or classify.
+|Baseline |Méthode de référence |A simple defensible comparator establishing whether added complexity has value.
+|Reproducibility |Reproductibilité |Ability to regenerate an artifact from identified code, data, environment, and parameters.
+|Repeatability |Répétabilité |Agreement under the same method, operator, equipment, and conditions.
+|Replicability |Réplicabilité |Agreement when a study is repeated with independently obtained evidence or implementation.
+|===
+
+When French and English usage varies by discipline, assessments accept a mathematically correct explanation rather than grading one preferred translation.
