@@ -35,7 +35,7 @@
     "npm": ">=10"
   },
   "dependencies": {
-    "@antora/cli": "3.1.15",
+    "@antora/cli": "3.2.0",
     "@antora/collector-extension": "1.0.3",
     "@antora/site-generator-default": "3.1.15",
     "@asciidoctor/core": "2.2.9",
