@@ -21,6 +21,16 @@ Record only role, environment class, and relevant prior experience. Do not place
 3. Confirm that no participant has instructor sources, solutions, hidden tests, or live assessment material.
 4. Give participants only the public website, student bundle, and the tasks below.
 
+For the September revision, use the new public practice notebooks and original
+synthetic data. A specimen notebook containing only the specification is not a
+timed implementation task. Prepare the environment before starting an assessment
+clock, and record installation time separately.
+
+The course lead also rehearses the Monday application tour against its 20-minute
+budget and the complete opening agenda against 120 minutes. Record actual elapsed
+time and cuts in the opening-session record. This instructor rehearsal does not
+replace the independent learner pilot.
+
 ## Tasks and evidence
 
 |Task |Target evidence |Maximum diagnostic window |
@@ -35,6 +45,40 @@ Record only role, environment class, and relevant prior experience. Do not place
 |Locate glossary, feedback, rubric, and specimen |Student-facing support artifacts are discoverable |10 min |
 
 Record active time, waiting time, first failure, recovery, unclear terms, environment issues, accessibility barriers, and unprompted misconceptions. Do not coach during the timed attempt; record the point at which help becomes necessary.
+
+## Timed public assessment rehearsals
+
+Use separate sittings after the prerequisite content has been learned. Do not
+combine all three formats into a single pilot visit or treat prior exposure to
+the public tasks as an unseen-exam timing observation.
+
+|Public task |Prerequisites |Target elapsed time |Evidence |
+|---|---|---:|---|
+|Control 1 practice |Blocks 1–7 |70 min |Validated join, repairs, checks, protected baseline, interpretation |
+|Control 2 practice |Blocks 1–13 |55 min |Evidence for defects, consequences, verified repairs, recommendation |
+|Final practice |Blocks 1–14 |165 min |Audit, reasoning, implementation, evaluation and reproducibility |
+
+Use `templates/assessment-rehearsal-observation.md` for actual elapsed and active
+time, completed tasks, first ambiguity, help required, and the exported artifact.
+A successful run of the supplied blank response notebook is a startup test only.
+The observer checks whether the student's evidence meets the public rubric;
+completeness messages are not correctness checks. Keep completed observation and
+assessment records in the approved private location and publish aggregates only.
+
+If a format overruns or requires undocumented help, reduce the task scope or
+improve scaffolding, then repeat with an independent learner. Two learners expose
+problems but do not establish a population timing distribution; retain slower
+completions and support needs in the decision instead of relying on a median alone.
+
+## Semester checkpoints
+
+After the Monday opening, summarise exit-ticket misconceptions and setup barriers
+before Block 2. After Blocks 4 and 9 compare actual contact, preparation and task
+time with the published allocation. At Blocks 5, 7, 9 and 13 review mini-project
+scope and per-student time logs. After each control review timing, ambiguous task
+wording and rubric interpretation. Use the course retrospective template and link
+each proposed change to evidence and a verification step. Publish only aggregates
+large enough to preserve anonymity.
 
 ## Exit criteria
 

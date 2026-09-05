@@ -93,6 +93,11 @@ representative-user pilot, and every named approval.
 
 ## Version progression
 
+The September revision and its remaining human gates are recorded in
+[`teaching-candidate-20260905.md`](teaching-candidate-20260905.md). Use the current
+commit's retained qualification report, rather than historical July counts or
+checksums, when evaluating this candidate.
+
 1. Approve a frozen commit and bundle checksum through the pilot protocol.
 2. Create `v0.9-pilot.N`; the tag workflow reruns all checks and publishes immutable artifacts.
 3. Record defects and corrections against the candidate commit.

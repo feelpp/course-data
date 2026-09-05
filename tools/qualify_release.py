@@ -134,6 +134,8 @@ def run(command: list[str]) -> None:
 def qualify(repetitions: int = 2) -> dict[str, Any]:
     if repetitions != 2:
         raise ValueError("Release qualification requires exactly two clean builds")
+    if working_tree_dirty():
+        raise RuntimeError("Release qualification requires a clean committed checkout")
     run(["npm", "run", "audit"])
     captures: list[dict[str, Any]] = []
     for run_number in range(1, repetitions + 1):
@@ -141,6 +143,8 @@ def qualify(repetitions: int = 2) -> dict[str, Any]:
         run(["npm", "run", "clean"])
         run(["npm", "run", "release:prepare"])
         captures.append(capture_release())
+        if captures[-1]["working_tree_dirty"]:
+            raise RuntimeError("Release preparation changed the committed source checkout")
     if captures[0] != captures[1]:
         keys = sorted(key for key in captures[0] if captures[0][key] != captures[1][key])
         raise RuntimeError(f"Clean release builds differ in: {keys}")
