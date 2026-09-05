@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '20 5 * * 1'
   workflow_dispatch:
+    inputs:
+      qualify:
+        description: Compare two clean full builds and retain the qualification report
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -30,9 +35,14 @@ jobs:
           cache: npm
       - run: uv sync --locked --all-groups --extra extensions
       - run: npm ci
-      - run: npm run audit
-      - run: npm run validate
-      - run: npm run site
-      - run: npm run test
-      - run: npm run notebooks:test:full
-      - run: npm run site:check
+      - name: Full course and bundle checks
+        if: ${{ !inputs.qualify }}
+        run: npm run audit && npm run release:prepare
+      - name: Two clean build qualification
+        if: ${{ inputs.qualify }}
+        run: uv run python -m tools.qualify_release
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: teaching-candidate-evidence
+          path: build/release/
+          if-no-files-found: error

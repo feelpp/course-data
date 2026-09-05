@@ -27,3 +27,9 @@ The first two clarity questions use a 1--5 scale in addition to optional text. T
 At the start of the next block, the instructor states what will change, what needs more evidence, and what remains unchanged because it is part of the course contract. Urgent technical or accessibility defects should be reported immediately through the approved support channel rather than waiting for the survey.
 
 Assessment-item statistics are reviewed separately after marks are final. They are aggregated by item and contain no student-level rows in the public course repository.
+
+For this delivery, the first exit ticket informs setup support before Block 2.
+Blocks 4 and 9 include a check on preparation, actual task time and remaining
+misconceptions. Project checkpoints review each student's outside-class time as
+well as the pair's scientific progress. After each control, the course team
+reviews task timing and ambiguous wording before the next assessment.
