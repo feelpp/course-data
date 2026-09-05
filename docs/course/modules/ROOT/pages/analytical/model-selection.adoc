@@ -179,6 +179,48 @@ ax.grid(alpha=0.25)
 plt.show()
 ----
 
+The split comparison above is a diagnostic, not a hyperparameter search. The next experiment uses a *separate synthetic dataset* and a predeclared grid. It protects eight complete groups before feature selection or tuning; four group folds on the remaining groups choose both the feature count and the regularisation strength.
+
+[#pipeline-search-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Feature and model selection inside group-respecting CV",table-description="Six candidates report feature count, logistic C, mean CV accuracy, fold spread, and whether selected; the protected-test accuracy is displayed only for the selected candidate."]
+----
+from sklearn.feature_selection import SelectKBest, f_classif
+from sklearn.model_selection import GridSearchCV, GroupShuffleSplit
+from sklearn.metrics import accuracy_score
+
+search_rng = np.random.default_rng(20260905)
+search_groups = np.repeat(np.arange(40), 15)
+group_effect = search_rng.normal(scale=0.6, size=40)
+features = pd.DataFrame({"signal": search_rng.normal(size=600), "irrelevant": search_rng.normal(size=600)})
+search_y = (features["signal"].to_numpy() + group_effect[search_groups] + search_rng.normal(scale=0.8, size=600) > 0).astype(int)
+train_ids, test_ids = next(GroupShuffleSplit(n_splits=1, test_size=0.2, random_state=20260905).split(features, search_y, search_groups))
+assert set(search_groups[train_ids]).isdisjoint(search_groups[test_ids])
+search_pipeline = Pipeline([
+    ("scale", StandardScaler()), ("select", SelectKBest(score_func=f_classif)),
+    ("model", LogisticRegression(max_iter=1000)),
+])
+search = GridSearchCV(search_pipeline, {"select__k": [1, "all"], "model__C": [0.1, 1.0, 10.0]},
+                      cv=GroupKFold(4), scoring="accuracy", n_jobs=1)
+search.fit(features.iloc[train_ids], search_y[train_ids], groups=search_groups[train_ids])
+protected_accuracy = accuracy_score(search_y[test_ids], search.predict(features.iloc[test_ids]))
+search_evidence = pd.DataFrame({
+    "features kept": search.cv_results_["param_select__k"],
+    "C": search.cv_results_["param_model__C"],
+    "mean CV accuracy": search.cv_results_["mean_test_score"],
+    "fold spread": search.cv_results_["std_test_score"],
+    "selected": np.arange(len(search.cv_results_["params"])) == search.best_index_,
+})
+search_evidence["protected-test accuracy"] = np.nan
+search_evidence.loc[search.best_index_, "protected-test accuracy"] = protected_accuracy
+selected_features = features.columns[search.best_estimator_.named_steps["select"].get_support()].tolist()
+search_evidence["selected inputs"] = ""
+search_evidence.loc[search.best_index_, "selected inputs"] = ", ".join(selected_features)
+assert len(train_ids) == 480 and len(test_ids) == 120
+search_evidence
+----
+
+The search budget is six candidates × four folds, plus one refit on 480 training rows. `selected_features` in the notebook names the retained inputs. The selected CV mean is optimistic after comparison; the final held-out groups supply separate evidence. Do not return to tuning after inspecting that result. Accuracy is chosen here to isolate selection mechanics; choose a consequence-aware metric for an actual application.
+
 [.worked-example-results#worked-model-selection-results]
 === Results
 
@@ -191,7 +233,7 @@ The random-row mean accuracy exceeds the group-held-out mean by more than stem:[
 
 *Importance:* Essential (P0)
 
-For deployment to unseen machines, group-held-out validation is the relevant evidence; random-row validation answers a different and easier question. The synthetic shortcut demonstrates the leakage mechanism but does not quantify leakage in a real factory. With only 30 groups, uncertainty across possible held-out machine sets remains material, and model selection would require an outer group-respecting evaluation.
+For deployment to unseen machines, group-held-out validation is the relevant evidence; random-row validation answers a different and easier question. The synthetic shortcut demonstrates the leakage mechanism but does not quantify leakage in a real factory. With only 30 groups in the first diagnostic, uncertainty across possible held-out machine sets remains material. The second experiment demonstrates actual feature/model selection on separate data, using group-respecting inner folds and a protected outer holdout.
 
 Use the page toolbar to download the generated notebook. Keep `n_jobs=1` and fixed split seeds for reference evidence; parallel search may change completion order without changing the mathematical contract.
 

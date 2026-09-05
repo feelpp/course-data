@@ -152,14 +152,14 @@ Both coordinates and the coefficient norm are halved, while training residual er
 
 *Importance:* Essential (P0)
 
-The orthogonal calculation isolates pure shrinkage. The executable extension generates polynomial data with declared signal and noise, then compares Ridge and Lasso pipelines over fixed penalty grids. Its table exposes the selected library penalty, protected-test RMSE, and number of non-zero coefficients; its plots show fitted signals and coefficient magnitude by polynomial degree. A coefficient-by-degree plot is not a penalty path or a learning curve.
+In Block 9, run the pipeline comparison, interpret the supplied path and learning curve, and change one condition in the repeated-sample experiment. Further reruns are independent practice. The orthogonal calculation isolates pure shrinkage. The executable extension generates polynomial data with declared signal and noise, then compares an unregularised reference with Ridge and Lasso pipelines over fixed penalty grids. Its table reports library alpha, protected-test RMSE, and non-zero coefficients. Further experiments separately vary penalty, training size, and training sample; each answers a different generalisation question.
 
 [#regularisation-summary-table]
-[%dynamic%open,python,fail-on-error=,output=table,table-caption="Cross-validated Ridge and Lasso evidence on polynomial data",table-description="Rows compare Ridge and Lasso. Columns report the selected penalty, protected-test RMSE, and number of non-zero polynomial coefficients."]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Unregularised and cross-validated polynomial models",table-description="Rows compare an unregularised reference with cross-validated Ridge and Lasso. Columns report the selected penalty, protected-test RMSE, and number of non-zero polynomial coefficients."]
 ----
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import Lasso, Ridge
+from sklearn.linear_model import Lasso, LinearRegression, Ridge
 from sklearn.metrics import root_mean_squared_error
 from sklearn.model_selection import GridSearchCV, KFold, train_test_split
 from sklearn.pipeline import make_pipeline
@@ -192,6 +192,10 @@ ridge = ridge_search.best_estimator_
 lasso = lasso_search.best_estimator_
 ridge_model = ridge.named_steps["ridge"]
 lasso_model = lasso.named_steps["lasso"]
+unregularised = make_pipeline(
+    PolynomialFeatures(12, include_bias=False), StandardScaler(), LinearRegression()
+).fit(X_train, y_train)
+unregularised_rmse = float(root_mean_squared_error(y_test, unregularised.predict(X_test)))
 ridge_rmse = float(root_mean_squared_error(y_test, ridge.predict(X_test)))
 lasso_rmse = float(root_mean_squared_error(y_test, lasso.predict(X_test)))
 assert ridge_rmse < 1.5 and lasso_rmse < 1.5
@@ -199,20 +203,21 @@ assert np.count_nonzero(lasso_model.coef_) < len(lasso_model.coef_)
 
 regularisation_summary = pd.DataFrame(
     {
-        "selected penalty": [ridge_model.alpha, lasso_model.alpha],
-        "protected-test RMSE": [ridge_rmse, lasso_rmse],
+        "selected penalty": [0.0, ridge_model.alpha, lasso_model.alpha],
+        "protected-test RMSE": [unregularised_rmse, ridge_rmse, lasso_rmse],
         "non-zero coefficients": [
+            int(np.count_nonzero(unregularised.named_steps["linearregression"].coef_)),
             int(np.count_nonzero(ridge_model.coef_)),
             int(np.count_nonzero(lasso_model.coef_)),
         ],
     },
-    index=["Ridge", "Lasso"],
+    index=["Unregularised", "Ridge", "Lasso"],
 )
 regularisation_summary
 ----
 
 [#regularisation-fit-figure]
-[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Two panels compare noisy quadratic observations with Ridge and Lasso fitted curves, then compare absolute polynomial coefficients by degree on a logarithmic scale",figure-caption="Regularised polynomial fits and coefficient magnitudes. Curves use distinct line styles; coefficient markers and offsets duplicate colour.",result-interpretation="Both procedures generalise similarly on this protected split, but Lasso produces exact zeros while Ridge distributes shrinkage across degrees. One selected sparse representation is not evidence that the retained polynomial terms are uniquely important."]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Two panels compare noisy quadratic observations with unregularised, Ridge, and Lasso fitted curves, then compare Ridge and Lasso coefficient magnitudes by degree",figure-caption="Regularised polynomial fits and coefficient magnitudes. Curves use distinct line styles; coefficient markers and offsets duplicate colour.",result-interpretation="Both procedures generalise similarly on this protected split, but Lasso produces exact zeros while Ridge distributes shrinkage across degrees. One selected sparse representation is not evidence that the retained polynomial terms are uniquely important."]
 ----
 import matplotlib.pyplot as plt
 
@@ -221,6 +226,7 @@ degrees = np.arange(1, 13)
 plt.style.use("tableau-colorblind10")
 fig, axes = plt.subplots(1, 2, figsize=(10, 4.0), constrained_layout=True)
 axes[0].scatter(X_train[:, 0], y_train, s=14, alpha=0.35, label="training observations")
+axes[0].plot(grid[:, 0], unregularised.predict(grid), ":", linewidth=2, label="Unregularised")
 axes[0].plot(grid[:, 0], ridge.predict(grid), "-", linewidth=2, label="Ridge")
 axes[0].plot(grid[:, 0], lasso.predict(grid), "--", linewidth=2, label="Lasso")
 axes[0].set(xlabel="x", ylabel="response y", title="Protected fitting experiment")
@@ -243,19 +249,106 @@ axes[1].grid(alpha=0.25)
 plt.show()
 ----
 
+Predict before running: which coefficients will disappear as the penalty grows? The following path fits only the training data. It describes coefficients conditional on that sample; it does not choose a penalty from the protected-test score.
+
+[#regularisation-path-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Lasso coefficient curves against library alpha, with distinct markers and line styles for polynomial degrees; larger penalties drive coefficients to zero",figure-caption="A genuine penalty path: alpha varies while the training sample and degree remain fixed.",result-interpretation="The path shows shrinkage and sparsity on one training sample. Correlated polynomial features can exchange predictive roles, so the path does not identify causal terms."]
+----
+path_alphas = np.logspace(-3, 0, 18)
+path_coefficients = []
+for alpha in path_alphas:
+    path_fit = make_pipeline(
+        PolynomialFeatures(12, include_bias=False), StandardScaler(),
+        Lasso(alpha=alpha, max_iter=100000),
+    ).fit(X_train, y_train)
+    path_coefficients.append(path_fit.named_steps["lasso"].coef_)
+path_coefficients = np.asarray(path_coefficients)
+fig, ax = plt.subplots(figsize=(9, 4.4), constrained_layout=True)
+for j in range(12):
+    ax.semilogx(path_alphas, path_coefficients[:, j],
+                linestyle=["-", "--", ":"][j // 4], marker=["o", "s", "^", "D"][j % 4],
+                markevery=4, markersize=3, label=f"degree {j + 1}")
+ax.set(xlabel="Lasso library alpha", ylabel="Scaled coefficient", title="Penalty path on the training sample")
+ax.legend(ncols=4, fontsize="small")
+ax.grid(alpha=0.2)
+plt.show()
+----
+
+Now vary the number of training observations. This learning curve uses *a predeclared fixed Ridge alpha of 1*, not the winner selected above. Scaling is fitted anew within every training subset. The error bars show fold spread, not an independent-sample confidence interval.
+
+[#regularisation-learning-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Training and validation RMSE plotted against four training sample sizes with error bars for fold spread",figure-caption="Learning curve for a fixed degree-12 Ridge pipeline with alpha 1; the protected test is not used.",result-interpretation="The gap and variability describe this fixed procedure under the declared CV design. Additional observations may help a variable estimator; a persistent high training error suggests a different limitation."]
+----
+from sklearn.model_selection import learning_curve
+
+sizes, training_scores, validation_scores = learning_curve(
+    make_pipeline(PolynomialFeatures(12, include_bias=False), StandardScaler(), Ridge(alpha=1.0)),
+    X_train, y_train, train_sizes=[0.25, 0.5, 0.75, 1.0], cv=selection_cv,
+    scoring="neg_root_mean_squared_error", shuffle=True, random_state=20260905, n_jobs=1,
+)
+fig, ax = plt.subplots(figsize=(7.5, 4.2), constrained_layout=True)
+for scores, label, style in [(training_scores, "training", "o-"), (validation_scores, "validation", "s--")]:
+    errors = -scores
+    ax.errorbar(sizes, errors.mean(axis=1), yerr=errors.std(axis=1, ddof=1), fmt=style,
+                capsize=4, label=label)
+ax.set(xlabel="Observations fitted per training subset", ylabel="Mean fold RMSE", title="Sample size varies; model specification stays fixed")
+ax.legend()
+ax.grid(alpha=0.2)
+plt.show()
+----
+
+Finally, predict which model will vary most across fresh training samples. We independently simulate 48 datasets of 40 observations from the same quadratic signal, with noise standard deviation 1. At a fixed interior grid, the finite-sample identity below separates squared bias and variance of the fitted predictions. Adding the *known* noise variance gives expected error for a fresh noisy response under this oracle; it is not a decomposition estimated from a real industrial dataset.
+
+[#bias-variance-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Repeated-training-sample bias–variance experiment",table-description="Four model specifications report grid-averaged squared bias, prediction variance, known noise variance, and their sum over 48 independent training datasets."]
+----
+from sklearn.base import clone
+
+oracle_rng = np.random.default_rng(20260905)
+oracle_grid = np.linspace(-1.8, 1.8, 160).reshape(-1, 1)
+def signal(values):
+    return 1.0 - 2.0 * values[:, 0] + 0.8 * values[:, 0] ** 2
+
+specifications = {
+    "linear least squares": make_pipeline(PolynomialFeatures(1, include_bias=False), StandardScaler(), LinearRegression()),
+    "quadratic least squares": make_pipeline(PolynomialFeatures(2, include_bias=False), StandardScaler(), LinearRegression()),
+    "degree 12 least squares": make_pipeline(PolynomialFeatures(12, include_bias=False), StandardScaler(), LinearRegression()),
+    "degree 12 Ridge (alpha 1)": make_pipeline(PolynomialFeatures(12, include_bias=False), StandardScaler(), Ridge(alpha=1.0)),
+}
+predictions = {name: [] for name in specifications}
+for repetition in range(48):
+    draw_x = oracle_rng.uniform(-2.0, 2.0, size=(40, 1))
+    draw_y = signal(draw_x) + oracle_rng.normal(scale=1.0, size=40)
+    for name, estimator in specifications.items():
+        predictions[name].append(clone(estimator).fit(draw_x, draw_y).predict(oracle_grid))
+
+rows = []
+for name, values in predictions.items():
+    values = np.asarray(values)
+    squared_bias = float(np.mean((values.mean(axis=0) - signal(oracle_grid)) ** 2))
+    variance = float(np.mean(values.var(axis=0, ddof=0)))
+    error_to_signal = float(np.mean((values - signal(oracle_grid)) ** 2))
+    assert np.isclose(error_to_signal, squared_bias + variance, rtol=1e-10, atol=1e-10)
+    rows.append([name, squared_bias, variance, 1.0, squared_bias + variance + 1.0])
+bias_variance_evidence = pd.DataFrame(rows, columns=["model", "squared bias", "variance", "known noise", "expected noisy-response MSE"])
+bias_variance_evidence
+----
+
+These are finite-repeat estimates: extreme polynomial fits can dominate their averages. Repeat under another seed and inspect fitted curves before generalising the ordering. Change *one* of sample size, noise, degree, or penalty and rerun. Use the known signal to explain the changed decomposition; do not infer bias from the appearance of one fitted curve.
+
 [.worked-example-results#worked-regularisation-results]
 === Results
 
 *Importance:* Essential (P0)
 
-For the orthogonal stem:[\lambda=1] case, every coefficient and the coefficient norm are halved. In the executable experiment, cross-validation selects a penalty for each method, both protected-test RMSE values remain below stem:[1.5], and Lasso retains fewer than 12 non-zero polynomial coefficients. The plot shows similar fitted signals but different shrinkage patterns.
+For the orthogonal stem:[\lambda=1] case, every coefficient and the coefficient norm are halved. In the executable experiment, cross-validation selects a penalty for each method, both protected-test RMSE values remain below stem:[1.5], and Lasso retains fewer than 12 non-zero polynomial coefficients. The fitted-signal plot compares the three prespecified models. The additional path varies alpha, the learning curve varies sample size, and the repeated-sample table verifies the bias–variance identity under a known oracle.
 
 [.worked-example-conclusion#worked-regularisation-conclusion]
 === Conclusion
 
 *Importance:* Essential (P0)
 
-Regularisation can trade a modest increase in bias for more stable prediction, but Ridge and Lasso encode different structural preferences. The coefficient-by-degree comparison illustrates shrinkage, while the protected test estimates predictive error under the declared sampling design. Minimum error and minimum coefficient norm answer different questions. The selected penalty remains uncertain, and correlated predictors make coordinate paths basis-dependent; this supports a predictive-stability claim, not a causal coefficient interpretation.
+Regularisation can trade a modest increase in bias for more stable prediction, but Ridge and Lasso encode different structural preferences. The penalty path illustrates shrinkage, while the protected test compares the prespecified fitted procedures. Repeated training samples expose variability that a single curve cannot show. Minimum error and minimum coefficient norm answer different questions. The selected penalty remains uncertain, and correlated predictors make coordinate paths basis-dependent; this supports a predictive-stability claim, not a causal coefficient interpretation.
 
 Use the page toolbar to download the generated notebook and repeat the full split–select–evaluate procedure under a second seed.
 
