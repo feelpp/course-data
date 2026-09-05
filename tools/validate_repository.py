@@ -692,7 +692,7 @@ def validate_blueprint(curriculum: dict[str, Any], errors: list[str]) -> None:
     package_dependencies = package_json["dependencies"]
     expected_packages = {
         "asciidoctor-jupyter": "0.7.0",
-        "katex": "0.16.22",
+        "katex": "0.18.4",
         "@feelpp/antora-extensions": (
             "file:vendor/npm/feelpp-antora-extensions-1.0.0-rc.7-dev.3.tgz"
         ),
