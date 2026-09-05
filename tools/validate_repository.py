@@ -1055,7 +1055,15 @@ def validate_datasets(errors: list[str]) -> None:
 
 
 def validate_naming_and_privacy(errors: list[str]) -> None:
-    ignored_roots = {"archive/raw", ".git", ".venv", "node_modules", "build", "public"}
+    ignored_roots = {
+        "archive/raw",
+        ".audit-work",
+        ".git",
+        ".venv",
+        "node_modules",
+        "build",
+        "public",
+    }
     roadmap_plan_root = "docs/analysis/"
     reserved_roadmap_token = "pha" + "se"
     for path in ROOT.rglob("*"):
