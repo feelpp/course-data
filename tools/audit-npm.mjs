@@ -2,10 +2,6 @@
 
 import { spawnSync } from 'node:child_process'
 
-const allowedAdvisories = new Set([
-  'https://github.com/advisories/GHSA-52cp-r559-cp3m',
-  'https://github.com/advisories/GHSA-h67p-54hq-rp68'
-])
 const blockingSeverities = new Set(['high', 'critical'])
 
 const audit = spawnSync('npm', ['audit', '--json'], {
@@ -22,25 +18,13 @@ try {
   throw new Error(`npm audit did not return valid JSON: ${error.message}`)
 }
 
-const blocking = []
-const accepted = []
-for (const vulnerability of Object.values(report.vulnerabilities || {})) {
-  if (!blockingSeverities.has(vulnerability.severity)) continue
-  const advisoryUrls = vulnerability.via
-    .filter((item) => typeof item === 'object')
-    .map((item) => item.url)
-  const isDocumentedJsYamlException = vulnerability.name === 'js-yaml' &&
-    vulnerability.isDirect === false &&
-    advisoryUrls.length > 0 &&
-    advisoryUrls.every((url) => allowedAdvisories.has(url))
-  ;(isDocumentedJsYamlException ? accepted : blocking).push(vulnerability)
+if (audit.error || audit.signal || report.error || !report.vulnerabilities ||
+    typeof report.vulnerabilities !== 'object' || ![0, 1].includes(audit.status)) {
+  throw new Error('npm audit failed to produce a complete vulnerability report')
 }
 
-for (const vulnerability of accepted) {
-  process.stderr.write(
-    `accepted bounded upstream advisory: ${vulnerability.name} ${vulnerability.range}\n`
-  )
-}
+const blocking = Object.values(report.vulnerabilities)
+  .filter((vulnerability) => blockingSeverities.has(vulnerability.severity))
 if (blocking.length) {
   for (const vulnerability of blocking) {
     process.stderr.write(
