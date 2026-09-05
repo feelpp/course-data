@@ -102,6 +102,7 @@ def expected_notebook_contracts() -> tuple[list[Path], dict[str, dict], set[str]
         *curriculum["foundation_release"]["notebook_sources"],
         *curriculum["analytical_release"]["notebook_sources"],
         *curriculum["enrichment_release"]["page_notebook_sources"],
+        *curriculum["practice_release"]["notebook_sources"],
     ]
     exercise_by_source: dict[str, dict] = {}
     for specimen in curriculum["exercise_release"]["public_specimens"]:

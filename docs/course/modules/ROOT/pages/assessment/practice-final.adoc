@@ -1,0 +1,161 @@
+= Public practice: environmental screening analysis
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-QLT-03, DP-EVAL-02, DP-PIPE-01, DP-TST-01, DP-INT-01
+:page-course-priority: P0
+:page-course-difficulty: D3
+:page-course-duration-minutes: 165
+:page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10
+:page-course-prerequisites: Blocks 1–14
+:page-course-assessed: no
+:page-jupyter:
+:page-course-execution-profile: full
+
+This is fresh, ungraded public practice aligned with the xref:assessment/final-exam-specimen.adoc[specimen specification and rubric]. It is independent of live papers and historical examination values. Use it after the prerequisite blocks. The 165-minute target is a rehearsal budget awaiting learner timing evidence.
+
+== Prepare an offline rehearsal
+
+Download the complete xref:downloads.adoc[student bundle], install its locked environment in advance, and open this page's notebook inside the extracted bundle. Restart the kernel and run all cells. Practise individually with bundled documentation and without AI assistance to rehearse Mode A; record any assistance if using a different practice setting. The supplied cells run before you answer, but successful execution does not mean the tasks are complete.
+
+Read the xref:attachment$datasets/rehearsal/SOURCE.yml[source card] and verify the xref:attachment$datasets/rehearsal/MANIFEST.yml[data checksums]. The source card specifies prediction time, units, provenance, permitted use, and the five-to-one error-cost ratio. Do not infer a real operational performance claim from these synthetic data.
+
+Required files:
+
+* xref:attachment$datasets/rehearsal/samples.csv[samples.csv]
+* xref:attachment$datasets/rehearsal/sites.csv[sites.csv]
+
+If downloading individual files, place both CSVs beside the notebook. Use the source card and manifest from the same release.
+
+== Load the supplied inputs
+
+[source,python]
+----
+from pathlib import Path
+import json
+import pandas as pd
+
+def course_file(name):
+    for parent in (Path.cwd(), *Path.cwd().parents):
+        for candidate in (parent / "datasets/teaching/rehearsal" / name, parent / name):
+            if candidate.is_file():
+                return candidate
+    raise FileNotFoundError(f"Download the complete student bundle or the rehearsal file {name}")
+
+SEED = 20260905
+DATA_ID = "csmi-rehearsal-20260905"
+
+samples = pd.read_csv(course_file("samples.csv"))
+sites = pd.read_csv(course_file("sites.csv"))
+print("samples:", samples.shape, list(samples.columns))
+print("sites:", sites.shape, list(sites.columns))
+----
+
+== Deliberately flawed analysis to audit
+
+The following runnable code is the evidence under review. Its output is an unsupported claim. Identify problems from operations and the source card, then repair them; do not copy this workflow as a valid solution.
+
+[source,python]
+----
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+joined = samples.merge(sites, on="site_id")
+inputs = joined[["concentration", "water_temperature_c", "post_review_flag"]]
+all_scaled = StandardScaler().fit_transform(SimpleImputer().fit_transform(inputs))
+X_train, X_test, y_train, y_test = train_test_split(
+    all_scaled, joined["review_required"], random_state=SEED
+)
+bad_model = LogisticRegression(max_iter=1000).fit(X_train, y_train)
+print("Claim under review: test accuracy", accuracy_score(y_test, bad_model.predict(X_test)))
+----
+
+== Your response workspace
+
+Each response needs your explanation and a reference to the code, assertion, table, or figure that supports it. Insert your own Python cells below each task and leave the input data unchanged. Export only after reviewing all responses.
+
+[source,python]
+----
+responses = {
+    "audit_repair": None,
+    "reasoning": None,
+    "implementation": None,
+    "evaluation": None,
+    "governance": None,
+}
+----
+
+=== Audit and repair — 40 minutes
+
+Define unit, intended use and prediction time. Validate the site join, repair repeated keys and inconsistent units, and inspect missingness by batch. Explain every field unavailable at prediction time, including aliases. Repair the supplied global preprocessing workflow for the new-site evaluation contract.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["audit_repair"] = your explanation and evidence references
+----
+
+=== Mathematical reasoning — 35 minutes
+
+Explain how an independent Bernoulli model gives binary log loss. Explain why explicit inversion is unsafe for nearly dependent design columns and choose a stable alternative. Interpret shrinkage and propose a controlled bias–variance diagnostic. For the announced PCA family, explain centring/scaling, what a singular value measures, and why maximum variance need not mean best prediction.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["reasoning"] = your explanation and evidence references
+----
+
+=== Implementation and tests — 45 minutes
+
+Implement a transformation with an input/output contract and a validation-safe pipeline. Write one toy-oracle check and one identity/schema check. Record data ID, seed, split ID, model ID, primary metric and assessed commit (use a descriptive local revision ID if practising without Git) in this response so the result.json export contains traceable evidence.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["implementation"] = your explanation and evidence references
+----
+
+=== Evaluation — 30 minutes
+
+Choose a metric and decision rule tied to the stated error consequences, without selecting them on the final test set. Interpret the confusion matrix, give one honest measure of variation, and state two generalisation limits.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["evaluation"] = your explanation and evidence references
+----
+
+=== Reproducibility and declaration — 15 minutes
+
+Check the source card, permitted use and checksum. Explain the roles of the lock, seed, data hash and revision ID. Record the assistance used and whether your rehearsal followed Mode A. Report elapsed time and one obstacle.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["governance"] = your explanation and evidence references
+----
+
+== Export and self-review
+
+The check below reports unanswered fields and writes JSON only when you provide all responses. It checks completeness and JSON compatibility, not scientific correctness or marks. Compare your evidence with the public rubric, record elapsed time and the point where you became stuck, and restart/run all before sharing your work.
+
+[source,python]
+----
+OUTPUT_FILE = "result.json"
+def unanswered(value):
+    if isinstance(value, dict):
+        return not value or any(unanswered(item) for item in value.values())
+    if isinstance(value, (list, tuple)):
+        return not value or any(unanswered(item) for item in value)
+    return value is None or (isinstance(value, str) and not value.strip())
+
+missing = [key for key, value in responses.items() if unanswered(value)]
+if missing:
+    print("Rehearsal incomplete. Add your own evidence for:", ", ".join(missing))
+else:
+    payload = {"data_id": DATA_ID, "seed": SEED, "responses": responses}
+    output = Path(OUTPUT_FILE)
+    output.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
+    print("Wrote", output.name, "— completeness only; correctness still needs review.")
+----

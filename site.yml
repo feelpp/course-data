@@ -50,6 +50,9 @@ antora:
           - assessment/mini-project.adoc
           - assessment/control-2-specimen.adoc
           - assessment/final-exam-specimen.adoc
+          - assessment/practice-control-1.adoc
+          - assessment/practice-control-2.adoc
+          - assessment/practice-final.adoc
         asciidoctor-extension-version: 1.0.0-rc.18
 
 asciidoc:

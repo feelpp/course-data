@@ -74,3 +74,7 @@ The live paper selects one of the announced method families; it does not require
 Each section receives independent partial credit. A test-leaking workflow caps the pipeline item at one point until corrected. An invalid row-multiplying join caps its join item at one point. A high metric cannot compensate for these failures. Counts are exact; deterministic floats use `rtol=1e-7`, `atol=1e-10`; seeded model metrics use absolute tolerance 0.01.
 
 The complete reference run must remain under 15 minutes and the prepared student compute path under 8 minutes on the xref:technical-contract.adoc[reference environment]. Fixed data and iteration budgets are used; hardware speed is not graded.
+
+== Runnable public rehearsal
+
+Use xref:assessment/practice-final.adoc[the independent public practice] for supplied synthetic inputs, response cells and a completeness check. This specification remains the assessment contract; the practice has no answer key and does not disclose live papers.

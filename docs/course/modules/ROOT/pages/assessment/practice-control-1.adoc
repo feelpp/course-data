@@ -1,0 +1,139 @@
+= Public practice: data audit and safe baseline
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-QLT-03, DP-EVAL-02, DP-PIPE-01, DP-TST-01, DP-INT-01
+:page-course-priority: P0
+:page-course-difficulty: D3
+:page-course-duration-minutes: 70
+:page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO9, LO10
+:page-course-prerequisites: Blocks 1–7
+:page-course-assessed: no
+:page-jupyter:
+:page-course-execution-profile: full
+
+This is fresh, ungraded public practice aligned with the xref:assessment/control-1-specimen.adoc[specimen specification and rubric]. It is independent of live papers and historical examination values. Use it after the prerequisite blocks. The 70-minute target is a rehearsal budget awaiting learner timing evidence.
+
+== Prepare an offline rehearsal
+
+Download the complete xref:downloads.adoc[student bundle], install its locked environment in advance, and open this page's notebook inside the extracted bundle. Restart the kernel and run all cells. Practise individually with bundled documentation and without AI assistance to rehearse Mode A; record any assistance if using a different practice setting. The supplied cells run before you answer, but successful execution does not mean the tasks are complete.
+
+Read the xref:attachment$datasets/rehearsal/SOURCE.yml[source card] and verify the xref:attachment$datasets/rehearsal/MANIFEST.yml[data checksums]. The source card specifies prediction time, units, provenance, permitted use, and the five-to-one error-cost ratio. Do not infer a real operational performance claim from these synthetic data.
+
+Required files:
+
+* xref:attachment$datasets/rehearsal/cycles.csv[cycles.csv]
+* xref:attachment$datasets/rehearsal/machines.csv[machines.csv]
+
+If downloading individual files, place both CSVs beside the notebook. Use the source card and manifest from the same release.
+
+== Load the supplied inputs
+
+[source,python]
+----
+from pathlib import Path
+import json
+import pandas as pd
+
+def course_file(name):
+    for parent in (Path.cwd(), *Path.cwd().parents):
+        for candidate in (parent / "datasets/teaching/rehearsal" / name, parent / name):
+            if candidate.is_file():
+                return candidate
+    raise FileNotFoundError(f"Download the complete student bundle or the rehearsal file {name}")
+
+SEED = 20260905
+DATA_ID = "csmi-rehearsal-20260905"
+
+cycles = pd.read_csv(course_file("cycles.csv"))
+machines = pd.read_csv(course_file("machines.csv"))
+print("cycles:", cycles.shape, list(cycles.columns))
+print("machines:", machines.shape, list(machines.columns))
+----
+
+== Your response workspace
+
+Each response needs your explanation and a reference to the code, assertion, table, or figure that supports it. Insert your own Python cells below each task and leave the input data unchanged. Export only after reviewing all responses.
+
+[source,python]
+----
+responses = {
+    "join_contract": None,
+    "quality": None,
+    "checks": None,
+    "baseline": None,
+    "interpretation": None,
+}
+----
+
+=== Problem and validated join — 12 minutes
+
+State the unit, target, population and table keys. Predict cardinality, inspect repeated cycle records, and implement a validated join with exact before/after evidence. Explain any repair.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["join_contract"] = your explanation and evidence references
+----
+
+=== Quality decisions — 14 minutes
+
+Audit units, invalid values, missingness, duplicates and unusual observations. Implement justified transformations; distinguish invalid records from rare plausible values. Preserve the original data and report the consequences of your decisions.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["quality"] = your explanation and evidence references
+----
+
+=== Executable checks — 10 minutes
+
+Write and run two meaningful checks: one for identity/cardinality and one for a semantic constraint. Show a small deliberately invalid input that each check rejects.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["checks"] = your explanation and evidence references
+----
+
+=== Protected evaluation — 22 minutes
+
+Use the prediction-time and new-machine contract in the source card to choose eligible inputs and a split. Fit numeric and categorical preprocessing inside a pipeline. Compare one simple classifier with a dummy baseline on the same protected observations.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["baseline"] = your explanation and evidence references
+----
+
+=== Metric, errors and limits — 12 minutes
+
+Report errors and a metric tied to the specified consequences. Explain one failure and one generalisation limitation. Include seed, group/split identity and the exact command or cell path used to reproduce the evidence.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["interpretation"] = your explanation and evidence references
+----
+
+== Export and self-review
+
+The check below reports unanswered fields and writes JSON only when you provide all responses. It checks completeness and JSON compatibility, not scientific correctness or marks. Compare your evidence with the public rubric, record elapsed time and the point where you became stuck, and restart/run all before sharing your work.
+
+[source,python]
+----
+OUTPUT_FILE = "audit.json"
+def unanswered(value):
+    if isinstance(value, dict):
+        return not value or any(unanswered(item) for item in value.values())
+    if isinstance(value, (list, tuple)):
+        return not value or any(unanswered(item) for item in value)
+    return value is None or (isinstance(value, str) and not value.strip())
+
+missing = [key for key, value in responses.items() if unanswered(value)]
+if missing:
+    print("Rehearsal incomplete. Add your own evidence for:", ", ".join(missing))
+else:
+    payload = {"data_id": DATA_ID, "seed": SEED, "responses": responses}
+    output = Path(OUTPUT_FILE)
+    output.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
+    print("Wrote", output.name, "— completeness only; correctness still needs review.")
+----

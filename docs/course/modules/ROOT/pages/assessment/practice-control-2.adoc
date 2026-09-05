@@ -1,0 +1,157 @@
+= Public practice: audit a flawed analysis
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-QLT-03, DP-EVAL-02, DP-PIPE-01, DP-TST-01, DP-INT-01
+:page-course-priority: P0
+:page-course-difficulty: D3
+:page-course-duration-minutes: 55
+:page-course-outcomes: LO1, LO2, LO3, LO4, LO5, LO6, LO7, LO8, LO9, LO10
+:page-course-prerequisites: Blocks 1–13
+:page-course-assessed: no
+:page-jupyter:
+:page-course-execution-profile: full
+
+This is fresh, ungraded public practice aligned with the xref:assessment/control-2-specimen.adoc[specimen specification and rubric]. It is independent of live papers and historical examination values. Use it after the prerequisite blocks. The 55-minute target is a rehearsal budget awaiting learner timing evidence.
+
+== Prepare an offline rehearsal
+
+Download the complete xref:downloads.adoc[student bundle], install its locked environment in advance, and open this page's notebook inside the extracted bundle. Restart the kernel and run all cells. Practise individually with bundled documentation and without AI assistance to rehearse Mode A; record any assistance if using a different practice setting. The supplied cells run before you answer, but successful execution does not mean the tasks are complete.
+
+Read the xref:attachment$datasets/rehearsal/SOURCE.yml[source card] and verify the xref:attachment$datasets/rehearsal/MANIFEST.yml[data checksums]. The source card specifies prediction time, units, provenance, permitted use, and the five-to-one error-cost ratio. Do not infer a real operational performance claim from these synthetic data.
+
+Required files:
+
+* xref:attachment$datasets/rehearsal/cycles.csv[cycles.csv]
+* xref:attachment$datasets/rehearsal/machines.csv[machines.csv]
+
+If downloading individual files, place both CSVs beside the notebook. Use the source card and manifest from the same release.
+
+== Load the supplied inputs
+
+[source,python]
+----
+from pathlib import Path
+import json
+import pandas as pd
+
+def course_file(name):
+    for parent in (Path.cwd(), *Path.cwd().parents):
+        for candidate in (parent / "datasets/teaching/rehearsal" / name, parent / name):
+            if candidate.is_file():
+                return candidate
+    raise FileNotFoundError(f"Download the complete student bundle or the rehearsal file {name}")
+
+SEED = 20260905
+DATA_ID = "csmi-rehearsal-20260905"
+
+cycles = pd.read_csv(course_file("cycles.csv"))
+machines = pd.read_csv(course_file("machines.csv"))
+print("cycles:", cycles.shape, list(cycles.columns))
+print("machines:", machines.shape, list(machines.columns))
+----
+
+== Deliberately flawed analysis to audit
+
+The following runnable code is the evidence under review. Its output is an unsupported claim. Identify problems from operations and the source card, then repair them; do not copy this workflow as a valid solution.
+
+[source,python]
+----
+import numpy as np
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+machine_export = pd.concat([machines, machines.iloc[:4]], ignore_index=True)
+analysis = cycles.merge(machine_export, on="machine_id")
+columns = ["temperature", "vibration_mm_s", "inspection_completed"]
+matrix = StandardScaler().fit_transform(SimpleImputer().fit_transform(analysis[columns]))
+labels = analysis["requires_inspection"]
+train_rows, test_rows = train_test_split(np.arange(len(analysis)), random_state=SEED)
+candidates = []
+for penalty in [0.1, 1.0, 10.0]:
+    classifier = LogisticRegression(C=penalty, max_iter=1000)
+    classifier.fit(matrix[train_rows], labels.iloc[train_rows])
+    candidates.append((penalty, accuracy_score(labels.iloc[test_rows], classifier.predict(matrix[test_rows]))))
+selected = max(candidates, key=lambda row: row[1])
+print("Reported rows:", len(analysis))
+print("Claim under review: selected C and test accuracy", selected, "; ready for deployment.")
+----
+
+== Your response workspace
+
+Each response needs your explanation and a reference to the code, assertion, table, or figure that supports it. Insert your own Python cells below each task and leave the input data unchanged. Export only after reviewing all responses.
+
+[source,python]
+----
+responses = {
+    "defects": None,
+    "consequences": None,
+    "repairs": None,
+    "recommendation": None,
+}
+----
+
+=== Locate evidence — 16 minutes
+
+Identify five distinct defects, citing exact code statements, source-card constraints or outputs. At least three must threaten validity. Do not count multiple symptoms of one defect as independent findings.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["defects"] = your explanation and evidence references
+----
+
+=== Explain consequences — 12 minutes
+
+For four defects, explain which quantity or conclusion is affected and why. Distinguish observed evidence from speculation about an alternative run.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["consequences"] = your explanation and evidence references
+----
+
+=== Repair and verify — 19 minutes
+
+Specify four concrete repairs and implement at least two with executable evidence. Recompute only what supports your claim. Explain what remains uncertain after the repair.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["repairs"] = your explanation and evidence references
+----
+
+=== Prioritise — 8 minutes
+
+Rank the defects by risk to the stated use. Write a four-sentence release recommendation identifying required corrections and remaining limits. Include data ID and seed in your evidence.
+
+[source,python]
+----
+# Write and run your analysis/checks here.
+# responses["recommendation"] = your explanation and evidence references
+----
+
+== Export and self-review
+
+The check below reports unanswered fields and writes JSON only when you provide all responses. It checks completeness and JSON compatibility, not scientific correctness or marks. Compare your evidence with the public rubric, record elapsed time and the point where you became stuck, and restart/run all before sharing your work.
+
+[source,python]
+----
+OUTPUT_FILE = "audit.json"
+def unanswered(value):
+    if isinstance(value, dict):
+        return not value or any(unanswered(item) for item in value.values())
+    if isinstance(value, (list, tuple)):
+        return not value or any(unanswered(item) for item in value)
+    return value is None or (isinstance(value, str) and not value.strip())
+
+missing = [key for key, value in responses.items() if unanswered(value)]
+if missing:
+    print("Rehearsal incomplete. Add your own evidence for:", ", ".join(missing))
+else:
+    payload = {"data_id": DATA_ID, "seed": SEED, "responses": responses}
+    output = Path(OUTPUT_FILE)
+    output.write_text(json.dumps(payload, indent=2, allow_nan=False) + "\n")
+    print("Wrote", output.name, "— completeness only; correctness still needs review.")
+----

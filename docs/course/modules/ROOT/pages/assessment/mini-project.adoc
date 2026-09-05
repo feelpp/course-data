@@ -21,7 +21,11 @@
 :page-course-submission-evidence: tagged-repository, report-or-notebook, tests, result-card, ai-notes, individual-verification
 :page-course-rubric-criteria: R1, R2, R3, R4, R5, R6, R7
 
-Pairs deliver a reproducible scientific or industrial analysis in a private GitHub Classroom repository. The project is worth 25%: 23 pair points and 2 individual-verification points. Block 13 provides an 80-minute clinic; most production work is outside contact time.
+Pairs deliver a reproducible scientific or industrial analysis in a private GitHub Classroom repository. The project is worth 25%: 23 pair points and 2 individual-verification points. Block 13 provides an 80-minute clinic; the budget is 600 minutes (10 hours) of outside-class work per student, in addition to the clinic. Keep a time log and raise a likely overrun at a checkpoint so the question can be narrowed. The final compute path is bounded; a model catalogue is not required.
+
+== Start at Block 5
+
+The xref:downloads.adoc[student bundle] includes `templates/project-starter/` with a locked environment, input-contract example, toy data, tests and CI workflow. Copy the entire folder, including hidden files, into the assigned private Classroom repository and follow its README. The supplied toy check does not replace assessed scientific tests.
 
 == Choice and scope
 
@@ -78,12 +82,13 @@ Feature selection/search may support any route, but it must remain inside the va
 
 == Individual verification — 2 points
 
-*A2-T8 — Individual verification — 2 points, Essential/Core (P0/P1).* Each student receives 5–8 minutes to explain, test, or modify a selected repository element. Full credit requires a correct explanation of the evidence chain and a safe small change. The verification may produce an individual adjustment when authorship or understanding differs materially within the pair.
+*A2-T8 — Individual verification — 2 points, Essential/Core (P0/P1).* Each student receives 5–8 minutes to explain, test, or modify a selected repository element. Full credit requires a correct explanation of the evidence chain and a safe small change. Appointments are separate from the 28 contact hours and the final control. The instructor publishes the schedule before project submission and reserves 5–8 minutes per student plus transitions; for a cohort of N students this is 5N–8N minutes before transitions. The verification may produce an individual adjustment when authorship or understanding differs materially within the pair.
 
 == Delivery checkpoints
 
-. Question, data source, licence, roles, and split design approved.
-. Pull request with the baseline, quality contract, and first tests.
+. Block 5: question, data source, licence, roles and split design proposed with the starter.
+. Block 7: pull request with the baseline, quality contract and first tests.
+. Block 9: bounded method comparison and validation design agreed.
 . Block 13 review with draft result card and reproducibility evidence.
 . Tagged release and individual verification.
 

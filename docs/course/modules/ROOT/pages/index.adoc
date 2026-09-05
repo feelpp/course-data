@@ -37,6 +37,8 @@ The *Foundations* route starts with data lifecycle, tables, and quality. Mathema
 
 The *Analytical core* develops regression, classification, regularisation, model selection, tree ensembles, PCA/clustering, and columnar performance. Its seven notebooks extend the ten foundation notebooks. Public assessment downloads also contain four specimen or project briefs; these briefs are not additional taught chapters.
 
+Three xref:notebooks.adoc[public practice notebooks] supply synthetic inputs and response cells for assessment rehearsal. The student bundle also includes a minimal project starter with tests and CI, available from Block 5.
+
 The *Extensions* section provides optional bridges to JAX transformations, kernels, calibration, dataframe engines, experiment tracking, drift monitoring, and downstream CSMI courses. Five extension notebooks use the declared optional routes; JAX needs the separate dependency extra. None is required for assessment.
 
 The xref:notebooks.adoc[notebook guide] explains the execution profiles. The quick technical check covers ten foundation notebooks and four assessment briefs; it does not represent completion of all required analytical learning. Current assessment solutions and hidden tests remain outside this public site.

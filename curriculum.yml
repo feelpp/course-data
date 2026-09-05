@@ -1441,3 +1441,15 @@ schedule:
     preparation:
       minutes: 30
       task: Rehearse a validity audit and identify unresolved course questions.
+
+practice_release:
+  status: public_rehearsals_ready_for_human_pilot
+  provenance: original_synthetic_data_and_independently_authored_prompts
+  notebook_sources:
+    - docs/course/modules/ROOT/pages/assessment/practice-control-1.adoc
+    - docs/course/modules/ROOT/pages/assessment/practice-control-2.adoc
+    - docs/course/modules/ROOT/pages/assessment/practice-final.adoc
+  data: datasets/teaching/rehearsal
+  project_starter: templates/project-starter
+  solutions_included: false
+  human_timing_status: pending

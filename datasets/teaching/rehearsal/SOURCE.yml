@@ -1,0 +1,55 @@
+schema_version: 1
+source_id: csmi-rehearsal-20260905
+title: Original synthetic maintenance and environmental rehearsal tables
+creator: CSMI Data Processing and Mining course contributors
+created: '2026-09-05'
+licence: CC-BY-4.0
+attribution: CSMI Data Processing and Mining course contributors, synthetic rehearsal data, 2026
+generator: tools/build_rehearsal_data.py
+seed: 20260905
+provenance: Independently generated for this course; no historical exam or research records copied.
+privacy: Entirely synthetic identifiers and observations; no people or operational sites represented.
+permitted_use: Teaching and reproducibility practice with attribution.
+limitations: Deliberate defects and artificial signal; metrics cannot describe a real deployment.
+evaluation:
+  maintenance: Predict inspection before it occurs for previously unseen machines.
+  environmental: Screen review need before review occurs for previously unseen sites.
+  error_cost: A missed positive costs five units; an unnecessary inspection or review costs one.
+  consequence: Relative teaching costs only; no autonomous operational decisions.
+tables:
+  cycles.csv:
+    unit: One recorded machine cycle before inspection.
+    intended_key: cycle_id
+    fields:
+      cycle_id: Synthetic cycle identifier; exact repeats must be investigated.
+      machine_id: Foreign key to machines.csv, repeated across cycles.
+      recorded_at: UTC timestamp, ISO 8601.
+      temperature: Sensor temperature; -999 is a documented invalid sentinel.
+      temperature_unit: degC or K; convert to a common unit before comparing.
+      vibration_mm_s: Vibration in millimetres per second; empty means missing.
+      requires_inspection: Binary outcome determined after the pre-inspection measurements.
+      inspection_completed: Recorded after inspection; unavailable when making a prediction.
+  machines.csv:
+    unit: One machine; machine_id must be unique.
+    fields:
+      machine_id: Synthetic machine identifier.
+      family: Machine family, A, B, or C; known before inspection.
+  samples.csv:
+    unit: One environmental sample collected before laboratory review.
+    intended_key: sample_id
+    fields:
+      sample_id: Synthetic sample identifier; exact repeats must be investigated.
+      site_id: Foreign key to sites.csv, repeated across samples.
+      collected_at: UTC timestamp, ISO 8601.
+      instrument_batch: Instrument batch identifier, B0 to B3; available at collection.
+      concentration: Concentration in the unit specified by concentration_unit.
+      concentration_unit: mg/L or ug/L; 1000 ug/L equals 1 mg/L.
+      water_temperature_c: Water temperature in Celsius; empty means missing.
+      review_required: Binary review outcome, determined after collection.
+      post_review_flag: Recorded after review, equal to the review outcome.
+      workflow_status: Recorded after review; reviewed or cleared from the same outcome.
+  sites.csv:
+    unit: One site; site_id must be unique.
+    fields:
+      site_id: Synthetic site identifier.
+      catchment: rural or urban; known before collection.

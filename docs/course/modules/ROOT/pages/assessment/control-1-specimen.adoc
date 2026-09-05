@@ -73,3 +73,7 @@ Fitting learned preprocessing on the complete/test data or retaining target-deri
 == Acceptance and tolerances
 
 Counts and join assertions are exact. Seeded metric checks use an absolute tolerance of 0.01. Wall-clock speed is not graded. The reference solution completes in under five minutes on the xref:technical-contract.adoc[reference environment].
+
+== Runnable public rehearsal
+
+Use xref:assessment/practice-control-1.adoc[the independent public practice] for supplied synthetic inputs, response cells and a completeness check. This specification remains the assessment contract; the practice has no answer key and does not disclose live papers.

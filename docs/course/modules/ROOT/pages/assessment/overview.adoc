@@ -61,3 +61,17 @@ A serious Essential (P0) failure caps the affected criterion even if a final met
 * xref:technical-contract.adoc[Execution and numerical contract]
 
 Current papers, variants, solutions, hidden tests, and grading scripts remain in the private assessment repository.
+
+== Runnable public practice
+
+Three independent rehearsal notebooks supplement the four specimen briefs. They include fresh synthetic inputs, response workspaces and completeness checks, with no solutions. Prepare the full student bundle before an offline rehearsal. Learner timing remains to be piloted.
+
+* xref:assessment/practice-control-1.adoc[Control 1 practice] — xref:attachment$assessment/practice-control-1.ipynb[notebook]
+* xref:assessment/practice-control-2.adoc[Control 2 practice] — xref:attachment$assessment/practice-control-2.ipynb[notebook]
+* xref:assessment/practice-final.adoc[Final examination practice] — xref:attachment$assessment/practice-final.ipynb[notebook]
+
+The bundle also contains `templates/project-starter/`, a minimal tested project scaffold. Follow its README and replace its toy input with an approved project dataset.
+
+== Required implementation depth
+
+Students implement an Essential baseline and one approved Core method route in the mini-project. In the ensemble and clustering sessions, they run and interpret the supplied comparisons, change one controlled condition, and explain assumptions and failure cases. They are not required to implement every algorithm from scratch. The final examination selects one announced Core family; students prepare interpretation across the stated families and implement the method specified by their paper.
