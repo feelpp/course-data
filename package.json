@@ -49,5 +49,8 @@
   "devDependencies": {
     "http-server": "14.1.1"
   },
+  "overrides": {
+    "js-yaml@^4.0.0": "4.3.2"
+  },
   "license": "SEE LICENSE.md"
 }
