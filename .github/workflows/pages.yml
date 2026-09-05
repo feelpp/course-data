@@ -18,10 +18,15 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+      pages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Read GitHub Pages configuration
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+        with:
+          enablement: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
@@ -54,23 +59,6 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - name: Report redacted Pages validation details
-        shell: python {0}
-        run: |
-          import os
-          from pathlib import Path
-
-          action = (Path(os.environ["RUNNER_WORKSPACE"]).parent / "_actions" /
-                    "actions/deploy-pages/cd2ce8fcbc39b97be8ca5fce6e763baed58fa128/dist/index.js")
-          source = action.read_text()
-          original = "core.error('Creating Pages deployment failed', error)"
-          redacted = ("JSON.stringify(error.response?.data ?? {})"
-                      ".replaceAll(idToken, '[redacted OIDC]')"
-                      ".replaceAll(githubToken, '[redacted token]')")
-          diagnostic = "core.error('Pages validation response: ' + " + redacted + ");\n    "
-          if source.count(original) != 1:
-              raise RuntimeError("Pinned Pages diagnostic insertion point changed")
-          action.write_text(source.replace(original, diagnostic + original))
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
