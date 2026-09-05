@@ -1,4 +1,5 @@
 * xref:index.adoc[Course home]
+* xref:starting-with-data.adoc[Start here: four applications]
 * xref:course-contract.adoc[Course contract]
 * xref:course-map.adoc[Course map]
 * xref:environment.adoc[Computing environment]
