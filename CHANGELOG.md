@@ -4,6 +4,28 @@ All notable public course changes are recorded here. Candidate and annual releas
 
 ## Unreleased
 
+### September teaching revision
+
+- a four-application opening page connecting Ktirio Urban Building, Sepsis,
+  Organ on Chip with Italy, and JNL-G with LNCMI to the CSMI programme;
+- fourteen explicit 120-minute contact blocks, bounded preparation, protected
+  controls, early tests/provenance, and separate individual verification;
+- whole-pipeline Ridge/Lasso selection with fold-isolation regression checks;
+- executable penalty-path, learning-curve, repeated-sample bias–variance,
+  group-safe feature/model search and clustering-geometry experiments;
+- three runnable public assessment rehearsals with original synthetic data,
+  response workspaces and completeness-only exports; 29 public notebooks in
+  the full profile, with the existing 14-notebook fast profile;
+- a locked, tested project starter and a ten-hour outside-class budget per
+  student, with scope checkpoints from Block 5;
+- pilot timing forms, semester feedback checkpoints, strict clean-checkout
+  qualification, and retained two-build evidence in the full workflow;
+- compatible dependency audit repairs, pinned action updates, paired Antora
+  3.2, KaTeX 0.18.4 and patched Tornado 6.5.8 in both Python locks.
+
+The timed opening rehearsal, learner pilots, cohort appointments and independent
+release decisions remain pending. These changes do not create an annual tag.
+
 ### Added
 
 - mathematical background, error-estimation, worked-example, and exercise structure across the learning pages;
