@@ -128,10 +128,10 @@ The principal directions are the coordinate axes, with explained-variance ratios
 
 *Importance:* Essential (P0)
 
-The diagonal covariance example makes the eigenvalues, principal directions, and stem:[90\%] explained-variance ratio checkable by hand. The executable extension standardises Dry Bean shape features without using `Class`, fits PCA, and clusters a controlled subset. Its table reports retained dimension, cumulative explained variance, silhouette, stability across seeds, and a post-hoc comparison with withheld labels. The score plot visualises the fitted geometry but is not used as proof of natural classes.
+The diagonal covariance example makes the eigenvalues, principal directions, and stem:[90\%] explained-variance ratio checkable by hand. The executable extension is an explicitly class-balanced benchmark: `Class` is used to sample 160 rows per class, and K=7 is prescribed from the benchmark design. Class labels are then excluded from scaling, PCA, and clustering. This is not a label-blind discovery experiment. Its table reports retained dimension, cumulative explained variance, silhouette, stability across seeds, and a post-hoc comparison with the known benchmark labels. The score plot visualises the fitted geometry but is not used as proof of natural classes.
 
 [#pca-clustering-table]
-[%dynamic%open,python,fail-on-error=,output=table,table-caption="PCA and K-means validation diagnostics",table-description="Rows report retained PCA dimension, cumulative explained variance, K-means silhouette, agreement across two fixed seeds, and post-hoc agreement with unused Dry Bean class labels."]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="PCA and K-means validation diagnostics",table-description="Rows report retained PCA dimension, cumulative explained variance, K-means silhouette, agreement across two fixed seeds, and post-hoc agreement with known Dry Bean benchmark labels."]
 ----
 from pathlib import Path
 
@@ -158,7 +158,7 @@ beans = pd.read_csv(data_path).groupby("Class", group_keys=False).sample(
 X = beans.drop(columns="Class")
 class_labels = beans["Class"]
 
-# Class labels are not passed to scaling, PCA, or clustering.
+# Sampling used Class and K=7 is prescribed; labels are not passed to the estimators.
 transform = make_pipeline(StandardScaler(), PCA(n_components=0.90, random_state=20260722))
 reduced = transform.fit_transform(X)
 clusters_a = KMeans(7, n_init=20, random_state=20260722).fit_predict(reduced)
@@ -194,13 +194,13 @@ pd.DataFrame(
         "cumulative explained variance",
         "silhouette",
         "ARI across seeds",
-        "ARI with withheld class",
+        "ARI with benchmark class",
     ],
 )
 ----
 
 [#pca-clustering-figure]
-[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="A two-dimensional PCA score plot shows seven K-means clusters using seven distinct marker shapes and colours; clusters overlap in several regions",figure-caption="First two standardised PCA scores coloured and marked by K-means assignment. Dry Bean class labels were not used in fitting this view.",result-interpretation="Separation in the first two components is a projection of the fitted geometry, not proof of seven natural classes. Overlap and seed sensitivity must be considered alongside silhouette, reconstruction, and domain evidence."]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="A two-dimensional PCA score plot shows seven K-means clusters using seven distinct marker shapes and colours; clusters overlap in several regions",figure-caption="First two standardised PCA scores coloured and marked by K-means assignment. Class labels balanced the sample and K=7 was prescribed; labels were excluded from the fitted estimators.",result-interpretation="Separation in the first two components is a projection of the fitted geometry, not proof of seven natural classes. Overlap and seed sensitivity must be considered alongside silhouette, reconstruction, and domain evidence."]
 ----
 import matplotlib.pyplot as plt
 import numpy as np
@@ -223,6 +223,59 @@ ax.legend(ncols=2, fontsize="small")
 ax.grid(alpha=0.2)
 plt.show()
 ----
+
+To isolate geometry, compare two fresh synthetic oracles with predeclared parameters. All coordinates have the same dimensionless scale. Known labels are used only to report oracle agreement, after fitting. DBSCAN noise is reported explicitly: a silhouette computed only on assigned points must be read together with its coverage.
+
+[#clustering-geometry-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Clustering methods under two controlled geometries",table-description="K-means, single-link hierarchical clustering, and DBSCAN report cluster count, noise fraction, oracle ARI, and silhouette on assigned points for blobs and two moons."]
+----
+from sklearn.cluster import AgglomerativeClustering, DBSCAN
+from sklearn.datasets import make_blobs, make_moons
+
+geometries = {
+    "blobs": make_blobs(n_samples=240, centers=[[-1, -1], [1, 1]], cluster_std=0.22, random_state=20260905),
+    "moons": make_moons(n_samples=240, noise=0.04, random_state=20260905),
+}
+geometry_labels = {}
+geometry_rows = []
+for dataset, (coordinates, oracle_labels) in geometries.items():
+    algorithms = {
+        "K-means": KMeans(2, n_init=10, random_state=20260905),
+        "single-link": AgglomerativeClustering(n_clusters=2, linkage="single"),
+        "DBSCAN": DBSCAN(eps=0.23, min_samples=5),
+    }
+    for name, algorithm in algorithms.items():
+        assignment = algorithm.fit_predict(coordinates)
+        geometry_labels[(dataset, name)] = assignment
+        assigned = assignment != -1
+        number = len(set(assignment[assigned]))
+        silhouette_assigned = (silhouette_score(coordinates[assigned], assignment[assigned])
+                               if 1 < number < int(assigned.sum()) else np.nan)
+        geometry_rows.append([dataset, name, number, float((~assigned).mean()),
+                              adjusted_rand_score(oracle_labels, assignment), silhouette_assigned])
+geometry_evidence = pd.DataFrame(geometry_rows, columns=["geometry", "method", "clusters", "noise fraction", "oracle ARI", "silhouette of assigned points"])
+geometry_evidence
+----
+
+[#clustering-geometry-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Six panels compare K-means, single-link hierarchical clustering, and DBSCAN on blobs and two moons, using marker shapes for groups and crosses for noise",figure-caption="Fixed algorithm choices expose different geometry assumptions; parameters are not selected by oracle labels.",result-interpretation="K-means partitions by centroid distance, single linkage connects through nearest neighbours, and DBSCAN connects sufficiently dense neighbourhoods. Agreement on one oracle does not establish scientific classes or robustness to changing noise and density."]
+----
+fig, axes = plt.subplots(2, 3, figsize=(10.5, 6.6), constrained_layout=True)
+for row, (dataset, (coordinates, _)) in enumerate(geometries.items()):
+    for column, name in enumerate(["K-means", "single-link", "DBSCAN"]):
+        ax = axes[row, column]
+        assignment = geometry_labels[(dataset, name)]
+        for label in sorted(set(assignment)):
+            subset = assignment == label
+            ax.scatter(coordinates[subset, 0], coordinates[subset, 1], s=15,
+                       marker="x" if label == -1 else ["o", "s", "^"][label % 3],
+                       label="noise" if label == -1 else f"group {label + 1}")
+        ax.set(xlabel="coordinate 1", ylabel="coordinate 2", title=f"{dataset}: {name}")
+        ax.legend(fontsize="x-small")
+plt.show()
+----
+
+Change the noise or `eps` and inspect both assignments and coverage. Single linkage can chain through bridging observations; one DBSCAN radius may fail when density varies. These are testable assumptions, not a ranking of algorithms for all data.
 
 [.worked-example-results#worked-pca-results]
 === Results
