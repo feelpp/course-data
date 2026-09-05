@@ -8,8 +8,6 @@
 :page-course-prerequisites: None
 :page-course-assessed: no
 
-[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
-
 Welcome to the CSMI course on trustworthy, reproducible, and performance-aware data processing.
 
 The course follows the complete path from a question and a raw dataset to a defensible result:
@@ -17,6 +15,8 @@ The course follows the complete path from a question and a raw dataset to a defe
 question -> provenance -> validation -> transformation -> exploration -> modelling -> evaluation -> communication
 
 The emphasis is not only on obtaining a numerical answer. You will learn to make the data lineage, assumptions, transformations, failure modes, and limitations reviewable by another scientist or engineer.
+
+Start with xref:starting-with-data.adoc[four applications from current research]: Ktirio Urban Building, Sepsis, Organ on Chip with Italy, and JNL-G with LNCMI. Each begins with a data question you can discuss before installing software. Then try the xref:foundations/data-lifecycle.adoc[first data audit].
 
 == Course format
 
@@ -29,12 +29,14 @@ Core (P1):: Taught, practised, and assessed at least once.
 Extension (P2):: Optional bridge or project material; never an unannounced prerequisite.
 Deferred (P3):: Assigned to another course or kept as background reading.
 
-Start with the xref:course-contract.adoc[course contract], review the xref:course-map.adoc[course map], verify the xref:environment.adoc[computing environment], and complete the xref:readiness-check.adoc[readiness check].
+After the introduction, read the xref:course-contract.adoc[course contract] and xref:course-map.adoc[course map]. Use the xref:environment.adoc[environment guide] for setup and complete the xref:readiness-check.adoc[readiness diagnostic] before Block 2.
 
 The xref:accessibility.adoc[accessibility guide] explains keyboard, figure, and adjustment support; the xref:glossary.adoc[English--French glossary] supports technical vocabulary. Use xref:downloads.adoc[downloads and releases] for immutable student bundles and checksums, and xref:feedback.adoc[feedback] to improve future delivery without submitting personal data.
 
-The first complete learning path is available under *Foundations*. It starts with a mathematical background and error-estimation chapter, then connects each concept to seven executable notebooks, an integrated baseline-synthesis checkpoint, reviewed teaching tables, public acceptance checks, and delivery templates. Current assessment solutions and hidden tests remain outside this public site.
+The *Foundations* route starts with data lifecycle, tables, and quality. Mathematical reference chapters support the examples at their point of use. Follow the xref:course-map.adoc[block guide] to distinguish class work, preparation, and optional reading.
 
-The *Analytical core* adds seven Core (P1) notebooks covering stable/probabilistic regression, classification losses, regularisation, model selection, tree ensembles, PCA/clustering, and columnar performance. The full core CPU workflow executes all fourteen required notebooks.
+The *Analytical core* develops regression, classification, regularisation, model selection, tree ensembles, PCA/clustering, and columnar performance. Its seven notebooks extend the ten foundation notebooks. Public assessment downloads also contain four specimen or project briefs; these briefs are not additional taught chapters.
 
-The *Extensions* section provides optional bridges to JAX transformations, kernels, probability calibration, modern dataframe engines, experiment tracking, drift monitoring, and downstream CSMI courses. Its one additional notebook uses a separate dependency extra and is never required for assessment.
+The *Extensions* section provides optional bridges to JAX transformations, kernels, calibration, dataframe engines, experiment tracking, drift monitoring, and downstream CSMI courses. Five extension notebooks use the declared optional routes; JAX needs the separate dependency extra. None is required for assessment.
+
+The xref:notebooks.adoc[notebook guide] explains the execution profiles. The quick technical check covers ten foundation notebooks and four assessment briefs; it does not represent completion of all required analytical learning. Current assessment solutions and hidden tests remain outside this public site.

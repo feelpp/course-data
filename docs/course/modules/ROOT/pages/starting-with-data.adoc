@@ -1,0 +1,109 @@
+= Four applications, one data question
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-FND-02, DP-GOV-01, DP-EVAL-02
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 30
+:page-course-outcomes: LO1, LO2, LO5, LO10
+:page-course-prerequisites: None
+:page-course-assessed: no
+
+In this course, we turn measurements and simulation outputs into a conclusion another scientist can check. Before computing, ask: *what does one observation represent, and what question can it answer?*
+
+Our first session connects four applications from the instructor's work to the data decisions we will learn to make. The diagrams and small numbers below are teaching examples, not reported project measurements.
+
+image::introduction/applications.svg["Four teaching schematics: building tables and energy, patient observations before a prediction time, cell images converted to tracks and density, and electrical and cooling traces aligned in time. Each has a different independent unit.",width=1100]
+
+== 1. Ktirio Urban Building: what are we averaging?
+
+A district model connects building geometry, materials, weather, and energy or comfort results. Building identifiers must match across tables. Power in kW, energy in kWh, and energy per floor area answer different questions.
+
+Consider two *synthetic* buildings:
+
+[cols="1,2,2,2",options="header"]
+|===
+|Building |Annual energy |Floor area |Energy per area
+|A |1,000 kWh |10 m² |100 kWh/m²
+|B |1,000 kWh |100 m² |10 kWh/m²
+|===
+
+*Predict before calculating:* what is the district's energy intensity? Discuss which building should receive more weight, and why.
+
+[%collapsible]
+.What the two calculations mean
+====
+The mean building intensity is `(100 + 10) / 2 = 55 kWh/m²`: it weights buildings equally. District energy divided by district area is `2000 / 110 ≈ 18.18 kWh/m²`: it weights square metres equally. Choose the question before choosing the weights.
+
+[source,python]
+----
+energy_kwh = [1000, 1000]
+area_m2 = [10, 100]
+mean_building = sum(e / a for e, a in zip(energy_kwh, area_m2)) / 2
+district = sum(energy_kwh) / sum(area_m2)
+assert abs(mean_building - 55.0) < 1e-10
+assert abs(district - 2000 / 110) < 1e-10
+print(f"Equal buildings: {mean_building:.2f}; equal area: {district:.2f} kWh/m²")
+----
+====
+
+*Connection:* Database gives us keys and joins; Scientific Computing produces physical predictions; HPC makes larger calculations feasible; this course checks what comparison the resulting table supports.
+
+Project context: https://arxiv.org/abs/2407.14535[the Ktirio framework paper].
+
+== 2. Sepsis: what was known at prediction time?
+
+A patient timeline contains irregular observations and missing measurements. A predictive task must state its observation window and future target window. Split patients or time periods according to the intended use before fitting imputation or a model.
+
+*Discuss:* if windows from one patient appear in both training and testing, does the score establish performance for a new patient? What if a column was recorded only after the outcome?
+
+*Connection:* Random Models helps describe variability; this course builds an honest baseline and evaluation; SciML can extend the model later. A synthetic classroom result does not establish clinical usefulness.
+
+== 3. Organ on Chip with Italy: from images to an observable
+
+A microscopy sequence can become cell positions, trajectories, velocities, density, or flux. Pixel size and time intervals determine physical units. Tracking choices affect the quantity compared with a mathematical model.
+
+*Discuss:* if a tracker switches a cell's identity between frames, what happens to its estimated velocity? Are neighbouring frames independent experimental replications?
+
+*Connection:* image processing extracts observations; statistics characterises their uncertainty; Scientific Computing and PDE modelling predict observables for comparison. In this course, make the image-to-table transformation and experimental unit explicit.
+
+== 4. JNL-G with LNCMI: align before comparing
+
+A magnet/facility digital twin connects multiphysics models with electrical and cooling observations. Timestamps, sensor units, and operating regimes must agree before a model–measurement discrepancy can be interpreted.
+
+*Discuss:* power readings are recorded at unequal time intervals. Is their arithmetic mean sufficient to compute energy? State the interpolation assumption you would need between readings.
+
+*Connection:* Scientific Computing and reduced models produce predictions; data processing aligns them with observations; HPC, SciML, and Optimization support larger models and future decisions.
+
+Project context: https://anr.fr/Projet-ANR-25-CE46-1157[ANR JNL-G description].
+
+== 5. Where this course fits in CSMI
+
+[cols="2,4",options="header"]
+|===
+|Course connection |What we practise here
+|Database |Validate keys, joins, types, and queries before interpreting a table.
+|Random Models |Relate sampling and uncertainty to the population being studied.
+|Scientific Computing |Check units, conditioning, numerical error, and model–data comparisons.
+|Project 1 |Deliver understandable code, tests, provenance, and a reproducible result.
+|HPC |Measure memory, copies, I/O, and computation before scaling up.
+|Optimization |Connect a loss and penalty to the problem being solved.
+|SciML |Provide reliable data, baselines, and protected evaluation for more advanced models.
+|===
+
+Several S1 courses run alongside this one. We coordinate their ideas and introduce the prerequisites we need; you are not expected to have completed them already. The https://csmi.cemosis.fr/fr/csmi/csmi-2024-2028/index.html[CSMI programme description] explains the broader curriculum.
+
+== 6. Your first audit
+
+In pairs, open xref:foundations/data-lifecycle.adoc#worked-lifecycle-context[the station-temperature example]. One station supplies six observations; each of two others supplies two. Before running it, choose between the mean recorded observation and the mean of equally weighted stations.
+
+The static example gives everything needed to discuss the question without installing software. Its executable version uses the bundled teaching data. Explain why the two results, approximately −1.810 °C and −2.072 °C, can both be correct.
+
+Continue with the xref:course-map.adoc[semester route] and xref:assessment/overview.adoc[assessment guide]. Complete the xref:readiness-check.adoc[readiness diagnostic] before Block 2; use the xref:environment.adoc[environment guide] for setup.
+
+== Exit ticket
+
+Write three short answers:
+
+. Choose one application and identify its independent unit: building, patient, experiment, or operating run.
+. Name a processing decision that could change the conclusion and one CSMI course connected to it.
+. State one setup difficulty or concept you want to practise next. Do not include personal or research data.
