@@ -27,6 +27,7 @@ SOURCE_PATHS = (
     Path("datasets/teaching"),
     Path("docs/course/modules/ROOT/nav.adoc"),
     Path("docs/course/modules/ROOT/pages"),
+    Path("docs/course/modules/ROOT/images"),
 )
 
 STUDENT_TEMPLATE_PATHS = (
