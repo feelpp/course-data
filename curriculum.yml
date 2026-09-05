@@ -458,7 +458,7 @@ release_qualification:
     antora_extension: "@feelpp/antora-extensions@1.0.0-rc.7-dev.3"
     asciidoctor_extension: "@feelpp/asciidoctor-extensions@1.0.0-rc.18-dev.2"
     notebook_converter: "asciidoctor-jupyter@0.7.0"
-    mathematics_renderer: "katex@0.16.22"
+    mathematics_renderer: "katex@0.18.4"
   retired_paths:
     - tools/build_foundation_notebooks.py
     - tools/build_analytical_notebooks.py
