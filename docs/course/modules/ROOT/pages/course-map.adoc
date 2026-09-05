@@ -10,98 +10,100 @@
 
 The course contains fourteen two-hour blocks. Essential (P0) and Core (P1) material is the binding course contract: it is taught, practised, and assessed. Extension (P2) demonstrations are optional and cannot be required in a control or examination.
 
-The site navigation is the recommended student sequence. After the first three data-handling foundations and before exploratory analysis, complete the mathematical pathway in order: xref:foundations/mathematical-background.adoc[Mathematical background and error estimation], xref:foundations/probability-distributions-moments.adoc[Probability distributions and statistical moments], xref:foundations/quantiles-exceedance-risk.adoc[Quantiles, exceedance probabilities, and risk], and xref:foundations/mean-uncertainty.adoc[Mean estimation and sampling uncertainty]. Their notation, probability summaries, uncertainty calculations, and error ledgers recur in the exploratory and analytical chapters.
+Use the block guide below for the teaching sequence. Page-duration labels describe complete reference and practice routes; they are not additional contact hours. Each block below totals 120 minutes, including its stated activities. The final examination is separate from these 28 contact hours.
 
-== Sequence and evidence
+== Preparation and mathematical support
 
-[cols="1,3,1,2,3",options="header"]
+Before Block 4, spend at most 45 minutes on the named refresher sections: notation and expectation (15), mean standard error (15), and empirical quantile/exceedance (15). The corresponding references are xref:foundations/mathematical-background.adoc[mathematical background], xref:foundations/mean-uncertainty.adoc[mean uncertainty], and xref:foundations/quantiles-exceedance-risk.adoc[quantiles and risk]. Bring an unresolved question to class rather than silently extending this assignment to all six hours of reference chapters.
+
+We apply sampling and mean/quantile uncertainty in Block 4, revisit vectors and conditioning in Block 6, and use xref:foundations/probability-distributions-moments.adoc[probability models and moments] for likelihood and classification in Blocks 6–7. Complete chapters remain available for support and further practice. The diagnostic guides additional individual support.
+
+== Sequence and time allocation
+
+[cols="1,3,5,3",options="header"]
 |===
-|Block |Focus |Importance |Practice evidence |Assessment connection
+|Block |Focus |Contact minutes (120 per row) |Preparation before this block
 
 |1
-|Question, data lifecycle, provenance, reproducible environment, readiness check
-|Essential (P0)
-|Environment evidence, source record, executable first audit
-|Controls, project, final
+|Applications, CSMI connections, question, and first audit
+|Welcome 10; Application tour 20; CSMI connections 15; Pair audit 25; Break 10; Execute first audit 15; Route and assessment 15; Exit ticket and setup triage 10
+|0 min: None; the readiness diagnostic follows the first class.
 
 |2
-|DataFrames, types, units, tidy data, reshaping, grouping
-|Essential (P0)
-|Typed tidy sensor table with assertions
-|Control 1, project, final
+|DataFrames, types, units, tidy data, reshape, and grouping
+|Concepts and demonstration 30; Tidy-table lab 65; Assertions and source notes 15; Checkpoint 10
+|35 min: Complete the 35-minute diagnostic and identify one setup or Python support need.
 
 |3
-|Validated joins, schemas, missing values, duplicates, anomalies
-|Essential (P0)
-|Join report, justified repair, executable data contract
-|Both controls, project, final
+|Joins, schemas, missing values, duplicates, and anomalies
+|Join and quality methods 30; Quality lab 70; Privacy and repair record 10; Checkpoint 10
+|20 min: Review keys, grouping, and the tidy-table checkpoint.
 
 |4
-|Exploratory analysis, sampling, representativeness, truthful figures
-|Essential (P0)
-|One-page evidence brief with a representativeness warning
-|Control 2, project, final
+|EDA, sampling, representativeness, and visual communication
+|Sampling and summaries 25; EDA lab 65; Mean and quantile uncertainty 20; Checkpoint 10
+|45 min: Bounded refresher: notation/expectation 15 min, mean standard error 15 min, empirical quantile/exceedance 15 min.
 
 |5
-|Splits, leakage, fitted preprocessing, baselines
-|Essential (P0)
-|Repaired leakage-safe heterogeneous pipeline
-|Both controls, project, final
+|Splits, leakage, preprocessing pipelines, and baselines
+|Validation design 25; Pipeline lab 75; Result and source record 10; Project launch 10
+|20 min: Read the splitting and leakage definitions; state an independent unit.
 
 |6
-|Stable least squares, likelihood, conditioning, regression metrics
-|Core (P1)
-|Solver and residual investigation on oracle data
-|Project, Control 2, final
+|Regression, stable least squares, likelihood, and residuals
+|Least-squares and likelihood 30; Stable-solver lab 70; Residual interpretation 20
+|20 min: Review vectors, norms, and conditioning in the mathematical reference.
 
 |7
-|Logistic/softmax models, classification metrics, thresholds and costs
-|Essential/Core (P0/P1)
-|Cost-aware industrial classification decision
-|Both controls, project, final
+|Logistic and softmax models, losses, metrics, and thresholds
+|Losses and decisions 20; Classification lab 70; Assistance disclosure and tests 10; Control 1 preparation 20
+|20 min: Review probability support, expectation, and conditional quantities.
 
 |8
-|Ridge/Lasso, bias–variance, learning curves, cross-validation
-|Core (P1)
-|Controlled regularisation experiment; Control 1
-|Controls, project, final
+|Control 1 and a short regularisation introduction
+|Control 1 70; Transition 10; Regularisation and CV introduction 40
+|30 min: Rehearse Essential (P0) audit, join, preprocessing, and metric tasks using the public practice route.
 
 |9
-|Trees, forests, boosting, interpretation limits
-|Core (P1)
-|Validated ensemble comparison and error analysis
-|Control 2, project, final
+|Regularisation, cross-validation, feature and model selection
+|Full-pipeline search 30; Generalisation lab 50; Paths and learning-curve interpretation 30; Checkpoint 10
+|20 min: Review the penalised objectives and the CV introduction.
 
 |10
-|PCA, k-means, hierarchical clustering, DBSCAN, validation
-|Core (P1)
-|Unsupervised analysis challenged across seeds or algorithms
-|Control 2, project, final
+|Trees, random forests, boosting, and interpretation limits
+|Tree and ensemble concepts 30; Ensemble lab 70; Interpretation limits 20
+|20 min: Read tree depth and bagging definitions; predict a complexity effect.
 
 |11
-|Vectorisation, memory, Parquet/Arrow, analytical query pushdown
-|Core (P1)
-|Measured storage, runtime, and memory comparison
-|Control 2, project, final
+|PCA, k-means, hierarchical clustering, DBSCAN, and validation
+|PCA and cluster geometry 25; Clustering lab 75; Stability and limitations 20
+|20 min: Review centring, covariance, and the PCA objective.
 
 |12
-|Tests, FAIR documentation, privacy, responsible AI, failure analysis
-|Essential (P0)
-|Datasheet, result card, AI declaration, tests, rerun manifest
-|Control 2, project, final
+|Columnar performance and reproducible delivery
+|Memory and query methods 20; Columnar lab 65; Delivery audit 20; Performance conclusion 15
+|15 min: Inspect a table schema and estimate its in-memory size.
 
 |13
 |Integrated mini-project clinic
-|Essential/Core (P0/P1)
-|Reviewable pull request and draft result card
-|Mini-project, final
+|Clinic questions 15; Project review 80; Feedback and next steps 25
+|30 min: Prepare a project question and draft result card for the clinic.
 
 |14
-|Professional audit, synthesis, individual verification
-|Essential/Core (P0/P1)
-|Prioritised defect report and correct repairs; optional JAX demonstration
-|Control 2, final
+|Control 2, debrief, and course synthesis
+|Control 2 audit 55; Debrief 35; Synthesis 30
+|30 min: Rehearse a validity audit and identify unresolved course questions.
 |===
+
+The assigned preparation totals 325 minutes across the semester. Practice and project production are separate from this preparation budget. If an activity takes longer, use the indicated support route and report the difficulty; contact time does not expand to absorb every reference-page estimate.
+
+The 65-minute documentation/testing activity E12 is distributed across Blocks 2 (15), 3 (10), 5 (10), 7 (10), and 12 (20). Tests, provenance, and assistance disclosure are therefore practised before Control 1. Block 12 consolidates them while measuring a columnar workflow.
+
+E08 belongs to Block 9. E14 is the 55-minute audit inside Control 2, not another 55-minute task. Individual project verification uses a separately announced appointment, with 5–8 minutes per student plus transitions; it is not placed in the spare minutes of Block 14.
+
+== Required depth
+
+Students implement and validate a small pipeline search before the Block 13 clinic. The project starts from a question and baseline in Block 5 and develops as methods are taught. Required tree/forest work includes fitting and comparison; boosting includes interpreting its objective and supplied comparison. For hierarchical clustering and DBSCAN, run the supplied geometry comparison and explain assumptions, parameters, and failure cases. Implementing those algorithms from scratch is outside the assessed scope.
 
 == Recurring datasets
 

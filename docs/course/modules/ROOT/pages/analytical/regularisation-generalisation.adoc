@@ -59,6 +59,8 @@ For the stated scaling of the loss,
 The stem:[\ell_1] objective is convex but not differentiable at zero. Its geometry can produce exact zero coefficients; it does not prove that the remaining variables are causal or uniquely important.
 ****
 
+For the displayed objectives, scikit-learn's `Ridge` uses `alpha = n_train * lambda`, whereas `Lasso` uses `alpha = lambda / 2`. The grids below tune the library's `alpha`. For Ridge, a fixed alpha therefore corresponds to a different lambda when the training size changes (144 rows per CV fit, 180 in the final refit here). Keep that convention explicit when comparing formulae and software.
+
 The intercept is normally left unpenalised. Without scaling, the same stem:[\lambda] penalises coefficients attached to differently scaled features unequally.
 
 == Bias–variance mathematics
@@ -84,7 +86,7 @@ Scale features inside the fitted pipeline before applying coefficient penalties.
 
 == Error estimation
 
-Cross-validation estimates performance of the entire selection procedure only when scaling, feature construction, and stem:[\lambda] selection occur inside each training fold. Report the fold distribution and repeat the outer split when feasible. Overlapping training folds make fold scores dependent, so a naive stem:[s/\sqrt K] interval should not be presented as exact.
+Cross-validation compares candidate pipelines only when learned preprocessing and feature selection occur inside each training fold. The winning CV score is used for selection and can be optimistic; evaluate the selected procedure on a protected test or with an outer CV loop. Report the fold distribution and repeat the outer split when feasible. Overlapping training folds make fold scores dependent, so a naive stem:[s/\sqrt K] interval should not be presented as exact.
 
 For feature stability, define a selection indicator stem:[I_{jb}=1] if feature stem:[j] is non-zero in resample stem:[b]. The empirical selection frequency
 
@@ -150,16 +152,16 @@ Both coordinates and the coefficient norm are halved, while training residual er
 
 *Importance:* Essential (P0)
 
-The orthogonal calculation isolates pure shrinkage. The executable extension generates polynomial data with declared signal and noise, then compares unregularised, Ridge, and Lasso pipelines over fixed penalty grids. Its table exposes the selected penalty, protected-test RMSE, and number of non-zero coefficients; its plots connect coefficient paths and learning curves to the generalisation question.
+The orthogonal calculation isolates pure shrinkage. The executable extension generates polynomial data with declared signal and noise, then compares Ridge and Lasso pipelines over fixed penalty grids. Its table exposes the selected library penalty, protected-test RMSE, and number of non-zero coefficients; its plots show fitted signals and coefficient magnitude by polynomial degree. A coefficient-by-degree plot is not a penalty path or a learning curve.
 
 [#regularisation-summary-table]
 [%dynamic%open,python,fail-on-error=,output=table,table-caption="Cross-validated Ridge and Lasso evidence on polynomial data",table-description="Rows compare Ridge and Lasso. Columns report the selected penalty, protected-test RMSE, and number of non-zero polynomial coefficients."]
 ----
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LassoCV, RidgeCV
+from sklearn.linear_model import Lasso, Ridge
 from sklearn.metrics import root_mean_squared_error
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV, KFold, train_test_split
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
@@ -171,24 +173,25 @@ X_train, X_test, y_train, y_test = train_test_split(
     x, y, test_size=0.25, random_state=20260722
 )
 penalties = np.logspace(-4, 3, 18)
-ridge = make_pipeline(
-    PolynomialFeatures(12, include_bias=False),
-    StandardScaler(),
-    RidgeCV(alphas=penalties, cv=5),
+# Search wraps every learned preprocessing step: validation rows never fit the scaler.
+selection_cv = KFold(5, shuffle=True, random_state=20260722)
+ridge_search = GridSearchCV(
+    make_pipeline(PolynomialFeatures(12, include_bias=False), StandardScaler(), Ridge()),
+    {"ridge__alpha": penalties},
+    cv=selection_cv, scoring="neg_root_mean_squared_error", n_jobs=1,
 ).fit(X_train, y_train)
-lasso = make_pipeline(
-    PolynomialFeatures(12, include_bias=False),
-    StandardScaler(),
-    LassoCV(
-        alphas=np.logspace(-4, 0, 18),
-        cv=5,
-        max_iter=30000,
-        random_state=20260722,
+lasso_search = GridSearchCV(
+    make_pipeline(
+        PolynomialFeatures(12, include_bias=False), StandardScaler(),
+        Lasso(max_iter=100000, random_state=20260722),
     ),
+    {"lasso__alpha": np.logspace(-3, 0, 18)},
+    cv=selection_cv, scoring="neg_root_mean_squared_error", n_jobs=1,
 ).fit(X_train, y_train)
-
-ridge_model = ridge.named_steps["ridgecv"]
-lasso_model = lasso.named_steps["lassocv"]
+ridge = ridge_search.best_estimator_
+lasso = lasso_search.best_estimator_
+ridge_model = ridge.named_steps["ridge"]
+lasso_model = lasso.named_steps["lasso"]
 ridge_rmse = float(root_mean_squared_error(y_test, ridge.predict(X_test)))
 lasso_rmse = float(root_mean_squared_error(y_test, lasso.predict(X_test)))
 assert ridge_rmse < 1.5 and lasso_rmse < 1.5
@@ -196,7 +199,7 @@ assert np.count_nonzero(lasso_model.coef_) < len(lasso_model.coef_)
 
 regularisation_summary = pd.DataFrame(
     {
-        "selected penalty": [ridge_model.alpha_, lasso_model.alpha_],
+        "selected penalty": [ridge_model.alpha, lasso_model.alpha],
         "protected-test RMSE": [ridge_rmse, lasso_rmse],
         "non-zero coefficients": [
             int(np.count_nonzero(ridge_model.coef_)),
@@ -252,7 +255,7 @@ For the orthogonal stem:[\lambda=1] case, every coefficient and the coefficient 
 
 *Importance:* Essential (P0)
 
-Regularisation can trade a modest increase in bias for more stable prediction, but Ridge and Lasso encode different structural preferences. The coefficient path verifies shrinkage, while the validation evidence estimates predictive error under one declared resampling design. Minimum error and minimum coefficient norm answer different questions. The selected penalty remains uncertain, and correlated predictors make coordinate paths basis-dependent; this supports a predictive-stability claim, not a causal coefficient interpretation.
+Regularisation can trade a modest increase in bias for more stable prediction, but Ridge and Lasso encode different structural preferences. The coefficient-by-degree comparison illustrates shrinkage, while the protected test estimates predictive error under the declared sampling design. Minimum error and minimum coefficient norm answer different questions. The selected penalty remains uncertain, and correlated predictors make coordinate paths basis-dependent; this supports a predictive-stability claim, not a causal coefficient interpretation.
 
 Use the page toolbar to download the generated notebook and repeat the full split–select–evaluate procedure under a second seed.
 

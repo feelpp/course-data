@@ -23,6 +23,10 @@ Assessment follows the complete evidence chain from question and data to reprodu
 
 Mode A prohibits external generative AI. Mode B permits it with disclosure and independent verification. The assessment header is authoritative if a different mode is announced. Examination, hidden-test, confidential, personal, or embargoed material must never be uploaded to an external service.
 
+Control 1 assesses Essential (P0) data handling, uncertainty/metric interpretation, and safe baseline practice from Blocks 1–7; it does not require independent Core (P1) modelling. The two timed controls occupy 70 minutes in Block 8 and 55 minutes in Block 14. The 165-minute final examination is a separate assessment session.
+
+Individual project verification is scheduled separately from Block 14. The course lead announces appointments and staffing before project submission.
+
 == Outcome coverage
 
 [cols="3,1,1,1,1",options="header"]

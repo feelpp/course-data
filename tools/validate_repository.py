@@ -720,6 +720,41 @@ def validate_blueprint(curriculum: dict[str, Any], errors: list[str]) -> None:
             errors.append(f"External runtime asset is forbidden: {path.relative_to(ROOT)}")
 
 
+def validate_contact_time(curriculum: dict[str, Any], errors: list[str]) -> None:
+    """Count each classroom slot once, even when an activity is a control."""
+    activity_minutes: dict[str, int] = {}
+    assessment_slots: dict[str, list[tuple[int, int]]] = {}
+    for block in curriculum["schedule"]:
+        number = block["block"]
+        plan = block.get("contact_plan", [])
+        if not plan or any(
+            type(slot.get("minutes")) is not int or slot["minutes"] <= 0 for slot in plan
+        ):
+            errors.append(f"Block {number}: positive contact-time allocations are required")
+            continue
+        if sum(slot["minutes"] for slot in plan) != 120:
+            errors.append(f"Block {number}: contact-time allocation must total 120 minutes")
+        used_activities = set()
+        for slot in plan:
+            if activity := slot.get("activity"):
+                used_activities.add(activity)
+                activity_minutes[activity] = activity_minutes.get(activity, 0) + slot["minutes"]
+            if assessment := slot.get("assessment"):
+                assessment_slots.setdefault(assessment, []).append((number, slot["minutes"]))
+        if used_activities != set(block["activities"]):
+            errors.append(f"Block {number}: activity inventory disagrees with contact slots")
+    for activity in curriculum["learning_activities"]:
+        if activity_minutes.get(activity["id"], 0) != activity["duration_minutes"]:
+            errors.append(f"{activity['id']}: assigned minutes disagree with activity duration")
+    for assessment in curriculum["assessments"]:
+        if "contact_block" in assessment and "duration_minutes" in assessment:
+            expected = [(assessment["contact_block"], assessment["duration_minutes"])]
+            if assessment_slots.get(assessment["id"]) != expected:
+                errors.append(
+                    f"{assessment['id']}: timed control allocation disagrees with contract"
+                )
+
+
 def load_curriculum(errors: list[str]) -> tuple[dict[str, Any], set[str], set[str]]:
     curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))
     weights = sum(item["weight_percent"] for item in curriculum["assessments"])
@@ -734,6 +769,7 @@ def load_curriculum(errors: list[str]) -> tuple[dict[str, Any], set[str], set[st
     if len(concepts) != len(curriculum["concepts"]):
         errors.append("Curriculum concept identifiers are not unique")
     validate_blueprint(curriculum, errors)
+    validate_contact_time(curriculum, errors)
     validate_worked_example_release(curriculum, errors)
     return curriculum, concepts, outcomes
 
