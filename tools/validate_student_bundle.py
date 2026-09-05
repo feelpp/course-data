@@ -35,6 +35,18 @@ REQUIRED_PATHS = {
     "notebooks/assessment/mini-project.ipynb",
     "notebooks/assessment/control-2-specimen.ipynb",
     "notebooks/assessment/final-exam-specimen.ipynb",
+    "notebooks/assessment/practice-control-1.ipynb",
+    "notebooks/assessment/practice-control-2.ipynb",
+    "notebooks/assessment/practice-final.ipynb",
+    "datasets/teaching/rehearsal/cycles.csv",
+    "datasets/teaching/rehearsal/machines.csv",
+    "datasets/teaching/rehearsal/samples.csv",
+    "datasets/teaching/rehearsal/sites.csv",
+    "datasets/teaching/rehearsal/SOURCE.yml",
+    "datasets/teaching/rehearsal/MANIFEST.yml",
+    "templates/project-starter/README.md",
+    "templates/project-starter/.github/workflows/check.yml",
+    "templates/project-starter/uv.lock",
     "datasets/teaching/air-quality/MANIFEST.yml",
     "datasets/teaching/predictive-maintenance/MANIFEST.yml",
     "templates/result-card.md",
@@ -53,6 +65,7 @@ def expected_notebooks(curriculum: dict) -> tuple[set[str], dict[str, str]]:
         *curriculum["foundation_release"]["notebook_sources"],
         *curriculum["analytical_release"]["notebook_sources"],
         *curriculum["enrichment_release"]["page_notebook_sources"],
+        *curriculum["practice_release"]["notebook_sources"],
         *[specimen["source"] for specimen in curriculum["exercise_release"]["public_specimens"]],
     ]
     expected = {
@@ -85,6 +98,8 @@ def validate_bundle(bundle: Path = DEFAULT_BUNDLE) -> list[str]:
                 errors.append(f"Unsafe archive path: {name}")
             if FORBIDDEN_PARTS & {part.lower() for part in path.parts}:
                 errors.append(f"Private or quarantined path in bundle: {name}")
+            if {".venv", ".ruff_cache", ".pytest_cache", "__pycache__"} & set(path.parts):
+                errors.append(f"Local environment or cache in bundle: {name}")
         missing = REQUIRED_PATHS - set(names)
         if missing:
             errors.append(f"Bundle is missing required paths: {sorted(missing)}")

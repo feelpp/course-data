@@ -67,3 +67,7 @@ Order the defects by risk to the decision. Write a four-sentence release recomme
 Counts, identities, and schema checks are exact. Deterministic floating checks use `rtol=1e-7` and `atol=1e-10`; seeded metrics use absolute tolerance 0.01. Wall-clock speed is not graded. A plausible alternative defect or repair receives credit when it is tied to observable evidence and preserves the stated data and evaluation contract.
 
 This page and its downloadable notebook contain no answer key or task-specific hint. Current papers, solutions, hidden checks, point keys, and moderation records remain in the private assessment repository.
+
+== Runnable public rehearsal
+
+Use xref:assessment/practice-control-2.adoc[the independent public practice] for supplied synthetic inputs, response cells and a completeness check. This specification remains the assessment contract; the practice has no answer key and does not disclose live papers.

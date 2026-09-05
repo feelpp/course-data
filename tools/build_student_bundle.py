@@ -37,6 +37,7 @@ STUDENT_TEMPLATE_PATHS = (
     Path("templates/dataset-datasheet.md"),
     Path("templates/reproducibility-manifest.yml"),
     Path("templates/result-card.md"),
+    Path("templates/project-starter"),
 )
 
 BUNDLE_README = """# CSMI Data Processing and Mining — student bundle

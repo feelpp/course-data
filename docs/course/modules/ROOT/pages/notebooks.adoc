@@ -78,3 +78,13 @@ Documented notebook-native exception:
 The JAX artifact retains its reviewed student/instructor cell transformation and optional runtime, so it is not executed by the required Antora build. Install its separate CPU dependencies with `npm run setup:extensions`.
 
 The comparative dataframe-engine lesson and downstream course map are page-only exceptions: one requires optional Polars and machine-specific benchmark evidence; the other has no executable method. Their reason, owner, environment, and maintenance policies are visible on the pages and governed by `curriculum.yml`. The normal course setup and all Essential/Core (P0/P1) notebooks remain independent of JAX and Polars.
+
+== Runnable public practice
+
+Three independent rehearsal notebooks supplement the four specimen briefs. They include fresh synthetic inputs, response workspaces and completeness checks, with no solutions. Prepare the full student bundle before an offline rehearsal. Learner timing remains to be piloted.
+
+* xref:assessment/practice-control-1.adoc[Control 1 practice] — xref:attachment$assessment/practice-control-1.ipynb[notebook]
+* xref:assessment/practice-control-2.adoc[Control 2 practice] — xref:attachment$assessment/practice-control-2.ipynb[notebook]
+* xref:assessment/practice-final.adoc[Final examination practice] — xref:attachment$assessment/practice-final.ipynb[notebook]
+
+The bundle also contains `templates/project-starter/`, a minimal tested project scaffold. Follow its README and replace its toy input with an approved project dataset.

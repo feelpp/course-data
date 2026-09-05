@@ -48,3 +48,6 @@
 ** xref:assessment/mini-project.adoc[Mini-project]
 ** xref:assessment/control-2-specimen.adoc[Specimen Control 2]
 ** xref:assessment/final-exam-specimen.adoc[Specimen final exam]
+** xref:assessment/practice-control-1.adoc[Practise Control 1]
+** xref:assessment/practice-control-2.adoc[Practise Control 2]
+** xref:assessment/practice-final.adoc[Practise the final examination]

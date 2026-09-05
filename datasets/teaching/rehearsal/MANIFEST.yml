@@ -1,0 +1,21 @@
+schema_version: 1
+source_id: csmi-rehearsal-20260905
+licence: CC-BY-4.0
+generated_by: tools/build_rehearsal_data.py
+files:
+- path: cycles.csv
+  rows: 121
+  size_bytes: 6794
+  sha256: bc4a1fdc7ae527624f9cc5a0c8e94c4120d6b03a10e393e976d97eb384233851
+- path: machines.csv
+  rows: 20
+  size_bytes: 138
+  sha256: 2120392451807d301b62b217521aa658466b5ce07cc01c23c4d19b8031cd76f4
+- path: samples.csv
+  rows: 121
+  size_bytes: 8240
+  sha256: c5d02c4f581400569ac419a99762992b80fb89c20587149b6e6ced33d94f5f24
+- path: sites.csv
+  rows: 15
+  size_bytes: 168
+  sha256: 49553ced6e53fca84b2e218337f870bb0873d18d049261068bc9916c58254b37

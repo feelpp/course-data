@@ -26,7 +26,7 @@ A reliable analysis starts before modelling. First define what one row represent
 An *estimand* is the population quantity stem:[\theta(P)] that answers the stated question. An *estimate* stem:[\widehat\theta(\mathcal D)] is the value computed from observed data stem:[\mathcal D]. The distinction forces three early questions: what is the target population stem:[P], how was stem:[\mathcal D] obtained, and which transformations connect the raw records to stem:[\widehat\theta]?
 ****
 
-Read xref:foundations/mathematical-background.adoc[Mathematical background and error estimation] before the first modelling chapter; it defines the notation used across the site.
+Follow the minimum preparation in the xref:course-map.adoc[course map] before Block 4. Use xref:foundations/mathematical-background.adoc[Mathematical background and error estimation] as a reference when a notation or error concept is needed; completing the full reference route is not a prerequisite for the opening audit.
 
 == Audit sequence
 
