@@ -8,7 +8,7 @@ each one; no unpublished result is needed to teach the processing question.
 | Minutes | Activity | Facilitation cue |
 |---|---|---|
 | 0–10 | Welcome and course promise | Ask what makes a computed result checkable. |
-| 10–30 | Application tour | Ktirio 8 min, Sepsis 4, Organ on Chip 6, JNL-G 2. |
+| 10–30 | Application tour | Ktirio 6 min, Sepsis 4, Organ on Chip 6, JNL-G 4. |
 | 30–45 | CSMI connections | Invite students to place a data decision beside a related course. |
 | 45–70 | Pair exercise | Use the two Ktirio averages, then transfer to station means. |
 | 70–80 | Break | Keep the static table visible for returning students. |
@@ -30,7 +30,10 @@ Preparation checklist:
   missing-data figure (report PDF page 8) and patient-split protocol (slide 38);
   Lucas Sonntag's image preprocessing (slide 20) and held-out corona centre
   (slide 31); Seydina Mouhamed Diop's micro-to-macro question (slide 4) and
-  density maps (slide 19). Ask students to inspect the maps' colour scales.
+  density maps (slide 19); Wolali Koffi's before/after signal alignment (slide 19);
+  Valentin Levchenko's experiment-level records (slide 7) and coverage (slide 17).
+  Ask students to inspect the density maps' colour scales, the signal time axes
+  and the population covered by the available experiment statistics.
   These replace part of the application commentary within its twenty minutes.
   Present the internships as end-of-M1 examples, not assumed entry knowledge.
 - Record aggregate exit-ticket themes and setup obstacles after the session.
