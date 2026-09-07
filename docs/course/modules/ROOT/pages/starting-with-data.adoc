@@ -12,7 +12,7 @@ In this course, we turn measurements and simulation outputs into a conclusion an
 
 Our first session connects four applications from the instructor's work to the data decisions we will learn to make. The diagrams and small numbers below are teaching examples, not reported project measurements.
 
-The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/index.html[2026 CSMI M1 internships] show where these skills can lead by the end of the year. We use four students' reports and presentations below as discussion material; their specialised methods are not entry prerequisites.
+The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/index.html[2026 CSMI M1 internships] show where these skills can lead by the end of the year. We use six students' reports and presentations below as discussion material; their specialised methods are not entry prerequisites.
 
 image::introduction/applications.svg["Four teaching schematics: building tables and energy, patient observations before a prediction time, cell images converted to tracks and density, and electrical and cooling traces aligned in time. Each has a different independent unit.",width=1100]
 
@@ -103,6 +103,14 @@ A magnet/facility digital twin connects multiphysics models with electrical and 
 *Connection:* Scientific Computing and reduced models produce predictions; data processing aligns them with observations; HPC, SciML, and Optimization support larger models and future decisions.
 
 Project context: https://anr.fr/Projet-ANR-25-CE46-1157[ANR JNL-G description].
+
+.Two M1 internships at LNCMI: align signals, then describe experiments
+****
+* *Wolali Koffi, _New Structure for Operational Data in the LNCMI Database_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali-slides.pdf[Presentation PDF]. His dashboard compares Pupitre and PigBrother acquisitions with different formats, sampling rates and clocks. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali-slides.pdf#page=19[signals before and after temporal alignment (slide 19)]. *Discuss:* could an apparent physical discrepancy come from a clock offset? Why must we inspect timestamps and comparable sensor quantities before subtracting two arrays? The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali.pdf#page=10[processing description (report, PDF pages 10–11)] connects a common time base, lag estimation and downsampling for visualisation.
+* *Valentin Levchenko, _Statistical Characterisation of High-Field Magnet Operations_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin-slides.pdf[Presentation PDF]. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin-slides.pdf#page=7[move from acquisition files to experiment-level records (slide 7)]. A DuckDB pipeline links operational records to metadata and extracts field summaries and compressed trajectories. The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin-slides.pdf#page=17[coverage summary (slide 17)] reports 1,524 housing records and field statistics for 446 experiments. *Discuss:* what does one row represent, and which experiments can the available statistics describe? A missing link is not a zero measurement.
+
+Together, these stages illustrate the data work needed for JNL-G's model–observation comparisons: align measurements, preserve their experimental context, and state what a summary can support. They connect Database, time-series processing, statistics, Scientific Computing and performance. For a later discussion, use Valentin's https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin.pdf#page=7[time-above-threshold calculation (report, PDF page 7)]: when is counting samples a valid estimate of duration?
+****
 
 == 5. Where this course fits in CSMI
 
