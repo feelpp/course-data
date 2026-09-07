@@ -12,6 +12,8 @@ In this course, we turn measurements and simulation outputs into a conclusion an
 
 Our first session connects four applications from the instructor's work to the data decisions we will learn to make. The diagrams and small numbers below are teaching examples, not reported project measurements.
 
+The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/index.html[2026 CSMI M1 internships] show where these skills can lead by the end of the year. We use three students' reports and presentations below as discussion material; their specialised methods are not entry prerequisites.
+
 image::introduction/applications.svg["Four teaching schematics: building tables and energy, patient observations before a prediction time, cell images converted to tracks and density, and electrical and cooling traces aligned in time. Each has a different independent unit.",width=1100]
 
 == 1. Ktirio Urban Building: what are we averaging?
@@ -58,6 +60,13 @@ A patient timeline contains irregular observations and missing measurements. A p
 
 *Connection:* Random Models helps describe variability; this course builds an honest baseline and evaluation; SciML can extend the model later. A synthetic classroom result does not establish clinical usefulness.
 
+.From an M1 internship: Jean Heckel, _Early Sepsis Prediction in ICU Data_ (2026)
+****
+Start with the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean.pdf#page=8[missing-data figure (report, PDF page 8)]. A patient's hourly record can contain many unmeasured variables. *Discuss:* does a missing measurement mean zero? What could happen if we filled an earlier gap using a later observation?
+
+Then show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean-slides.pdf#page=38[stated evaluation protocol (slide 38)]: patients are kept separate between training and validation within set A, and set B is reserved for testing on another hospital. *Discuss:* why must all windows from one patient stay together? This links missing-data handling and time-aware preprocessing to an evaluation that matches the intended use.
+****
+
 == 3. Organ on Chip with Italy: from images to an observable
 
 A microscopy sequence can become cell positions, trajectories, velocities, density, or flux. Pixel size and time intervals determine physical units. Tracking choices affect the quantity compared with a mathematical model.
@@ -65,6 +74,14 @@ A microscopy sequence can become cell positions, trajectories, velocities, densi
 *Discuss:* if a tracker switches a cell's identity between frames, what happens to its estimated velocity? Are neighbouring frames independent experimental replications?
 
 *Connection:* image processing extracts observations; statistics characterises their uncertainty; Scientific Computing and PDE modelling predict observables for comparison. In this course, make the image-to-table transformation and experimental unit explicit.
+
+.Two complementary M1 internships: locating an observation and constructing an observable
+****
+* *Lucas Sonntag, _Fiducial-Based ROI Registration for Organ-on-Chip Imaging_ (2026).* Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf#page=20[chip image before and after preprocessing (slide 20)]. Detected landmarks connect image coordinates to chip coordinates. The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf#page=31[validation example (slide 31)] reserves the chip's corona centre as a point not used to fit the transformation. *Discuss:* would a small error on the fitted landmarks establish accuracy elsewhere? What changes when an error is expressed in pixels or micrometres?
+* *Seydina Mouhamed Diop, _Kernel Density Estimation for Organ-on-Chip Data_ (2026).* Use the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf#page=4[microscopic-to-macroscopic question (slide 4)] and https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf#page=19[cell positions and density maps (slide 19)]. A smoothing choice turns discrete locations into a field for comparison with a PDE model. *Discuss:* what does projecting 3D positions into 2D discard? Do equal colours in the three panels represent equal densities? Read each colour scale before comparing.
+
+These are complementary research tasks, not evidence of one already integrated pipeline. Diop's https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed.pdf#page=35[limitations (report, PDF page 35)] identify lost depth information, small SVGA cell counts, and one experiment without independent biological replicates. Connect the example to units, transformations, uncertainty, and validation; no KDE derivation is needed in the opening session.
+****
 
 == 4. JNL-G with LNCMI: align before comparing
 
