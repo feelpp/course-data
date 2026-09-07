@@ -3,14 +3,14 @@
 :page-course-concepts: DP-FND-01, DP-FND-02, DP-GOV-01, DP-EVAL-02
 :page-course-priority: P0
 :page-course-difficulty: D1
-:page-course-duration-minutes: 15
+:page-course-duration-minutes: 30
 :page-course-outcomes: LO1, LO2, LO5, LO10
 :page-course-prerequisites: None
 :page-course-assessed: no
 
 These applications build on xref:starting-with-data.adoc[what data are and why processing matters] and xref:csmi-connections.adoc[the CSMI connections].
 
-For this first tour, identify only *the scientific question, the form of the data, and one processing decision*. The internship reports provide material to revisit later; understanding their specialised methods is not a prerequisite.
+Choose one application for the opening session and return to the others as the course progresses. Identify *the scientific question, the form of the data, and one processing decision*. The internship reports provide material to revisit later; understanding their specialised methods is not a prerequisite.
 
 The four applications come from the instructor's work. The diagrams and small numbers below are teaching examples, not reported project measurements.
 

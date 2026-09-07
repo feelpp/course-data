@@ -26,12 +26,12 @@ We apply sampling and mean/quantile uncertainty in Block 4, revisit vectors and 
 
 |1
 |Data foundations, CSMI connections, applications, and first audit
-|Why this course and data basics 20; CSMI connections 10; Application tour 15; Pair audit 25; Break 10; Execute first audit 15; Route and assessment 15; Exit ticket and setup triage 10
+|Welcome and student examples 10; Data origins and forms 20; Challenges and temperature discussion 20; Break 10; CSMI connections 15; One pair audit 25; One application 10; Route, exit ticket and setup triage 10
 |0 min: None; the readiness diagnostic follows the first class.
 
 |2
 |DataFrames, types, units, tidy data, reshape, and grouping
-|Concepts and demonstration 30; Tidy-table lab 65; Assertions and source notes 15; Checkpoint 10
+|First notebook demonstration 10; Table concepts and demonstration 20; Tidy-table lab 65; Assertions and source notes 15; Checkpoint 10
 |35 min: Complete the 35-minute diagnostic and identify one setup or Python support need.
 
 |3

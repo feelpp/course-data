@@ -3,7 +3,7 @@
 :page-course-concepts: DP-FND-01, DP-FND-02, DP-GOV-01, DP-EVAL-02
 :page-course-priority: P0
 :page-course-difficulty: D1
-:page-course-duration-minutes: 20
+:page-course-duration-minutes: 40
 :page-course-outcomes: LO1, LO2, LO5, LO10
 :page-course-prerequisites: None
 :page-course-assessed: no
@@ -11,6 +11,8 @@
 *Why do we have this course?* Because scientific results and many decisions in society depend on how data are produced, organised and transformed. We will learn to turn data into results whose meaning, limits and computation we can explain and check.
 
 Start here with the meaning, forms and challenges of data. Then explore xref:csmi-connections.adoc[the place of this course in CSMI] and xref:data-in-action.adoc[applications and M1 internships]. You can follow this introduction with paper and a pen.
+
+In the first session, take time to discuss the figures, suggest examples and explain your reasoning before calculating. The application reports are references to explore progressively; there is no expectation to cover them all today.
 
 == 1. What are data, and what do they look like?
 

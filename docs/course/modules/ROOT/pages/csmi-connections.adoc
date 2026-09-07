@@ -3,7 +3,7 @@
 :page-course-concepts: DP-FND-01, DP-FND-02, DP-GOV-01, DP-EVAL-02
 :page-course-priority: P0
 :page-course-difficulty: D1
-:page-course-duration-minutes: 10
+:page-course-duration-minutes: 15
 :page-course-outcomes: LO1, LO2, LO5, LO10
 :page-course-prerequisites: None
 :page-course-assessed: no
