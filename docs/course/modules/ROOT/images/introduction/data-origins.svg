@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="570" viewBox="0 0 1100 570" role="img" aria-labelledby="title desc">
+<title id="title">From the world and from code to data</title>
+<desc id="desc">Four illustrated sources: instruments and sensors, cameras and microscopes, simulations and code, and people and digital activities. Each produces representations stored in different formats. All need context such as source, units, time and acquisition or model settings. These are teaching illustrations.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#52677d"/></marker></defs>
+<rect width="1100" height="570" rx="12" fill="#f1f5f9"/>
+<g font-family="Arial, sans-serif" fill="#16324f">
+<text x="28" y="42" font-size="28" font-weight="bold">Where do data come from?</text>
+<text x="28" y="72" font-size="18">Measured, observed, described or computed — each source records a view of the world.</text>
+<g transform="translate(24,96)">
+<rect width="251" height="325" rx="12" fill="#fff" stroke="#cbd5e1"/>
+<text x="18" y="32" font-size="20" font-weight="bold">Instruments &amp; sensors</text>
+<g stroke="#235d88" stroke-width="3" fill="none"><path d="M41 68V122a18 18 0 1 0 24 0V68a12 12 0 0 0-24 0Z" fill="#dbeafe"/><path d="M53 79V138"/><circle cx="53" cy="143" r="6" fill="#235d88"/><path d="M95 143H225M98 137V72M100 118L120 107L140 121L163 88L185 97L212 73"/></g>
+<text x="18" y="189" font-size="19">Readings over time</text>
+<text x="18" y="215" font-size="17">Temperature, current, position</text>
+<path d="M125 229V253" stroke="#52677d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="16" y="267" width="219" height="40" rx="7" fill="#e8f1fb"/>
+<text x="125" y="293" text-anchor="middle" font-size="18" font-weight="bold">Tables · CSV, Parquet</text>
+</g>
+<g transform="translate(291,96)">
+<rect width="251" height="325" rx="12" fill="#fff" stroke="#cbd5e1"/>
+<text x="18" y="32" font-size="20" font-weight="bold">Cameras &amp; microscopes</text>
+<rect x="38" y="65" width="174" height="90" rx="6" fill="#f3e8ff" stroke="#8750a3" stroke-width="3"/>
+<path d="M38 95H212M38 125H212M73 65V155M108 65V155M143 65V155M178 65V155" stroke="#cab1d7"/>
+<g fill="#8750a3"><ellipse cx="93" cy="98" rx="14" ry="9"/><ellipse cx="170" cy="123" rx="12" ry="18"/><circle cx="164" cy="82" r="9"/></g>
+<text x="18" y="189" font-size="19">Pixels, frames, channels</text>
+<text x="18" y="215" font-size="17">Cells, surfaces, satellite views</text>
+<path d="M125 229V253" stroke="#52677d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="16" y="267" width="219" height="40" rx="7" fill="#f3e8ff"/>
+<text x="125" y="293" text-anchor="middle" font-size="18" font-weight="bold">Images · PNG, TIFF</text>
+</g>
+<g transform="translate(558,96)">
+<rect width="251" height="325" rx="12" fill="#fff" stroke="#cbd5e1"/>
+<text x="18" y="32" font-size="20" font-weight="bold">Simulations &amp; code</text>
+<rect x="33" y="65" width="184" height="91" rx="6" fill="#e4f3ee" stroke="#16705d" stroke-width="3"/>
+<text x="45" y="121" font-size="27" font-family="monospace" fill="#16705d">&lt;/&gt;</text>
+<g stroke="#16705d" fill="none" stroke-width="1.5"><path d="M117 82H198V141H117ZM117 82L145 141L173 82L198 141M117 112H198M145 82V141M173 82V141"/></g>
+<text x="18" y="189" font-size="19">Computed arrays &amp; fields</text>
+<text x="18" y="215" font-size="17">Meshes, states, model outputs</text>
+<path d="M125 229V253" stroke="#52677d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="16" y="267" width="219" height="40" rx="7" fill="#e4f3ee"/>
+<text x="125" y="293" text-anchor="middle" font-size="18" font-weight="bold">Arrays · HDF5, VTK</text>
+</g>
+<g transform="translate(825,96)">
+<rect width="251" height="325" rx="12" fill="#fff" stroke="#cbd5e1"/>
+<text x="18" y="32" font-size="20" font-weight="bold">People &amp; digital activity</text>
+<circle cx="59" cy="88" r="17" fill="#ffedd5" stroke="#9a4b0a" stroke-width="3"/>
+<path d="M30 146V134a29 29 0 0 1 58 0V146" fill="#ffedd5" stroke="#9a4b0a" stroke-width="3"/>
+<rect x="113" y="65" width="98" height="91" rx="5" fill="#fff7ed" stroke="#9a4b0a" stroke-width="3"/>
+<path d="M130 86H190M130 104H181M130 122H193M130 140H170" stroke="#9a4b0a" stroke-width="3"/>
+<text x="18" y="189" font-size="19">Text, labels, event records</text>
+<text x="18" y="215" font-size="17">Surveys, annotations, logs</text>
+<path d="M125 229V253" stroke="#52677d" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="16" y="267" width="219" height="40" rx="7" fill="#ffedd5"/>
+<text x="125" y="293" text-anchor="middle" font-size="18" font-weight="bold">Records · text, JSON</text>
+</g>
+<path d="M149 422V446H951V422M416 422V446M683 422V446M550 446V463" stroke="#52677d" fill="none" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="24" y="477" width="1052" height="67" rx="10" fill="#16324f"/>
+<text x="550" y="503" text-anchor="middle" fill="#fff" font-size="21" font-weight="bold">Data + context = interpretable records</text>
+<text x="550" y="529" text-anchor="middle" fill="#e2e8f0" font-size="18">Source · units · time · location · acquisition or model settings</text>
+</g>
+</svg>

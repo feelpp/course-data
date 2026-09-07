@@ -1,0 +1,41 @@
+= Where this course fits in CSMI
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-FND-02, DP-GOV-01, DP-EVAL-02
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 10
+:page-course-outcomes: LO1, LO2, LO5, LO10
+:page-course-prerequisites: None
+:page-course-assessed: no
+
+After xref:starting-with-data.adoc[the introduction to data and their challenges], locate the skills we develop among the other CSMI courses.
+
+CSMI connects mathematical models, computation and observations. This course develops the data preparation and evaluation needed to make those connections work in practice.
+
+== Courses we connect with in S1
+
+[cols="2,3",options="header"]
+|===
+|Alongside this course in S1 |A shared question we practise here
+|Database |Do identifiers and joins preserve the intended observations?
+|Random Models |What variability and sampling limits affect a conclusion?
+|Scientific Computing 1 and 2 |Can we compare a computed quantity with a measurement in the same units?
+|Project 1 |Can a teammate understand, rerun and check our analysis?
+|HPC 1, Operating System, Algorithmics and C++ |What do data size, memory, storage and algorithm choices cost?
+|===
+
+== Where these skills lead
+
+Later, *Signal and Image Processing* develops ways to extract information from signals and images; *Optimization* supplies methods for fitting models; *Scientific Machine Learning* combines learning with scientific questions. Numerical methods, reduced models and uncertainty courses deepen model–data comparisons. Projects and internships bring these skills together.
+
+This is our teaching map, using the course names and sequence in the https://csmi.cemosis.fr/fr/csmi/csmi-2024-2028/index.html#_courses[CSMI 2024–2028 programme description]. Several S1 courses run alongside this one: you are not expected to have completed them already. We introduce the concepts we need as we use them.
+
+== Project 1 and our working tools
+
+*Project 1, 15 September:* we will work through the use of GitHub, Slack and Visual Studio Code together. Today's data discussion requires no installation.
+
+== Continue with applications
+
+Explore xref:data-in-action.adoc[four applications and the 2026 M1 internship reports]. For each, identify the data, one processing decision and a course that helps you make it.
+
+For our own fourteen teaching blocks, see the xref:course-map.adoc[semester route].

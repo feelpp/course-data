@@ -1,145 +1,126 @@
-= Four applications, one data question
+= Why data processing? From observations to trustworthy results
 :page-course-language: en
 :page-course-concepts: DP-FND-01, DP-FND-02, DP-GOV-01, DP-EVAL-02
 :page-course-priority: P0
 :page-course-difficulty: D1
-:page-course-duration-minutes: 30
+:page-course-duration-minutes: 20
 :page-course-outcomes: LO1, LO2, LO5, LO10
 :page-course-prerequisites: None
 :page-course-assessed: no
 
-In this course, we turn measurements and simulation outputs into a conclusion another scientist can check. Before computing, ask: *what does one observation represent, and what question can it answer?*
+*Why do we have this course?* Because scientific results and many decisions in society depend on how data are produced, organised and transformed. We will learn to turn data into results whose meaning, limits and computation we can explain and check.
 
-Our first session connects four applications from the instructor's work to the data decisions we will learn to make. The diagrams and small numbers below are teaching examples, not reported project measurements.
+Start here with the meaning, forms and challenges of data. Then explore xref:csmi-connections.adoc[the place of this course in CSMI] and xref:data-in-action.adoc[applications and M1 internships]. You can follow this introduction with paper and a pen.
 
-The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/index.html[2026 CSMI M1 internships] show where these skills can lead by the end of the year. We use six students' reports and presentations below as discussion material; their specialised methods are not entry prerequisites.
+== 1. What are data, and what do they look like?
 
-image::introduction/applications.svg["Four teaching schematics: building tables and energy, patient observations before a prediction time, cell images converted to tracks and density, and electrical and cooling traces aligned in time. Each has a different independent unit.",width=1100]
+Data are recorded representations of observations, descriptions or computed results: information encoded so that we can store, share and process it. They can come from a sensor, a questionnaire, an image, a document or a simulation. Recording them involves choices: what to observe, when, with what instrument or model, and at what precision.
 
-== 1. Ktirio Urban Building: what are we averaging?
+.Different origins, different representations, a shared need for context
+image::introduction/data-origins.svg["Sensors produce readings and time series; cameras and microscopes produce pixel arrays; code and simulations produce computed tables and fields; people and digital activities produce text and records. CSV, Parquet, PNG, TIFF, HDF5, VTK and JSON are examples of formats. Units, time, source and acquisition or model settings are needed to interpret them.",width=1100]
 
-A district model connects building geometry, materials, weather, and energy or comfort results. Building identifiers must match across tables. Power in kW, energy in kWh, and energy per floor area answer different questions.
+Write just *22* on a sheet. Is it a temperature, an age, a count or an identifier? Add *22 °C, sensor A, room R, 7 September 2026 at 10:00 local time*. We can now interpret the number as a temperature reading in a stated context.
 
-Consider two *synthetic* buildings:
+* The *value* is 22; the *variable* is temperature, expressed in °C.
+* The *observation* is one sensor reading at a given place and time.
+* The *metadata* describe how to interpret it: units, sensor location, time convention and acquisition method.
+* A *dataset* collects related observations. It should retain the context needed to use them.
 
-[cols="1,2,2,2",options="header"]
-|===
-|Building |Annual energy |Floor area |Energy per area
-|A |1,000 kWh |10 m² |100 kWh/m²
-|B |1,000 kWh |100 m² |10 kWh/m²
-|===
-
-*Predict before calculating:* what is the district's energy intensity? Discuss which building should receive more weight, and why.
+An observation can have several variables. A sensor identifier is a label even if it contains digits. A missing reading is a lack of information, not a temperature of zero.
 
 [%collapsible]
-.What the two calculations mean
+.Reading common data representations
 ====
-The mean building intensity is `(100 + 10) / 2 = 55 kWh/m²`: it weights buildings equally. District energy divided by district area is `2000 / 110 ≈ 18.18 kWh/m²`: it weights square metres equally. Choose the question before choosing the weights.
-
-[source,python]
-----
-energy_kwh = [1000, 1000]
-area_m2 = [10, 100]
-mean_building = sum(e / a for e, a in zip(energy_kwh, area_m2)) / 2
-district = sum(energy_kwh) / sum(area_m2)
-assert abs(mean_building - 55.0) < 1e-10
-assert abs(district - 2000 / 110) < 1e-10
-print(f"Equal buildings: {mean_building:.2f}; equal area: {district:.2f} kWh/m²")
-----
+[cols="2,3,3",options="header"]
+|===
+|Form |What we see |What gives it meaning?
+|Table |Rows and columns in a spreadsheet, CSV file or database |What one row represents; column types and units; identifiers.
+|Time series or signal |Values indexed by time |Timestamps, sampling intervals and gaps.
+|Image |A grid of pixel values, possibly with several channels |Pixel size, channel meaning and acquisition settings.
+|Text or structured record |A report, a log entry or a JSON document |Language, field definitions and source context.
+|Simulation output |An array or a field on a mesh |Coordinates, physical units, model parameters and numerical settings.
+|===
 ====
 
-*Connection:* Database gives us keys and joins; Scientific Computing produces physical predictions; HPC makes larger calculations feasible; this course checks what comparison the resulting table supports.
+These forms can overlap: a time series can be stored in a table. A file format tells us how values are encoded; it does not, by itself, tell us what they mean. Simulation outputs are data too, with assumptions and numerical errors to examine.
 
-Project context: https://arxiv.org/abs/2407.14535[the Ktirio framework paper].
+*Quick discussion:* name one dataset you have already encountered. What does one observation represent? Which piece of context would be lost if you shared only its numbers?
 
-.From an M1 internship: Lila Dayras, _Multiphysics urban thermo-hydraulic modeling_ (2026)
-****
-https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila-slides.pdf[Presentation PDF]
+== 2. Why is processing a critical scientific step?
 
-Lila's ground-temperature model connects weather time series, surface labels and physical properties to a heat equation solved in vertical columns beneath mesh cells. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila-slides.pdf#page=25[solar masks at three times (slide 25)], then the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila-slides.pdf#page=18[data-preprocessing steps (slide 18)].
+Processing means reading and organising data, checking their quality, converting representations or units, combining sources, and computing quantities that answer a question. Each transformation can preserve information, discard it or introduce an assumption.
 
-The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila.pdf#page=17[report's data preparation (PDF pages 17–19)] converts units and maps surface categories to material parameters, including a default for missing labels. *Discuss:* what changes physically if an unknown surface is assigned asphalt instead of grass? Does a correct heat-equation solver make that assumption correct? This connects pandas transformations and database joins to Scientific Computing and HPC. Hydraulic interactions are listed as future work in the presentation.
-****
+=== Imperfect, massive, or scarce: different challenges
 
-== 2. Sepsis: what was known at prediction time?
+.Data volume and data quality are separate questions
+image::introduction/data-challenges.svg["Three challenges: imperfect data have missing values, noise, errors, duplicates or bias; massive data require choices about memory, storage, movement and computation; scarce data require careful use of limited independent observations and explicit uncertainty. Many rows from one experiment do not create many independent experiments.",width=1100]
 
-A patient timeline contains irregular observations and missing measurements. A predictive task must state its observation window and future target window. Split patients or time periods according to the intended use before fitting imputation or a model.
+* *Imperfect data:* a missing measurement, an incorrect unit, sensor noise, a duplicated record or an unrepresentative sample require different responses. An unusual value may be a genuine event; inspect its source before deleting it.
+* *Massive data:* long sensor streams, image sequences and simulation fields can exceed memory or make transfers expensive. Choose what to read, store, compress and compute, and check what a summary discards.
+* *Scarce data:* a few expensive experiments or rare observed events limit what can be estimated and tested. Preserve information, examine uncertainty and avoid conclusions beyond the evidence.
 
-*Discuss:* if windows from one patient appear in both training and testing, does the score establish performance for a new patient? What if a column was recorded only after the outcome?
+These challenges coexist. A single experiment can generate millions of pixels while still providing only one independent experiment. More rows do not automatically remove bias or provide more independent evidence.
 
-*Connection:* Random Models helps describe variability; this course builds an honest baseline and evaluation; SciML can extend the model later. A synthetic classroom result does not establish clinical usefulness.
+=== A small example: the calculation runs, but what does it mean?
 
-.From an M1 internship: Jean Heckel, _Early Sepsis Prediction in ICU Data_ (2026)
-****
-https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean-slides.pdf[Presentation PDF]
+Consider this *synthetic* table of readings from four sensors in a room at the same stated time:
 
-Start with the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean.pdf#page=8[missing-data figure (report, PDF page 8)]. A patient's hourly record can contain many unmeasured variables. *Discuss:* does a missing measurement mean zero? What could happen if we filled an earlier gap using a later observation?
-
-Then show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean-slides.pdf#page=38[stated evaluation protocol (slide 38)]: patients are kept separate between training and validation within set A, and set B is reserved for testing on another hospital. *Discuss:* why must all windows from one patient stay together? This links missing-data handling and time-aware preprocessing to an evaluation that matches the intended use.
-****
-
-== 3. Organ on Chip with Italy: from images to an observable
-
-A microscopy sequence can become cell positions, trajectories, velocities, density, or flux. Pixel size and time intervals determine physical units. Tracking choices affect the quantity compared with a mathematical model.
-
-*Discuss:* if a tracker switches a cell's identity between frames, what happens to its estimated velocity? Are neighbouring frames independent experimental replications?
-
-*Connection:* image processing extracts observations; statistics characterises their uncertainty; Scientific Computing and PDE modelling predict observables for comparison. In this course, make the image-to-table transformation and experimental unit explicit.
-
-.Two complementary M1 internships: locating an observation and constructing an observable
-****
-* *Lucas Sonntag, _Fiducial-Based ROI Registration for Organ-on-Chip Imaging_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf[Presentation PDF]. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf#page=20[chip image before and after preprocessing (slide 20)]. Detected landmarks connect image coordinates to chip coordinates. The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf#page=31[validation example (slide 31)] reserves the chip's corona centre as a point not used to fit the transformation. *Discuss:* would a small error on the fitted landmarks establish accuracy elsewhere? What changes when an error is expressed in pixels or micrometres?
-* *Seydina Mouhamed Diop, _Kernel Density Estimation for Organ-on-Chip Data_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf[Presentation PDF]. Use the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf#page=4[microscopic-to-macroscopic question (slide 4)] and https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf#page=19[cell positions and density maps (slide 19)]. A smoothing choice turns discrete locations into a field for comparison with a PDE model. *Discuss:* what does projecting 3D positions into 2D discard? Do equal colours in the three panels represent equal densities? Read each colour scale before comparing.
-
-These are complementary research tasks, not evidence of one already integrated pipeline. Diop's https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed.pdf#page=35[limitations (report, PDF page 35)] identify lost depth information, small SVGA cell counts, and one experiment without independent biological replicates. Connect the example to units, transformations, uncertainty, and validation; no KDE derivation is needed in the opening session.
-****
-
-== 4. JNL-G with LNCMI: align before comparing
-
-A magnet/facility digital twin connects multiphysics models with electrical and cooling observations. Timestamps, sensor units, and operating regimes must agree before a model–measurement discrepancy can be interpreted.
-
-*Discuss:* power readings are recorded at unequal time intervals. Is their arithmetic mean sufficient to compute energy? State the interpolation assumption you would need between readings.
-
-*Connection:* Scientific Computing and reduced models produce predictions; data processing aligns them with observations; HPC, SciML, and Optimization support larger models and future decisions.
-
-Project context: https://anr.fr/Projet-ANR-25-CE46-1157[ANR JNL-G description].
-
-.Two M1 internships at LNCMI: align signals, then describe experiments
-****
-* *Wolali Koffi, _New Structure for Operational Data in the LNCMI Database_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali-slides.pdf[Presentation PDF]. His dashboard compares Pupitre and PigBrother acquisitions with different formats, sampling rates and clocks. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali-slides.pdf#page=19[signals before and after temporal alignment (slide 19)]. *Discuss:* could an apparent physical discrepancy come from a clock offset? Why must we inspect timestamps and comparable sensor quantities before subtracting two arrays? The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali.pdf#page=10[processing description (report, PDF pages 10–11)] connects a common time base, lag estimation and downsampling for visualisation.
-* *Valentin Levchenko, _Statistical Characterisation of High-Field Magnet Operations_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin-slides.pdf[Presentation PDF]. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin-slides.pdf#page=7[move from acquisition files to experiment-level records (slide 7)]. A DuckDB pipeline links operational records to metadata and extracts field summaries and compressed trajectories. The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin-slides.pdf#page=17[coverage summary (slide 17)] reports 1,524 housing records and field statistics for 446 experiments. *Discuss:* what does one row represent, and which experiments can the available statistics describe? A missing link is not a zero measurement.
-
-Together, these stages illustrate the data work needed for JNL-G's model–observation comparisons: align measurements, preserve their experimental context, and state what a summary can support. They connect Database, time-series processing, statistics, Scientific Computing and performance. For a later discussion, use Valentin's https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin.pdf#page=7[time-above-threshold calculation (report, PDF page 7)]: when is counting samples a valid estimate of duration?
-****
-
-== 5. Where this course fits in CSMI
-
-[cols="2,4",options="header"]
+[cols="1,2,1",options="header"]
 |===
-|Course connection |What we practise here
-|Database |Validate keys, joins, types, and queries before interpreting a table.
-|Random Models |Relate sampling and uncertainty to the population being studied.
-|Scientific Computing |Check units, conditioning, numerical error, and model–data comparisons.
-|Project 1 |Deliver understandable code, tests, provenance, and a reproducible result.
-|HPC |Measure memory, copies, I/O, and computation before scaling up.
-|Optimization |Connect a loss and penalty to the problem being solved.
-|SciML |Provide reliable data, baselines, and protected evaluation for more advanced models.
+|Sensor |Recorded temperature |Unit
+|A |22 |°C
+|B |71.6 |°F
+|C |20 |°C
+|D |Missing |°C
 |===
 
-Several S1 courses run alongside this one. We coordinate their ideas and introduce the prerequisites we need; you are not expected to have completed them already. The https://csmi.cemosis.fr/fr/csmi/csmi-2024-2028/index.html[CSMI programme description] explains the broader curriculum.
+*Question:* what is the mean of the available temperature readings, expressed in °C? Before calculating, identify two things that need attention.
 
-== 6. Your first audit
+[%collapsible]
+.A correct calculation needs a defined input
+====
+Convert B using `°C = (°F − 32) × 5/9`: 71.6 °F is 22 °C. The mean of the three available readings is therefore `(22 + 22 + 20) / 3 ≈ 21.3 °C`. Report that one of the four readings is missing.
 
-In pairs, open xref:foundations/data-lifecycle.adoc#worked-lifecycle-context[the station-temperature example]. One station supplies six observations; each of two others supplies two. Before running it, choose between the mean recorded observation and the mean of equally weighted stations.
+Averaging the three raw numbers gives about 37.9, with no consistent temperature unit. Replacing the missing reading by zero after conversion gives 16 °C, but invents a measurement. Both computations can run without a software error.
 
-The static example gives everything needed to discuss the question without installing software. Its executable version uses the bundled teaching data. Explain why the two results, approximately −1.810 °C and −2.072 °C, can both be correct.
+The 21.3 °C result describes the available readings at that time. Calling it the temperature of the whole room, or of the whole day, would require further evidence about sensor locations, calibration and times. Retain the original values and record the conversion and missing-data rule so another person can check the result.
+====
 
-Continue with the xref:course-map.adoc[semester route] and xref:assessment/overview.adoc[assessment guide]. Complete the xref:readiness-check.adoc[readiness diagnostic] before Block 2; use the xref:environment.adoc[environment guide] for setup.
+The same issue arises when a duplicated row receives extra weight, a date is misread, an image loses its physical scale, or two sensors use different clocks. A plot, model or decision inherits those choices. More computation cannot recover context that was discarded.
 
-== Exit ticket
+=== Why this matters for science and society
 
-Write three short answers:
+Digital instruments and software make data easier to produce, combine and reuse. Automated analyses can then carry the same processing choice into many downstream results and decisions. The need to check meaning, quality and limits grows with that reuse.
 
-. Choose one application and identify its independent unit: building, patient, experiment, or operating run.
-. Name a processing decision that could change the conclusion and one CSMI course connected to it.
-. State one setup difficulty or concept you want to practise next. Do not include personal or research data.
+[cols="1,3,3",options="header"]
+|===
+|Context |What data make possible |Why processing matters
+|Science |Test a hypothesis, compare a simulation with measurements, reuse an experiment |Preserve units, uncertainty and provenance so the comparison is meaningful and reproducible.
+|Society |Inform energy planning, transport or the allocation of public resources |Check whose situations are represented and explain the evidence and limits behind a decision.
+|People and organisations |Share observations and collaborate across teams |Control access to sensitive information and document transformations so results can be questioned and checked.
+|===
+
+For example, an energy estimate can inform a renovation choice; missing certain kinds of buildings can distort that estimate. The responsibility extends from reading a file to deciding what a result supports and who may be affected by its use.
+
+Our working sequence is *question → data and context → checked transformations → analysis → conclusion with limits*. We revisit earlier steps when a check reveals a problem.
+
+By the end of the course, you should be able to explain what a dataset represents, justify its transformations, evaluate an analysis against its question, and deliver a result someone else can reproduce. Python, tables, plots and models are the tools we will use to practise these skills.
+
+== Continue the introduction
+
+[[_5_where_this_course_fits_in_csmi]]
+*Next:* xref:csmi-connections.adoc[Where this course fits in CSMI] connects these foundations to the other courses and to Project 1.
+
+The xref:data-in-action.adoc[applications and internships] page then illustrates four uses of data:
+
+[[_1_ktirio_urban_building_what_are_we_averaging]]
+* xref:data-in-action.adoc#_1_ktirio_urban_building_what_are_we_averaging[Ktirio Urban Building: geometry, weather and energy].
+[[_2_sepsis_what_was_known_at_prediction_time]]
+* xref:data-in-action.adoc#_2_sepsis_what_was_known_at_prediction_time[Sepsis: patient observations over time].
+[[_3_organ_on_chip_with_italy_from_images_to_an_observable]]
+* xref:data-in-action.adoc#_3_organ_on_chip_with_italy_from_images_to_an_observable[Organ on Chip: images and cell observations].
+[[_4_jnl_g_with_lncmi_align_before_comparing]]
+* xref:data-in-action.adoc#_4_jnl_g_with_lncmi_align_before_comparing[JNL-G / LNCMI: sensor streams and experiment records].
+
+[[_6_your_first_audit]]
+Ready to practise? Open xref:foundations/data-lifecycle.adoc#worked-lifecycle-context[the first data audit]. Before computing, state what one observation represents and what question the calculation should answer.
