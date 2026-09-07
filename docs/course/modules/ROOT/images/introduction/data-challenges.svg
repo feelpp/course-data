@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="530" viewBox="0 0 1100 530" role="img" aria-labelledby="title desc">
+<title id="title">Imperfect, massive, scarce: three challenges for data processing</title>
+<desc id="desc">Illustrative diagrams: a table with a missing value and a suspect unit; stacks of data that exceed a small memory box; three independent experiments, one generating many repeated frames. Check quality, manage computation and state uncertainty. These challenges can occur together.</desc>
+<rect width="1100" height="530" rx="12" fill="#f1f5f9"/>
+<g font-family="Arial, sans-serif" fill="#16324f">
+<text x="28" y="42" font-size="28" font-weight="bold">More data is only one part of the story</text>
+<text x="28" y="73" font-size="18">Quality, volume and independent evidence are different questions.</text>
+<g transform="translate(24,97)">
+<rect width="340" height="330" rx="12" fill="#fff" stroke="#cbd5e1"/>
+<text x="22" y="37" font-size="25" font-weight="bold" fill="#9a4b0a">Imperfect</text>
+<rect x="32" y="63" width="276" height="109" rx="4" fill="#fff7ed" stroke="#d3b393"/>
+<path d="M32 99H308M32 135H308M116 63V172M220 63V172" stroke="#d3b393"/>
+<text x="52" y="88" font-size="18">A</text><text x="144" y="88" font-size="18">22</text><text x="243" y="88" font-size="18">°C</text>
+<text x="52" y="125" font-size="18">B</text><text x="137" y="125" font-size="18">71.6</text><text x="243" y="125" font-size="18" fill="#9a4b0a" font-weight="bold">°F</text>
+<text x="52" y="161" font-size="18">C</text><text x="136" y="161" font-size="18" fill="#9a4b0a">missing</text><text x="243" y="161" font-size="18">°C</text>
+<text x="22" y="210" font-size="18">Gaps, noise, errors, duplicates</text>
+<text x="22" y="236" font-size="18">Samples that miss part of reality</text>
+<path d="M22 257H318" stroke="#e2e8f0"/>
+<text x="22" y="284" font-size="18" font-weight="bold">Check source, units and coverage.</text>
+<text x="22" y="309" font-size="17">A missing value is not zero.</text>
+</g>
+<g transform="translate(380,97)">
+<rect width="340" height="330" rx="12" fill="#fff" stroke="#cbd5e1"/>
+<text x="22" y="37" font-size="25" font-weight="bold" fill="#235d88">Massive</text>
+<g fill="#dbeafe" stroke="#235d88" stroke-width="2"><rect x="37" y="65" width="97" height="24" rx="4"/><rect x="37" y="99" width="97" height="24" rx="4"/><rect x="37" y="133" width="97" height="24" rx="4"/><rect x="236" y="101" width="65" height="43" rx="5"/></g>
+<path d="M151 118H215l-10-8m10 8-10 8" stroke="#235d88" stroke-width="3" fill="none"/>
+<text x="50" y="183" font-size="16">files / streams</text><text x="238" y="171" font-size="16">memory</text>
+<text x="22" y="210" font-size="18">Long streams, images, large fields</text>
+<text x="22" y="236" font-size="18">Storage, transfer and compute costs</text>
+<path d="M22 257H318" stroke="#e2e8f0"/>
+<text x="22" y="284" font-size="18" font-weight="bold">Read, move and compute carefully.</text>
+<text x="22" y="309" font-size="17">Know what compression discards.</text>
+</g>
+<g transform="translate(736,97)">
+<rect width="340" height="330" rx="12" fill="#fff" stroke="#cbd5e1"/>
+<text x="22" y="37" font-size="25" font-weight="bold" fill="#16705d">Scarce</text>
+<g fill="#e4f3ee" stroke="#16705d" stroke-width="3"><circle cx="71" cy="92" r="22"/><circle cx="170" cy="92" r="22"/><circle cx="269" cy="92" r="22"/></g>
+<text x="71" y="98" text-anchor="middle" font-size="17">1</text><text x="170" y="98" text-anchor="middle" font-size="17">2</text><text x="269" y="98" text-anchor="middle" font-size="17">3</text>
+<text x="170" y="145" text-anchor="middle" font-size="18">Few independent experiments</text>
+<text x="170" y="173" text-anchor="middle" font-size="16">Each may generate many records</text>
+<text x="22" y="210" font-size="18">Expensive tests, rare observations</text>
+<text x="22" y="236" font-size="18">Limited evidence for generalisation</text>
+<path d="M22 257H318" stroke="#e2e8f0"/>
+<text x="22" y="284" font-size="18" font-weight="bold">Keep evidence; state uncertainty.</text>
+<text x="22" y="309" font-size="17">Match claims to what was observed.</text>
+</g>
+<rect x="24" y="446" width="1052" height="60" rx="10" fill="#16324f"/>
+<text x="550" y="472" text-anchor="middle" fill="#fff" font-size="20" font-weight="bold">One experiment can produce millions of pixels.</text>
+<text x="550" y="495" text-anchor="middle" fill="#e2e8f0" font-size="18">It still provides only one independent experiment. These challenges can coexist.</text>
+</g>
+</svg>

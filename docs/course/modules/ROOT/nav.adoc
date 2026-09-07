@@ -1,5 +1,7 @@
 * xref:index.adoc[Course home]
-* xref:starting-with-data.adoc[Start here: four applications]
+* xref:starting-with-data.adoc[Start here: why data processing?]
+* xref:csmi-connections.adoc[Place of the course in CSMI]
+* xref:data-in-action.adoc[Applications and M1 internships]
 * xref:course-contract.adoc[Course contract]
 * xref:course-map.adoc[Course map]
 * xref:environment.adoc[Computing environment]

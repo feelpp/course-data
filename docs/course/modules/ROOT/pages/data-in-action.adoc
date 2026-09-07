@@ -1,0 +1,136 @@
+= Data in action: applications and M1 internships
+:page-course-language: en
+:page-course-concepts: DP-FND-01, DP-FND-02, DP-GOV-01, DP-EVAL-02
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 30
+:page-course-outcomes: LO1, LO2, LO5, LO10
+:page-course-prerequisites: None
+:page-course-assessed: no
+
+These applications build on xref:starting-with-data.adoc[what data are and why processing matters] and xref:csmi-connections.adoc[the CSMI connections].
+
+Choose one application for the opening session and return to the others as the course progresses. Identify *the scientific question, the form of the data, and one processing decision*. The internship reports provide material to revisit later; understanding their specialised methods is not a prerequisite.
+
+The four applications come from the instructor's work. The diagrams and small numbers below are teaching examples, not reported project measurements.
+
+The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/index.html[2026 CSMI M1 internships] show where these skills can lead by the end of the year. We use six students' reports and presentations below as discussion material; their specialised methods are not entry prerequisites.
+
+image::introduction/applications.svg["Four teaching schematics: building tables and energy, patient observations before a prediction time, cell images converted to tracks and density, and electrical and cooling traces aligned in time. Each has a different independent unit.",width=1100]
+
+[[_1_ktirio_urban_building_what_are_we_averaging]]
+== 1. Ktirio Urban Building: what are we averaging?
+
+A district model connects building geometry, materials, weather, and energy or comfort results. Building identifiers must match across tables. Power in kW, energy in kWh, and energy per floor area answer different questions.
+
+Consider two *synthetic* buildings:
+
+[cols="1,2,2,2",options="header"]
+|===
+|Building |Annual energy |Floor area |Energy per area
+|A |1,000 kWh |10 m² |100 kWh/m²
+|B |1,000 kWh |100 m² |10 kWh/m²
+|===
+
+*Predict before calculating:* what is the district's energy intensity? Discuss which building should receive more weight, and why.
+
+[%collapsible]
+.What the two calculations mean
+====
+The mean building intensity is `(100 + 10) / 2 = 55 kWh/m²`: it weights buildings equally. District energy divided by district area is `2000 / 110 ≈ 18.18 kWh/m²`: it weights square metres equally. Choose the question before choosing the weights.
+
+[source,python]
+----
+energy_kwh = [1000, 1000]
+area_m2 = [10, 100]
+mean_building = sum(e / a for e, a in zip(energy_kwh, area_m2)) / 2
+district = sum(energy_kwh) / sum(area_m2)
+assert abs(mean_building - 55.0) < 1e-10
+assert abs(district - 2000 / 110) < 1e-10
+print(f"Equal buildings: {mean_building:.2f}; equal area: {district:.2f} kWh/m²")
+----
+====
+
+*Connection:* Database gives us keys and joins; Scientific Computing produces physical predictions; HPC makes larger calculations feasible; this course checks what comparison the resulting table supports.
+
+Project context: https://arxiv.org/abs/2407.14535[the Ktirio framework paper].
+
+.From an M1 internship: Lila Dayras, _Multiphysics urban thermo-hydraulic modeling_ (2026)
+****
+https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila-slides.pdf[Presentation PDF]
+
+Lila's ground-temperature model connects weather time series, surface labels and physical properties to a heat equation solved in vertical columns beneath mesh cells. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila-slides.pdf#page=25[solar masks at three times (slide 25)], then the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila-slides.pdf#page=18[data-preprocessing steps (slide 18)].
+
+The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila.pdf#page=17[report's data preparation (PDF pages 17–19)] converts units and maps surface categories to material parameters, including a default for missing labels. *Discuss:* what changes physically if an unknown surface is assigned asphalt instead of grass? Does a correct heat-equation solver make that assumption correct? This connects pandas transformations and database joins to Scientific Computing and HPC. Hydraulic interactions are listed as future work in the presentation.
+****
+
+[[_2_sepsis_what_was_known_at_prediction_time]]
+== 2. Sepsis: what was known at prediction time?
+
+A patient timeline contains irregular observations and missing measurements. A predictive task must state its observation window and future target window. Split patients or time periods according to the intended use before fitting imputation or a model.
+
+*Discuss:* if windows from one patient appear in both training and testing, does the score establish performance for a new patient? What if a column was recorded only after the outcome?
+
+*Connection:* Random Models helps describe variability; this course builds an honest baseline and evaluation; SciML can extend the model later. A synthetic classroom result does not establish clinical usefulness.
+
+.From an M1 internship: Jean Heckel, _Early Sepsis Prediction in ICU Data_ (2026)
+****
+https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean-slides.pdf[Presentation PDF]
+
+Start with the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean.pdf#page=8[missing-data figure (report, PDF page 8)]. A patient's hourly record can contain many unmeasured variables. *Discuss:* does a missing measurement mean zero? What could happen if we filled an earlier gap using a later observation?
+
+Then show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean-slides.pdf#page=38[stated evaluation protocol (slide 38)]: patients are kept separate between training and validation within set A, and set B is reserved for testing on another hospital. *Discuss:* why must all windows from one patient stay together? This links missing-data handling and time-aware preprocessing to an evaluation that matches the intended use.
+****
+
+[[_3_organ_on_chip_with_italy_from_images_to_an_observable]]
+== 3. Organ on Chip with Italy: from images to an observable
+
+A microscopy sequence can become cell positions, trajectories, velocities, density, or flux. Pixel size and time intervals determine physical units. Tracking choices affect the quantity compared with a mathematical model.
+
+*Discuss:* if a tracker switches a cell's identity between frames, what happens to its estimated velocity? Are neighbouring frames independent experimental replications?
+
+*Connection:* image processing extracts observations; statistics characterises their uncertainty; Scientific Computing and PDE modelling predict observables for comparison. In this course, make the image-to-table transformation and experimental unit explicit.
+
+.Two complementary M1 internships: locating an observation and constructing an observable
+****
+* *Lucas Sonntag, _Fiducial-Based ROI Registration for Organ-on-Chip Imaging_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf[Presentation PDF]. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf#page=20[chip image before and after preprocessing (slide 20)]. Detected landmarks connect image coordinates to chip coordinates. The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf#page=31[validation example (slide 31)] reserves the chip's corona centre as a point not used to fit the transformation. *Discuss:* would a small error on the fitted landmarks establish accuracy elsewhere? What changes when an error is expressed in pixels or micrometres?
+* *Seydina Mouhamed Diop, _Kernel Density Estimation for Organ-on-Chip Data_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf[Presentation PDF]. Use the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf#page=4[microscopic-to-macroscopic question (slide 4)] and https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf#page=19[cell positions and density maps (slide 19)]. A smoothing choice turns discrete locations into a field for comparison with a PDE model. *Discuss:* what does projecting 3D positions into 2D discard? Do equal colours in the three panels represent equal densities? Read each colour scale before comparing.
+
+These are complementary research tasks, not evidence of one already integrated pipeline. Diop's https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed.pdf#page=35[limitations (report, PDF page 35)] identify lost depth information, small SVGA cell counts, and one experiment without independent biological replicates. Connect the example to units, transformations, uncertainty, and validation; no KDE derivation is needed in the opening session.
+****
+
+[[_4_jnl_g_with_lncmi_align_before_comparing]]
+== 4. JNL-G with LNCMI: align before comparing
+
+A magnet/facility digital twin connects multiphysics models with electrical and cooling observations. Timestamps, sensor units, and operating regimes must agree before a model–measurement discrepancy can be interpreted.
+
+*Discuss:* power readings are recorded at unequal time intervals. Is their arithmetic mean sufficient to compute energy? State the interpolation assumption you would need between readings.
+
+*Connection:* Scientific Computing and reduced models produce predictions; data processing aligns them with observations; HPC, SciML, and Optimization support larger models and future decisions.
+
+Project context: https://anr.fr/Projet-ANR-25-CE46-1157[ANR JNL-G description].
+
+.Two M1 internships at LNCMI: align signals, then describe experiments
+****
+* *Wolali Koffi, _New Structure for Operational Data in the LNCMI Database_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali-slides.pdf[Presentation PDF]. His dashboard compares Pupitre and PigBrother acquisitions with different formats, sampling rates and clocks. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali-slides.pdf#page=19[signals before and after temporal alignment (slide 19)]. *Discuss:* could an apparent physical discrepancy come from a clock offset? Why must we inspect timestamps and comparable sensor quantities before subtracting two arrays? The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Koffi-Wolali.pdf#page=10[processing description (report, PDF pages 10–11)] connects a common time base, lag estimation and downsampling for visualisation.
+* *Valentin Levchenko, _Statistical Characterisation of High-Field Magnet Operations_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin-slides.pdf[Presentation PDF]. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin-slides.pdf#page=7[move from acquisition files to experiment-level records (slide 7)]. A DuckDB pipeline links operational records to metadata and extracts field summaries and compressed trajectories. The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin-slides.pdf#page=17[coverage summary (slide 17)] reports 1,524 housing records and field statistics for 446 experiments. *Discuss:* what does one row represent, and which experiments can the available statistics describe? A missing link is not a zero measurement.
+
+Together, these stages illustrate the data work needed for JNL-G's model–observation comparisons: align measurements, preserve their experimental context, and state what a summary can support. They connect Database, time-series processing, statistics, Scientific Computing and performance. For a later discussion, use Valentin's https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Levchenko-Valentin.pdf#page=7[time-above-threshold calculation (report, PDF page 7)]: when is counting samples a valid estimate of duration?
+****
+
+[[_6_your_first_audit]]
+== 5. Your first audit
+
+In pairs, open xref:foundations/data-lifecycle.adoc#worked-lifecycle-context[the station-temperature example]. One station supplies six observations; each of two others supplies two. Before running it, choose between the mean recorded observation and the mean of equally weighted stations.
+
+The static example gives everything needed to discuss the question without installing software. Its executable version uses the bundled teaching data. Explain why the two results, approximately −1.810 °C and −2.072 °C, can both be correct.
+
+Continue with the xref:course-map.adoc[semester route] and xref:assessment/overview.adoc[assessment guide]. Complete the xref:readiness-check.adoc[readiness diagnostic] before Block 2; use the xref:environment.adoc[environment guide] for setup.
+
+== Exit ticket
+
+Write three short answers:
+
+. Choose one application and identify its independent unit: building, patient, experiment, or operating run.
+. Name a processing decision that could change the conclusion and one CSMI course connected to it.
+. State one setup difficulty or concept you want to practise next. Do not include personal or research data.

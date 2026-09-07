@@ -16,7 +16,7 @@ question -> provenance -> validation -> transformation -> exploration -> modelli
 
 The emphasis is not only on obtaining a numerical answer. You will learn to make the data lineage, assumptions, transformations, failure modes, and limitations reviewable by another scientist or engineer.
 
-Start with xref:starting-with-data.adoc[four applications from current research]: Ktirio Urban Building, Sepsis, Organ on Chip with Italy, and JNL-G with LNCMI. Each begins with a data question you can discuss before installing software. Then try the xref:foundations/data-lifecycle.adoc[first data audit].
+Start with xref:starting-with-data.adoc[why we need data processing]: what data are, how they appear, and why quality, volume and transformations affect conclusions. Continue with xref:csmi-connections.adoc[the place of the course in CSMI], then xref:data-in-action.adoc[applications and M1 internships]: Ktirio Urban Building, Sepsis, Organ on Chip with Italy, and JNL-G with LNCMI. No installation is needed for the discussion or the xref:foundations/data-lifecycle.adoc[first data audit].
 
 == Course format
 
