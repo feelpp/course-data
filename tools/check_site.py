@@ -17,6 +17,8 @@ import yaml
 from nbclient import NotebookClient
 from nbclient.exceptions import CellExecutionError, CellTimeoutError, DeadKernelError
 
+from tools.validate_student_bundle import validate_bundle
+
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "public"
 PRIVATE_CELL_TAGS = {"solution", "instructor-only", "remove-cell"}
@@ -28,6 +30,7 @@ class LinkParser(HTMLParser):
         super().__init__()
         self.targets: list[str] = []
         self.jupyter_targets: list[str] = []
+        self.bundle_targets: list[str] = []
         self.external_runtime_targets: list[str] = []
         self.images_without_alt: list[str] = []
         self.ids: list[str] = []
@@ -49,6 +52,8 @@ class LinkParser(HTMLParser):
             self.has_skip_link = True
         if tag == "a" and "jupyter-download" in (attributes.get("class") or "").split():
             self.jupyter_targets.append(attributes.get("href") or "")
+        if tag == "a" and "download-btn" in (attributes.get("class") or "").split():
+            self.bundle_targets.append(attributes.get("href") or "")
         runtime_target = None
         if tag in {"script", "img", "source", "video", "audio"}:
             runtime_target = attributes.get("src")
@@ -225,6 +230,15 @@ def main() -> None:
     if not pages:
         raise SystemExit("Generated site contains no HTML pages")
     errors: list[str] = []
+    bundle = SITE / "course-data/_downloads/course-data-student-bundle.zip"
+    errors.extend(validate_bundle(bundle))
+    checksum = bundle.with_suffix(".zip.sha256")
+    if not checksum.is_file():
+        errors.append("Published student bundle checksum is missing")
+    elif bundle.is_file():
+        expected = f"{hashlib.sha256(bundle.read_bytes()).hexdigest()}  {bundle.name}"
+        if checksum.read_text().strip() != expected:
+            errors.append("Published student bundle checksum does not match its ZIP")
     sitemap = SITE / "sitemap.xml"
     expected_last_modified = "<lastmod>2026-01-01T00:00:00.000Z</lastmod>"
     if not sitemap.exists():
@@ -239,6 +253,12 @@ def main() -> None:
         parser = LinkParser()
         page_html = page.read_text(encoding="utf-8")
         parser.feed(page_html)
+        if len(parser.bundle_targets) != 1:
+            errors.append(f"{page.relative_to(SITE)}: one student bundle button is required")
+        for target in parser.bundle_targets:
+            destination = target_path(page, target)
+            if destination is None or destination.resolve() != bundle.resolve():
+                errors.append(f"{page.relative_to(SITE)}: bundle button has wrong target {target}")
         if parser.language != "en":
             errors.append(f"{page.relative_to(SITE)}: rendered document language must be en")
         if "fontawesome-icon-defs.js" not in page_html or "fontawesome.js" not in page_html:

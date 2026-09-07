@@ -19,7 +19,6 @@ FIXED_ZIP_TIME = (2026, 1, 1, 0, 0, 0)
 SOURCE_PATHS = (
     Path(".python-version"),
     Path("LICENSE.md"),
-    Path("README.md"),
     Path("curriculum.yml"),
     Path("pyproject.toml"),
     Path("uv.lock"),
@@ -42,19 +41,28 @@ STUDENT_TEMPLATE_PATHS = (
 
 BUNDLE_README = """# CSMI Data Processing and Mining — student bundle
 
-This immutable bundle contains solution-free notebooks, prepared teaching data,
+This bundle contains solution-free notebooks, prepared teaching data,
 public course pages, templates, and the locked Python environment.
 
 ## Start
 
 1. Install CPython 3.12 and `uv`.
-2. Run `uv sync --locked --all-groups` from this directory.
-3. Open a notebook below `notebooks/` in a Jupyter-compatible editor.
-4. Restart the kernel and run cells from top to bottom.
+2. Extract the ZIP into a new folder and open a terminal in that folder,
+   beside `pyproject.toml` and `uv.lock`. Run `uv sync --locked`.
+3. Open the folder in a Jupyter-compatible editor and select the Python 3.12
+   environment in this folder's `.venv` directory.
+4. Open `notebooks/foundations/data-lifecycle.ipynb`, restart the kernel,
+   and run all cells from top to bottom. Keep the notebook inside this folder
+   so it can find the bundled data. Record any errors for the instructor.
+
+Git, Node.js and npm are not required for this student workflow.
 
 Required P0/P1 work is CPU-only. After bundle preparation, assessments do not
 require network access, a personal service account, or a GPU. Verify every file
-against `MANIFEST.json`; the release page publishes the ZIP SHA-256.
+against `MANIFEST.json`, which also records the source commit. The Downloads
+page provides the ZIP SHA-256 beside the download. The website's current study
+bundle is updated with the site; retain your copy and checksum. Approved tagged
+releases are immutable and are listed separately on the GitHub Releases page.
 
 Optional kernel, calibration, tracking, and drift notebooks use the required
 CPU environment but are outside assessed completion. The optional JAX notebook
@@ -92,7 +100,10 @@ def iter_files(path: Path):
 
 
 def collect_files(student_notebooks: Path) -> dict[str, bytes]:
-    files: dict[str, bytes] = {"README-STUDENT.md": BUNDLE_README.encode()}
+    files: dict[str, bytes] = {
+        "README.md": BUNDLE_README.encode(),
+        "README-STUDENT.md": BUNDLE_README.encode(),
+    }
     for relative in SOURCE_PATHS:
         source = ROOT / relative
         if not source.exists():

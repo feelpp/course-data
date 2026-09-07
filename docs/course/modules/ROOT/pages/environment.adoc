@@ -5,30 +5,35 @@
 :page-course-difficulty: D1
 :page-course-duration-minutes: 20
 :page-course-outcomes: LO9
-:page-course-prerequisites: Basic shell and Git use
+:page-course-prerequisites: Basic shell use
 :page-course-assessed: yes
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
 
 The reference environment is CPython 3.12 on Ubuntu 24.04 LTS using CPU execution. macOS and Windows through WSL are supported, but a GPU is never required for Essential (P0) or Core (P1) work.
 
-== Install the environment
+== Download and extract
+
+Click the green *Download bundle* button in the top navigation, or use xref:downloads.adoc[Downloads and releases]. Extract the ZIP into a new folder. Keep its directory structure: notebooks use the data supplied beside them.
+
+Install CPython 3.12 and `uv`, and use a Jupyter-compatible editor. Open a terminal in the extracted folder, where `pyproject.toml` and `uv.lock` are located. Git, Node.js and npm are not needed for student setup.
+
+== Install the Python environment
 
 [source,shell]
 ----
-uv sync --locked --all-groups
-npm ci
+uv sync --locked
+uv run python -c "import numpy, pandas; print(numpy.__version__, pandas.__version__)"
 ----
 
-== Validate the repository
+== Run the first notebook
 
-[source,shell]
-----
-npm run check
-----
+Open the extracted folder in your Jupyter-compatible editor and select its `.venv` Python 3.12 environment as the notebook kernel. Open `notebooks/foundations/data-lifecycle.ipynb`, restart the kernel and run all cells in order. Keep the notebook in the extracted folder so it can find the bundled data.
 
-This command validates curriculum and content metadata, generates clean student notebooks, executes the instructor reference notebook, runs tests and linting, builds the Antora site, and checks the generated site.
+Record the command output and any errors for xref:readiness-check.adoc[the readiness check]. If setup fails, use the static xref:foundations/data-lifecycle.adoc[first-audit page] in class and bring the error message to the instructor for support.
+
+Git and project conventions are introduced through the project starter. Course authors who need to rebuild this website can follow the https://github.com/feelpp/course-data#readme[repository README].
 
 == Reproducibility rule
 
-A result is complete only when it can be regenerated from a clean checkout using pinned dependencies and checksum-verified data. Saved notebook output alone is not evidence of reproducibility.
+A result is complete only when it can be regenerated from the recorded bundle using pinned dependencies, checksum-verified data and a fresh kernel. Saved notebook output alone is not evidence of reproducibility.
