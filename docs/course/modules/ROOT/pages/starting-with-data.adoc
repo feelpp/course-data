@@ -113,14 +113,10 @@ By the end of the course, you should be able to explain what a dataset represent
 
 The xref:data-in-action.adoc[applications and internships] page then illustrates four uses of data:
 
-[[_1_ktirio_urban_building_what_are_we_averaging]]
-* xref:data-in-action.adoc#_1_ktirio_urban_building_what_are_we_averaging[Ktirio Urban Building: geometry, weather and energy].
-[[_2_sepsis_what_was_known_at_prediction_time]]
-* xref:data-in-action.adoc#_2_sepsis_what_was_known_at_prediction_time[Sepsis: patient observations over time].
-[[_3_organ_on_chip_with_italy_from_images_to_an_observable]]
-* xref:data-in-action.adoc#_3_organ_on_chip_with_italy_from_images_to_an_observable[Organ on Chip: images and cell observations].
-[[_4_jnl_g_with_lncmi_align_before_comparing]]
-* xref:data-in-action.adoc#_4_jnl_g_with_lncmi_align_before_comparing[JNL-G / LNCMI: sensor streams and experiment records].
+* [[_1_ktirio_urban_building_what_are_we_averaging]]xref:data-in-action.adoc#_1_ktirio_urban_building_what_are_we_averaging[Ktirio Urban Building: geometry, weather and energy].
+* [[_2_sepsis_what_was_known_at_prediction_time]]xref:data-in-action.adoc#_2_sepsis_what_was_known_at_prediction_time[Sepsis: patient observations over time].
+* [[_3_organ_on_chip_with_italy_from_images_to_an_observable]]xref:data-in-action.adoc#_3_organ_on_chip_with_italy_from_images_to_an_observable[Organ on Chip: images and cell observations].
+* [[_4_jnl_g_with_lncmi_align_before_comparing]]xref:data-in-action.adoc#_4_jnl_g_with_lncmi_align_before_comparing[JNL-G / LNCMI: sensor streams and experiment records].
 
 [[_6_your_first_audit]]
 Ready to practise? Open xref:foundations/data-lifecycle.adoc#worked-lifecycle-context[the first data audit]. Before computing, state what one observation represents and what question the calculation should answer.

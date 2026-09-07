@@ -25,7 +25,7 @@ We apply sampling and mean/quantile uncertainty in Block 4, revisit vectors and 
 |Block |Focus |Contact minutes (120 per row) |Preparation before this block
 
 |1
-|Applications, CSMI connections, question, and first audit
+|Data foundations, CSMI connections, applications, and first audit
 |Why this course and data basics 20; CSMI connections 10; Application tour 15; Pair audit 25; Break 10; Execute first audit 15; Route and assessment 15; Exit ticket and setup triage 10
 |0 min: None; the readiness diagnostic follows the first class.
 
