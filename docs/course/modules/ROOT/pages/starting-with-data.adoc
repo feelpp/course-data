@@ -12,7 +12,7 @@ In this course, we turn measurements and simulation outputs into a conclusion an
 
 Our first session connects four applications from the instructor's work to the data decisions we will learn to make. The diagrams and small numbers below are teaching examples, not reported project measurements.
 
-The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/index.html[2026 CSMI M1 internships] show where these skills can lead by the end of the year. We use three students' reports and presentations below as discussion material; their specialised methods are not entry prerequisites.
+The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/index.html[2026 CSMI M1 internships] show where these skills can lead by the end of the year. We use four students' reports and presentations below as discussion material; their specialised methods are not entry prerequisites.
 
 image::introduction/applications.svg["Four teaching schematics: building tables and energy, patient observations before a prediction time, cell images converted to tracks and density, and electrical and cooling traces aligned in time. Each has a different independent unit.",width=1100]
 
@@ -52,6 +52,15 @@ print(f"Equal buildings: {mean_building:.2f}; equal area: {district:.2f} kWh/m²
 
 Project context: https://arxiv.org/abs/2407.14535[the Ktirio framework paper].
 
+.From an M1 internship: Lila Dayras, _Multiphysics urban thermo-hydraulic modeling_ (2026)
+****
+https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila-slides.pdf[Presentation PDF]
+
+Lila's ground-temperature model connects weather time series, surface labels and physical properties to a heat equation solved in vertical columns beneath mesh cells. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila-slides.pdf#page=25[solar masks at three times (slide 25)], then the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila-slides.pdf#page=18[data-preprocessing steps (slide 18)].
+
+The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Dayras-Lila.pdf#page=17[report's data preparation (PDF pages 17–19)] converts units and maps surface categories to material parameters, including a default for missing labels. *Discuss:* what changes physically if an unknown surface is assigned asphalt instead of grass? Does a correct heat-equation solver make that assumption correct? This connects pandas transformations and database joins to Scientific Computing and HPC. Hydraulic interactions are listed as future work in the presentation.
+****
+
 == 2. Sepsis: what was known at prediction time?
 
 A patient timeline contains irregular observations and missing measurements. A predictive task must state its observation window and future target window. Split patients or time periods according to the intended use before fitting imputation or a model.
@@ -62,6 +71,8 @@ A patient timeline contains irregular observations and missing measurements. A p
 
 .From an M1 internship: Jean Heckel, _Early Sepsis Prediction in ICU Data_ (2026)
 ****
+https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean-slides.pdf[Presentation PDF]
+
 Start with the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean.pdf#page=8[missing-data figure (report, PDF page 8)]. A patient's hourly record can contain many unmeasured variables. *Discuss:* does a missing measurement mean zero? What could happen if we filled an earlier gap using a later observation?
 
 Then show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Heckel-Jean-slides.pdf#page=38[stated evaluation protocol (slide 38)]: patients are kept separate between training and validation within set A, and set B is reserved for testing on another hospital. *Discuss:* why must all windows from one patient stay together? This links missing-data handling and time-aware preprocessing to an evaluation that matches the intended use.
@@ -77,8 +88,8 @@ A microscopy sequence can become cell positions, trajectories, velocities, densi
 
 .Two complementary M1 internships: locating an observation and constructing an observable
 ****
-* *Lucas Sonntag, _Fiducial-Based ROI Registration for Organ-on-Chip Imaging_ (2026).* Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf#page=20[chip image before and after preprocessing (slide 20)]. Detected landmarks connect image coordinates to chip coordinates. The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf#page=31[validation example (slide 31)] reserves the chip's corona centre as a point not used to fit the transformation. *Discuss:* would a small error on the fitted landmarks establish accuracy elsewhere? What changes when an error is expressed in pixels or micrometres?
-* *Seydina Mouhamed Diop, _Kernel Density Estimation for Organ-on-Chip Data_ (2026).* Use the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf#page=4[microscopic-to-macroscopic question (slide 4)] and https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf#page=19[cell positions and density maps (slide 19)]. A smoothing choice turns discrete locations into a field for comparison with a PDE model. *Discuss:* what does projecting 3D positions into 2D discard? Do equal colours in the three panels represent equal densities? Read each colour scale before comparing.
+* *Lucas Sonntag, _Fiducial-Based ROI Registration for Organ-on-Chip Imaging_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf[Presentation PDF]. Show the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf#page=20[chip image before and after preprocessing (slide 20)]. Detected landmarks connect image coordinates to chip coordinates. The https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Sonntag-Lucas-slides.pdf#page=31[validation example (slide 31)] reserves the chip's corona centre as a point not used to fit the transformation. *Discuss:* would a small error on the fitted landmarks establish accuracy elsewhere? What changes when an error is expressed in pixels or micrometres?
+* *Seydina Mouhamed Diop, _Kernel Density Estimation for Organ-on-Chip Data_ (2026).* https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed.pdf[Report PDF] · https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf[Presentation PDF]. Use the https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf#page=4[microscopic-to-macroscopic question (slide 4)] and https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed-slides.pdf#page=19[cell positions and density maps (slide 19)]. A smoothing choice turns discrete locations into a field for comparison with a PDE model. *Discuss:* what does projecting 3D positions into 2D discard? Do equal colours in the three panels represent equal densities? Read each colour scale before comparing.
 
 These are complementary research tasks, not evidence of one already integrated pipeline. Diop's https://master-csmi.github.io/csmi-stages-2026/csmi-stages-2026/m1/_attachments/Diop-Seydina-Mouhamed.pdf#page=35[limitations (report, PDF page 35)] identify lost depth information, small SVGA cell counts, and one experiment without independent biological replicates. Connect the example to units, transformations, uncertainty, and validation; no KDE derivation is needed in the opening session.
 ****

@@ -24,7 +24,9 @@ Preparation checklist:
 - Keep the public diagrams, small tables, and expected first-audit output locally.
 - If showing a research result, verify that it is shareable and explain its data
   origin; do not present the synthetic examples as measured project performance.
-- Use the linked 2026 M1 internship material in the introduction: Jean Heckel's
+- Use the linked 2026 M1 internship material in the introduction: Lila Dayras's
+  ground-model solar masks (slide 25), preprocessing (slide 18) and unit/category
+  transformations (report PDF pages 17–19); Jean Heckel's
   missing-data figure (report PDF page 8) and patient-split protocol (slide 38);
   Lucas Sonntag's image preprocessing (slide 20) and held-out corona centre
   (slide 31); Seydina Mouhamed Diop's micro-to-macro question (slide 4) and
