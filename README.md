@@ -4,7 +4,9 @@ This repository contains the English course site, executable labs, exercises, pu
 
 The site is built with Antora and `feelpp/antora-ui`. Course concepts are classified by importance from P0 Essential to P3 Deferred, and every published learning artifact declares its outcomes, priority, difficulty, duration, prerequisites, and assessment status.
 
-## Quick start
+Students can use **Download bundle** on the [course website](https://feelpp.github.io/course-data/course-data/index.html). Extract the ZIP and follow its `README.md`; Git and Node.js are not needed to run the student notebooks.
+
+## Course author quick start
 
 Requirements:
 
@@ -42,7 +44,11 @@ npm run release:bundle
 npm run release:check
 ```
 
-Run one complete candidate preparation, including all 26 notebooks:
+Every site build includes the validated current student ZIP and its checksum under
+`public/course-data/_downloads/`, served by the green Antora UI download button.
+This current study bundle is separate from approved immutable tagged releases.
+
+Run one complete candidate preparation, including all 29 notebooks:
 
 ```sh
 npm run release:prepare

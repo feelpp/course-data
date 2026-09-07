@@ -50,10 +50,9 @@
             </a>
           </div>
         </div>
-        <div class="navbar-item has-dropdown is-hoverable download-item">
-          {{#with (get-install-page 'latest')}}
-            <div class="navbar-item"><a href="{{{relativize this.pub.url}}}" class="download-btn">Get Feel++</a></div>
-          {{/with}}
+        <div class="navbar-item download-item hide-for-print">
+          <a href="{{{relativize '/course-data/_downloads/course-data-student-bundle.zip'}}}"
+             class="download-btn" download="course-data-student-bundle.zip">Download bundle</a>
         </div>
         <div class="navbar-item"><a class="navbar-brand" href="https://www.cemosis.fr"><img class="cemosis-logo" src="{{{uiRootPath}}}/img/cemosis-logo.svg" alt="Cemosis"/></a></div>
         <div class="navbar-item"><a class="navbar-brand" href="https://www.cnrs.fr"><img class="cnrs-logo" src="{{{uiRootPath}}}/img/logo-cnrs.svg" alt="CNRS"/></a></div>

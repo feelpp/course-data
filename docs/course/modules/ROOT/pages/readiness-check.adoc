@@ -16,11 +16,17 @@ Allow 35 minutes without external AI assistance. Documentation for Python, NumPy
 
 == A. Environment and reproducible execution — 4 points
 
-. From a clean clone, run `uv sync --locked` and `npm ci`.
-. Run `uv run python -c "import numpy, pandas; print(numpy.__version__, pandas.__version__)"`.
-. Explain why a lock file and a clean run provide stronger evidence than “it works in my current notebook”.
+. Download the student bundle using the green *Download bundle* button or xref:downloads.adoc[the downloads page]. Extract it into a new folder and follow xref:environment.adoc[the Python setup]. No repository clone or npm installation is required. From the extracted folder, run:
++
+[source,shell]
+----
+uv sync --locked
+uv run python -c "import numpy, pandas; print(numpy.__version__, pandas.__version__)"
+----
+. Open `notebooks/foundations/data-lifecycle.ipynb` using the extracted folder's `.venv` kernel. Restart the kernel and run all cells in order. Record the version output and whether the notebook completes; preserve any error messages.
+. Explain what the Python lockfile fixes and what restarting and running every cell checks that saved notebook output does not.
 
-Award one point for each successful command and two points for a correct explanation mentioning both dependency identity and hidden state.
+Award one point for successful environment installation and the version output, one point for the notebook completing from a fresh kernel, and two points for the explanation: one for dependency identity and one for hidden state. Total: four points. If installation takes longer than the diagnostic session, record the obstacle and continue with B–E; complete A through the environment support route.
 
 == B. Core Python — 4 points
 
@@ -56,7 +62,7 @@ Construct a small DataFrame with columns `station`, `timestamp`, `variable`, and
 [cols="2,1,3,2",options="header"]
 |===
 |Domain below threshold |Target time |Required work |Completion evidence
-|Environment |45 min |Repeat xref:environment.adoc[the environment setup] from a clean clone. |Successful command summary; this route requires full completion.
+|Environment |45 min |Repeat xref:environment.adoc[the student setup] from a newly extracted bundle. |Successful command summary and fresh-kernel notebook run; this route requires full completion.
 |Core Python |90 min |Functions, collections, exceptions, imports, and small tests. |Completed practice set with two tests per function.
 |NumPy arrays |90 min |Shapes, masks, broadcasting, reductions, dtypes, vectorisation. |Array practice set plus shape explanations.
 |Tables |120 min |Selection, safe assignment, grouping, key uniqueness, tidy/long and wide forms. |A transformed toy table with assertions.

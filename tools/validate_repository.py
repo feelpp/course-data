@@ -994,10 +994,16 @@ def validate_executable_pages(errors: list[str]) -> None:
     site_command = package.get("scripts", {}).get("site", "")
     if site_command != (
         "uv run -- ./node_modules/.bin/antora --stacktrace site.yml && node tools/sanitise_site.mjs"
+        " && npm run site:bundle"
     ):
         errors.append(
-            "The Antora site command must use locked dependencies and local font sanitisation"
+            "The Antora site command must use locked dependencies, local font sanitisation "
+            "and the student bundle"
         )
+    if package.get("scripts", {}).get("site:bundle") != (
+        "uv run python -m tools.publish_student_bundle"
+    ):
+        errors.append("The site must build and validate its downloadable student bundle")
 
 
 def validate_notebooks(concepts: set[str], outcomes: set[str], errors: list[str]) -> None:

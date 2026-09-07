@@ -16,6 +16,17 @@
 .difficulty-d2 { background: #fff4d6; color: #684c00; }
 .difficulty-d3 { background: #f5e5f4; color: #66235e; }
 
+/* Reuse the Antora UI download button with readable contrast on green. */
+.navbar-item .download-btn {
+  background-color: #175f42;
+  white-space: nowrap;
+}
+
+.navbar-item .download-btn:hover {
+  background-color: #10462f;
+  color: #fff;
+}
+
 .skip-link {
   background: #fff;
   border: 3px solid #111;

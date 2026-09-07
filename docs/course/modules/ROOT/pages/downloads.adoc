@@ -10,24 +10,30 @@
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
 
-The current website is built from the `main` branch. Immutable candidate and teaching releases are published on the https://github.com/feelpp/course-data/releases[GitHub Releases page] only after the documented approval gates pass.
+Use the green *Download bundle* button in the top navigation to get all notebooks, data and Python dependencies for this version of the course. On a narrow screen, open the navigation menu to find the button. No GitHub account or repository clone is needed.
 
 == Student bundle
 
-Each approved release provides a checksum-addressed ZIP archive containing:
+link:_downloads/course-data-student-bundle.zip[Download the student bundle (ZIP)] · link:_downloads/course-data-student-bundle.zip.sha256[SHA-256 checksum]
+
+Extract the ZIP into a new folder, open `README.md`, and follow xref:environment.adoc[the student setup]. Keep the notebooks inside the extracted folder so they can find their data.
+
+The ZIP contains:
 
 * generated solution-free student notebooks;
 * deterministic teaching datasets and their licence/provenance records;
 * dataset, result, contract, reproducibility, feedback, and AI-log templates;
-* the Python and Node lockfiles plus environment instructions;
+* the Python lockfile and environment instructions;
 * the public schedule, rubrics, and specimen assessments;
 * a machine-readable manifest of every bundled file.
 
-The bundle contains no instructor solutions, hidden tests, live examinations, direct identifiers, or raw quarantined archive material. Verify its SHA-256 value against the release notes before use.
+The bundle contains no instructor solutions, hidden tests, live examinations, direct identifiers, or raw quarantined archive material. Verify its SHA-256 value against the linked checksum before use. Its `MANIFEST.json` records the source commit and every file's checksum.
 
 == Version policy
 
-Candidate tags use `v0.9-pilot.N`. The annual teaching release uses `v1.0-2026` after corrections, academic/accessibility approval, and the representative-user pilot. A tag is evidence of an approval decision; rebuilding the same tag with different content is forbidden.
+The button downloads the *current study bundle*, built together with the website. It is updated when the site changes, so retain your downloaded ZIP and checksum for reproducibility. It is available for preparation and practice before an approved teaching release.
+
+Immutable candidate and teaching releases are listed separately on the https://github.com/feelpp/course-data/releases[GitHub Releases page] after the documented approval gates pass. Candidate tags use `v0.9-pilot.N`. The annual teaching release uses `v1.0-2026` after corrections, academic/accessibility approval, and the representative-user pilot. A tag is evidence of an approval decision; rebuilding the same tag with different content is forbidden.
 
 The website may show newer draft content than the latest immutable release. Assessments always name the exact bundle and checksum that govern the sitting.
 
