@@ -1,4 +1,7 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const stylesheet = new URL('../public/_/css/site.css', import.meta.url);
 const sitemap = new URL('../public/sitemap.xml', import.meta.url);
@@ -48,6 +51,28 @@ sitemapSource = sitemapSource.replaceAll(
 );
 await writeFile(sitemap, sitemapSource, 'utf8');
 
+// Antora can preserve an asset's timestamp across builds. Use the stylesheet
+// content to refresh cached course styles in both previews and deployed pages.
+const siteDirectory = fileURLToPath(new URL('../public/', import.meta.url));
+const courseCss = await readFile(path.join(siteDirectory, '_/css/course.css'));
+const courseCssVersion = createHash('sha256').update(courseCss).digest('hex').slice(0, 12);
+async function versionCourseStyles(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const filename = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      await versionCourseStyles(filename);
+    } else if (entry.isFile() && entry.name.endsWith('.html')) {
+      const html = await readFile(filename, 'utf8');
+      const versioned = html.replace(
+        /(href="[^"?]*\/css\/course\.css)(?:\?[^"\s]*)?("|&quot;)/g,
+        `$1?v=${courseCssVersion}$2`,
+      );
+      if (versioned !== html) await writeFile(filename, versioned, 'utf8');
+    }
+  }
+}
+await versionCourseStyles(siteDirectory);
+
 console.log(
-  `Localised UI fonts and normalised ${lastModifiedEntries.length} sitemap timestamps`,
+  `Localised UI fonts, versioned course styles, and normalised ${lastModifiedEntries.length} sitemap timestamps`,
 );

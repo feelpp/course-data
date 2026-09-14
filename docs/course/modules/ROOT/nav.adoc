@@ -12,6 +12,7 @@
 * xref:feedback.adoc[Feedback and course improvement]
 * xref:downloads.adoc[Downloads and releases]
 * Foundations
+** xref:session-pandas.adoc[Class slides: Python to data tables]
 ** xref:foundations/python-pandas.adoc[Python and pandas: first steps]
 ** xref:foundations/pandas-sql.adoc[Groups, joins, and SQL]
 ** xref:foundations/data-lifecycle.adoc[Data lifecycle and audit]

@@ -20,6 +20,8 @@ Start with xref:starting-with-data.adoc[why we need data processing]: what data 
 
 == Course format
 
+The xref:session-pandas.adoc[class slides for 14 September] guide a two-hour session through pandas, groups and SQL, data lifecycle, and arrays. They assume familiarity with Python and introduce pandas from the first class's sensor table.
+
 The course carries 3 ECTS and contains 28 contact hours in fourteen two-hour blocks. Each block combines a concise concept lesson, a guided demonstration, an executable lab, and a short explanation and check of the result.
 
 == Importance labels

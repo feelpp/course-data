@@ -18,6 +18,8 @@
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
 
+xref:attachment$slides/20260914-pandas.html#19[Open class slides,role=class-slides-button,window=_blank]
+
 The unit of analysis must survive every selection, reshape, aggregation, and join. A table that looks plausible can still be wrong when keys multiply rows or when storage types hide semantic errors.
 
 The mathematical object behind a table matters: rows index observational units, columns represent variables, and keys define identity. Array and aggregation errors can therefore change the estimand, not merely the file layout. The notation follows xref:foundations/mathematical-background.adoc[Mathematical background and error estimation].

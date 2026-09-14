@@ -10,6 +10,8 @@
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
 
+*First time running a notebook?* Start with xref:environment.adoc[Computing environment: install uv, prepare the bundle and select its Python kernel in VS Code]. Use the bundle's `.venv` for all notebooks below.
+
 All foundation, analytical, assessment, and eligible optional notebooks are generated from their canonical AsciiDoc pages. One JAX notebook remains a documented notebook-native exception. Both paths clear outputs and execution counts, validate metadata, and write deterministic notebook files.
 
 == Working rule

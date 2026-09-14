@@ -14,12 +14,12 @@ Spend at most 35 minutes: environment 10, Python 7, arrays 5, table reasoning 8,
 
 == A. Environment — attempt, then record the result
 
-. Download the student bundle using the green *Download bundle* button or xref:downloads.adoc[the downloads page]. Extract it into a new folder and follow xref:environment.adoc[the Python setup]. No repository clone or npm installation is required. From the extracted folder, try:
+. Download the student bundle using the green *Download bundle* button or xref:downloads.adoc[the downloads page]. Extract it into a new folder and follow xref:environment.adoc[Computing environment: install uv, create `.venv` and choose its notebook kernel]. That page starts with the installation command if uv is not yet available. No repository clone or npm installation is required. From the folder containing `pyproject.toml` and `uv.lock`, try:
 +
 [source,shell]
 ----
 uv sync --locked
-uv run python -c "import numpy, pandas; print(numpy.__version__, pandas.__version__)"
+uv run --locked python -c "import numpy, pandas; print(numpy.__version__, pandas.__version__)"
 ----
 . Open `notebooks/foundations/python-pandas.ipynb` using the extracted folder's `.venv` kernel. Restart the kernel and run the supplied cells in order. The practice prompts will be completed in class; running the examples is enough for this setup check.
 . Record the version output and whether the run completes. If something fails or installation exceeds ten minutes, keep the error message, mark *blocked*, and continue with B–E. You may answer those on paper.

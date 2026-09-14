@@ -253,7 +253,10 @@ def main() -> None:
         parser = LinkParser()
         page_html = page.read_text(encoding="utf-8")
         parser.feed(page_html)
-        if len(parser.bundle_targets) != 1:
+        # Standalone attachments (such as class slides) keep the generic link,
+        # language and accessibility checks, but do not use the Antora UI.
+        uses_antora_ui = "_attachments" not in page.relative_to(SITE).parts
+        if uses_antora_ui and len(parser.bundle_targets) != 1:
             errors.append(f"{page.relative_to(SITE)}: one student bundle button is required")
         for target in parser.bundle_targets:
             destination = target_path(page, target)
@@ -261,7 +264,9 @@ def main() -> None:
                 errors.append(f"{page.relative_to(SITE)}: bundle button has wrong target {target}")
         if parser.language != "en":
             errors.append(f"{page.relative_to(SITE)}: rendered document language must be en")
-        if "fontawesome-icon-defs.js" not in page_html or "fontawesome.js" not in page_html:
+        if uses_antora_ui and (
+            "fontawesome-icon-defs.js" not in page_html or "fontawesome.js" not in page_html
+        ):
             errors.append(
                 f"{page.relative_to(SITE)}: local icon definitions and runtime must both load"
             )

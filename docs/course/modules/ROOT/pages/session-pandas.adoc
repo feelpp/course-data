@@ -1,0 +1,49 @@
+= Class slides: from Python to data tables
+:page-course-language: en
+:page-course-concepts: DP-TAB-01, DP-TAB-02, DP-TAB-03, DP-ARR-01, DP-QLT-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO2, LO3, LO8
+:page-course-prerequisites: Familiarity with Python; no previous pandas experience
+:page-course-assessed: no
+
+This two-hour session is for CSMI master's students who already know Python and are discovering pandas. We start with the four-sensor table from the first class and connect table operations to mathematical questions about means, weights and dimensions.
+
+* xref:attachment$slides/20260914-pandas.html[Open the slides in your browser]
+* xref:attachment$slides/20260914-pandas.pptx[Download the editable PowerPoint]
+
+Use the left and right arrows to navigate, *F* for full screen and *N* for the instructor's notes in French. Each part links to its course page. The slides are in English, as are the course pages.
+
+== Today's route
+
+[cols="1,3,4",options="header"]
+|===
+|Time |Course page |Class work
+|0–40 min
+|xref:foundations/python-pandas.adoc[Python and pandas: first steps]
+|DataFrames, selection, missing values and unit conversion. A short exercise on the familiar sensor table.
+|40–65 min
+|xref:foundations/pandas-sql.adoc[Groups, joins, and SQL]
+|One summary per sensor, sensor descriptions and a small SQLite query.
+|65–75 min
+|Break
+|Ten minutes.
+|75–95 min
+|xref:foundations/data-lifecycle.adoc[Data lifecycle and audit]
+|The question, the source, checks and decisions. Why changing weights changes a mean.
+|95–115 min
+|xref:foundations/tabular-data.adoc[Arrays, tables, and joins]
+|Array shapes, column means, wide and long tables, and expected join sizes.
+|115–120 min
+|Discussion
+|Explain the meaning of a row, the transformations and the result.
+|===
+
+The pages are fuller references: this session follows selected examples rather than every exercise. Python reminders remain available if needed. We spend class time on pandas and the meaning of the operations, with predictions before execution and short discussions after each result.
+
+== Working alongside the slides
+
+Use the green *Download bundle* button and follow xref:environment.adoc[Computing environment: install uv, create a virtual environment and open the notebook in VS Code]. The bundle supplies `pyproject.toml` and `uv.lock`; `uv sync --locked` installs the required libraries. The four corresponding notebooks are available from each page's download toolbar. Open notebooks inside the extracted bundle so the air-quality examples can find their data.
+
+Students whose environment is not ready can work in pairs and follow the demonstrations. Keep the original sensor values, create a separate Celsius column, and report both the mean and the number of available readings. The xref:foundations/python-pandas.adoc#_practise_on_the_same_table[first short exercise] changes only one reading.

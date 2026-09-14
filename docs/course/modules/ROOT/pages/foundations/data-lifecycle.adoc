@@ -18,6 +18,8 @@
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
 
+xref:attachment$slides/20260914-pandas.html#15[Open class slides,role=class-slides-button,window=_blank]
+
 A reliable analysis starts before modelling. First define what one row represents, where the data came from, what may be missing or duplicated, and which values are impossible.
 
 .Definition: Estimand and estimate

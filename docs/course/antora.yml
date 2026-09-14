@@ -13,6 +13,12 @@ asciidoc:
 ext:
   collector:
     - run:
+        command: node tools/build_lesson_slides.mjs
+      scan:
+        dir: build/slides
+        files: '**/*.html'
+        base: modules/ROOT/attachments/slides
+    - run:
         command: uv run python tools/generate_notebooks.py --mode student --output-dir build/notebooks/student
       scan:
         dir: build/notebooks/student

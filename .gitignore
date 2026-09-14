@@ -5,6 +5,7 @@
 # Local execution and audit scratch space.
 /.audit-work/
 .DS_Store
+~$*.pptx
 
 # Generated environments, notebooks, and site output.
 /.venv/

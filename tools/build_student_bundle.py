@@ -46,14 +46,88 @@ public course pages, templates, and the locked Python environment.
 
 ## Start
 
-1. Install CPython 3.12 and `uv`.
-2. Extract the ZIP into a new folder and open a terminal in that folder,
-   beside `pyproject.toml` and `uv.lock`. Run `uv sync --locked`.
-3. Open the folder in a Jupyter-compatible editor and select the Python 3.12
-   environment in this folder's `.venv` directory.
-4. Open `notebooks/foundations/python-pandas.ipynb`, restart the kernel,
-   and run all cells from top to bottom. Keep the notebook inside this folder
-   so it can find the bundled data. Record any errors for the instructor.
+Follow the [Computing environment guide](https://feelpp.github.io/course-data/course-data/environment.html)
+for the full steps, explanations, and help with common errors. A source copy
+is included at `docs/course/modules/ROOT/pages/environment.adoc`.
+
+### The names, before the commands
+
+- **uv** is the terminal program that manages Python and installs libraries.
+- A **virtual environment** (often shortened to **venv**) gives this project
+  its own Python and libraries, separate from those used by other projects.
+- **`uv venv`** is the command that creates it. **`.venv`** is the folder
+  it creates inside this bundle; your notebooks stay in `notebooks/`.
+- **`pyproject.toml`** is a text configuration file: it lists the required
+  Python version and libraries. TOML is its format, not a Python command.
+- **`uv.lock`** is a text file recording exact library versions, including
+  the other libraries they need (their dependencies). It is not a command.
+- **`.python-version`** contains `3.12`, the Python version uv should select.
+
+For example, `"pandas==2.3.1"` in `pyproject.toml` asks for exactly that pandas
+version. The lockfile records the full set of libraries to install. Keep both
+supplied files together; uv uses them to prepare `.venv` for this course.
+
+### 1. Install uv for your user account
+
+Open Terminal (macOS/Linux) or PowerShell (Windows), and try `uv --version`.
+If uv is missing, use the command for your operating system below, without
+`sudo` or an administrator terminal. Python is not needed for this step.
+
+macOS/Linux (also WSL, from its Linux terminal):
+
+```sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Windows PowerShell:
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Close and reopen your terminal, then check `uv --version` again. Restart
+VS Code too if it was open during installation. These are the commands from
+the [official uv installer](https://docs.astral.sh/uv/getting-started/installation/).
+
+### 2. Prepare the bundle's Python environment
+
+Extract the ZIP into a new folder. In VS Code, use **File > Open Folder** to
+open the folder directly containing `pyproject.toml` and `uv.lock`, then
+**Terminal > New Terminal**. Run the following in that terminal:
+
+```sh
+uv venv --python 3.12
+uv sync --locked
+uv run --locked python -c "import sys; print(sys.version); print(sys.executable)"
+uv run --locked python -c "import numpy, pandas; print(numpy.__version__, pandas.__version__)"
+```
+
+A virtual environment is a separate Python and set of libraries for this
+project, kept in `.venv`. uv downloads Python 3.12 if needed. Skip `uv venv`
+if this folder already has a working environment; `uv sync` also creates it
+when missing. `pyproject.toml` lists the required libraries and `uv.lock`
+records their exact versions. `--locked` keeps those supplied versions.
+The initial downloads need Internet access. Your notebooks stay outside `.venv`.
+
+Check that Python is 3.12.x and its path is inside this folder's `.venv`.
+`uv run` uses that environment without a separate activation command.
+
+### 3. Run the first notebook
+
+In VS Code, install the **Python** and **Jupyter** extensions from Microsoft.
+Open `notebooks/foundations/python-pandas.ipynb`. In its top-right kernel
+selector, choose **Python Environments** (possibly under **Select Another
+Kernel**), then Python 3.12 from this folder's `.venv`. The kernel is the
+Python process that executes the cells; `ipykernel` is already supplied.
+
+Restart the kernel and run all cells from top to bottom. The worked sensor
+example gives a mean of about 21.3 degrees Celsius, with 3 available readings
+and 1 missing reading. Keep the notebook inside this folder so later lessons
+can find the bundled data. Record any errors for the instructor.
+
+Next time, reopen this folder and select the same kernel. You do not need to
+reinstall uv or recreate `.venv`. Keep Windows and WSL environments separate:
+if using WSL, open the bundle in a VS Code window connected to WSL.
 
 Git, Node.js and npm are not required for this student workflow.
 

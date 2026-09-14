@@ -18,6 +18,12 @@
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
 
+xref:attachment$slides/20260914-pandas.html#10[Open class slides,role=class-slides-button,window=_blank]
+
+Before running this notebook, follow xref:environment.adoc[Computing environment: install uv and prepare the bundle's Python environment]. Use the same `.venv` kernel as in the first pandas notebook.
+
+*Connection with your database course:* `groupby` plays the role of `GROUP BY`, and `merge` combines tables like a `JOIN`. We use these familiar ideas to learn pandas. The final example shows how a real SQL query supplies a DataFrame for further processing in Python. The operations are related, but details such as the treatment of missing join keys can differ.
+
 Start after xref:foundations/python-pandas.adoc[the first Python–pandas session]. First, practise selecting a column and one sensor's rows again. Only continue when those operations make sense. This session introduces two questions: how can we summarise repeated readings, and how can we attach a sensor's description to its readings?
 
 We keep the four sensors from the first class and add a second reading time. These are still invented measurements. We introduce each operation on a displayed table, predict its result, run it, and discuss what changed. The final database demonstration is a short connection to the Database course; it requires no database installation.

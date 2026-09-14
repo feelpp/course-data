@@ -18,6 +18,8 @@
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
 
+xref:attachment$slides/20260914-pandas.html#3[Open class slides,role=class-slides-button,window=_blank]
+
 We return to *the same four-sensor table used in the first class*, in xref:starting-with-data.adoc#_a_small_example_the_calculation_runs_but_what_does_it_mean[the introductory temperature example]. We already discussed its meaning on paper. Now we will carry out that reasoning in Python, one small step at a time. No previous pandas experience is required.
 
 [cols="1,2,1",options="header"]
@@ -31,7 +33,7 @@ We return to *the same four-sensor table used in the first class*, in xref:start
 
 The four readings are synthetic, from four sensors in a room at the same stated time. The question is unchanged: *what is the mean of the available temperatures, in degrees Celsius?* Before touching the computer, recall why we cannot average the three raw numbers or replace D's missing value by zero.
 
-Use the notebook download in the page toolbar, or open `notebooks/foundations/python-pandas.ipynb` in the xref:downloads.adoc[student bundle]. Choose the bundle's `.venv` kernel. If setup is blocked, follow the displayed results or work with a partner, then bring the error for support. We explain the code together; running all cells is not the same as understanding them.
+Use the notebook download in the page toolbar, or open `notebooks/foundations/python-pandas.ipynb` in the xref:downloads.adoc[student bundle]. *Before your first run*, follow xref:environment.adoc[Computing environment: install uv, prepare Python and select the notebook kernel]. It explains how to create `.venv` and install the libraries from the bundle. If setup is blocked, follow the displayed results or work with a partner, then bring the error for support. We explain the code together; running all cells is not the same as understanding them.
 
 == Today's pace
 

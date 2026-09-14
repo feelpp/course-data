@@ -1,0 +1,1375 @@
+{
+  "title": "From Python to useful data tables",
+  "date": "2026-09-14",
+  "audience": "CSMI master students who know Python and are new to pandas",
+  "language": "en",
+  "durationMinutes": 120,
+  "width": 1280,
+  "height": 720,
+  "publicBase": "https://feelpp.github.io/course-data/course-data/",
+  "slides": [
+    {
+      "title": "From Python to useful data tables",
+      "chapter": "CSMI · 14 September 2026",
+      "minutes": 2,
+      "page": "foundations/python-pandas.html",
+      "anchor": "",
+      "elements": [
+        {
+          "kind": "text",
+          "text": "pandas, SQL and the meaning of a result",
+          "x": 72,
+          "y": 284,
+          "w": 1136,
+          "h": 70,
+          "size": 38
+        },
+        {
+          "kind": "text",
+          "text": "We know Python. Today we learn how to work with tables.",
+          "x": 72,
+          "y": 405,
+          "w": 1136,
+          "h": 90,
+          "size": 30
+        },
+        {
+          "kind": "text",
+          "text": "One question throughout: what does one row represent?",
+          "x": 72,
+          "y": 535,
+          "w": 1136,
+          "h": 90,
+          "size": 31,
+          "bold": true,
+          "color": "green"
+        }
+      ],
+      "notes": "Présenter la séance comme une découverte de pandas pour des mathématiciens qui connaissent déjà Python. Aucun rappel détaillé des variables, boucles ou fonctions. Partir du sens des lignes et des colonnes.",
+      "cover": true
+    },
+    {
+      "title": "Our route for two hours",
+      "chapter": "Today",
+      "minutes": 2,
+      "page": "foundations/python-pandas.html",
+      "anchor": "",
+      "elements": [
+        {
+          "kind": "text",
+          "text": "00–40 min    Python and pandas: first steps",
+          "x": 72,
+          "y": 178,
+          "w": 1136,
+          "h": 48,
+          "size": 31,
+          "href": "https://feelpp.github.io/course-data/course-data/foundations/python-pandas.html"
+        },
+        {
+          "kind": "text",
+          "text": "40–65 min    Groups, joins, and SQL",
+          "x": 72,
+          "y": 244,
+          "w": 1136,
+          "h": 48,
+          "size": 31,
+          "href": "https://feelpp.github.io/course-data/course-data/foundations/pandas-sql.html"
+        },
+        {
+          "kind": "text",
+          "text": "65–75 min    Break",
+          "x": 72,
+          "y": 310,
+          "w": 1136,
+          "h": 48,
+          "size": 31
+        },
+        {
+          "kind": "text",
+          "text": "75–95 min    Data lifecycle and audit",
+          "x": 72,
+          "y": 376,
+          "w": 1136,
+          "h": 48,
+          "size": 31,
+          "href": "https://feelpp.github.io/course-data/course-data/foundations/data-lifecycle.html"
+        },
+        {
+          "kind": "text",
+          "text": "95–115 min  Arrays, tables, and joins",
+          "x": 72,
+          "y": 442,
+          "w": 1136,
+          "h": 48,
+          "size": 31,
+          "href": "https://feelpp.github.io/course-data/course-data/foundations/tabular-data.html"
+        },
+        {
+          "kind": "text",
+          "text": "115–120 min  Explain what we have learned",
+          "x": 72,
+          "y": 508,
+          "w": 1136,
+          "h": 48,
+          "size": 31
+        },
+        {
+          "kind": "text",
+          "text": "Follow the selected examples today. The pages remain fuller references.",
+          "x": 72,
+          "y": 581,
+          "w": 1136,
+          "h": 44,
+          "size": 24
+        }
+      ],
+      "notes": "Les liens sont cliquables. Les durées comprennent explications, démonstrations et échanges. Ce parcours de séance sélectionne des passages des quatre pages ; il ne demande pas de terminer tous leurs exercices aujourd’hui. Si le groupe a besoin de plus de temps, donner la priorité à la pratique pandas et reprendre les prolongements à la séance suivante."
+    },
+    {
+      "title": "The same four sensors, now in pandas",
+      "chapter": "1 · First steps",
+      "minutes": 5,
+      "page": "foundations/python-pandas.html",
+      "anchor": "_2_put_the_familiar_table_into_pandas",
+      "elements": [
+        {
+          "kind": "table",
+          "values": [
+            [
+              "sensor",
+              "temperature",
+              "unit"
+            ],
+            [
+              "A",
+              "22",
+              "°C"
+            ],
+            [
+              "B",
+              "71.6",
+              "°F"
+            ],
+            [
+              "C",
+              "20",
+              "°C"
+            ],
+            [
+              "D",
+              "missing",
+              "°C"
+            ]
+          ],
+          "x": 72,
+          "y": 180,
+          "w": 555,
+          "h": 302,
+          "size": 28,
+          "widths": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "DataFrame: a table with named columns.\nSeries: one labelled column.",
+          "x": 670,
+          "y": 186,
+          "w": 540,
+          "h": 110,
+          "size": 30
+        },
+        {
+          "kind": "text",
+          "text": "One row = one sensor reading.\nThe row index is not the sensor ID.",
+          "x": 670,
+          "y": 325,
+          "w": 540,
+          "h": 105,
+          "size": 30
+        },
+        {
+          "kind": "code",
+          "text": "import pandas as pd\nmeasurements = pd.read_csv(StringIO(csv_text))",
+          "x": 72,
+          "y": 515,
+          "w": 1136,
+          "h": 96,
+          "size": 27
+        }
+      ],
+      "notes": "Ouvrir le notebook au bloc « Put the familiar table into pandas ». L’import de StringIO et csv_text sont fournis dans la page : StringIO permet de lire le petit texte CSV comme un fichier. Sur disque, pd.read_csv(\"measurements.csv\") jouerait le même rôle. Montrer measurements, .shape et .dtypes. La colonne temperature est numérique, mais son type ne dit rien de son unité physique. Ce sont exactement les valeurs discutées au premier cours."
+    },
+    {
+      "title": "Select columns and rows by name",
+      "chapter": "1 · First steps",
+      "minutes": 5,
+      "page": "foundations/python-pandas.html",
+      "anchor": "_3_read_one_column_then_select_one_sensor",
+      "elements": [
+        {
+          "kind": "code",
+          "text": "measurements[\"temperature\"]\n\nmask = measurements[\"sensor\"] == \"B\"\nmeasurements.loc[mask, [\"sensor\", \"temperature\", \"unit\"]]",
+          "x": 72,
+          "y": 180,
+          "w": 1136,
+          "h": 188,
+          "size": 27
+        },
+        {
+          "kind": "text",
+          "text": "The mask contains one Boolean per row: False, True, False, False.",
+          "x": 72,
+          "y": 407,
+          "w": 1136,
+          "h": 62,
+          "size": 29
+        },
+        {
+          "kind": "text",
+          "text": ".loc[row selection, column selection]",
+          "x": 72,
+          "y": 489,
+          "w": 1136,
+          "h": 62,
+          "size": 34,
+          "bold": true,
+          "color": "green"
+        },
+        {
+          "kind": "text",
+          "text": "Try: select the rows whose unit is °C. How many rows should remain?",
+          "x": 72,
+          "y": 576,
+          "w": 1136,
+          "h": 48,
+          "size": 26
+        }
+      ],
+      "notes": "Définir le masque booléen une fois. Faire prévoir trois lignes, y compris D dont la valeur manque. Expliquer que la liste de noms conserve une table, alors que measurements[\"temperature\"] produit une Series. pandas aligne les Series selon leurs index ; ici le masque vient de la même table."
+    },
+    {
+      "title": "A missing value is not zero",
+      "chapter": "1 · First steps",
+      "minutes": 4,
+      "page": "foundations/python-pandas.html",
+      "anchor": "_4_locate_what_is_missing",
+      "elements": [
+        {
+          "kind": "code",
+          "text": "measurements[\"temperature\"].isna()\nmeasurements.loc[measurements[\"temperature\"].isna()]",
+          "x": 72,
+          "y": 180,
+          "w": 1136,
+          "h": 114,
+          "size": 28
+        },
+        {
+          "kind": "table",
+          "values": [
+            [
+              "What do we count?",
+              "Result"
+            ],
+            [
+              "Rows: len(measurements)",
+              "4"
+            ],
+            [
+              "Available temperatures: .count()",
+              "3"
+            ],
+            [
+              "Missing temperatures: .isna().sum()",
+              "1"
+            ]
+          ],
+          "x": 72,
+          "y": 328,
+          "w": 1136,
+          "h": 214,
+          "size": 28,
+          "widths": [
+            3,
+            1
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Do not replace D by 0 °C without a scientific reason.",
+          "x": 72,
+          "y": 574,
+          "w": 1136,
+          "h": 56,
+          "size": 30,
+          "bold": true,
+          "color": "green"
+        }
+      ],
+      "notes": "La cellule vide du CSV est lue comme NaN dans cette colonne numérique. isna() sert à repérer les valeurs manquantes ; ne pas comparer une valeur à NaN avec ==. count() compte les valeurs présentes, contrairement à len. La température de D est inconnue, et non nulle."
+    },
+    {
+      "title": "Convert units and keep the recorded values",
+      "chapter": "1 · First steps",
+      "minutes": 6,
+      "page": "foundations/python-pandas.html",
+      "anchor": "_5_add_a_celsius_column_without_losing_the_recorded_values",
+      "elements": [
+        {
+          "kind": "code",
+          "text": "converted = measurements.copy()\nconverted[\"temperature_c\"] = converted[\"temperature\"]\nis_fahrenheit = converted[\"unit\"] == \"°F\"\nconverted.loc[is_fahrenheit, \"temperature_c\"] = (\n    converted.loc[is_fahrenheit, \"temperature\"] - 32\n) * 5 / 9",
+          "x": 72,
+          "y": 180,
+          "w": 1136,
+          "h": 258,
+          "size": 27
+        },
+        {
+          "kind": "text",
+          "text": "71.6 °F becomes 22 °C. D remains missing.",
+          "x": 72,
+          "y": 478,
+          "w": 1136,
+          "h": 57,
+          "size": 34,
+          "bold": true,
+          "color": "green"
+        },
+        {
+          "kind": "text",
+          "text": "The expression acts on selected values together. No Python loop is needed.",
+          "x": 72,
+          "y": 563,
+          "w": 1136,
+          "h": 70,
+          "size": 28
+        }
+      ],
+      "notes": "Lire les six lignes en reliant chaque opération à son intention. La copie préserve les valeurs enregistrées. La nouvelle colonne a une seule unité. .loc permet de modifier explicitement les cellules voulues et évite une affectation ambiguë en plusieurs sélections. Faire afficher les quatre colonnes ensemble. Une opération vectorisée applique ici la même formule à toutes les valeurs sélectionnées."
+    },
+    {
+      "title": "Compute a mean, then say what it means",
+      "chapter": "1 · First steps",
+      "minutes": 4,
+      "page": "foundations/python-pandas.html",
+      "anchor": "_worked_example_finish_the_calculation_from_the_first_class",
+      "elements": [
+        {
+          "kind": "code",
+          "text": "mean_c = converted[\"temperature_c\"].mean()\ncount = converted[\"temperature_c\"].count()",
+          "x": 72,
+          "y": 180,
+          "w": 1136,
+          "h": 112,
+          "size": 29
+        },
+        {
+          "kind": "text",
+          "text": "(22 + 22 + 20) / 3 ≈ 21.3 °C",
+          "x": 72,
+          "y": 336,
+          "w": 1136,
+          "h": 89,
+          "size": 48,
+          "bold": true,
+          "color": "green"
+        },
+        {
+          "kind": "text",
+          "text": "Mean of the three available readings. One reading is missing.",
+          "x": 72,
+          "y": 460,
+          "w": 1136,
+          "h": 75,
+          "size": 31
+        },
+        {
+          "kind": "text",
+          "text": "This is a summary of this table, not an estimate of every place in the room.",
+          "x": 72,
+          "y": 567,
+          "w": 1136,
+          "h": 64,
+          "size": 27
+        }
+      ],
+      "notes": "pandas mean() ignore les valeurs manquantes par défaut. Le résultat exact est 64/3 ; 21.3 est un arrondi à une décimale, pas une précision de mesure démontrée. Demander ce qui changerait si D valait réellement 0 °C : 16 °C avec quatre valeurs. Une valeur manquante peut aussi être liée au fonctionnement du capteur."
+    },
+    {
+      "title": "Your turn: change one reading",
+      "chapter": "1 · Practice · 9 minutes",
+      "minutes": 9,
+      "page": "foundations/python-pandas.html",
+      "anchor": "_practise_on_the_same_table",
+      "elements": [
+        {
+          "kind": "text",
+          "text": "Work in pairs in the first pandas notebook.",
+          "x": 72,
+          "y": 180,
+          "w": 1136,
+          "h": 57,
+          "size": 32
+        },
+        {
+          "kind": "text",
+          "text": "1. Make a copy of the original table.",
+          "x": 72,
+          "y": 270,
+          "w": 1136,
+          "h": 57,
+          "size": 32
+        },
+        {
+          "kind": "text",
+          "text": "2. Change C from 20 °C to 18 °C using .loc.",
+          "x": 72,
+          "y": 349,
+          "w": 1136,
+          "h": 57,
+          "size": 32
+        },
+        {
+          "kind": "text",
+          "text": "3. Recompute the Celsius column and the mean.",
+          "x": 72,
+          "y": 428,
+          "w": 1136,
+          "h": 57,
+          "size": 32
+        },
+        {
+          "kind": "text",
+          "text": "4. Report the mean, the available count and the missing count.",
+          "x": 72,
+          "y": 507,
+          "w": 1136,
+          "h": 77,
+          "size": 31
+        }
+      ],
+      "notes": "Laisser environ six minutes de manipulation et trois minutes d’échange. Faire prévoir une baisse de 2/3 °C avant le calcul. Vérifier que les étudiants repartent bien de la copie modifiée, et non de converted calculé auparavant. La correction sera sur la diapositive suivante. Ceux sans environnement prêt peuvent raisonner à deux sur la table et suivre la démonstration."
+    },
+    {
+      "title": "Check the change, not only the final number",
+      "chapter": "1 · Debrief",
+      "minutes": 3,
+      "page": "foundations/python-pandas.html",
+      "anchor": "_practise_on_the_same_table",
+      "elements": [
+        {
+          "kind": "code",
+          "text": "trial = measurements.copy()\ntrial.loc[trial[\"sensor\"] == \"C\", \"temperature\"] = 18.0",
+          "x": 72,
+          "y": 180,
+          "w": 1136,
+          "h": 118,
+          "size": 27
+        },
+        {
+          "kind": "text",
+          "text": "After converting trial to Celsius:",
+          "x": 72,
+          "y": 340,
+          "w": 1136,
+          "h": 55,
+          "size": 31
+        },
+        {
+          "kind": "text",
+          "text": "(22 + 22 + 18) / 3 ≈ 20.7 °C",
+          "x": 72,
+          "y": 420,
+          "w": 1136,
+          "h": 85,
+          "size": 45,
+          "bold": true,
+          "color": "green"
+        },
+        {
+          "kind": "text",
+          "text": "Still 4 rows, 3 available values and 1 missing value.\nThe original table still contains 20 °C for C.",
+          "x": 72,
+          "y": 543,
+          "w": 1136,
+          "h": 92,
+          "size": 29
+        }
+      ],
+      "notes": "Faire expliquer pourquoi 20.7 correspond à 62/3. Reprendre les lignes de conversion de la diapositive 6 en remplaçant measurements par trial. Ne pas suggérer qu’une valeur calculée se met automatiquement à jour lorsque la table source est modifiée. Transition : plusieurs lignes peuvent maintenant provenir du même capteur."
+    },
+    {
+      "title": "Group readings into one row per sensor",
+      "chapter": "2 · Groups, joins, and SQL",
+      "minutes": 6,
+      "page": "foundations/pandas-sql.html",
+      "anchor": "_2_one_summary_for_each_sensor",
+      "elements": [
+        {
+          "kind": "text",
+          "text": "Add 11:00 readings: A = 24, B = 24, C = 22, D = 21 °C.",
+          "x": 72,
+          "y": 172,
+          "w": 1136,
+          "h": 53,
+          "size": 29
+        },
+        {
+          "kind": "table",
+          "values": [
+            [
+              "sensor",
+              "rows",
+              "available",
+              "mean °C"
+            ],
+            [
+              "A",
+              "2",
+              "2",
+              "23"
+            ],
+            [
+              "B",
+              "2",
+              "2",
+              "23"
+            ],
+            [
+              "C",
+              "2",
+              "2",
+              "21"
+            ],
+            [
+              "D",
+              "2",
+              "1",
+              "21"
+            ]
+          ],
+          "x": 72,
+          "y": 250,
+          "w": 610,
+          "h": 280,
+          "size": 28,
+          "widths": [
+            1,
+            1,
+            1.3,
+            1.3
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Input: one sensor at one time.\nOutput: one summary per sensor.\n\nSQL connection: GROUP BY.",
+          "x": 740,
+          "y": 274,
+          "w": 464,
+          "h": 234,
+          "size": 28
+        },
+        {
+          "kind": "code",
+          "text": "converted.groupby(\"sensor\")[\"temperature_c\"].mean()",
+          "x": 72,
+          "y": 565,
+          "w": 1136,
+          "h": 67,
+          "size": 28
+        }
+      ],
+      "notes": "Ouvrir la deuxième page, exécuter son entrée à huit lignes et sa conversion : B est enregistré à 75.2 °F à 11 h, soit 24 °C. Les quatre lignes de 10 h sont inchangées. Le couple (sensor, time_local) identifie une lecture pour ce seul jour ; il faudrait une date sur plusieurs jours. Montrer ensuite agg avec size, count et mean dans le notebook. Demander quel serait le sens d’un groupby(\"time_local\"). Relier groupby au GROUP BY vu en bases de données. Ici on apprend son utilisation dans pandas, pas le principe des bases de données."
+    },
+    {
+      "title": "Join each reading to its sensor description",
+      "chapter": "2 · Groups, joins, and SQL",
+      "minutes": 7,
+      "page": "foundations/pandas-sql.html",
+      "anchor": "pandas-guided-join",
+      "elements": [
+        {
+          "kind": "table",
+          "values": [
+            [
+              "sensor",
+              "position"
+            ],
+            [
+              "A",
+              "window"
+            ],
+            [
+              "B",
+              "window"
+            ],
+            [
+              "C",
+              "door"
+            ],
+            [
+              "D",
+              "door"
+            ]
+          ],
+          "x": 72,
+          "y": 180,
+          "w": 397,
+          "h": 268,
+          "size": 27,
+          "widths": [
+            1,
+            1.4
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "8 readings + 4 sensor descriptions\n\nExpected result: 8 enriched readings.",
+          "x": 527,
+          "y": 196,
+          "w": 681,
+          "h": 150,
+          "size": 31
+        },
+        {
+          "kind": "text",
+          "text": "merge corresponds to a SQL JOIN.\nHere: many readings, one description per sensor.",
+          "x": 527,
+          "y": 364,
+          "w": 681,
+          "h": 96,
+          "size": 27
+        },
+        {
+          "kind": "code",
+          "text": "joined = converted.merge(\n    sensors, on=\"sensor\", how=\"left\",\n    validate=\"many_to_one\", indicator=True\n)",
+          "x": 72,
+          "y": 480,
+          "w": 1136,
+          "h": 153,
+          "size": 27
+        }
+      ],
+      "notes": "Faire exécuter le bloc sensors de la page avant merge. Une jointure associe des lignes selon une clé commune, ici sensor. how=\"left\" garde toutes les lectures ; validate vérifie l’unicité de la clé du côté descriptions. indicator ajoute _merge qui indique les associations trouvées. Faire afficher sensor, time_local, temperature_c, position. Les quatre capteurs restent dans la même pièce. Faire explicitement le rapprochement avec JOIN, déjà rencontré dans le cours de bases de données. Le parallèle porte sur les opérations ; les détails peuvent différer, notamment les clés manquantes que pandas peut associer entre elles, contrairement à une égalité SQL usuelle. Nos clés sensor sont toutes renseignées."
+    },
+    {
+      "title": "Predict two different join problems",
+      "chapter": "2 · Pair discussion",
+      "minutes": 5,
+      "page": "foundations/pandas-sql.html",
+      "anchor": "_4_pair_practice_one_change_at_a_time",
+      "elements": [
+        {
+          "kind": "table",
+          "values": [
+            [
+              "Change in the sensor table",
+              "What happens?"
+            ],
+            [
+              "A appears twice",
+              "4 rows for A without validate"
+            ],
+            [
+              "D has no description",
+              "Its 2 readings stay, with no position"
+            ]
+          ],
+          "x": 72,
+          "y": 180,
+          "w": 1136,
+          "h": 210,
+          "size": 27,
+          "widths": [
+            1.05,
+            1.65
+          ]
+        },
+        {
+          "kind": "code",
+          "text": "assert len(joined) == len(converted)\nassert joined[\"_merge\"].eq(\"both\").all()\nassert not joined.duplicated([\"sensor\", \"time_local\"]).any()",
+          "x": 72,
+          "y": 421,
+          "w": 1136,
+          "h": 138,
+          "size": 26
+        },
+        {
+          "kind": "text",
+          "text": "Unique descriptions and complete matches are separate checks.",
+          "x": 72,
+          "y": 588,
+          "w": 1136,
+          "h": 45,
+          "size": 28,
+          "bold": true,
+          "color": "green"
+        }
+      ],
+      "notes": "Deux minutes pour prévoir, puis montrer. Dans la première situation, sans validate le résultat aurait dix lignes ; avec validate=\"many_to_one\", pandas refuse la jointure. Dans la seconde, validate accepte la jointure car la clé reste unique ; le contrôle de _merge détecte les descriptions absentes. Ces assertions s’exécutent sur la jointure normale de la page. La page compare aussi les ensembles de clés avant/après. Une température manquante chez D reste un problème différent."
+    },
+    {
+      "title": "A database query supplies a pandas table",
+      "chapter": "2 · Connection with the database course",
+      "minutes": 7,
+      "page": "foundations/pandas-sql.html",
+      "anchor": "pandas-sql-bridge",
+      "elements": [
+        {
+          "kind": "code",
+          "text": "import sqlite3\nconnection = sqlite3.connect(\":memory:\")\nconverted.to_sql(\"readings\", connection, index=False)\nselected = pd.read_sql_query(\n    \"SELECT sensor, time_local, temperature_c FROM readings \"\n    \"WHERE temperature_c >= ? ORDER BY sensor, time_local\",\n    connection, params=(23.0,)\n)",
+          "x": 72,
+          "y": 170,
+          "w": 1136,
+          "h": 290,
+          "size": 25
+        },
+        {
+          "kind": "text",
+          "text": "SELECT chooses columns. WHERE selects rows.\nThe parameter ? receives the threshold 23.0.",
+          "x": 72,
+          "y": 484,
+          "w": 1136,
+          "h": 80,
+          "size": 29
+        },
+        {
+          "kind": "text",
+          "text": "Result: A at 11:00 and B at 11:00, both 24 °C.",
+          "x": 72,
+          "y": 585,
+          "w": 1136,
+          "h": 48,
+          "size": 29,
+          "bold": true,
+          "color": "green"
+        }
+      ],
+      "notes": "Réutiliser les connaissances du cours de bases de données. Le but est de montrer la connexion réelle entre une requête SQL et un DataFrame, puis la comparaison avec une sélection pandas. La page fournit un exemple SQLite en mémoire ; aucun serveur à installer. Définir une requête comme une demande de colonnes et de lignes à une base. Faire prévoir les deux lignes, puis comparer avec .loc sur le notebook. La création de la petite base sert uniquement à la démonstration. Dans un projet réel, on interroge une base existante pour charger les données utiles. Fermer connection à la fin de la démonstration."
+    },
+    {
+      "title": "Break",
+      "chapter": "10 minutes",
+      "minutes": 10,
+      "page": "foundations/data-lifecycle.html",
+      "anchor": "",
+      "elements": [
+        {
+          "kind": "text",
+          "text": "We can now manipulate tables.",
+          "x": 72,
+          "y": 284,
+          "w": 1136,
+          "h": 75,
+          "size": 44
+        },
+        {
+          "kind": "text",
+          "text": "Next: which question does a calculation answer?",
+          "x": 72,
+          "y": 410,
+          "w": 1136,
+          "h": 115,
+          "size": 42,
+          "bold": true,
+          "color": "green"
+        }
+      ],
+      "notes": "Pause de dix minutes à la minute 65. Reprendre à la minute 75. Ne pas transformer la pause en contenu supplémentaire.",
+      "cover": true
+    },
+    {
+      "title": "Start with a question, keep a trace of each step",
+      "chapter": "3 · Data lifecycle",
+      "minutes": 5,
+      "page": "foundations/data-lifecycle.html",
+      "anchor": "_audit_sequence",
+      "elements": [
+        {
+          "kind": "table",
+          "values": [
+            [
+              "Step",
+              "What to write down"
+            ],
+            [
+              "Question",
+              "Population, variable and quantity to estimate"
+            ],
+            [
+              "Source",
+              "Where the data came from, when, and under what licence"
+            ],
+            [
+              "Checks",
+              "Row meaning, keys, units and missing values"
+            ],
+            [
+              "Transformations",
+              "Conversions, selections, groups and joins"
+            ],
+            [
+              "Result",
+              "A number with units, counts and limitations"
+            ]
+          ],
+          "x": 72,
+          "y": 176,
+          "w": 1136,
+          "h": 357,
+          "size": 26,
+          "widths": [
+            1,
+            3.2
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Keep the raw data and the code that produces the result.",
+          "x": 72,
+          "y": 573,
+          "w": 1136,
+          "h": 61,
+          "size": 32,
+          "bold": true,
+          "color": "green"
+        }
+      ],
+      "notes": "Le cycle de vie relie une question, une source, les opérations réalisées et l’explication finale. Demander pour notre table : une ligne désigne quoi avant et après groupby ? Où a-t-on conservé les unités d’origine ? Où peut-on retrouver la conversion ? Les contrôles peuvent amener à revenir à la source ou à reformuler la question."
+    },
+    {
+      "title": "One dataset can answer two different questions",
+      "chapter": "3 · Data lifecycle",
+      "minutes": 6,
+      "page": "foundations/data-lifecycle.html",
+      "anchor": "lifecycle-estimand-table",
+      "elements": [
+        {
+          "kind": "text",
+          "text": "A small, deliberately uneven slice of the air-quality teaching data:",
+          "x": 72,
+          "y": 171,
+          "w": 1136,
+          "h": 61,
+          "size": 28
+        },
+        {
+          "kind": "table",
+          "values": [
+            [
+              "station",
+              "available readings",
+              "mean temperature °C"
+            ],
+            [
+              "Aotizhongxin",
+              "6",
+              "−1.4167"
+            ],
+            [
+              "Changping",
+              "2",
+              "−2.4000"
+            ],
+            [
+              "Dingling",
+              "2",
+              "−2.4000"
+            ]
+          ],
+          "x": 72,
+          "y": 258,
+          "w": 1136,
+          "h": 234,
+          "size": 28,
+          "widths": [
+            1.5,
+            1.35,
+            1.85
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Equal weight per reading: −1.810 °C\nEqual weight per station:   −2.072 °C",
+          "x": 72,
+          "y": 532,
+          "w": 1136,
+          "h": 103,
+          "size": 34,
+          "bold": true,
+          "color": "green"
+        }
+      ],
+      "notes": "Changer explicitement d’exemple : ce sont des données de stations de mesure de la page Data lifecycle, pas les capteurs fictifs A à D. La première station fournit trois fois plus de lignes que chacune des deux autres. Les moyennes de station affichées sont arrondies ; le calcul des résultats utilise les valeurs complètes. Montrer le tableau puis la figure du notebook. Ce petit extrait n’autorise pas une affirmation à l’échelle de toute la ville."
+    },
+    {
+      "title": "The weights belong to the question",
+      "chapter": "3 · Mathematical connection",
+      "minutes": 4,
+      "page": "foundations/data-lifecycle.html",
+      "anchor": "worked-lifecycle-method",
+      "elements": [
+        {
+          "kind": "text",
+          "text": "Let nᵢ be the available count and μᵢ the mean for group i.",
+          "x": 72,
+          "y": 177,
+          "w": 1136,
+          "h": 74,
+          "size": 29
+        },
+        {
+          "kind": "text",
+          "text": "Equal weight per reading",
+          "x": 72,
+          "y": 281,
+          "w": 550,
+          "h": 58,
+          "size": 31,
+          "bold": true
+        },
+        {
+          "kind": "text",
+          "text": "Σ nᵢ μᵢ / Σ nᵢ",
+          "x": 72,
+          "y": 365,
+          "w": 550,
+          "h": 74,
+          "size": 42,
+          "color": "green"
+        },
+        {
+          "kind": "text",
+          "text": "Equal weight per group",
+          "x": 690,
+          "y": 281,
+          "w": 520,
+          "h": 58,
+          "size": 31,
+          "bold": true
+        },
+        {
+          "kind": "text",
+          "text": "(1 / G) Σ μᵢ",
+          "x": 690,
+          "y": 365,
+          "w": 520,
+          "h": 74,
+          "size": 42,
+          "color": "green"
+        },
+        {
+          "kind": "text",
+          "text": "All sums run over G groups. Different weights can give different answers.",
+          "x": 72,
+          "y": 496,
+          "w": 1136,
+          "h": 60,
+          "size": 28
+        },
+        {
+          "kind": "text",
+          "text": "An estimand is the population quantity we want to estimate.",
+          "x": 72,
+          "y": 585,
+          "w": 1136,
+          "h": 48,
+          "size": 29,
+          "bold": true
+        }
+      ],
+      "notes": "Définir G comme le nombre de groupes et supposer ici des groupes non vides pour la variable étudiée. Les deux formules décrivent des résumés empiriques ; pour une inférence, préciser la population cible. Un estimand est la quantité de population visée ; une estimation est la valeur calculée à partir des données. Les moyennes ne diffèrent pas uniquement par un effet d’arrondi. Les effectifs utilisés doivent compter les valeurs présentes, pas seulement les lignes."
+    },
+    {
+      "title": "Detect a problem before deciding how to handle it",
+      "chapter": "3 · Discussion and checks",
+      "minutes": 5,
+      "page": "foundations/data-lifecycle.html",
+      "anchor": "lifecycle-audit",
+      "elements": [
+        {
+          "kind": "table",
+          "values": [
+            [
+              "Finding",
+              "Question before changing data"
+            ],
+            [
+              "Repeated observation key",
+              "Same reading copied twice, or distinct observations?"
+            ],
+            [
+              "Missing temperature",
+              "Why is it absent? Does absence depend on conditions?"
+            ],
+            [
+              "Mixed units",
+              "Can we convert them while retaining the original values?"
+            ],
+            [
+              "Surprising value",
+              "Measurement error, or a real unusual event?"
+            ]
+          ],
+          "x": 72,
+          "y": 184,
+          "w": 1136,
+          "h": 302,
+          "size": 26,
+          "widths": [
+            1.05,
+            2.7
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "Discuss: would deleting all incomplete rows answer the same question?",
+          "x": 72,
+          "y": 527,
+          "w": 1136,
+          "h": 76,
+          "size": 34,
+          "bold": true,
+          "color": "green"
+        }
+      ],
+      "notes": "Demander une réponse argumentée, pas un nettoyage automatique. Distinguer détection et décision. La page montre un exemple dont les défauts ont été ajoutés volontairement : doublon, valeur manquante et température hors du seuil de démonstration. Ne pas présenter un seuil arbitraire comme une vérité universelle. Noter la décision et la limite qui reste après traitement."
+    },
+    {
+      "title": "An array has a shape and columns have units",
+      "chapter": "4 · Arrays, tables, and joins",
+      "minutes": 5,
+      "page": "foundations/tabular-data.html",
+      "anchor": "_block_4_bridge_array_shapes_and_reductions",
+      "elements": [
+        {
+          "kind": "table",
+          "values": [
+            [
+              "row",
+              "temperature °C",
+              "humidity %"
+            ],
+            [
+              "0",
+              "20",
+              "50"
+            ],
+            [
+              "1",
+              "22",
+              "60"
+            ],
+            [
+              "2",
+              "24",
+              "70"
+            ]
+          ],
+          "x": 72,
+          "y": 180,
+          "w": 618,
+          "h": 250,
+          "size": 28,
+          "widths": [
+            0.5,
+            1.5,
+            1.2
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "X has shape (3, 2).\n\naxis=0 reduces over rows:\none result per column.",
+          "x": 752,
+          "y": 196,
+          "w": 453,
+          "h": 224,
+          "size": 30
+        },
+        {
+          "kind": "code",
+          "text": "values = np.array([[20., 50.], [22., 60.], [24., 70.]])\nvalues.mean(axis=0)  # array([22., 60.])",
+          "x": 72,
+          "y": 484,
+          "w": 1136,
+          "h": 116,
+          "size": 27
+        }
+      ],
+      "notes": "Importer numpy as np. Le contexte mathématique est X dans R^(n×p), avec n observations et p variables. Les moyennes sont 22 °C et 60 %. Une moyenne sur axis=1 mélangerait ici des unités incompatibles. NumPy conserve les nombres et leur type de stockage, mais pas les noms de colonnes et les unités de ce tableau. Les expliquer avant de calculer."
+    },
+    {
+      "title": "Broadcasting repeats one operation across rows",
+      "chapter": "4 · Arrays, tables, and joins",
+      "minutes": 4,
+      "page": "foundations/tabular-data.html",
+      "anchor": "_block_4_bridge_array_shapes_and_reductions",
+      "elements": [
+        {
+          "kind": "code",
+          "text": "column_means = values.mean(axis=0)\ncentred = values - column_means\nwarm_rows = values[values[:, 0] >= 22.0]",
+          "x": 72,
+          "y": 180,
+          "w": 1136,
+          "h": 151,
+          "size": 28
+        },
+        {
+          "kind": "table",
+          "values": [
+            [
+              "row",
+              "centred temperature",
+              "centred humidity"
+            ],
+            [
+              "0",
+              "−2",
+              "−10"
+            ],
+            [
+              "1",
+              "0",
+              "0"
+            ],
+            [
+              "2",
+              "2",
+              "10"
+            ]
+          ],
+          "x": 72,
+          "y": 370,
+          "w": 715,
+          "h": 236,
+          "size": 27,
+          "widths": [
+            0.45,
+            1.65,
+            1.5
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "(3, 2) − (2,)\nproduces (3, 2).\n\nPredict the shape\nof warm_rows.",
+          "x": 843,
+          "y": 386,
+          "w": 366,
+          "h": 209,
+          "size": 29
+        }
+      ],
+      "notes": "Définir broadcasting : on soustrait le même vecteur de deux moyennes à chacune des trois lignes, sans écrire une boucle. centered[i,j] = values[i,j] − column_means[j]. warm_rows a deux lignes et deux colonnes, donc (2,2). Les écarts de température et d’humidité restent dans leurs unités propres. Faire prédire avant de lancer le code."
+    },
+    {
+      "title": "Wide and long tables store the same measurements",
+      "chapter": "4 · Change the layout",
+      "minutes": 6,
+      "page": "foundations/tabular-data.html",
+      "anchor": "_block_4_bridge_long_and_wide_tables",
+      "elements": [
+        {
+          "kind": "table",
+          "values": [
+            [
+              "time_utc",
+              "A",
+              "B"
+            ],
+            [
+              "08:00",
+              "20",
+              "18"
+            ],
+            [
+              "09:00",
+              "22",
+              "20"
+            ]
+          ],
+          "x": 72,
+          "y": 180,
+          "w": 415,
+          "h": 183,
+          "size": 28,
+          "widths": [
+            1.7,
+            0.7,
+            0.7
+          ]
+        },
+        {
+          "kind": "table",
+          "values": [
+            [
+              "time_utc",
+              "station",
+              "temperature_c"
+            ],
+            [
+              "08:00",
+              "A",
+              "20"
+            ],
+            [
+              "09:00",
+              "A",
+              "22"
+            ],
+            [
+              "08:00",
+              "B",
+              "18"
+            ],
+            [
+              "09:00",
+              "B",
+              "20"
+            ]
+          ],
+          "x": 565,
+          "y": 180,
+          "w": 643,
+          "h": 284,
+          "size": 26,
+          "widths": [
+            1.1,
+            0.8,
+            1.7
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "2 time rows × 2 stations\n= 4 station-time rows.",
+          "x": 72,
+          "y": 413,
+          "w": 437,
+          "h": 87,
+          "size": 30,
+          "bold": true,
+          "color": "green"
+        },
+        {
+          "kind": "code",
+          "text": "long = wide.melt(id_vars=\"time_utc\",\n    var_name=\"station\", value_name=\"temperature_c\")",
+          "x": 72,
+          "y": 542,
+          "w": 1136,
+          "h": 92,
+          "size": 26
+        }
+      ],
+      "notes": "Cet exemple de la page Arrays utilise deux stations et deux heures UTC ; ce n’est pas le tableau des quatre capteurs. Créer wide avec le code fourni dans la page. melt met les noms des anciennes colonnes A et B dans station et les valeurs dans temperature_c. Une ligne longue est identifiée par station et time_utc dans cet exemple d’un jour. Demander la clé, le nombre de lignes et si une moyenne a été calculée : non."
+    },
+    {
+      "title": "Check the row count you expect",
+      "chapter": "4 · Reshaping and joining",
+      "minutes": 5,
+      "page": "foundations/tabular-data.html",
+      "anchor": "_hand_calculation_join_amplification",
+      "elements": [
+        {
+          "kind": "table",
+          "values": [
+            [
+              "Operation",
+              "Expected effect"
+            ],
+            [
+              "melt: 2 times × 2 stations",
+              "4 rows, with all 4 values preserved"
+            ],
+            [
+              "pivot back to wide",
+              "Unique (station, time_utc) pairs are required"
+            ],
+            [
+              "Join key A: 2 left rows × 3 right rows",
+              "6 joined rows for A"
+            ]
+          ],
+          "x": 72,
+          "y": 186,
+          "w": 1136,
+          "h": 243,
+          "size": 27,
+          "widths": [
+            1.65,
+            2.05
+          ]
+        },
+        {
+          "kind": "text",
+          "text": "For an inner join: N = Σₖ mL(k) mR(k)",
+          "x": 72,
+          "y": 469,
+          "w": 1136,
+          "h": 67,
+          "size": 37,
+          "bold": true,
+          "color": "green"
+        },
+        {
+          "kind": "text",
+          "text": "mL(k) and mR(k) count rows with key k in each table.\nIf B occurs once on each side, A and B produce 6 + 1 = 7 rows.",
+          "x": 72,
+          "y": 556,
+          "w": 1136,
+          "h": 83,
+          "size": 27
+        }
+      ],
+      "notes": "Dernière connexion mathématique. La formule concerne une jointure interne d’égalité ; ne pas l’appliquer sans adaptation à une jointure gauche avec des clés absentes. pivot requiert des clés uniques. pivot_table peut agréger les doublons, ce qui ajoute une décision statistique. Une jointure many-to-one validée évite l’amplification des lignes de gauche. Faire prévoir sept lignes sur le petit exemple A/B de la page."
+    },
+    {
+      "title": "Explain a result before you close the notebook",
+      "chapter": "5 · Wrap-up",
+      "minutes": 5,
+      "page": "foundations/tabular-data.html",
+      "anchor": "",
+      "elements": [
+        {
+          "kind": "text",
+          "text": "1. What does one row represent before and after this operation?",
+          "x": 72,
+          "y": 183,
+          "w": 1136,
+          "h": 78,
+          "size": 32
+        },
+        {
+          "kind": "text",
+          "text": "2. Which values, units, keys or weights have changed?",
+          "x": 72,
+          "y": 299,
+          "w": 1136,
+          "h": 78,
+          "size": 32
+        },
+        {
+          "kind": "text",
+          "text": "3. Which checks support the number you report?",
+          "x": 72,
+          "y": 415,
+          "w": 1136,
+          "h": 78,
+          "size": 32
+        },
+        {
+          "kind": "text",
+          "text": "Restart and run the notebook. Keep one short explanation beside the result.",
+          "x": 72,
+          "y": 552,
+          "w": 1136,
+          "h": 84,
+          "size": 32,
+          "bold": true,
+          "color": "green"
+        }
+      ],
+      "notes": "Faire répondre deux ou trois binômes en s’appuyant sur une opération concrète. Un notebook qui s’exécute ne suffit pas si les lignes n’ont plus le sens annoncé. Conclure sur le lien avec statistiques, bases de données et calcul scientifique. La séance projet du 15 septembre permettra de revenir sur l’utilisation des outils. Les exercices complets des pages restent disponibles pour approfondir."
+    }
+  ]
+}
