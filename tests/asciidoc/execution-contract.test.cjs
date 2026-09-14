@@ -151,6 +151,8 @@ pd.DataFrame({"value": [1, 2]}, index=["alpha", "beta"])
 
 test('generated notebooks preserve page code and contain no pre-filled outputs', () => {
   const relatives = [
+    'foundations/python-pandas.adoc',
+    'foundations/pandas-sql.adoc',
     'foundations/data-lifecycle.adoc',
     'foundations/tabular-data.adoc',
     'foundations/data-quality.adoc',

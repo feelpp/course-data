@@ -51,7 +51,7 @@ public course pages, templates, and the locked Python environment.
    beside `pyproject.toml` and `uv.lock`. Run `uv sync --locked`.
 3. Open the folder in a Jupyter-compatible editor and select the Python 3.12
    environment in this folder's `.venv` directory.
-4. Open `notebooks/foundations/data-lifecycle.ipynb`, restart the kernel,
+4. Open `notebooks/foundations/python-pandas.ipynb`, restart the kernel,
    and run all cells from top to bottom. Keep the notebook inside this folder
    so it can find the bundled data. Record any errors for the instructor.
 

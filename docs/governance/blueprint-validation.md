@@ -50,7 +50,7 @@ LO11 is a P2 downstream bridge. It may appear in the optional Block 14 demonstra
 
 ## Diagnostic decision
 
-The 35-minute readiness check covers environment, core Python, NumPy arrays, tabular reasoning, and mathematical notation. The general threshold is 75%; environment evidence requires full completion. Each domain has a 45–120 minute targeted route, repeat evidence, and instructor/teaching-assistant escalation before Block 3 when needed.
+The ungraded 35-minute inventory is completed before Block 2 and has no entry threshold. For environment, Python, arrays, tables, and mathematics, students report independent, with help, not yet encountered, or blocked. Table reasoning can be completed on paper; no pandas coding is required. Python and pandas are taught in Blocks 2–3; arrays and reshape follow in Block 4. The student-bundle fresh-kernel run is required before independent notebook work, with supported participation available while setup is blocked. Targeted support follows guided teaching; checkpoints and support routes are recorded in `curriculum.yml` and the public readiness page.
 
 ## Automated gates
 

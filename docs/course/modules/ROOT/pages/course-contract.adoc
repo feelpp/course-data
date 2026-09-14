@@ -1,4 +1,4 @@
-= Course contract
+= Course expectations
 :page-course-language: en
 :page-course-concepts: DP-FND-01, DP-FND-02, DP-AI-01
 :page-course-priority: P0
@@ -10,7 +10,11 @@
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
 
-This course prepares you to turn heterogeneous data into reproducible and defensible evidence for scientific and industrial decisions.
+This course prepares you to turn different kinds of data into results that can be checked, explained, and used for scientific and industrial decisions.
+
+== Starting point
+
+No pandas experience is required. Block 2 includes a Python refresher and guided first table operations; Block 3 introduces grouping, joins, and the SQL connection. The xref:readiness-check.adoc[readiness check] identifies support needs without a passing score. Use the student bundle; Git is introduced with the project tools.
 
 == What you are expected to do
 

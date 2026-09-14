@@ -15,7 +15,7 @@ All foundation, analytical, assessment, and eligible optional notebooks are gene
 == Working rule
 
 . Download or regenerate the student notebook.
-. Complete the marked tasks without changing the data contract.
+. Complete the marked tasks while respecting the stated data rules: columns, units, allowed missing values, and identifiers.
 . Restart the kernel and run all cells.
 . Check that results are deterministic and that paths are repository-relative.
 . Record any AI assistance according to the assessment mode.
@@ -24,6 +24,8 @@ Never submit a notebook whose correctness depends on cells being run in a hidden
 
 == Foundation notebooks in teaching order
 
+* xref:attachment$foundations/python-pandas.ipynb[Python refresher and first steps with pandas]
+* xref:attachment$foundations/pandas-sql.ipynb[Groups, validated joins, and the SQL bridge]
 * xref:attachment$foundations/data-lifecycle.ipynb[Data lifecycle and first audit]
 * xref:attachment$foundations/tabular-data.ipynb[Arrays, tidy tables, and validated joins]
 * xref:attachment$foundations/data-quality.ipynb[Data quality, missingness, and anomalies]
@@ -37,7 +39,7 @@ Never submit a notebook whose correctness depends on cells being run in a hidden
 
 Every foundation notebook is generated directly from its executable lesson page. Each page is the canonical source for its English narrative, STEM mathematics, Python code, accessibility metadata, and exercises. Generated notebooks have deterministic cell identifiers and cleared outputs, and the site exposes each download only after Antora confirms the attachment.
 
-Notebooks locate data automatically when run inside the course clone. If you download one independently, also download its linked CSV files into the same directory. All required foundation notebooks run on CPU in the fast CI profile.
+The two beginner notebooks contain their tiny synthetic inputs and need no data download. For the other lessons, use the student bundle and keep its directory structure so notebooks can find the supplied datasets. All required foundation notebooks run on CPU in the fast CI profile.
 
 == Analytical notebooks
 
@@ -49,7 +51,7 @@ Notebooks locate data automatically when run inside the course clone. If you dow
 * xref:attachment$analytical/pca-clustering.ipynb[PCA and clustering]
 * xref:attachment$analytical/performance-columnar.ipynb[Columnar performance]
 
-The analytical notebooks are generated from their canonical lesson pages and execute in the full scheduled/release workflow. Each contains the same mathematics, guided evidence, commented code, interpretation, and independent transfer task as its webpage.
+The analytical notebooks are generated from their canonical lesson pages and execute in the full scheduled/release workflow. Each contains the same mathematics, worked examples and results, commented code, interpretation, and independent transfer task as its webpage.
 
 == Public exercise notebooks
 
@@ -58,7 +60,7 @@ The analytical notebooks are generated from their canonical lesson pages and exe
 * xref:attachment$assessment/control-2-specimen.ipynb[Specimen Control 2]
 * xref:attachment$assessment/final-exam-specimen.ipynb[Specimen final examination]
 
-These notebooks are generated from the public assessment pages. They contain identical task IDs, importance levels, point allocations, AI mode, allowed-resource profile, submission evidence, and rubric mappings. They contain no solutions or instructor-only cells. See the xref:assessment/exercise-contract.adoc[exercise, hint, and assistance contract].
+These notebooks are generated from the public assessment pages. They contain identical task IDs, importance levels, point allocations, AI mode, allowed-resource profile, required submitted work, and rubric mappings. They contain no solutions or instructor-only cells. See the xref:assessment/exercise-contract.adoc[rules for exercises, hints, and assistance].
 
 == Optional extension notebooks
 
@@ -69,7 +71,7 @@ Generated from the English lesson pages:
 * xref:attachment$extensions/experiment-tracking.ipynb[Local experiment tracking]
 * xref:attachment$extensions/drift-monitoring.ipynb[Drift and monitoring]
 
-These notebooks use only the required CPU environment but carry the `full` execution profile. They are not assessed and do not belong to the required 28-hour contact contract.
+These notebooks use only the required CPU environment but carry the `full` execution profile. They are not assessed and do not belong to the required 28 hours of teaching.
 
 Documented notebook-native exception:
 
@@ -77,7 +79,7 @@ Documented notebook-native exception:
 
 The JAX artifact retains its reviewed student/instructor cell transformation and optional runtime, so it is not executed by the required Antora build. Install its separate CPU dependencies with `npm run setup:extensions`.
 
-The comparative dataframe-engine lesson and downstream course map are page-only exceptions: one requires optional Polars and machine-specific benchmark evidence; the other has no executable method. Their reason, owner, environment, and maintenance policies are visible on the pages and governed by `curriculum.yml`. The normal course setup and all Essential/Core (P0/P1) notebooks remain independent of JAX and Polars.
+The comparative dataframe-engine lesson and downstream course map are page-only exceptions: one requires optional Polars and performance measurements on your own computer; the other has no executable method. Their reason, owner, environment, and maintenance policies are visible on the pages and governed by `curriculum.yml`. The normal course setup and all Essential/Core (P0/P1) notebooks remain independent of JAX and Polars.
 
 == Runnable public practice
 

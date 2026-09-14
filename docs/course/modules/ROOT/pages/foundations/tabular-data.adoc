@@ -5,7 +5,7 @@
 :page-course-difficulty: D2
 :page-course-duration-minutes: 120
 :page-course-outcomes: LO2, LO3, LO8
-:page-course-prerequisites: readiness check
+:page-course-prerequisites: guided Python–pandas sessions in Blocks 2–3
 :page-course-assessed: yes
 :page-jupyter: true
 :page-course-execution-profile: fast
@@ -22,6 +22,8 @@ The unit of analysis must survive every selection, reshape, aggregation, and joi
 
 The mathematical object behind a table matters: rows index observational units, columns represent variables, and keys define identity. Array and aggregation errors can therefore change the estimand, not merely the file layout. The notation follows xref:foundations/mathematical-background.adoc[Mathematical background and error estimation].
 
+Use this as the fuller reference after xref:foundations/python-pandas.adoc[first steps with pandas] and xref:foundations/pandas-sql.adoc[groups and joins]. Block 4 introduces array shapes and long/wide reshaping before the EDA lab; the class revisits arrays in Block 6. You are not expected to learn this entire reference before Block 2.
+
 == What you must be able to do
 
 * reason about array shapes, dtypes, masks, broadcasting, and reductions;
@@ -31,7 +33,7 @@ The mathematical object behind a table matters: rows index observational units, 
 * declare join cardinality before merging and validate it in code;
 * preserve row/key evidence and report unmatched records.
 
-== Core contracts
+== Rules to check for a table
 
 A tidy row is one observation of the declared unit; a column is one variable; a table is one observational level. This is a reasoning convention, not a demand that every stored artifact have one physical layout.
 
@@ -39,7 +41,48 @@ For a join, write the expected relationship first: one-to-one, one-to-many, many
 
 Storage dtype is not semantics. An integer may be an identifier, a float may carry a physical unit, and a string may encode an ordered category or timestamp. Record types, units, category vocabulary, nullability, and timezone alongside the code.
 
-== Array shapes and reductions
+== Block 4 bridge: array shapes and reductions
+
+Begin with three observations and two variables: temperature in degrees Celsius and relative humidity in percent. Read `axis=0` as “reduce over the rows, leaving one result per column”. Each column keeps its own unit; averaging across these two different variables would not have a useful physical interpretation.
+
+[#tabular-array-bridge]
+[%dynamic%open,python,fail-on-error=]
+----
+import numpy as np
+
+values = np.array([[20.0, 50.0], [22.0, 60.0], [24.0, 70.0]])
+column_means = values.mean(axis=0)
+centred = values - column_means
+warm_rows = values[values[:, 0] >= 22.0]
+assert values.shape == (3, 2)
+assert column_means.shape == (2,)
+assert warm_rows.shape == (2, 2)
+assert np.allclose(centred.mean(axis=0), [0.0, 0.0])
+print("Column means [Celsius, percent]:", column_means)
+print("Centred rows:", centred)
+----
+
+The means are 22 degrees Celsius and 60 percent. Subtracting the length-two mean array from the three-by-two input is broadcasting: the same pair of column means is subtracted from each row. *Pause:* predict the mask and the number of selected rows before executing the example. We revisit shapes and broadcasting in Block 6.
+
+== Block 4 bridge: long and wide tables
+
+Here each wide row contains two stations' temperatures at the same time. A long row will represent one station at one time. Predict four output rows before calling `melt`; no averaging is required.
+
+[#tabular-reshape-bridge]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Four station-time observations in long form",table-description="Two time rows with two Celsius station columns become four rows, keyed by station and time."]
+----
+import pandas as pd
+
+wide = pd.DataFrame({"time_utc": ["08:00", "09:00"], "A": [20.0, 22.0], "B": [18.0, 20.0]})
+long = wide.melt(id_vars="time_utc", var_name="station", value_name="temperature_c")
+assert len(long) == 4
+assert not long.duplicated(["station", "time_utc"]).any()
+long
+----
+
+The values and units are unchanged; the row definition changes. A column called `temperature_c` now contains all four values, while `station` identifies their origin. In the EDA lab, explain the key and expected count before using the corresponding reshape on the teaching data. A reverse `pivot` needs unique station-time keys; `pivot_table` can aggregate duplicates, which is a different decision.
+
+== Array reference
 
 For stem:[X\in\mathbb R^{n\times p}], rows index stem:[n] observational units and columns index stem:[p] variables. A column mean is
 
@@ -125,7 +168,7 @@ The objective is to attach source-file provenance to every hourly observation wi
 [.notebook-insight-label]
 *Mathematical insight.*
 
-*Essential (P0).* For a many-to-one enrichment join, each observation key should map to exactly one registry row. The key set and row count are invariants: unexpected multiplication proves that the declared relation is false or the registry key is not unique. A successful SQL or pandas call is not evidence of semantic correctness without these cardinality checks.
+*Essential (P0).* For a many-to-one enrichment join, each observation key should map to exactly one registry row. The key set and row count are quantities that should remain unchanged (invariants): unexpected multiplication proves that the declared relation is false or the registry key is not unique. A successful SQL or pandas call is not evidence of semantic correctness without these cardinality checks.
 ====
 
 [.worked-example-implementation#worked-tabular-implementation]

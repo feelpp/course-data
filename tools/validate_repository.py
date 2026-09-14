@@ -342,9 +342,18 @@ def validate_blueprint(curriculum: dict[str, Any], errors: list[str]) -> None:
 
     diagnostic = curriculum["diagnostic"]
     routes = diagnostic["routes"]
-    if not 0 < diagnostic["mastery_threshold_percent"] <= 100:
-        errors.append("Diagnostic mastery threshold must be a percentage")
+    if diagnostic.get("mode") != "support_inventory" or diagnostic.get("entry_gate") is not False:
+        errors.append("The entry diagnostic must route support without a pass/fail gate")
+    if set(diagnostic.get("response_levels", [])) != {
+        "independent",
+        "with_help",
+        "not_yet_encountered",
+        "blocked",
+    }:
+        errors.append("Diagnostic responses must distinguish inexperience from a setup blocker")
     for domain in diagnostic["domains"]:
+        if not domain.get("checkpoint"):
+            errors.append(f"{domain['id']}: a checkpoint after guided teaching is required")
         if set(domain["concepts"]) - concept_ids:
             errors.append(f"{domain['id']}: unknown diagnostic concept")
         if domain["route"] not in routes:

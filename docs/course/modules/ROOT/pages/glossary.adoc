@@ -16,6 +16,12 @@ The course site, notebooks, and assessments are in English. This glossary connec
 |===
 |English term |French equivalent |Meaning in this course
 |Data processing |Traitement des données |The complete path from source and validation to transformation, analysis, and delivery.
+|DataFrame |Tableau pandas |A Python table with named columns and row labels.
+|Mask |Masque de sélection |One True/False value per row, used to select rows.
+|Join |Jointure |Matching rows from two tables using shared labels, such as a sensor identifier.
+|Query |Requête |A request for data, such as selecting readings above a temperature.
+|Data contract |Règles de validation des données |Explicit rules a table must satisfy: required columns, units, allowed missing values, and unique identifiers. A failed rule needs investigation.
+|Evidence |Éléments qui appuient une conclusion |Measurements, calculations, or checks used to support a statement. For example, three converted readings and their count support the reported available-value mean; they do not establish a whole-room temperature.
 |Observational unit |Unité statistique / unité d'observation |The entity represented by one declared row or record.
 |Target population |Population cible |The population to which the result is intended to apply.
 |Sample |Échantillon |The observed units used to estimate a population quantity.

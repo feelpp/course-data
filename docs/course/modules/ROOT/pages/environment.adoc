@@ -28,12 +28,12 @@ uv run python -c "import numpy, pandas; print(numpy.__version__, pandas.__versio
 
 == Run the first notebook
 
-Open the extracted folder in your Jupyter-compatible editor and select its `.venv` Python 3.12 environment as the notebook kernel. Open `notebooks/foundations/data-lifecycle.ipynb`, restart the kernel and run all cells in order. Keep the notebook in the extracted folder so it can find the bundled data.
+Open the extracted folder in your Jupyter-compatible editor and select its `.venv` Python 3.12 environment as the notebook kernel. Open `notebooks/foundations/python-pandas.ipynb`, restart the kernel and run all cells in order. Keep the notebook in the extracted folder so it can find the bundled data.
 
-Record the command output and any errors for xref:readiness-check.adoc[the readiness check]. If setup fails, use the static xref:foundations/data-lifecycle.adoc[first-audit page] in class and bring the error message to the instructor for support.
+Record the command output and any errors for xref:readiness-check.adoc[the readiness check]. If setup fails, use the static xref:foundations/python-pandas.adoc[first Python–pandas page] in class and bring the error message to the instructor for support.
 
 Git and project conventions are introduced through the project starter. Course authors who need to rebuild this website can follow the https://github.com/feelpp/course-data#readme[repository README].
 
 == Reproducibility rule
 
-A result is complete only when it can be regenerated from the recorded bundle using pinned dependencies, checksum-verified data and a fresh kernel. Saved notebook output alone is not evidence of reproducibility.
+A result is complete only when it can be regenerated from the recorded bundle using pinned dependencies, checksum-verified data and a fresh kernel. Saved output alone does not show that a notebook will run again correctly.

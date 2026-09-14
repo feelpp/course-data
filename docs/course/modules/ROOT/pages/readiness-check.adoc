@@ -1,72 +1,91 @@
-= Readiness check and remediation
+= Readiness check and support routes
 :page-course-language: en
 :page-course-concepts: DP-FND-01, DP-REP-01, DP-ARR-01, DP-TAB-01, DP-TAB-02
 :page-course-priority: P0
 :page-course-difficulty: D1
 :page-course-duration-minutes: 35
 :page-course-outcomes: LO1, LO3, LO8, LO9
-:page-course-prerequisites: introductory Python, basic linear algebra and statistics
+:page-course-prerequisites: None; no pandas experience required
 :page-course-assessed: no
 
-Complete this individual check before Block 2. It is diagnostic, carries no mark, and is designed to identify the shortest useful preparation route. Record commands, answers, and any error messages in one file.
+Complete this individual preparation check before Block 2. It carries no mark and has no passing score. Having never used pandas is an expected starting point: the xref:foundations/python-pandas.adoc[first Python–pandas session] teaches it in class.
 
-== Rules and scoring
+Spend at most 35 minutes: environment 10, Python 7, arrays 5, table reasoning 8, and mathematics 5. Stop when time is up and bring unfinished items. For each topic, record *independent*, *with help*, *not yet encountered*, or *blocked*, plus one answer or question. Do not use generative AI for this inventory; documentation is allowed. The purpose is to show what support would help you.
 
-Allow 35 minutes without external AI assistance. Documentation for Python, NumPy, and pandas is allowed. Score each of the five domains out of four. The general readiness threshold is 15/20, but the environment domain requires 4/4. A low score is a routing signal, not a judgement about your ability to complete the course.
+== A. Environment — attempt, then record the result
 
-== A. Environment and reproducible execution — 4 points
-
-. Download the student bundle using the green *Download bundle* button or xref:downloads.adoc[the downloads page]. Extract it into a new folder and follow xref:environment.adoc[the Python setup]. No repository clone or npm installation is required. From the extracted folder, run:
+. Download the student bundle using the green *Download bundle* button or xref:downloads.adoc[the downloads page]. Extract it into a new folder and follow xref:environment.adoc[the Python setup]. No repository clone or npm installation is required. From the extracted folder, try:
 +
 [source,shell]
 ----
 uv sync --locked
 uv run python -c "import numpy, pandas; print(numpy.__version__, pandas.__version__)"
 ----
-. Open `notebooks/foundations/data-lifecycle.ipynb` using the extracted folder's `.venv` kernel. Restart the kernel and run all cells in order. Record the version output and whether the notebook completes; preserve any error messages.
-. Explain what the Python lockfile fixes and what restarting and running every cell checks that saved notebook output does not.
+. Open `notebooks/foundations/python-pandas.ipynb` using the extracted folder's `.venv` kernel. Restart the kernel and run the supplied cells in order. The practice prompts will be completed in class; running the examples is enough for this setup check.
+. Record the version output and whether the run completes. If something fails or installation exceeds ten minutes, keep the error message, mark *blocked*, and continue with B–E. You may answer those on paper.
 
-Award one point for successful environment installation and the version output, one point for the notebook completing from a fresh kernel, and two points for the explanation: one for dependency identity and one for hidden state. Total: four points. If installation takes longer than the diagnostic session, record the obstacle and continue with B–E; complete A through the environment support route.
+A successful fresh-kernel run is needed before independent notebook work. A setup blocker does not prevent attending the guided session: use the rendered page or work with a partner, then arrange installation support. We explain the lockfile and hidden notebook state together in class.
 
-== B. Core Python — 4 points
+== B. Python — what is already familiar?
 
-Write a function `summarise(values)` that accepts numbers and `None`, returns the count of valid values and their arithmetic mean, and raises a clear exception when no valid value exists. Demonstrate it with one ordinary case and the empty-valid-data case.
+Given the code below, predict the first printed value. Explain what the dictionary represents and what the function would return (if functions are familiar). If these constructs are new, identify the unfamiliar ones; you do not need to learn them alone before class.
 
-== C. NumPy arrays — 4 points
+[source,python]
+----
+values = [22.0, 71.6, 20.0, None]
+record = {"sensor": "A", "temperature": values[0], "unit": "°C"}
 
-Given `x = np.arange(12).reshape(4, 3)`:
 
-. state its shape and dtype;
-. select the rows whose first column is at least 6 without a Python loop;
-. subtract each column mean using broadcasting;
-. explain the shape of the mean used for broadcasting.
+def fahrenheit_to_celsius(value):
+    return (value - 32) * 5 / 9
 
-== D. Tabular reasoning — 4 points
 
-Construct a small DataFrame with columns `station`, `timestamp`, `variable`, and `value`. Then:
+print(values[0])
+print(fahrenheit_to_celsius(71.6))
+----
 
-. identify the unit of analysis;
-. detect duplicate `(station, timestamp, variable)` keys;
-. calculate the mean value by station and variable;
-. reshape the result so variables become columns without silently aggregating duplicate keys.
+Variables, lists, dictionaries, calculations, imports, and reading errors are revisited in Block 2. A function example is provided for later practice.
 
-== E. Mathematical and quantitative reasoning — 4 points
+== C. Arrays — an exposure question
 
-. Explain the difference between a scalar, a vector, and a matrix using shapes.
-. Compute the mean and population variance of `[1, 2, 3]`.
-. Explain why stem:[\log(ab)=\log(a)+\log(b)] helps when multiplying many small probabilities.
-. State one reason a predictive association is not automatically a causal effect.
+Have you used NumPy? Can you explain what “four rows and three columns” means and identify a shape `(4, 3)`? Have you encountered a Boolean mask or broadcasting? Record your experience and one uncertainty; do not implement these operations now.
 
-== Remediation routes
+Shapes and column operations are introduced in Block 4 and revisited before their use in Block 6. NumPy fluency is not an entry requirement for the first pandas session.
 
-[cols="2,1,3,2",options="header"]
+== D. Tables — reason on paper first
+
+Return to the four-sensor table from the first class, at the same stated time:
+
+[cols="1,1,1",options="header"]
 |===
-|Domain below threshold |Target time |Required work |Completion evidence
-|Environment |45 min |Repeat xref:environment.adoc[the student setup] from a newly extracted bundle. |Successful command summary and fresh-kernel notebook run; this route requires full completion.
-|Core Python |90 min |Functions, collections, exceptions, imports, and small tests. |Completed practice set with two tests per function.
-|NumPy arrays |90 min |Shapes, masks, broadcasting, reductions, dtypes, vectorisation. |Array practice set plus shape explanations.
-|Tables |120 min |Selection, safe assignment, grouping, key uniqueness, tidy/long and wide forms. |A transformed toy table with assertions.
-|Mathematics |60 min |Notation, vectors and matrices, logarithms, mean and variance. |Short written practice with checked calculations.
+|Sensor |Recorded temperature |Unit
+|A |22 |°C
+|B |71.6 |°F
+|C |20 |°C
+|D |Missing |°C
 |===
 
-Repeat only the affected domain after completing its route. If it remains below 70%, meet the instructor or teaching assistant before Block 3 for a supported plan. The course does not convert contact time into a general Python course, but early remediation is part of the course support contract.
+. What does one row represent? What identifies a reading?
+. How many records and how many available temperatures are there?
+. Which unit needs conversion before computing a mean? Why is a missing value different from zero?
+. Have you used pandas to represent or manipulate a table? Record your experience separately from the paper answers.
+
+No pandas code, grouping, join, or reshape is required here. Blocks 2–3 teach those first table operations; reshaping follows in Block 4.
+
+== E. Mathematical notation — identify a support need
+
+Explain a scalar, vector, or matrix in your own words. Compute the mean of `[1, 2, 3]`; if familiar, also compute its population variance. Mark any unfamiliar notation or calculation for the mathematical support route. This is a short inventory, not a prerequisite examination.
+
+== Support after the guided teaching
+
+[cols="2,1,3,3",options="header"]
+|===
+|Topic |Target time |When and what to revisit |What to show or explain
+|Environment |Up to 45 min |Setup support before independent notebook work; stop and ask if still blocked. |Successful command summary and fresh-kernel run, or the precise unresolved error.
+|Core Python |20 min |After Block 2, repeat its lists, dictionaries, and conversion example. |Explain one changed input and its result.
+|NumPy arrays |20 min |After the Block 4 introduction, revisit shapes, masks, broadcasting, and reductions with the xref:foundations/tabular-data.adoc[tabular reference]. |A shape explanation; bring remaining questions to the Block 6 recap.
+|Tables |20 min |After Blocks 2–3, repeat only the unclear example in xref:foundations/python-pandas.adoc[first steps] or xref:foundations/pandas-sql.adoc[groups and joins]. |Explain a prediction, the resulting table, and one check.
+|Mathematics |45 min |Use the preparation already assigned before Block 4 in xref:course-map.adoc[the course map]. |A checked calculation and one question; this is not an additional 45-minute assignment.
+|===
+
+These are targeted support routes, not five additional compulsory assignments. If a checkpoint remains unclear after guided work, arrange support before the next dependent independent task. There is no percentage threshold and no requirement to teach yourself pandas before Block 2.

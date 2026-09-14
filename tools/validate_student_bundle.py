@@ -27,6 +27,8 @@ REQUIRED_PATHS = {
     "curriculum.yml",
     "pyproject.toml",
     "uv.lock",
+    "notebooks/foundations/python-pandas.ipynb",
+    "notebooks/foundations/pandas-sql.ipynb",
     "notebooks/foundations/data-lifecycle.ipynb",
     "notebooks/foundations/baseline-synthesis.ipynb",
     "notebooks/analytical/linear-probabilistic.ipynb",

@@ -119,6 +119,8 @@ test('schemas define deterministic source and notebook identities', () => {
 test('course mathematics sequence uses the vendored Antora generator deterministically', () => {
   const root = path.join(__dirname, '..', '..')
   const relatives = [
+    'foundations/python-pandas.adoc',
+    'foundations/pandas-sql.adoc',
     'foundations/data-lifecycle.adoc',
     'foundations/tabular-data.adoc',
     'foundations/data-quality.adoc',

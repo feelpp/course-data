@@ -32,7 +32,7 @@ Preparation and pacing:
   links remain on the applications page for later discussions.
 - Keep specialised validation protocols, KDE, PCA and detailed physical models
   for subsequent sessions. Present the internships as end-of-M1 work.
-- Introduce the live notebook in Block 2's first ten minutes, within its existing
+- Introduce the beginner notebook during Block 2's Python refresher, within its
   120-minute budget. Today's pair exercise can use the static pages throughout.
 - If discussion needs longer, use the application slot for clarification and return
   to the research example later. Preserve the break and final practical guidance.
