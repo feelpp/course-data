@@ -59,9 +59,9 @@ image::introduction/data-challenges.svg["Three challenges: imperfect data have m
 
 * *Imperfect data:* a missing measurement, an incorrect unit, sensor noise, a duplicated record or an unrepresentative sample require different responses. An unusual value may be a genuine event; inspect its source before deleting it.
 * *Massive data:* long sensor streams, image sequences and simulation fields can exceed memory or make transfers expensive. Choose what to read, store, compress and compute, and check what a summary discards.
-* *Scarce data:* a few expensive experiments or rare observed events limit what can be estimated and tested. Preserve information, examine uncertainty and avoid conclusions beyond the evidence.
+* *Scarce data:* a few expensive experiments or rare observed events limit what can be estimated and tested. Preserve information, examine uncertainty and avoid conclusions that the observations cannot support.
 
-These challenges coexist. A single experiment can generate millions of pixels while still providing only one independent experiment. More rows do not automatically remove bias or provide more independent evidence.
+These challenges coexist. A single experiment can generate millions of pixels while still providing only one independent experiment. More rows do not automatically remove bias or provide more independent observations.
 
 === A small example: the calculation runs, but what does it mean?
 
@@ -85,7 +85,7 @@ Convert B using `°C = (°F − 32) × 5/9`: 71.6 °F is 22 °C. The mean of the
 
 Averaging the three raw numbers gives about 37.9, with no consistent temperature unit. Replacing the missing reading by zero after conversion gives 16 °C, but invents a measurement. Both computations can run without a software error.
 
-The 21.3 °C result describes the available readings at that time. Calling it the temperature of the whole room, or of the whole day, would require further evidence about sensor locations, calibration and times. Retain the original values and record the conversion and missing-data rule so another person can check the result.
+The 21.3 °C result describes the available readings at that time. Calling it the temperature of the whole room, or of the whole day, would require more information about sensor locations, calibration and times. Retain the original values and record the conversion and missing-data rule so another person can check the result.
 ====
 
 The same issue arises when a duplicated row receives extra weight, a date is misread, an image loses its physical scale, or two sensors use different clocks. A plot, model or decision inherits those choices. More computation cannot recover context that was discarded.
@@ -98,7 +98,7 @@ Digital instruments and software make data easier to produce, combine and reuse.
 |===
 |Context |What data make possible |Why processing matters
 |Science |Test a hypothesis, compare a simulation with measurements, reuse an experiment |Preserve units, uncertainty and provenance so the comparison is meaningful and reproducible.
-|Society |Inform energy planning, transport or the allocation of public resources |Check whose situations are represented and explain the evidence and limits behind a decision.
+|Society |Inform energy planning, transport or the allocation of public resources |Check whose situations are represented and explain the observations, calculations and limits behind a decision.
 |People and organisations |Share observations and collaborate across teams |Control access to sensitive information and document transformations so results can be questioned and checked.
 |===
 

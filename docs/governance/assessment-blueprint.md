@@ -207,4 +207,4 @@ For each assessed task, the private repository must contain:
 
 ## Entry diagnostic
 
-The ungraded 35-minute readiness check must be completed before Block 2. It covers environment execution, core Python, NumPy, tabular reasoning, and mathematical notation. A 75% overall score is the normal threshold; environment evidence requires full completion. Targeted routes take 45–120 minutes and are repeated only for the affected domain. Persistent difficulty triggers supported review before Block 3.
+The ungraded 35-minute inventory is completed before Block 2 and has no entry threshold. For environment, Python, arrays, tables, and mathematics, students report independent, with help, not yet encountered, or blocked. Table reasoning can be completed on paper; no pandas coding is required. Python and pandas are taught in Blocks 2–3; arrays and reshape follow in Block 4. The student-bundle fresh-kernel run is required before independent notebook work, with supported participation available while setup is blocked. Targeted support follows guided teaching; checkpoints and support routes are recorded in `curriculum.yml` and the public readiness page.

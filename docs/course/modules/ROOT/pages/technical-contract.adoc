@@ -1,4 +1,4 @@
-= Execution and numerical contract
+= Running the course code and checking numerical results
 :page-course-language: en
 :page-course-concepts: DP-REP-01, DP-TST-01, DP-NUM-01, DP-PERF-01
 :page-course-priority: P0
@@ -8,7 +8,7 @@
 :page-course-prerequisites: computing environment
 :page-course-assessed: yes
 
-This contract makes runtime and numerical expectations predictable across ordinary laptops, CI, controls, and examinations.
+These rules explain which computers can run the course examples, how long the code should take, and how numerical results are checked. They apply to laptops, automated tests, and examinations.
 
 == Reference environment
 

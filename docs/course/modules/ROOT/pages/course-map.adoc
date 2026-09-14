@@ -8,9 +8,15 @@
 :page-course-prerequisites: none
 :page-course-assessed: yes
 
-The course contains fourteen two-hour blocks. Essential (P0) and Core (P1) material is the binding course contract: it is taught, practised, and assessed. Extension (P2) demonstrations are optional and cannot be required in a control or examination.
+The course contains fourteen two-hour blocks. Essential (P0) and Core (P1) material is the course requirements: it is taught, practised, and assessed. Extension (P2) demonstrations are optional and cannot be required in a control or examination.
 
 Use the block guide below for the teaching sequence. Page-duration labels describe complete reference and practice routes; they are not additional contact hours. Each block below totals 120 minutes, including its stated activities. The final examination is separate from these 28 contact hours.
+
+== Learning Python and pandas together
+
+No pandas experience is required at entry. Block 2 follows xref:foundations/python-pandas.adoc[Python refresher and first steps with pandas]: the same four-sensor table as the first class, predictions by hand, short code cells, and time to explain. Block 3 follows xref:foundations/pandas-sql.adoc[grouping, joins, and the SQL bridge]. Block 4 introduces array shapes and reshaping, then practises them during EDA. The full xref:foundations/tabular-data.adoc[tabular reference] supports this progression; reading it in advance is not required.
+
+If the first operations remain unclear, use the recap and targeted support before independent tasks. The xref:readiness-check.adoc[readiness check] identifies support needs; it has no entry score. The SQL demonstration establishes the connection to the Database course; query performance remains in Block 12.
 
 == Preparation and mathematical support
 
@@ -30,18 +36,18 @@ We apply sampling and mean/quantile uncertainty in Block 4, revisit vectors and 
 |0 min: None; the readiness diagnostic follows the first class.
 
 |2
-|DataFrames, types, units, tidy data, reshape, and grouping
-|First notebook demonstration 10; Table concepts and demonstration 20; Tidy-table lab 65; Assertions and source notes 15; Checkpoint 10
-|35 min: Complete the 35-minute diagnostic and identify one setup or Python support need.
+|Python refresher and first steps with pandas
+|Python and notebook refresher 20; CSV and DataFrame walkthrough 20; Guided selection, derivation and missingness 25; Break 10; Guided mean and pair practice 30; Explain the calculation, check it and rerun 15
+|35 min: Complete the 35-minute support inventory; no pandas experience or passing score is required.
 
 |3
-|Joins, schemas, missing values, duplicates, and anomalies
-|Join and quality methods 30; Quality lab 70; Privacy and repair record 10; Checkpoint 10
-|20 min: Review keys, grouping, and the tidy-table checkpoint.
+|Grouping readings, combining tables, and a first database example
+|Recap and grouping 20; Combining readings and sensor descriptions 25; Break 10; Quality decisions 20; Pair practice 25; Database to pandas demonstration 10; Explanation, quality record and checks 10
+|20 min: Revisit one selection or missing-value example from Block 2 and bring an unresolved question.
 
 |4
-|EDA, sampling, representativeness, and visual communication
-|Sampling and summaries 25; EDA lab 65; Mean and quantile uncertainty 20; Checkpoint 10
+|Array and reshape bridge, EDA, sampling, and visual communication
+|Array shapes and column operations 10; Long and wide table demonstration 10; Sampling and summaries 15; EDA lab including shape and reshape practice 55; Mean and quantile uncertainty 20; Checkpoint 10
 |45 min: Bounded refresher: notation/expectation 15 min, mean standard error 15 min, empirical quantile/exceedance 15 min.
 
 |5
@@ -51,7 +57,7 @@ We apply sampling and mean/quantile uncertainty in Block 4, revisit vectors and 
 
 |6
 |Regression, stable least squares, likelihood, and residuals
-|Least-squares and likelihood 30; Stable-solver lab 70; Residual interpretation 20
+|Array recap, least-squares and likelihood 30; Stable-solver lab 70; Residual interpretation 20
 |20 min: Review vectors, norms, and conditioning in the mathematical reference.
 
 |7
@@ -93,6 +99,7 @@ We apply sampling and mean/quantile uncertainty in Block 4, revisit vectors and 
 |Control 2, debrief, and course synthesis
 |Control 2 audit 55; Debrief 35; Synthesis 30
 |30 min: Rehearse a validity audit and identify unresolved course questions.
+
 |===
 
 The assigned preparation totals 325 minutes across the semester. Practice and project production are separate from this preparation budget. If an activity takes longer, use the indicated support route and report the difficulty; contact time does not expand to absorb every reference-page estimate.
@@ -107,18 +114,18 @@ Students implement and validate a small pipeline search before the Block 13 clin
 
 == Recurring datasets
 
-The Beijing Multi-Site Air Quality snapshot is the semester spine. AI4I 2020 supplies a compact industrial classification context, Dry Bean is a reserve multiclass dataset, and versioned synthetic generators provide mathematical oracles. No normal class activity or assessment depends on a live download.
+Block 2 reuses the four-sensor temperature table from the first class. Block 3 adds a second time for those same sensors. From Block 4, the Beijing Multi-Site Air Quality snapshot is the semester spine. AI4I 2020 supplies a compact industrial classification context, Dry Bean is a reserve multiclass dataset, and versioned synthetic generators provide mathematical oracles. No normal class activity or assessment depends on a live download.
 
 == Optional extension routes
 
 The extension section sits outside the fourteen scheduled blocks. Students may select JAX transformations, kernel methods, probability calibration, DuckDB/Polars comparison, local experiment tracking, or drift monitoring for preparation or project exploration. These routes add no required contact hours and no assessment prerequisite.
 
-Use xref:extensions/downstream-paths.adoc[the downstream CSMI map] to carry the appropriate evidence into Scientific Machine Learning, High Performance Computing, Database, and Project courses.
+Use xref:extensions/downstream-paths.adoc[the downstream CSMI map] to connect this work to Scientific Machine Learning, High Performance Computing, Database, and Project courses.
 
 == How to read the map
 
 * *Importance* says whether a concept is required: Essential (P0), Core (P1), Extension (P2), or Deferred (P3).
 * *Difficulty* says how independently it must be used: D1 Guided, D2 Independent, or D3 Synthesis.
-* xref:assessment/overview.adoc[Assessment design] shows where evidence is graded.
-* xref:technical-contract.adoc[Execution contract] fixes the supported hardware, runtime, and tolerance rules.
-* xref:readiness-check.adoc[Readiness check] provides the entry diagnostic and remediation route.
+* xref:assessment/overview.adoc[Assessment design] shows which work is graded.
+* xref:technical-contract.adoc[Running the course code] explains the supported hardware, running times, and acceptable numerical differences.
+* xref:readiness-check.adoc[Readiness check] provides the preparation check and support options.

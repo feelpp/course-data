@@ -4,7 +4,7 @@
 
 The course webpage is a primary learning environment, not a catalogue pointing elsewhere. Every canonical worked example must let a student identify the question, understand the mathematics, follow the implementation, inspect the evidence, and state a defensible conclusion without instructor-only material.
 
-This contract applies to all 12 foundation and seven analytical lesson pages. Seventeen examples also generate student notebooks from the same AsciiDoc; the mathematical-background and reproducible-delivery examples remain page-only because transparent hand calculations are the appropriate implementation.
+This contract applies to all 14 foundation and seven analytical lesson pages. Nineteen examples also generate student notebooks from the same AsciiDoc; the mathematical-background and reproducible-delivery examples remain page-only because transparent hand calculations are the appropriate implementation.
 
 ## Required five-part structure
 

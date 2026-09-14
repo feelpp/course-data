@@ -1,0 +1,251 @@
+= Grouping readings and combining tables with pandas
+:page-course-language: en
+:page-course-concepts: DP-TAB-01, DP-TAB-02, DP-TAB-03, DP-QLT-02, DP-QLT-03, DP-TST-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO2, LO3, LO5, LO9
+:page-course-prerequisites: Python refresher and first steps with pandas
+:page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: fast
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
+
+Start after xref:foundations/python-pandas.adoc[the first Python–pandas session]. First, practise selecting a column and one sensor's rows again. Only continue when those operations make sense. This session introduces two questions: how can we summarise repeated readings, and how can we attach a sensor's description to its readings?
+
+We keep the four sensors from the first class and add a second reading time. These are still invented measurements. We introduce each operation on a displayed table, predict its result, run it, and discuss what changed. The final database demonstration is a short connection to the Database course; it requires no database installation.
+
+The two-hour plan is recap and grouping (20 minutes), combining two tables (25), break (10), decisions about questionable data (20), pair practice (25), database demonstration (10), and explanation and checks (10). If the first operations remain unclear, use the database slot for another guided example and return to that demonstration later.
+
+== 1. Add one new reading time
+
+The first four rows are exactly the original readings: A = 22 °C, B = 71.6 °F, C = 20 °C, D missing. For this exercise we label their common time 10:00 local time and add four invented readings at 11:00 on the same day. Compare the rows before running the code.
+
+[#pandas-groups-input]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="The original four readings and a second time",table-description="The first four readings are unchanged from the first class. Four additional synthetic readings at 11:00 let us compare repeated measurements from each sensor."]
+----
+from io import StringIO
+
+import pandas as pd
+
+csv_text = """sensor,time_local,temperature,unit
+A,10:00,22,°C
+B,10:00,71.6,°F
+C,10:00,20,°C
+D,10:00,,°C
+A,11:00,24,°C
+B,11:00,75.2,°F
+C,11:00,22,°C
+D,11:00,21,°C
+"""
+measurements = pd.read_csv(StringIO(csv_text))
+measurements
+----
+
+We repeat the conversion already explained in the first pandas session. A sensor's original unit and value remain available beside the Celsius column.
+
+[#pandas-groups-convert]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Both times expressed in Celsius",table-description="The two Fahrenheit readings from B become 22 and 24 Celsius. D's missing first reading stays missing."]
+----
+converted = measurements.copy()
+converted["temperature_c"] = converted["temperature"]
+is_fahrenheit = converted["unit"] == "°F"
+fahrenheit_values = converted.loc[is_fahrenheit, "temperature"]
+celsius_values = (fahrenheit_values - 32) * 5 / 9
+converted.loc[is_fahrenheit, "temperature_c"] = celsius_values
+converted[["sensor", "time_local", "temperature_c"]]
+----
+
+*Recap:* select A's rows, then locate the missing temperature. Each row now represents one sensor at one time. The pair `(sensor, time_local)` identifies it within this single-day example; a real multi-day table would also need the date.
+
+== 2. One summary for each sensor
+
+For A, we have 22 and 24 degrees Celsius: their mean is 23. For B, the converted readings also have a mean of 23. C's mean is 21. D has only one available value, 21. Write these four predictions before running the next cell.
+
+`groupby("sensor")` puts together rows with the same sensor label. Selecting `"temperature_c"` chooses the column to summarise; `mean()` computes a mean within each group.
+
+[#pandas-group-first]
+[%dynamic%open,python,fail-on-error=]
+----
+print(converted.groupby("sensor")["temperature_c"].mean())
+----
+
+We now have one result per sensor, not one result per reading. D's mean uses a different number of values from A's. To show that difference, we can calculate several summaries at once with `agg`.
+
+In the next cell, each line names an output column, an input column, and an operation. `size` counts records; `count` counts available values; `mean` computes their average. `as_index=False` keeps `sensor` as an ordinary output column.
+
+[#pandas-group-summary]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Counts and means for each sensor",table-description="A and B have two available readings and mean 23 Celsius, C has two and mean 21, while D has one available reading out of two records and mean 21."]
+----
+summary = converted.groupby("sensor", as_index=False).agg(
+    records=("temperature_c", "size"),
+    available=("temperature_c", "count"),
+    mean_c=("temperature_c", "mean"),
+)
+summary
+----
+
+*Pause:* explain D's two counts. Would averaging the four sensor means give the same answer as averaging the seven available readings? The first gives each sensor equal weight; the second gives each available reading equal weight. We must say which question we are answering.
+
+== Worked example: add a description of each sensor
+
+[.worked-example-context#worked-pandas-sql-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+Suppose a separate table tells us where each sensor is placed in the same room. We want to attach that description to each reading. We should still have eight rows afterwards: adding a description should neither lose nor repeat a measurement.
+
+[.worked-example-method#worked-pandas-sql-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+Match the `sensor` column in the readings to the `sensor` column in the descriptions. This operation is called a *join*. Several readings can share one sensor description: a *many-to-one* relationship. Check that the description table has only one row per sensor and that every reading finds its description.
+
+.Mathematical insight — a repeated description can repeat readings
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* Two A readings matched with one A description give stem:[2\times1=2] rows. Two descriptions for A would instead give stem:[2\times2=4] rows. A later average would then count A's measurements twice. We check the match before using the combined table.
+====
+
+[.worked-example-implementation#worked-pandas-sql-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+Read the small description table first. The positions are invented for this exercise. They add context to the same four sensors; they are not additional temperature measurements.
+
+[#pandas-sensor-descriptions]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="One description per sensor",table-description="In the invented room, A and B are near the window and C and D near the door."]
+----
+sensors = pd.DataFrame({
+    "sensor": ["A", "B", "C", "D"],
+    "position": ["window", "window", "door", "door"],
+})
+sensors
+----
+
+`merge` combines the tables. Read its arguments one at a time:
+
+* `on="sensor"`: match sensor labels.
+* `how="left"`: keep every row from the left table, `converted`.
+* `validate="many_to_one"`: stop if a sensor has several description rows.
+* `indicator=True`: add a column showing whether a match was found.
+
+[#pandas-guided-join]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Sensor descriptions attached to all eight readings",table-description="The join retains eight readings and adds a position. The match indicator is both for every row."]
+----
+joined = converted.merge(
+    sensors, on="sensor", how="left", validate="many_to_one", indicator=True
+)
+joined[["sensor", "time_local", "temperature_c", "position", "_merge"]]
+----
+
+`both` means the sensor was found in both input tables. Now check the properties we predicted. `is_unique` asks whether labels are repeated. `duplicated` detects repeated sensor-time pairs. The final check compares those pairs before and after the join, including their order.
+
+[#pandas-guided-join-checks]
+[%dynamic%open,python,fail-on-error=]
+----
+key = ["sensor", "time_local"]
+assert sensors["sensor"].is_unique
+assert not converted.duplicated(key).any()
+assert len(joined) == len(converted)
+assert joined["_merge"].eq("both").all()
+pd.testing.assert_frame_equal(joined[key], converted[key])
+print("Eight readings kept; all sensor descriptions found.")
+----
+
+[.worked-example-results#worked-pandas-sql-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+All eight readings remain, every sensor has a description, and D's first temperature is still missing. Adding a sensor's position has not created the absent measurement.
+
+[.worked-example-conclusion#worked-pandas-sql-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The combined table can now be used to compare readings near the window and near the door. These checks do not establish the accuracy of the sensors or their descriptions. The example is synthetic and cannot support a conclusion about a real room.
+
+== 3. Different problems need different responses
+
+[cols="2,3",options="header"]
+|===
+|What we see |What to investigate first
+|A missing temperature |Which reading is absent, and why? Do not invent a zero.
+|A sensor without a description |Is its label wrong, or is the description table incomplete?
+|Two rows with the same sensor and time |Are they repeated records or distinct measurements? Check their source before deleting anything.
+|An unexpected temperature |Check its unit, sensor range, and source. An unusual value is not automatically an error.
+|A missing sensor label |Resolve the identity before matching. pandas may match missing labels to one another, unlike an ordinary SQL equality join.
+|===
+
+We discuss these choices before automating repairs. Later, if a predictive model needs a replacement for missing values, we will calculate that replacement from training data only. This avoids using information from the data reserved for evaluation; Block 5 explains the separation.
+
+== 4. Pair practice, one change at a time
+
+Keep the solved tables unchanged and use copies for practice. Predict each result before running it.
+
+. Group the converted readings by `time_local` instead of `sensor`. Explain what one output row now represents.
+. Make a copy of the description table that omits D. Join again. Find the two unmatched readings using `_merge`; explain why `validate="many_to_one"` alone does not detect an absent description.
+. Restore D's description. Check that every reading matches again, and write one sentence about the original missing temperature.
+
+During the discussion, the instructor can demonstrate adding a second description for A. The same merge should raise `MergeError`: its message says that the description labels are not unique. This is a useful failure, because it stops the accidental duplication we predicted. There is no need to write exception-handling code in this exercise.
+
+== 5. Later in the session: a database result is also a table
+
+This is an instructor demonstration after the preceding manipulations are understood. A database stores data and answers requests called *queries*. SQL is a language for writing those requests. pandas can receive a query's result as a DataFrame, which we can then manipulate with the same methods as before.
+
+Here the question is: “Which readings are at least 23 degrees Celsius?” Predict A and B at 11:00, both at 24 degrees Celsius. We use Python's built-in `sqlite3` to create a small temporary database in memory. No server or account is required. The first two lines below create the database and copy our converted table into it.
+
+[#pandas-sql-bridge]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="The database returns a pandas DataFrame",table-description="The query selects A and B at 11:00, the two readings of at least 23 degrees Celsius."]
+----
+import sqlite3
+
+connection = sqlite3.connect(":memory:")
+converted.to_sql("readings", connection, index=False)
+sql_result = pd.read_sql_query(
+    "SELECT sensor, time_local, temperature_c FROM readings "
+    "WHERE temperature_c >= ? ORDER BY sensor, time_local",
+    connection,
+    params=(23.0,),
+)
+connection.close()
+sql_result
+----
+
+`SELECT` names the columns, `FROM` names the stored table, `WHERE` filters rows, and `ORDER BY` sorts the result. `?` is replaced with the separately supplied value 23.0. `read_sql_query` places the returned rows in `sql_result`; `close()` releases the temporary connection.
+
+For comparison, we can ask pandas the same question and check that the two tables agree. This is supplied checking code for the demonstration, not new syntax to learn by heart. `reset_index(drop=True)` gives the selected rows labels 0 and 1, matching the query output.
+
+[#pandas-sql-comparison]
+[%dynamic%open,python,fail-on-error=]
+----
+pandas_result = converted.loc[
+    converted["temperature_c"] >= 23.0,
+    ["sensor", "time_local", "temperature_c"],
+].sort_values(["sensor", "time_local"]).reset_index(drop=True)
+pd.testing.assert_frame_equal(sql_result, pandas_result)
+print("The SQL request and pandas selection return the same two readings.")
+----
+
+Both give the predicted result. This one comparison does not mean all SQL and pandas operations behave identically. For a large database, asking for only the necessary rows and columns also avoids loading the whole dataset into Python memory. The Database course develops queries and storage; Block 12 measures this practical benefit.
+
+== What to explain before moving on
+
+Explain what one row represents before and after grouping, how a sensor description is attached, and how you find unmatched readings. Record that the data are invented and state one thing these measurements cannot tell us. Restart the notebook and run the examples in order.
+
+Block 4 then introduces array shapes and changing between long and wide tables, using the xref:foundations/tabular-data.adoc[tabular reference] before xref:foundations/eda-sampling.adoc[exploratory analysis]. More detail is available in the https://pandas.pydata.org/pandas-docs/version/2.3.1/getting_started/comparison/comparison_with_sql.html[official SQL–pandas comparison].

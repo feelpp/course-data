@@ -6,6 +6,19 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_public_contact_plan_matches_the_canonical_schedule() -> None:
+    curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))
+    source = (ROOT / "docs/course/modules/ROOT/pages/course-map.adoc").read_text(encoding="utf-8")
+    for block in curriculum["schedule"]:
+        contact = "; ".join(f"{slot['label']} {slot['minutes']}" for slot in block["contact_plan"])
+        preparation = block["preparation"]
+        expected = (
+            f"|{block['block']}\n|{block['title']}\n|{contact}\n"
+            f"|{preparation['minutes']} min: {preparation['task']}"
+        )
+        assert expected in source, f"Block {block['block']} differs from the public plan"
+
+
 def test_curriculum_totals_and_references() -> None:
     curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text(encoding="utf-8"))
     assert sum(item["weight_percent"] for item in curriculum["assessments"]) == 100
@@ -83,8 +96,8 @@ def test_foundation_release_inventory_is_complete() -> None:
     release = curriculum["foundation_release"]
     assert release["implementation_status"] == "complete"
     assert release["external_academic_review"] == "pending"
-    assert len(release["pages"]) == 12
-    assert len(release["notebook_sources"]) == 10
+    assert len(release["pages"]) == 14
+    assert len(release["notebook_sources"]) == 12
     assert len(release["templates"]) == 5
     for group in ("pages", "notebook_sources", "templates", "teaching_data"):
         assert all((ROOT / path).exists() for path in release[group])
@@ -94,6 +107,8 @@ def test_foundation_release_inventory_is_complete() -> None:
 def test_foundation_navigation_follows_the_student_sequence() -> None:
     nav = (ROOT / "docs/course/modules/ROOT/nav.adoc").read_text(encoding="utf-8")
     sequence = [
+        "foundations/python-pandas.adoc",
+        "foundations/pandas-sql.adoc",
         "foundations/data-lifecycle.adoc",
         "foundations/tabular-data.adoc",
         "foundations/data-quality.adoc",
@@ -149,8 +164,8 @@ def test_worked_example_release_has_complete_learning_contract() -> None:
     assert set(release["pages"]) == foundation_pages | analytical_pages
     assert set(release["notebook_sources"]) == notebook_sources
     assert set(release["page_only"]) == (foundation_pages | analytical_pages) - notebook_sources
-    assert len(release["pages"]) == 19
-    assert len(release["notebook_sources"]) == 17
+    assert len(release["pages"]) == 21
+    assert len(release["notebook_sources"]) == 19
     for relative in [
         *release["pages"],
         release["authoring_contract"],

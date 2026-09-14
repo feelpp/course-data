@@ -1,0 +1,291 @@
+= Python refresher and first steps with pandas
+:page-course-language: en
+:page-course-concepts: DP-TAB-01, DP-QLT-01, DP-REP-01, DP-TST-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO2, LO3, LO9
+:page-course-prerequisites: No pandas experience; introductory Python revisited in class
+:page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: fast
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
+
+We return to *the same four-sensor table used in the first class*, in xref:starting-with-data.adoc#_a_small_example_the_calculation_runs_but_what_does_it_mean[the introductory temperature example]. We already discussed its meaning on paper. Now we will carry out that reasoning in Python, one small step at a time. No previous pandas experience is required.
+
+[cols="1,2,1",options="header"]
+|===
+|Sensor |Recorded temperature |Unit
+|A |22 |°C
+|B |71.6 |°F
+|C |20 |°C
+|D |Missing |°C
+|===
+
+The four readings are synthetic, from four sensors in a room at the same stated time. The question is unchanged: *what is the mean of the available temperatures, in degrees Celsius?* Before touching the computer, recall why we cannot average the three raw numbers or replace D's missing value by zero.
+
+Use the notebook download in the page toolbar, or open `notebooks/foundations/python-pandas.ipynb` in the xref:downloads.adoc[student bundle]. Choose the bundle's `.venv` kernel. If setup is blocked, follow the displayed results or work with a partner, then bring the error for support. We explain the code together; running all cells is not the same as understanding them.
+
+== Today's pace
+
+[cols="1,3",options="header"]
+|===
+|Minutes |Activity
+|0–20 |Recall the table; revisit Python values, names, lists, and the conversion formula.
+|20–40 |Read the same table from CSV and recognise its rows and columns.
+|40–65 |Select a column and a sensor; locate the missing reading; convert units together.
+|65–75 |Break.
+|75–105 |Finish the mean together, then practise small changes to the same table.
+|105–120 |Explain the result, its checks, and its limitation; restart and run the notebook.
+|===
+
+Each code cell is followed by an explanation and a question. Take time to answer before continuing. Grouping, joins, SQL, and array broadcasting are later steps. The additional function example at the end is a reference to revisit, not an extra task to fit into today.
+
+== 1. Start with a value and a calculation
+
+A variable is a name attached to a value. We can write the conversion from the first class almost as we would on paper. `print` displays a result; `round` below changes its displayed precision.
+
+[#python-temperature]
+[%dynamic%open,python,fail-on-error=]
+----
+temperature_f = 71.6
+temperature_c = (temperature_f - 32) * 5 / 9
+print(round(temperature_c, 1))
+----
+
+The result is 22.0 degrees Celsius. The first line names the input, the second computes the converted value, and the third displays it. *Pause:* point to the input, the calculation, and the output. Why is 71.6 not a Celsius temperature in this example?
+
+A list keeps several values in order. A dictionary attaches names to the fields of one record. `None` represents a missing value here; quoted text such as `"A"` is a label.
+
+[#python-list-record]
+[%dynamic%open,python,fail-on-error=]
+----
+readings = [22.0, 71.6, 20.0, None]
+record = {"sensor": "A", "temperature": 22.0, "unit": "°C"}
+print(readings[0])
+print(record["sensor"])
+----
+
+This prints the first reading, 22.0, and the sensor label A. List positions start at zero; a dictionary uses a key such as `"sensor"`. *Pause:* what would `readings[1]` and `record["unit"]` return? Why must we keep each reading's unit?
+
+In a notebook, run cells in order. If a name is unknown (`NameError`), check its spelling and the cell that defines it. If a key or column is unknown (`KeyError`), check its name. Read the final error line and ask for help with that line; errors are information about what needs attention.
+
+== 2. Put the familiar table into pandas
+
+A *DataFrame* is a table in Python, with named columns and row labels. pandas is the library that provides it. `import pandas as pd` loads pandas and gives it the short name `pd`.
+
+CSV is plain text: commas separate fields and each new line is a record. The first line names the columns. Compare the four CSV records below with the table at the top: they contain exactly the same readings. The empty field for D is the missing measurement.
+
+`StringIO` simply lets this small text be read as a file. It avoids a separate download for our first lesson; you do not need to remember how it works. For an actual file in the notebook's folder, we would use `pd.read_csv("readings.csv")`.
+
+[#pandas-read-csv]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="The first-class table, now in pandas",table-description="Sensors A, B, C, and D have values 22 Celsius, 71.6 Fahrenheit, 20 Celsius, and one missing Celsius reading respectively."]
+----
+from io import StringIO
+
+import pandas as pd
+
+csv_text = """sensor,temperature,unit
+A,22,°C
+B,71.6,°F
+C,20,°C
+D,,°C
+"""
+measurements = pd.read_csv(StringIO(csv_text))
+measurements
+----
+
+The displayed table is our four-sensor example. `NaN` is how this numeric column displays its missing value. The leftmost labels 0–3 form the pandas *index*. They are not sensor identifiers: A–D are stored in the `sensor` column. Here one row is one sensor's reading at the common time.
+
+[#pandas-inspect]
+[%dynamic%open,python,fail-on-error=]
+----
+print(measurements.shape)
+print(measurements.columns.tolist())
+----
+
+`shape` gives `(4, 3)`: four rows and three columns. `columns.tolist()` lists their names. *Pause:* find sensor B and its unit in the displayed table before selecting anything in code. `measurements.head()` is another way to display only the first few rows of a larger table.
+
+The temperature column is numeric, while the sensor and unit columns contain text. The `dtypes` attribute can display these storage types. A numeric dtype does not tell us whether the measurement is in Celsius or Fahrenheit; that meaning comes from the unit column.
+
+== 3. Read one column, then select one sensor
+
+A column is selected using its name in brackets. pandas calls this one-dimensional sequence a *Series*.
+
+[#pandas-column]
+[%dynamic%open,python,fail-on-error=]
+----
+print(measurements["temperature"])
+----
+
+This displays 22, 71.6, 20, and the missing value, together with their row labels. *Pause:* which part of the expression would you change to display the units instead?
+
+A comparison creates a *mask*: one `True` or `False` for each row. Only the row for sensor B should be true.
+
+[#pandas-mask]
+[%dynamic%open,python,fail-on-error=]
+----
+is_sensor_b = measurements["sensor"] == "B"
+print(is_sensor_b)
+----
+
+Read the four results alongside the original four rows. `.loc` uses this mask to retain the rows where it is true.
+
+[#pandas-filter]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Select sensor B",table-description="The Boolean mask retains B's single reading, 71.6 degrees Fahrenheit."]
+----
+measurements.loc[is_sensor_b]
+----
+
+The result contains B's reading and its unit. It has not changed the original table. *Pause:* select sensor C by changing the comparison. Predict the value and unit first.
+
+== 4. Locate what is missing
+
+`isna()` makes a mask for missing values. We use exactly the same row-selection operation as before.
+
+[#pandas-missing]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Locate the missing reading",table-description="Sensor D is the only sensor without a recorded temperature."]
+----
+is_missing = measurements["temperature"].isna()
+measurements.loc[is_missing]
+----
+
+We find D. This tells us where information is absent, but not why it is absent. *Pause:* why would filling this cell with zero change the scientific meaning?
+
+== 5. Add a Celsius column without losing the recorded values
+
+First copy the table and add a column. The new column initially copies the recorded values; it still needs the Fahrenheit conversion. Keep that intermediate state in mind.
+
+[#pandas-copy]
+[%dynamic%open,python,fail-on-error=]
+----
+converted = measurements.copy()
+converted["temperature_c"] = converted["temperature"]
+----
+
+We will correct the new column only where the recorded unit is Fahrenheit. With two arguments, `.loc[rows, column]` selects both the rows and a named column.
+
+[#pandas-conversion-input]
+[%dynamic%open,python,fail-on-error=]
+----
+is_fahrenheit = converted["unit"] == "°F"
+fahrenheit_values = converted.loc[is_fahrenheit, "temperature"]
+print(fahrenheit_values)
+----
+
+The selection contains just B's recorded 71.6. Apply the same formula as in the Python refresher, then place the result in the new column at those same rows.
+
+[#pandas-conversion-result]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Recorded values preserved beside Celsius values",table-description="B's recorded 71.6 Fahrenheit becomes 22 Celsius in a new column; the original values and units are kept and D remains missing."]
+----
+celsius_values = (fahrenheit_values - 32) * 5 / 9
+converted.loc[is_fahrenheit, "temperature_c"] = celsius_values
+converted
+----
+
+The `temperature` and `unit` columns still describe the original readings. The new `temperature_c` column has values 22, 22, 20, and missing, all in Celsius. *Pause:* explain what each of the three new code lines does. Why did we preserve the original columns?
+
+== Worked example: finish the calculation from the first class
+
+[.worked-example-context#worked-python-pandas-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+What is the mean of the available readings in Celsius? Use the original four sensors, after converting B. The synthetic example describes a common time in one room; it does not establish the temperature of the whole room or day.
+
+[.worked-example-method#worked-python-pandas-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+Count all records and available temperatures, then calculate the mean of the converted values. Predict it by hand: stem:[(22+22+20)/3=64/3\approx21.3] degrees Celsius.
+
+.Mathematical insight — count the available readings
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* Four records contain only three measured temperatures. Dividing their converted sum by four would implicitly replace the missing reading by zero and produce 16 degrees Celsius. The available-value mean needs a denominator of three.
+====
+
+[.worked-example-implementation#worked-python-pandas-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+`len` counts rows. For this numeric column, `count()` counts available values and `mean()` averages them, skipping the missing value. We name the three results before displaying them.
+
+[#pandas-mean-evidence]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="The original hand calculation reproduced in Python",table-description="Four records contain three temperatures and one missing value. The available-value mean is approximately 21.3 degrees Celsius."]
+----
+n_records = len(converted)
+n_available = converted["temperature_c"].count()
+mean_c = converted["temperature_c"].mean()
+
+pd.DataFrame({
+    "records": [n_records],
+    "available": [n_available],
+    "missing": [n_records - n_available],
+    "mean_c": [round(mean_c, 1)],
+})
+----
+
+We can ask Python to check statements we already verified by hand. `assert` stops with an error if its statement is false. The last check allows a tiny rounding difference between two floating-point calculations; we explain it together rather than treating its syntax as something to memorise.
+
+[#pandas-mean-checks]
+[%dynamic%open,python,fail-on-error=]
+----
+assert n_records == 4
+assert n_available == 3
+assert abs(mean_c - 64 / 3) < 1e-10
+print("The counts and mean agree with the hand calculation.")
+----
+
+[.worked-example-results#worked-python-pandas-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The mean is approximately 21.3 degrees Celsius over three available readings, with one reading missing. This is the result from the first class. pandas carried out our stated choices; it did not choose the units or missing-value rule for us.
+
+[.worked-example-conclusion#worked-python-pandas-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+We can report the mean of the available readings at this time, with its count and missingness. A limitation remains: the fourth temperature is unknown, and we have not checked sensor calibration, room coverage, or change over time.
+
+== Practise on the same table
+
+Keep the original example intact and create new cells for these short tasks. Work in pairs: one person predicts, the other types, then swap. We do the first task together if needed.
+
+. Display the `sensor` column. Then select C's complete row. Explain the difference between the two outputs.
+. Display the missing row and say why it remains in the source table.
+. Make a new copy of the converted table. Suppose C had recorded 18 degrees Celsius instead of 20. Change C's `temperature_c` value in this copy using `.loc`, predict the new mean on paper, and calculate it. Explain why the copy and the original now give different results.
+
+For the exit discussion, explain one selection, why B was converted, and why the mean uses three values. Restart the notebook and run the supplied cells in order. If an operation remains unclear, mark it for the next session's recap. The quantity of code completed is not the goal.
+
+== Later reference: give a calculation a name
+
+Once the steps above are comfortable, a function can make the conversion reusable. Indentation marks its body; `return` passes the result back. This short refresher is available for later practice.
+
+[#python-conversion-function]
+[%dynamic%open,python,fail-on-error=]
+----
+def fahrenheit_to_celsius(value):
+    return (value - 32) * 5 / 9
+
+
+print(round(fahrenheit_to_celsius(71.6), 1))
+----
+
+It prints 22.0 degrees Celsius, exactly the same displayed result as our first calculation. Next, after these operations are understood: xref:foundations/pandas-sql.adoc[grouping, joins, and the connection to databases]. Additional examples are available in the https://pandas.pydata.org/pandas-docs/version/2.3.1/getting_started/intro_tutorials/index.html[pandas introductory tutorials for the course version].

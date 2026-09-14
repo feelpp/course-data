@@ -20,14 +20,9 @@ By the end of the course, a student can take a documented dataset from raw table
 
 The course assumes mathematical maturity at Bachelor level, including basic linear algebra, calculus, probability, and statistics. Students should have introductory Python experience, but the diagnostic recognises that programming fluency will vary.
 
-Required before Block 2:
+Before Block 2, complete the ungraded 35-minute support inventory and attempt the student-bundle setup. Prior pandas or NumPy fluency is not required, and the inventory has no passing score. A successful fresh-kernel run is required before independent notebook work; blocked students can follow the rendered lesson or pair up while receiving setup support. Git is introduced through Project 1.
 
-- run Python and Jupyter in the supported environment;
-- use variables, functions, loops/comprehensions, imports, and exceptions;
-- read basic NumPy array code;
-- clone/pull a repository and run a documented command.
-
-Students who do not meet the diagnostic threshold receive a short remedial path. Contact time is not converted into a general Python course.
+Block 2 explicitly refreshes Python and teaches first pandas operations. Block 3 teaches grouping, validated joins, and the SQL connection. Block 4 introduces array shapes and reshape before EDA, with an array recap in Block 6. Targeted practice follows instruction; persistent difficulty leads to support before the next dependent independent task. See `python-pandas-session.md` for pacing and checkpoints.
 
 ## Learning outcomes
 
