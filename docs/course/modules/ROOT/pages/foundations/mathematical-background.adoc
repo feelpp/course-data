@@ -407,7 +407,9 @@ The practical review questions and examples are given in xref:foundations/data-q
 
 == Uncertainty for quality measurements
 
-A *Bernoulli variable* is a zero/one random variable. The missingness indicators are Bernoulli variables because each entry is observed or missing. A *standard error* describes how much an estimate would vary across repeated samples generated in the same way. If the missingness indicators are independent, an estimated standard error for the observed missing rate is
+A *Bernoulli variable* records one of two outcomes as 0 or 1. The missingness indicators are Bernoulli variables because each entry is observed (`0`) or missing (`1`). Their empirical mean is therefore the observed proportion of missing entries.
+
+A *standard error* describes how much an estimate would vary across repeated samples collected in the same way. It is uncertainty about an estimated summary, not spread among the individual measurements. If stem:[n] missingness indicators are independent, an estimated standard error for the observed missing rate stem:[\widehat p_j] is
 
 [stem]
 ++++
@@ -415,22 +417,63 @@ A *Bernoulli variable* is a zero/one random variable. The missingness indicators
 =\sqrt{\frac{\widehat p_j(1-\widehat p_j)}{n}}.
 ++++
 
-This independence approximation is unsuitable when outages occur in bursts or affect a complete device, station, or group. *Resampling* constructs repeated pseudo-samples from the observed data to study variability. In this case it must preserve the relevant groups or time blocks rather than treating every row as independent.
+This independence approximation is unsuitable when outages occur in bursts or affect a complete device, station, or group. *Resampling* repeatedly draws from the available observations to mimic the variation between samples. In this case, each resample must preserve the relevant groups or time blocks rather than treating every row as independent.
 
-For a deterministic conversion stem:[y=ax+b], a small measurement uncertainty stem:[u_x] propagates as
+A *measurement uncertainty* describes the plausible variation around a reported measurement. Here stem:[u_x] denotes a standard uncertainty, expressed in the same unit as stem:[x]. For a deterministic conversion stem:[y=ax+b], meaning that the same input always gives the same output, a small measurement uncertainty propagates as
 
 [stem]
 ++++
 u_y=|a|u_x
 ++++
 
-when stem:[a] and stem:[b] are treated as exact. The word *propagates* means that input uncertainty is transformed through the calculation. For example, stem:[20.0\pm0.2] degrees Celsius becomes stem:[68.0\pm0.36] degrees Fahrenheit. *Calibration parameters* are values used to translate an instrument's signal into a reported measurement. If they are estimated rather than exact, their uncertainty must be included separately.
+when stem:[a] and stem:[b] are treated as exact. The word *propagates* means that input uncertainty is transformed through the calculation. *Calibration parameters* are numbers used to translate an instrument's signal into a reported measurement. If they are estimated rather than exact, their uncertainty must be included separately.
+
+=== Small Python example: missing rate and unit conversion
+
+Suppose 12 of 100 temperature entries are missing. The observed missing rate is 0.12 and its estimated standard error under row independence is about 0.0325. Separately, converting stem:[20.0\pm0.2] degrees Celsius to Fahrenheit multiplies both the value's varying part and its uncertainty by stem:[9/5].
+
+[#math-quality-uncertainty]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Two elementary uncertainty calculations",table-description="Rows show an observed missing rate of 0.12, its estimated standard error of about 0.0325 under independence, a converted temperature of 68 degrees Fahrenheit, and a converted standard uncertainty of 0.36 degrees Fahrenheit."]
+----
+observed_rows = 100
+missing_rows = 12
+missing_rate = missing_rows / observed_rows
+missing_rate_se = np.sqrt(
+    missing_rate * (1 - missing_rate) / observed_rows
+)
+
+temperature_c = 20.0
+standard_uncertainty_c = 0.2
+temperature_f = (9 / 5) * temperature_c + 32
+standard_uncertainty_f = (9 / 5) * standard_uncertainty_c
+
+pd.DataFrame(
+    {
+        "quantity": [
+            "observed missing rate",
+            "estimated SE of missing rate",
+            "converted temperature (°F)",
+            "converted standard uncertainty (°F)",
+        ],
+        "value": [
+            missing_rate,
+            missing_rate_se,
+            temperature_f,
+            standard_uncertainty_f,
+        ],
+    }
+).round(4)
+----
+
+The value 0.0325 depends on the independence assumption. The conversion to 0.36 degrees Fahrenheit is different: it follows directly from the known linear conversion when stem:[9/5] and 32 are treated as exact.
 
 == Estimators, bias, variance, and mean-squared error
 
 Let stem:[\theta(P)] be a parameter: a fixed but unknown population quantity determined by stem:[P]. An *estimator* is a rule that takes a sample as input. Applying that rule to the observed sample produces an *estimate*. We write the estimator and its resulting estimate as stem:[\widehat\theta=\widehat\theta(\mathcal D_n)]. The hat indicates that the quantity was estimated from data.
 
 Because another valid sample would usually give another estimate, stem:[\widehat\theta] is a random variable before the sample is observed. Its *bias* is the difference between its average over repeated samples and the target stem:[\theta]. Its *variance* describes how much it changes across those repeated samples.
+
+Do not confuse these two variances. The empirical variance defined earlier describes spread among observations inside one sample. The variance of an estimator describes spread among estimates obtained from many possible samples.
 
 .Definition: Estimator bias
 [.def#def:estimator-bias]
@@ -459,9 +502,48 @@ The formula says that MSE has two parts: repeated-sample variation and squared s
 
 Regularisation, defined in the earlier Ridge and Lasso note, may increase bias while reducing variance. The useful question is whether the total MSE decreases for the target population and sample size.
 
+=== Small Python example: a biased estimate can have a smaller MSE
+
+Assume that the target population quantity is stem:[\theta=22]. The following five values for each method represent estimates obtained from five hypothetical repetitions of the complete sampling procedure. This small example uses the average over those five repetitions in place of a theoretical expectation.
+
+[#math-bias-variance-mse]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Bias, variance, and MSE for two toy estimators",table-description="Estimator A has zero observed bias, variance 8, and MSE 8; estimator B has bias 0.4, variance 0.34, and MSE 0.5, illustrating that a small bias can accompany a much larger reduction in variation."]
+----
+target = 22.0
+repeated_estimates = {
+    "A: variable but centred": np.array([18, 20, 22, 24, 26]),
+    "B: slightly high, less variable": np.array(
+        [21.5, 22.0, 22.5, 23.0, 23.0]
+    ),
+}
+
+estimator_comparison = []
+for estimator, estimates in repeated_estimates.items():
+    average_estimate = estimates.mean()
+    bias = average_estimate - target
+    variance = ((estimates - average_estimate) ** 2).mean()
+    mse = ((estimates - target) ** 2).mean()
+    estimator_comparison.append(
+        {
+            "estimator": estimator,
+            "average estimate": average_estimate,
+            "bias": bias,
+            "variance": variance,
+            "bias squared": bias**2,
+            "MSE": mse,
+        }
+    )
+
+pd.DataFrame(estimator_comparison).round(2)
+----
+
+For each row, `MSE` equals `variance + bias squared`. Estimator A is centred on the target but varies widely. Estimator B is slightly high on average, yet its smaller variation gives a much smaller MSE. Five repetitions are enough to explain the calculation, but far too few for a reliable scientific comparison.
+
 == Loss, risk, and generalisation
 
 A *prediction rule* stem:[f] maps an input stem:[x] to an action or prediction stem:[f(x)] in a set of allowed outputs stem:[\mathcal A]. A *loss function* stem:[L(y,f(x))] assigns a numerical cost to the difference between the observed response stem:[y] and the prediction. Smaller loss means better performance according to the chosen criterion.
+
+For a numerical response, a common choice is *squared-error loss*, stem:[L(y,\widehat y)=(y-\widehat y)^2]. It is zero for an exact prediction and gives increasingly large costs to increasingly large errors. The unit of squared loss is the square of the response unit; other loss functions answer other practical questions.
 
 *Population risk* is the expected loss for a new observation drawn from the target population. *Empirical risk* is the average loss on a finite sample. *Generalisation* means that performance measured on available data continues to hold for new observations from the intended population.
 
@@ -476,7 +558,45 @@ R(f)=\mathbb E_{(X,Y)\sim P}[L(Y,f(X))],
 ++++
 ****
 
+=== Small Python example: training fit and generalisation
+
+The next example fits two polynomial prediction rules to five training measurements. A degree-1 polynomial is a straight line. A degree-4 polynomial can bend enough to pass through all five training points. `numpy.polyfit` selects the coefficients, and `numpy.polyval` uses them to make predictions.
+
+[#math-training-generalisation]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Training and test mean-squared errors",table-description="A straight-line rule has training MSE about 0.34 and test MSE about 0.19; a degree-four rule has essentially zero training MSE but test MSE about 1.33."]
+----
+x_train = np.array([0, 1, 2, 3, 4], dtype=float)
+y_train = np.array([20.0, 21.8, 21.2, 23.7, 23.9])
+x_test = np.array([0.5, 1.5, 2.5, 3.5])
+y_test = np.array([20.6, 20.9, 22.7, 23.1])
+
+fit_rows = []
+for degree, rule_name in [(1, "straight line"), (4, "degree-4 polynomial")]:
+    coefficients = np.polyfit(x_train, y_train, deg=degree)
+    train_predictions = np.polyval(coefficients, x_train)
+    test_predictions = np.polyval(coefficients, x_test)
+    fit_rows.append(
+        {
+            "prediction rule": rule_name,
+            "training MSE": np.mean((y_train - train_predictions) ** 2),
+            "test MSE": np.mean((y_test - test_predictions) ** 2),
+        }
+    )
+
+pd.DataFrame(fit_rows).round(3)
+----
+
+The degree-4 rule has almost zero empirical risk on the training rows because it passes through them. Its test error is nevertheless larger. The straight line does not reproduce every training fluctuation, but predicts these new rows better. This gap illustrates *overfitting*: adapting so closely to the training data that performance deteriorates on new data.
+
+The test MSE is still only an estimate of population risk. Its usefulness depends on whether the test rows are independent of the choices made during training and representative of the intended population.
+
 *Training* uses data to choose a fitted prediction rule, usually by minimising an empirical objective. *Evaluation* measures the fitted rule on observations not used to choose it. The population quantity that an analysis aims to estimate is called its *estimand*. Reusing evaluation observations to choose the model usually makes reported performance too favourable; this is *optimistic bias*.
+
+.Later reference: separating sources of prediction error
+[NOTE]
+====
+The rest of this section gives notation used later to separate limits of the model family, finite-sample fitting, and numerical optimisation. It is not needed to understand the preceding training/test example.
+====
 
 A *model class* stem:[\mathcal H] is the collection of prediction rules that the method is allowed to choose from. The following symbols separate four rules:
 
