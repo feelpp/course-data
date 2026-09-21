@@ -25,6 +25,7 @@ antora:
     - require: '@feelpp/antora-extensions'
       jupyter:
         include:
+          - foundations/mathematical-background.adoc
           - foundations/python-pandas.adoc
           - foundations/pandas-sql.adoc
           - foundations/data-lifecycle.adoc

@@ -97,7 +97,7 @@ def test_foundation_release_inventory_is_complete() -> None:
     assert release["implementation_status"] == "complete"
     assert release["external_academic_review"] == "pending"
     assert len(release["pages"]) == 14
-    assert len(release["notebook_sources"]) == 12
+    assert len(release["notebook_sources"]) == 13
     assert len(release["templates"]) == 5
     for group in ("pages", "notebook_sources", "templates", "teaching_data"):
         assert all((ROOT / path).exists() for path in release[group])
@@ -111,8 +111,8 @@ def test_foundation_navigation_follows_the_student_sequence() -> None:
         "foundations/pandas-sql.adoc",
         "foundations/data-lifecycle.adoc",
         "foundations/tabular-data.adoc",
-        "foundations/data-quality.adoc",
         "foundations/mathematical-background.adoc",
+        "foundations/data-quality.adoc",
         "foundations/probability-distributions-moments.adoc",
         "foundations/quantiles-exceedance-risk.adoc",
         "foundations/mean-uncertainty.adoc",
@@ -165,7 +165,7 @@ def test_worked_example_release_has_complete_learning_contract() -> None:
     assert set(release["notebook_sources"]) == notebook_sources
     assert set(release["page_only"]) == (foundation_pages | analytical_pages) - notebook_sources
     assert len(release["pages"]) == 21
-    assert len(release["notebook_sources"]) == 19
+    assert len(release["notebook_sources"]) == 20
     for relative in [
         *release["pages"],
         release["authoring_contract"],

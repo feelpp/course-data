@@ -64,6 +64,7 @@ foundation_release:
     - docs/course/modules/ROOT/pages/foundations/reproducible-delivery.adoc
     - docs/course/modules/ROOT/pages/foundations/baseline-synthesis.adoc
   notebook_sources:
+    - docs/course/modules/ROOT/pages/foundations/mathematical-background.adoc
     - docs/course/modules/ROOT/pages/foundations/python-pandas.adoc
     - docs/course/modules/ROOT/pages/foundations/pandas-sql.adoc
     - docs/course/modules/ROOT/pages/foundations/data-lifecycle.adoc
@@ -173,6 +174,7 @@ worked_example_release:
     - docs/course/modules/ROOT/pages/analytical/pca-clustering.adoc
     - docs/course/modules/ROOT/pages/analytical/performance-columnar.adoc
   notebook_sources:
+    - docs/course/modules/ROOT/pages/foundations/mathematical-background.adoc
     - docs/course/modules/ROOT/pages/foundations/probability-distributions-moments.adoc
     - docs/course/modules/ROOT/pages/foundations/quantiles-exceedance-risk.adoc
     - docs/course/modules/ROOT/pages/foundations/mean-uncertainty.adoc
@@ -193,7 +195,6 @@ worked_example_release:
     - docs/course/modules/ROOT/pages/analytical/pca-clustering.adoc
     - docs/course/modules/ROOT/pages/analytical/performance-columnar.adoc
   page_only:
-    - docs/course/modules/ROOT/pages/foundations/mathematical-background.adoc
     - docs/course/modules/ROOT/pages/foundations/reproducible-delivery.adoc
 
 assessment_hardening:

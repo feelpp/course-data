@@ -20,32 +20,62 @@
 
 xref:attachment$slides/20260914-pandas.html#19[Open class slides,role=class-slides-button,window=_blank]
 
-The unit of analysis must survive every selection, reshape, aggregation, and join. A table that looks plausible can still be wrong when keys multiply rows or when storage types hide semantic errors.
+This session starts from a simple question: *what does one row represent?* We call that the *unit of observation*. The closely related phrase *unit of analysis* means the kind of thing about which we calculate and report a result. It might be one sensor at one time, one patient, or one simulation run. Selecting rows, changing the table layout, calculating a summary, or joining another table must not silently change that meaning.
 
-The mathematical object behind a table matters: rows index observational units, columns represent variables, and keys define identity. Array and aggregation errors can therefore change the estimand, not merely the file layout. The notation follows xref:foundations/mathematical-background.adoc[Mathematical background and error estimation].
+A table that looks plausible can still be wrong. A join can duplicate measurements, a missing value can disappear from a count, or a column containing numbers can mix different physical units. We therefore learn each pandas operation together with a small check.
 
-Use this as the fuller reference after xref:foundations/python-pandas.adoc[first steps with pandas] and xref:foundations/pandas-sql.adoc[groups and joins]. Block 4 introduces array shapes and long/wide reshaping before the EDA lab; the class revisits arrays in Block 6. You are not expected to learn this entire reference before Block 2.
+Use this page after xref:foundations/python-pandas.adoc[first steps with pandas] and xref:foundations/pandas-sql.adoc[groups and joins]. The first part is the guided route for today's class. The mathematical reference and complete air-quality example remain available for later reading.
+
+== Today's two-hour route
+
+[cols="1,3,4",options="header"]
+|===
+|Time |Topic |Question to answer
+|0–10 min |Return to the sensor table |What does one row represent, and which columns identify it?
+|10–25 min |Arrays, DataFrames, shapes and axes |What changes when an operation acts down rows or across columns?
+|25–40 min |Inspect, select and sort |How can we understand a table before calculating anything?
+|40–55 min |Wide and long tables |What does `melt` change, and what stays unchanged?
+|55–65 min |Break |Ten minutes.
+|65–80 min |A small checked join |How do we attach station information without losing or duplicating measurements?
+|80–95 min |xref:foundations/mathematical-background.adoc#_data_population_and_notation[Mathematical bridge] |What are an observation, a sample, an empirical mean, and a missingness indicator?
+|95–120 min |xref:foundations/data-quality.adoc[First data-quality pass] |How do missing values, duplicates, and anomalies change the observations used in a calculation?
+|===
+
+The core target is the small checked join, a short mathematical bridge, and a first discussion of data quality. The mathematical bridge supplies only the language required by the quality examples; it is not a tour of the complete mathematical chapter. If earlier activities take longer, keep the order and reduce the number of quality examples rather than introducing MCAR, MAR, or MNAR without first defining observations, samples, empirical means, and missingness indicators. The sections from *Mathematical reference* onward deepen the ideas and remain available after class.
+
+== Four words used throughout the page
+
+[cols="1,3,3",options="header"]
+|===
+|Word |Plain meaning |Example
+|Observation |One measured or recorded case; usually one row in a tidy table. |One station at one time.
+|Variable |A property recorded for every observation; usually one column. |Temperature in degrees Celsius.
+|Key |One column, or several columns together, that identify an observation. |`station` together with `time_utc`.
+|Index |The labels displayed at the far left of a DataFrame. |The default index `0, 1, 2, ...` is only a row label; it is not the station key.
+|===
 
 == What you must be able to do
 
-* reason about array shapes, dtypes, masks, broadcasting, and reductions;
-* distinguish an index from a domain key and declare the unit of analysis;
+* read array and DataFrame shapes, types, masks, broadcasting, and reductions;
+* explain what one row represents and distinguish the DataFrame index from a data key;
+* inspect, select, sort, and count values before calculating a summary;
 * convert between long/tidy and wide forms without accidental aggregation;
-* group and aggregate with explicit output keys and units;
-* declare join cardinality before merging and validate it in code;
-* preserve row/key evidence and report unmatched records.
+* state the expected join relationship before merging and check it in code;
+* report unmatched rows and verify that a join did not lose or duplicate measurements.
 
 == Rules to check for a table
 
-A tidy row is one observation of the declared unit; a column is one variable; a table is one observational level. This is a reasoning convention, not a demand that every stored artifact have one physical layout.
+A *tidy table* has one observation per row, one variable per column, and one kind of observation per table. This is a useful layout for analysis, not a rule that every file must always be stored that way.
 
-For a join, write the expected relationship first: one-to-one, one-to-many, many-to-one, or intentional many-to-many. In pandas, use `validate=` where possible, inspect key uniqueness on both sides, record unmatched keys, and compare the pre/post key set. Row-count equality alone is insufficient: one row can be lost while another is duplicated.
+For a join, write the expected relationship first: one-to-one, one-to-many, many-to-one, or intentional many-to-many. In pandas, use `validate=` where possible, inspect whether keys are unique, show unmatched rows, and compare the keys before and after the join. Comparing only the number of rows is insufficient: one row can be lost while another is duplicated.
 
-Storage dtype is not semantics. An integer may be an identifier, a float may carry a physical unit, and a string may encode an ordered category or timestamp. Record types, units, category vocabulary, nullability, and timezone alongside the code.
+A pandas `dtype` tells us how values are stored, such as integer, floating-point number, text, or date-time. It does not give their scientific meaning. An integer may be an identifier; a floating-point number still needs a physical unit; text may represent a category or a time. Keep names, units, allowed categories, missing-value rules, and timezone information beside the code.
 
-== Block 4 bridge: array shapes and reductions
+== Arrays: shapes, axes and reductions
 
-Begin with three observations and two variables: temperature in degrees Celsius and relative humidity in percent. Read `axis=0` as “reduce over the rows, leaving one result per column”. Each column keeps its own unit; averaging across these two different variables would not have a useful physical interpretation.
+Begin with three observations and two variables: temperature in degrees Celsius and relative humidity in percent. A NumPy array has no column names, so we must remember that column 0 is temperature and column 1 is humidity.
+
+The shape `(3, 2)` means *3 rows and 2 columns*. Read `axis=0` as “move down the rows and leave one result per column”. Each column keeps its own unit. An average across temperature and humidity would mix degrees Celsius with percent and would have no useful physical interpretation.
 
 [#tabular-array-bridge]
 [%dynamic%open,python,fail-on-error=]
@@ -64,29 +94,307 @@ print("Column means [Celsius, percent]:", column_means)
 print("Centred rows:", centred)
 ----
 
-The means are 22 degrees Celsius and 60 percent. Subtracting the length-two mean array from the three-by-two input is broadcasting: the same pair of column means is subtracted from each row. *Pause:* predict the mask and the number of selected rows before executing the example. We revisit shapes and broadcasting in Block 6.
+`values[:, 0]` means “all rows from column 0”. Comparing those temperatures with 22 produces the Boolean mask `[False, True, True]`. Using that mask keeps the last two rows.
 
-== Block 4 bridge: long and wide tables
+The means are 22 degrees Celsius and 60 percent. Subtracting the length-two mean array from the three-by-two input is *broadcasting*: NumPy applies the same pair `[22, 60]` to every row. Broadcasting avoids a Python loop, but compatible shapes do not guarantee a meaningful calculation; the units must also make sense.
 
-Here each wide row contains two stations' temperatures at the same time. A long row will represent one station at one time. Predict four output rows before calling `melt`; no averaging is required.
+== A practical DataFrame inspection toolbox
 
-[#tabular-reshape-bridge]
-[%dynamic%open,python,fail-on-error=,output=table,table-caption="Four station-time observations in long form",table-description="Two time rows with two Celsius station columns become four rows, keyed by station and time."]
+A pandas `DataFrame` adds column names and an index to a rectangular table. Before calculating anything, inspect its size, names, stored types, missing values, and a few rows.
+
+[#tabular-inspect-table]
+[%dynamic%open,python,fail-on-error=]
 ----
 import pandas as pd
 
-wide = pd.DataFrame({"time_utc": ["08:00", "09:00"], "A": [20.0, 22.0], "B": [18.0, 20.0]})
-long = wide.melt(id_vars="time_utc", var_name="station", value_name="temperature_c")
+weather = pd.DataFrame(
+    {
+        "station": ["A", "A", "B", "B"],
+        "time_utc": ["08:00", "09:00", "08:00", "09:00"],
+        "temperature_c": [20.0, 22.0, 18.0, None],
+    }
+)
+
+print("shape:", weather.shape)
+print("columns:", weather.columns.tolist())
+print("types:\n", weather.dtypes)
+print("missing values:\n", weather.isna().sum())
+weather.head()
+----
+
+Notice two kinds of pandas feature:
+
+* an *attribute* describes the current object and has no parentheses: `weather.shape`, `weather.columns`, `weather.dtypes`;
+* a *method* performs an operation and has parentheses: `weather.head()`, `weather.isna()`, `weather.sort_values(...)`.
+
+Useful first questions are collected below. `df` means any DataFrame.
+
+[cols="2,3,4",options="header"]
+|===
+|Expression |What it returns |Question it answers
+|`df.head()` / `df.tail()` |The first or last five rows. |What do actual rows and values look like?
+|`df.shape` |A pair `(number of rows, number of columns)`. |How large is the table?
+|`df.columns.tolist()` |The column names as a Python list. |Which variables are available?
+|`df.dtypes` |The storage type of each column. |Which columns are numeric, text, or date-time?
+|`df.info()` |A compact summary including non-missing counts and memory use. |Are types or missing values surprising?
+|`df.isna().sum()` |The number of missing values in each column. |Where is information missing?
+|`df["station"].nunique()` |The number of distinct station values. |How many stations occur?
+|`df["station"].value_counts()` |The number of rows for every station. |Are groups balanced or unexpectedly repeated?
+|`df.duplicated(key).sum()` |The number of repeated keys. |Does the proposed key really identify rows?
+|===
+
+`info()` prints its summary rather than returning a new table. `nunique()` counts different non-missing values, whereas `unique()` returns those values. These small distinctions matter when checking unfamiliar data.
+
+== Select rows and columns explicitly
+
+Square brackets select a column: `weather["station"]`. A comparison on that column produces one Boolean value per row. `.loc[rows, columns]` then uses a row mask and named columns.
+
+[#tabular-select-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Available measurements from station A, sorted by time",table-description="Two station A rows remain after selecting the station, requiring an available temperature, choosing three named columns, and sorting by time."]
+----
+is_station_a = weather["station"].eq("A")
+has_temperature = weather["temperature_c"].notna()
+
+station_a = weather.loc[
+    is_station_a & has_temperature,
+    ["station", "time_utc", "temperature_c"],
+].sort_values("time_utc")
+
+station_a
+----
+
+Read the expression in this order:
+
+. `eq("A")` marks rows whose station is A;
+. `notna()` marks rows whose temperature is available;
+. `&` means that both conditions must be true; each condition needs parentheses when written directly inside `.loc`;
+. the list after the comma chooses the three output columns;
+. `sort_values("time_utc")` orders the result without changing the values.
+
+The result is a new DataFrame. Use `.copy()` when you plan to modify such a selection: `station_a = station_a.copy()`. This makes the intention clear and avoids ambiguous chained assignments.
+
+=== Rename, remove, and create columns
+
+The following small source table uses an unclear measurement name and contains two columns that are useful during data collection but are not needed in the analysis table.
+
+[#tabular-rename-drop-assign]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="A clearer analysis table created with rename, drop and assign",table-description="The source measurement is renamed with its unit, collection-only columns are removed, and Fahrenheit values are calculated without changing the source table."]
+----
+source_weather = pd.DataFrame(
+    {
+        "sensor_id": ["A", "B", "C"],
+        "value1": [20.0, 22.0, 18.0],
+        "unit": ["C", "C", "C"],
+        "collection_note": ["checked", "checked", "checked"],
+    }
+)
+
+# It is safe to put the unit in the column name only after checking it.
+assert source_weather["unit"].eq("C").all()
+
+analysis_weather = (
+    source_weather
+    .rename(columns={"sensor_id": "station", "value1": "temperature_c"})
+    .drop(columns=["unit", "collection_note"])
+    .assign(
+        temperature_f=lambda df: df["temperature_c"] * 9 / 5 + 32,
+        above_20_c=lambda df: df["temperature_c"] > 20,
+    )
+)
+
+analysis_weather
+----
+
+Read the chain from top to bottom:
+
+. `rename(columns={...})` changes the two column labels. The dictionary maps each old name to its new name.
+. `drop(columns=[...])` removes columns from the result. Here the unit is no longer a separate column because it was checked and recorded in `temperature_c`; the collection note is not an analysis variable.
+. `assign(...)` creates or replaces columns. Each `lambda df` receives the table produced by the preceding steps, so it can refer to the newly named `temperature_c` column.
+
+These methods return a new DataFrame by default: `source_weather` is unchanged. This makes the sequence easier to inspect and avoids altering the raw input accidentally. A method call can still be valid Python while making a poor scientific choice, so explain why each renamed, removed, or calculated column is appropriate.
+
+== Wide and long tables
+
+In a *wide* table below, the station names A and B appear as column names. One row represents one time and contains both temperatures. In the *long* table, station becomes a variable: one row represents one station at one time.
+
+Neither layout is universally better. Wide form is convenient for comparing aligned columns or displaying a report. Long form is usually convenient for grouping, plotting and applying the same operation to every station. The important question is what one row represents in each layout.
+
+=== What does `melt` do?
+
+`melt` turns selected columns into rows. It makes a table *longer and narrower*. Here is one row of the wide input:
+
+[cols="1,1,1",options="header"]
+|===
+|`time_utc` |`A` |`B`
+|08:00 |20.0 |18.0
+|===
+
+After melting columns `A` and `B`, that one row becomes two rows:
+
+[cols="1,1,1",options="header"]
+|===
+|`time_utc` |`station` |`temperature_c`
+|08:00 |A |20.0
+|08:00 |B |18.0
+|===
+
+The transformation follows three simple rules:
+
+. `time_utc` is an identifying column, so its value is repeated;
+. the old column names `A` and `B` become values in a new `station` column;
+. the values formerly stored under `A` and `B` go into a new `temperature_c` column.
+
+Nothing is calculated, averaged, or discarded. Only the layout changes. With two input rows and two melted measurement columns, predict `2 × 2 = 4` output rows before running the code.
+
+First construct and display the wide input. Each row represents one time, and the station names are column names.
+
+[#tabular-wide-before-melt]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Wide input before melt",table-description="The wide input has two time rows and one Celsius column for each station."]
+----
+import pandas as pd
+
+wide = pd.DataFrame(
+    {
+        "time_utc": ["08:00", "09:00"],
+        "A": [20.0, 22.0],
+        "B": [18.0, 20.0],
+    }
+)
+
+wide
+----
+
+Now apply `melt` and display the long result. Each row represents one station at one time.
+
+[#tabular-long-after-melt]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Long result after melt",table-description="The same four measurements now occupy four rows, keyed by station and time."]
+----
+long = wide.melt(
+    id_vars="time_utc",
+    var_name="station",
+    value_name="temperature_c",
+)
+
 assert len(long) == 4
 assert not long.duplicated(["station", "time_utc"]).any()
 long
 ----
 
-The values and units are unchanged; the row definition changes. A column called `temperature_c` now contains all four values, while `station` identifies their origin. In the EDA lab, explain the key and expected count before using the corresponding reshape on the teaching data. A reverse `pivot` needs unique station-time keys; `pivot_table` can aggregate duplicates, which is a different decision.
+The arguments to `melt` say:
 
-== Array reference
+* `id_vars="time_utc"`: repeat this identifying column;
+* `var_name="station"`: put the former column names A and B into a column named `station`;
+* `value_name="temperature_c"`: put the four measurements into a column named `temperature_c`.
 
-For stem:[X\in\mathbb R^{n\times p}], rows index stem:[n] observational units and columns index stem:[p] variables. A column mean is
+The values and units are unchanged; only the table layout and the meaning of one row change. The long-table key is `(station, time_utc)`, and the expected row count is `2 times × 2 stations = 4`.
+
+`pivot` performs the reverse operation when every station-time key is unique:
+
+[#tabular-pivot-back]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="The four long observations returned to wide form",table-description="The unique station-time keys are rearranged so each time is a row and stations A and B are temperature columns."]
+----
+wide_again = (
+    long.pivot(index="time_utc", columns="station", values="temperature_c")
+    .reset_index()
+    .rename_axis(columns=None)
+)
+assert wide_again.equals(wide)
+wide_again
+----
+
+`pivot` refuses to continue if two rows have the same station-time key. That error is useful: it reveals a duplicate that requires a decision. `pivot_table` can combine duplicates with an operation such as `mean`, but this changes the data and should be used only when that aggregation answers the intended question.
+
+== A small checked join
+
+A join combines columns from two tables by matching a key. Here the measurement table has several rows per station, while the station table has exactly one description per station. The expected relationship is therefore *many measurements to one station description*.
+
+[cols="1,1,1",options="header"]
+|===
+|`station` |`city` |`elevation_m`
+|A |North |140
+|B |South |85
+|===
+
+Before joining, check that `station` is unique in the description table. Then ask pandas to verify the expected relationship with `validate="many_to_one"`.
+
+[#tabular-small-join]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Four measurements enriched with one description per station",table-description="Every station-time measurement is retained exactly once and receives its matching city and elevation."]
+----
+station_info = pd.DataFrame(
+    {
+        "station": ["A", "B"],
+        "city": ["North", "South"],
+        "elevation_m": [140, 85],
+    }
+)
+
+assert station_info["station"].is_unique
+
+enriched = long.merge(
+    station_info,
+    on="station",
+    how="left",
+    validate="many_to_one",
+    indicator=True,
+)
+
+assert len(enriched) == len(long)
+assert enriched["_merge"].eq("both").all()
+enriched
+----
+
+Read the join arguments one by one:
+
+* `on="station"` chooses the matching key;
+* `how="left"` keeps every measurement row, even if its station has no description;
+* `validate="many_to_one"` raises an error if the right table contains repeated station keys;
+* `indicator=True` creates `_merge`, which says whether each row matched both tables or appeared on only one side.
+
+[cols="1,3,3",options="header"]
+|===
+|`how=` |Rows kept |Typical use
+|`"left"` |Every left row, plus matching right columns. |Enrich measurements while retaining all measurements.
+|`"inner"` |Only keys present on both sides. |Keep matched cases, while accepting that unmatched rows disappear.
+|`"outer"` |Every key from either side. |Diagnose missing matches on both sides.
+|===
+
+The four common `validate=` relationships are `"one_to_one"`, `"one_to_many"`, `"many_to_one"`, and `"many_to_many"`. Using `"many_to_many"` performs no uniqueness check, so reserve it for cases where repeated keys on both sides are deliberate and their multiplication has been predicted.
+
+For example, duplicating station A in `station_info` would make the join above ambiguous. Because `validate="many_to_one"` is present, pandas raises a `MergeError` instead of silently duplicating both A measurements.
+
+Before moving to the larger example, be able to answer four questions:
+
+. What does one row of the left table represent?
+. Which column or columns form its key?
+. Which join relationship do we expect?
+. Which counts, keys and `_merge` values should remain unchanged or be reported?
+
+== Build the mathematical bridge first
+
+Use only the opening of xref:foundations/mathematical-background.adoc#_data_population_and_notation[Mathematical background: data, population, and notation]. Connect the symbols to the tables already used:
+
+* stem:[Z_i] is one observation, such as one station at one time;
+* stem:[n] is the number of observed rows used in a calculation;
+* stem:[\bar x] is the empirical mean calculated from those rows;
+* having stem:[n] rows does not prove that they are stem:[n] independent observations: repeated measurements from the same station can be related.
+
+Then introduce stem:[M_{ij}] as a zero/one indicator that says whether variable stem:[j] is missing from row stem:[i]. Its empirical mean is the observed missing rate. This is enough mathematics for today's quality examples. Vectors, conditioning, bias, risk, and confidence intervals need their own guided examples later in the course.
+
+== Continue today: a first data-quality pass
+
+After the mathematical bridge, continue with xref:foundations/data-quality.adoc[Data quality, schemas, missingness, and anomalies]. Do not try to complete its full two-hour reference route today. Use the remaining 25 minutes as follows:
+
+. Read the xref:foundations/data-quality.adoc#_a_repeatable_audit_route[repeatable audit route] and state the intended use of the weather table.
+. Run the xref:foundations/data-quality.adoc#_missing_values[missing-values example] and compare the overall rate with the rates for stations A and B.
+. Explain the three xref:foundations/data-quality.adoc#_missingness_mechanisms_with_examples[missingness mechanisms] through their sensor examples before showing their formal probability definitions.
+. Use the xref:foundations/data-quality.adoc#_duplicates[duplicate example] to distinguish an exact copy, a valid repeated event, and conflicting records.
+. If time remains, discuss the three xref:foundations/data-quality.adoc#_anomalies[anomaly decisions]: convert, keep, or quarantine.
+
+The minimum conclusion for today is: *missing does not mean zero, repeated does not always mean duplicated, and unusual does not automatically mean wrong.*
+
+== Mathematical reference
+
+For stem:[X\in\mathbb R^{n\times p}], rows index stem:[n] observations and columns index stem:[p] variables. A column mean is
 
 [stem]
 ++++
@@ -117,7 +425,7 @@ If group stem:[g] has stem:[n_g] observations and mean stem:[\bar x_g], the glob
 \bar x=\frac{\sum_g n_g\bar x_g}{\sum_g n_g},
 ++++
 
-not the unweighted mean of group means unless all group sizes are equal or the target population gives groups equal weight. Standard deviation describes variation among observations; standard error describes uncertainty of an estimator. Aggregating hourly measurements to daily means changes both the observational unit and the dependence structure.
+not the unweighted mean of group means unless all group sizes are equal or the question deliberately gives every group equal weight. Standard deviation describes variation among observations; standard error describes uncertainty in an estimated quantity such as a mean. Aggregating hourly measurements to daily means changes what one row represents and also changes which values depend on each other.
 
 == Hand calculation: join amplification
 
@@ -138,7 +446,7 @@ Groups of sizes stem:[10] and stem:[90] have means stem:[2] and stem:[8]. Comput
 .Exercise: Validate a join
 [.exer#ex:join-validation]
 ****
-Given key multiplicities stem:[m_L=(2,1,3)] and stem:[m_R=(1,4,0)], predict the inner-join row count. Identify the cardinality contract and assertions needed if the right table is intended as unique metadata.
+Given key multiplicities stem:[m_L=(2,1,3)] and stem:[m_R=(1,4,0)], predict the inner-join row count. State the expected join relationship and the checks needed if the right table is intended to have one row per key.
 ****
 
 == Worked example: a validated observation-to-station join
@@ -148,7 +456,7 @@ Given key multiplicities stem:[m_L=(2,1,3)] and stem:[m_R=(1,4,0)], predict the 
 
 *Importance:* Essential (P0)
 
-The objective is to attach source-file provenance to every hourly observation without changing the observation unit or silently multiplying rows. The example uses the three-station teaching slice and its station registry. The declared relation is many observations to one registry row per station.
+The objective is to attach the source filename to every hourly observation without changing what one row represents or silently multiplying rows. The example uses the three-station teaching slice and its station information table. The expected relationship is many observations to one information row per station.
 
 [.worked-example-method#worked-tabular-method]
 === Method
@@ -159,18 +467,18 @@ The objective is to attach source-file provenance to every hourly observation wi
 . Reshape three pollutant columns to long form and predict stem:[3n] output rows.
 . Assert one registry row per station, then request a `many_to_one` join.
 . Compare the complete observation-key set before and after the join.
-. Display a bounded result table containing both measurement and provenance.
+. Display a small result table containing both the measurement and its source filename.
 
 * xref:attachment$datasets/air-quality/observations.csv[Air-quality observations]
 * xref:attachment$datasets/air-quality/stations.csv[Station/source registry]
 
-.Mathematical insight — join cardinality is a conservation law
+.Mathematical insight — predict what a join may change
 [IMPORTANT]
 ====
 [.notebook-insight-label]
 *Mathematical insight.*
 
-*Essential (P0).* For a many-to-one enrichment join, each observation key should map to exactly one registry row. The key set and row count are quantities that should remain unchanged (invariants): unexpected multiplication proves that the declared relation is false or the registry key is not unique. A successful SQL or pandas call is not evidence of semantic correctness without these cardinality checks.
+*Essential (P0).* For a many-to-one join, each observation key should match exactly one station-information row. The observation keys and number of rows should remain unchanged. If rows multiply, the expected relationship was wrong or the station key is repeated. A SQL or pandas command can run successfully and still answer the wrong question, so these checks are part of the calculation.
 ====
 
 [.worked-example-implementation#worked-tabular-implementation]
@@ -181,7 +489,7 @@ The objective is to attach source-file provenance to every hourly observation wi
 The implementation checks the observation key, predicts tidy multiplicity, requests a `many_to_one` join, and compares the complete key set before presenting any enriched rows.
 
 [#validated-join-table]
-[%dynamic%open,python,fail-on-error=,output=table,table-caption="Validated observation-to-station join",table-description="The first five joined rows retain the station and timestamp key, PM2.5 measurement, and source-file provenance after a declared many-to-one join."]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Checked observation-to-station join",table-description="The first five joined rows retain the station and timestamp key, PM2.5 measurement, and source filename after an expected many-to-one join."]
 ----
 from pathlib import Path
 
@@ -206,7 +514,7 @@ stations = pd.read_csv(stations_path)
 def prepare_tables(
     observations: pd.DataFrame, stations: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Construct the observation key, tidy pollutants, and validate provenance join."""
+    """Construct the observation key, tidy pollutants, and check the station join."""
     frame = observations.copy()
     frame["timestamp"] = pd.to_datetime(frame[["year", "month", "day", "hour"]])
     key = ["station", "timestamp"]
@@ -242,14 +550,14 @@ joined[["station", "timestamp", "PM2.5", "source_file"]].head()
 
 *Importance:* Essential (P0)
 
-The join preserves every observation key and row, matches every station, and attaches source-file provenance. The long-form pollutant table has exactly three times the observation count, matching the declared three-measurement reshape rather than an accidental Cartesian product.
+The join preserves every observation key and row, matches every station, and attaches the source filename. The long-form pollutant table has exactly three times the observation count, as expected for three pollutant columns. This distinguishes the intended reshape from an accidental multiplication of rows.
 
 [.worked-example-conclusion#worked-tabular-conclusion]
 === Conclusion
 
 *Importance:* Essential (P0)
 
-The registry enrichment is structurally valid for the declared many-to-one relation. The assertions are part of the evidence, not optional debugging: they establish key uniqueness, row preservation, expected tidy multiplicity, and complete registry matching. They do not prove that the measurements are physically valid, representative, or free from upstream duplication.
+The join has the expected many-to-one structure. The assertions are part of the calculation, not merely debugging: they check unique keys, preserved rows, the expected number of long-form rows, and complete station matches. They do not prove that the measurements themselves are physically valid, representative, or free from earlier duplication.
 
 Use the page toolbar to download the notebook generated from this page.
 

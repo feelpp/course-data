@@ -7,26 +7,85 @@
 :page-course-outcomes: LO1, LO4, LO6, LO7, LO8
 :page-course-prerequisites: Functions, vectors, matrices, derivatives, elementary probability
 :page-course-assessed: yes
+:page-course-execution-profile: fast
+:page-course-figure-contract: Alternative text, caption, labelled axes and units, and non-colour encoding
+:page-jupyter:
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+:jupyter-language-name: python
+:jupyter-language-version: 3.12
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
 
 This chapter fixes the notation and error language used throughout the course. It is not a complete probability or linear-algebra course. Its purpose is to make every data-analysis claim mathematically explicit: what is observed, what is random, what is estimated, which loss is minimised, and how far the reported value may be from the target quantity.
 
+== How to use this page today
+
+For the first data-quality discussion, read only:
+
+. the plain-language vocabulary below;
+. <<_data_population_and_notation,Data, population, and notation>>;
+. <<_probability_expectation_and_conditional_quantities,Probability, expectation, and conditional quantities>> for the meaning of conditional probability;
+. <<_missingness_indicators_and_mechanisms,Missingness indicators and mechanisms>>.
+
+The sections on vectors, condition numbers, estimators, risk, and confidence intervals are references for later sessions. They do not need to be presented before today's practical quality examples.
+
+== Plain-language vocabulary
+
+[cols="2,4,3",options="header"]
+|===
+|Term |Meaning on this page |Example
+|Observation |One recorded case about which we may calculate something. It often corresponds to one row. |One station at 08:00.
+|Variable |A property recorded for observations. It often corresponds to one column. |Temperature in degrees Celsius.
+|Population |The complete set or process about which we want to draw a conclusion. It does not have to be a population of people. |All measurements that the station could produce during September.
+|Sample |The observations actually available for the calculation. |The 720 hourly rows recorded in September.
+|Feature or input |A recorded variable supplied to a predictive method. |Humidity used to predict temperature.
+|Response or target |The quantity that a supervised method is asked to predict. |Tomorrow's temperature.
+|Parameter |A fixed but usually unknown property of the population. |The population mean temperature.
+|Estimate |A number calculated from the available sample to approximate a parameter. |The mean of the 720 recorded temperatures.
+|Random variable |A numerical quantity whose value can differ when the observation or experiment is repeated. |The next temperature reported by a sensor.
+|Independent observations |Observations for which knowing one result gives no information about another under the stated model. |Separate random draws may be modelled as independent; consecutive sensor readings often are not.
+|Loss |A numerical cost used to judge a prediction or decision. |Squared temperature prediction error.
+|Uncertainty |The variation or lack of knowledge remaining around a value or conclusion. |A sample mean would change if another valid sample were collected.
+|===
+
+=== Notation used repeatedly
+
+[cols="2,3,4",options="header"]
+|===
+|Symbol |Read it as |Meaning
+|stem:[n] |“n” |Number of observations in the sample.
+|stem:[i], stem:[j] |“i”, “j” |Indices: labels used to select an observation, variable, or term in a sum.
+|stem:[\sum_{i=1}^{n}] |“sum from i equals 1 to n” |Add one term for every observation from 1 through stem:[n].
+|stem:[\bar x] |“x bar” |An empirical mean calculated from observed values.
+|stem:[\widehat q_p] |“q hat p” |The empirical quantile at proportion stem:[p], calculated from observed values.
+|stem:[\widehat\theta] |“theta hat” |A quantity estimated from data; the hat marks an estimate.
+|stem:[P] |“P” |A probability distribution for the population under study.
+|stem:[\mathbb E[U]] |“expectation of U” |The theoretical mean of random variable stem:[U] under stem:[P].
+|stem:[\operatorname{Var}(U)] |“variance of U” |The theoretical squared spread of stem:[U] around its expectation.
+|===
+
 == Data, population, and notation
 
-Let stem:[Z] denote one observational unit drawn from a population distribution stem:[P]. In supervised learning stem:[Z=(X,Y)], where stem:[X\in\mathcal X] is the available information and stem:[Y\in\mathcal Y] is the response. A sample is
+Let stem:[Z] denote one observation drawn from a population described by a probability distribution stem:[P]. A probability distribution states which values are possible and how likely they are under the model.
+
+In *supervised learning*, each example contains inputs and a response whose value is known during training. We write stem:[Z=(X,Y)], where stem:[X\in\mathcal X] contains the available inputs and stem:[Y\in\mathcal Y] is the response. The symbols stem:[\mathcal X] and stem:[\mathcal Y] denote the sets of possible input and response values. A sample of stem:[n] observations is
 
 [stem]
 ++++
 \mathcal D_n = \{Z_i=(X_i,Y_i)\}_{i=1}^{n}.
 ++++
 
-The notation does not imply that the stem:[Z_i] are independent. Repeated patients, machines, sites, or nearby times require a group or temporal dependence model.
+The subscript stem:[i] labels an observation, and stem:[n] is the number of observations. The notation does not imply that the stem:[Z_i] are independent. Repeated observations from the same patient, machine, site, or nearby times can be related; this is called *dependence*.
 
 .Definition: Empirical mean
 [.def#def:empirical-mean]
 ****
-For observed values stem:[x_1,\ldots,x_n], the empirical mean is
+“Empirical” means calculated from the observed sample. For observed values stem:[x_1,\ldots,x_n], the empirical mean is
 
 [stem]
 ++++
@@ -34,22 +93,97 @@ For observed values stem:[x_1,\ldots,x_n], the empirical mean is
 ++++
 ****
 
+.Definition: Median, quantiles, and quartiles
+[.def#def:empirical-quantiles]
+****
+First sort the observed values from smallest to largest. A *quantile* marks a position in this ordered sample. The empirical stem:[p]-quantile, written stem:[\widehat q_p], has approximately a proportion stem:[p] of the observations at or below it. A *percentile* expresses the same position as a percentage: stem:[\widehat q_{0.25}] is the 25th percentile.
+
+The quantiles used most often are:
+
+[cols="1,2,4",options="header"]
+|===
+|stem:[p] |Name |Meaning
+|stem:[0] |Minimum |Smallest observed value.
+|stem:[0.25] |First quartile stem:[Q_1] |About 25% of the observations are at or below it.
+|stem:[0.5] |Second quartile stem:[Q_2], or median |Middle of the ordered data: half the observations lie on each side.
+|stem:[0.75] |Third quartile stem:[Q_3] |About 75% of the observations are at or below it.
+|stem:[1] |Maximum |Largest observed value.
+|===
+
+If the sample has an odd number of observations, the median is its middle value. If it has an even number, the usual `pandas` convention takes the average of the two middle values. Other quantiles can also fall between two observations. `Series.quantile()` uses linear interpolation by default to choose a value between them, so a report should state the convention when the precise value matters.
+
+The *interquartile range* is stem:[\operatorname{IQR}=Q_3-Q_1]. It measures the spread of the central half of the observations. The 5th and 95th percentiles, stem:[\widehat q_{0.05}] and stem:[\widehat q_{0.95}], are also useful for describing lower and upper tails. Tail quantiles need many observations to be estimated reliably. An interval between two empirical quantiles describes the sample; it is not automatically a confidence interval.
+****
+
+For a fuller treatment of quantiles and exceedance probabilities, see xref:foundations/quantiles-exceedance-risk.adoc[Quantiles, exceedance, and risk].
+
 .Definition: Empirical variance
 [.def#def:empirical-variance]
 ****
-The unbiased sample variance for independent observations with a common finite variance is
+The empirical mean describes the centre of the observed values. The *sample variance* describes their spread around that centre:
 
 [stem]
 ++++
 s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar x)^2.
 ++++
 
-The divisor stem:[n-1] corrects the bias caused by estimating the population mean from the same sample. It does not correct selection bias, dependence, measurement error, or a changing population.
+The deviations stem:[x_i-\bar x] are squared so that positive and negative differences do not cancel. Under independent sampling from one population with a finite variance, using stem:[n-1] makes stem:[s^2] *unbiased*: across repeated samples, its average equals the population variance. “Finite variance” means that the theoretical spread is not infinite.
+
+This correction does not solve other problems. *Selection bias* occurs when the way observations enter the sample systematically favours some cases. *Measurement error* is the difference between a recorded value and the quantity intended to be measured. Dependence and a changing population also require separate treatment.
 ****
+
+=== Small Python example: sample summaries
+
+The code uses five recorded temperatures. It computes the mean, the three quartiles, the interquartile range, the sample variance, and the sample standard deviation. The argument `interpolation="linear"` makes the quantile convention explicit. The argument `ddof=1` selects the stem:[n-1] divisor used in the variance formula above.
+
+[#math-sample-summaries]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Sample summaries for five recorded temperatures",table-description="Rows report the observation count, minimum, first quartile, median, third quartile, maximum, empirical mean, interquartile range, sample variance, and sample standard deviation for temperatures 20, 21, 22, 23, and 60 degrees Celsius."]
+----
+import pandas as pd
+
+temperatures = pd.Series([20.0, 21.0, 22.0, 23.0, 60.0], name="temperature_c")
+quartiles = temperatures.quantile(
+    [0.25, 0.5, 0.75],
+    interpolation="linear",
+)
+
+pd.DataFrame(
+    {
+        "summary": [
+            "observation count",
+            "minimum",
+            "first quartile Q1",
+            "median Q2",
+            "third quartile Q3",
+            "maximum",
+            "mean",
+            "interquartile range",
+            "sample variance",
+            "sample standard deviation",
+        ],
+        "value": [
+            temperatures.size,
+            temperatures.min(),
+            quartiles.loc[0.25],
+            quartiles.loc[0.5],
+            quartiles.loc[0.75],
+            temperatures.max(),
+            temperatures.mean(),
+            quartiles.loc[0.75] - quartiles.loc[0.25],
+            temperatures.var(ddof=1),
+            temperatures.std(ddof=1),
+        ],
+    }
+).round(2)
+----
+
+Here stem:[Q_1=21], the median is 22, stem:[Q_3=23], and the IQR is 2 degrees Celsius. The value 60 pulls the mean upward much more than the median. The later robust-summary example makes this effect visible.
 
 == Vectors, norms, and conditioning
 
-For stem:[x=(x_1,\ldots,x_p)^\top\in\mathbb R^p], the norms most often used here are
+A *vector* is an ordered list of numbers. For example, stem:[x=(20,50)^\top] can represent one observation with temperature 20 degrees Celsius and humidity 50 percent. Each number stem:[x_j] is a *coordinate* of the vector, stem:[p] is the number of coordinates, stem:[\mathbb R^p] is the set of vectors containing stem:[p] real numbers, and the superscript stem:[\top] writes the list as a column.
+
+A *norm* assigns a non-negative size to a vector. The three norms used most often here are
 
 [stem]
 ++++
@@ -60,19 +194,64 @@ For stem:[x=(x_1,\ldots,x_p)^\top\in\mathbb R^p], the norms most often used here
 \lVert x\rVert_\infty=\max_j|x_j|.
 ++++
 
-They encode different geometries. Ridge uses a squared stem:[\ell_2] penalty; Lasso uses an stem:[\ell_1] penalty. Distance-based methods depend on feature scale because rescaling one coordinate changes stem:[\lVert x-x'\rVert_2].
+Read the formulas as follows:
+
+* the stem:[\ell_1] norm adds the absolute values of all coordinates;
+* the stem:[\ell_2] norm is the ordinary straight-line length from the origin;
+* the stem:[\ell_\infty] norm keeps the largest absolute coordinate.
+
+For the dimensionless vector stem:[v=(3,4)^\top], these sizes are stem:[\lVert v\rVert_1=7], stem:[\lVert v\rVert_2=5], and stem:[\lVert v\rVert_\infty=4]. A norm can always be calculated from compatible numbers, but its scientific meaning still depends on the variables and units.
+
+Here, *geometry* means the rule used to measure size and distance. Once a norm is chosen, the distance between observations stem:[x] and stem:[x'] is stem:[\lVert x-x'\rVert]. Different norms can therefore say that different observations are nearest.
+
+The *scale* of a feature is the numerical range and unit in which it is expressed. Changing Celsius to millidegrees multiplies one coordinate by 1000 without changing the physical temperature. This *rescaling* can dominate a distance calculation unless the variables are put on comparable scales for a justified reason. Compatible numbers do not remove the need to check units: temperature and humidity still describe different quantities.
+
+=== Small Python example: norms and scale
+
+[#math-norms-scale]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Three norms before and after rescaling one coordinate",table-description="Rows compare the L1, L2, and infinity norms of vector 3,4 with vector 3000,4, showing how rescaling one coordinate dominates every norm."]
+----
+import numpy as np
+
+vectors = {
+    "v = (3, 4)": np.array([3.0, 4.0]),
+    "rescaled v = (3000, 4)": np.array([3000.0, 4.0]),
+}
+
+norm_table = pd.DataFrame(
+    {
+        "vector": name,
+        "l1": np.linalg.norm(values, ord=1),
+        "l2": np.linalg.norm(values, ord=2),
+        "linfinity": np.linalg.norm(values, ord=np.inf),
+    }
+    for name, values in vectors.items()
+)
+
+norm_table.round(3)
+----
+
+The second row does not represent a physically larger observation if only the recording unit changed. It shows why distance-based calculations require an explicit scaling decision.
+
+.Later application: Ridge and Lasso
+[NOTE]
+====
+An *objective* is the numerical quantity that a fitting algorithm tries to minimise. A model *coefficient* is a numerical weight assigned to an input. *Regularisation* modifies the objective to discourage overly large coefficients; the added term is called a *penalty*. If stem:[\beta] is the vector of fitted coefficients, Ridge adds a multiple of stem:[\lVert\beta\rVert_2^2], while Lasso adds a multiple of stem:[\lVert\beta\rVert_1]. These methods are studied later; the point here is only that the choice of norm changes what “large coefficients” means.
+====
+
+A *matrix* is a rectangular array of numbers. A square matrix stem:[A] is *invertible* when every right-hand side stem:[b] in the linear system stem:[Ax=b] has exactly one solution stem:[x]. A *perturbation* is a small change, such as replacing stem:[b] by stem:[b+\delta b]. The condition number below measures how strongly such an input change can affect the solution.
 
 .Definition: Condition number
 [.def#def:condition-number]
 ****
-For an invertible matrix stem:[A], the normwise condition number is
+The symbol stem:[A^{-1}] denotes the inverse of stem:[A]: multiplying by it reverses the action of stem:[A]. After choosing compatible norms for matrices and vectors, the condition number is
 
 [stem]
 ++++
 \kappa(A)=\lVert A\rVert\,\lVert A^{-1}\rVert.
 ++++
 
-It measures sensitivity of the mathematical problem, not the quality of one implementation. For a small perturbation stem:[\delta b] in stem:[Ax=b], a first-order bound is
+It measures the sensitivity of the mathematical problem, not the quality of one program. For a sufficiently small perturbation stem:[\delta b] in stem:[Ax=b], the corresponding solution change is stem:[\delta x]. The following approximate bound describes their relative sizes:
 
 [stem]
 ++++
@@ -82,14 +261,22 @@ It measures sensitivity of the mathematical problem, not the quality of one impl
 ++++
 ****
 
-For full-column-rank stem:[X], stem:[\kappa(X^\top X)=\kappa(X)^2] in the stem:[\ell_2] norm. This is why explicitly solving least squares through the normal-equation inverse can amplify numerical error.
+The fractions are *relative changes*: change divided by original size. The symbol stem:[\lesssim] means “less than or approximately bounded by”. Thus a condition number near 1 is favourable, while a very large condition number warns that a small relative change in stem:[b] may produce a much larger relative change in stem:[x].
+
+.Later reference: least squares
+[NOTE]
+====
+A *linear combination* multiplies columns by numbers and adds the results. A matrix has *full column rank* when none of its columns can be formed as a linear combination of the others. A *design matrix* stem:[X] stores observations in rows and model inputs in columns. *Least squares* chooses coefficients that minimise the squared differences between predictions and observations. For a full-column-rank design matrix, stem:[\kappa(X^\top X)=\kappa(X)^2] in the stem:[\ell_2] norm. Forming stem:[X^\top X] can therefore square the condition number and amplify rounding error. The numerical linear-algebra session develops this issue later.
+====
 
 == Probability, expectation, and conditional quantities
+
+A *random variable* assigns a numerical value to the outcome of a random process. Its probability distribution stem:[P] describes which values occur and how frequently the model expects them to occur. The *expectation* is the distribution's theoretical mean, while the *variance* describes theoretical squared spread around that mean.
 
 .Definition: Expectation and variance
 [.def#def:expectation-variance]
 ****
-For an integrable random variable stem:[U],
+For a random variable stem:[U] whose absolute value has a finite expectation,
 
 [stem]
 ++++
@@ -98,14 +285,152 @@ For an integrable random variable stem:[U],
 \operatorname{Var}(U)=\mathbb E\!\left[(U-\mathbb E[U])^2\right].
 ++++
 
-Expectation is a population quantity. An empirical average estimates it only under a sampling design that connects the observed sample to that population.
+The integral means “average over the whole probability distribution”. Expectation is a population quantity. An empirical average estimates it only when the *sampling design*—the rule that selected or generated the observations—connects the observed sample to that population.
 ****
 
-Conditional expectation stem:[\mathbb E[Y\mid X=x]] is a function of stem:[x]. In squared-error regression it is the population-optimal prediction. Conditional probability stem:[P(Y=k\mid X=x)] is the target of probabilistic classification, not automatically the output of every classifier.
+The vertical bar in stem:[P(Y=k\mid X=x)] means “given”. This conditional probability asks: among cases with input stem:[X=x], how likely is response category stem:[k]? Similarly, stem:[\mathbb E[Y\mid X=x]] is the theoretical average of stem:[Y] among cases with stem:[X=x].
+
+In *regression*, the response is numerical. If prediction errors are squared, the conditional expectation is the prediction with the smallest population-average squared error. In *classification*, the response is a category. A probabilistic classifier aims to estimate conditional category probabilities. Probabilities are *calibrated* when, among cases assigned probability 0.7, roughly 70% have the event in the relevant population; not every classifier guarantees this property.
+
+== Missingness indicators and mechanisms
+
+An *indicator* is a variable that equals 1 when a statement is true and 0 when it is false. For row stem:[i] and variable stem:[j], define
+
+[stem]
+++++
+M_{ij}=
+\begin{cases}
+1 & \text{if }X_{ij}\text{ is missing},\\
+0 & \text{if }X_{ij}\text{ is observed}.
+\end{cases}
+++++
+
+The observed missing rate for variable stem:[j] is the empirical mean of these zero/one indicators:
+
+[stem]
+++++
+\widehat p_j=\frac1n\sum_{i=1}^{n}M_{ij}.
+++++
+
+This number describes the inspected sample. It does not by itself explain why values are missing or estimate the error rate of a larger population.
+
+=== Small Python example: a missingness indicator
+
+[#math-missing-indicator]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Temperatures and their zero-one missingness indicator",table-description="Four station-time rows show two recorded temperatures, two missing temperatures, and an indicator equal to one exactly for the missing rows."]
+----
+missing_example = pd.DataFrame(
+    {
+        "station": ["A", "A", "B", "B"],
+        "time_utc": ["08:00", "09:00", "08:00", "09:00"],
+        "temperature_c": [20.0, None, 18.0, None],
+    }
+)
+missing_example["M_temperature"] = missing_example["temperature_c"].isna().astype(int)
+
+assert missing_example["M_temperature"].mean() == 0.5
+missing_example
+----
+
+The empirical mean of `M_temperature` is `0.5`: two of the four temperature values are missing. This calculation describes the table but does not identify MCAR, MAR, or MNAR.
+
+.Definition: Missingness mechanisms
+[.def#def:missingness]
+****
+Write stem:[X_{\mathrm{obs}}] for observed values and stem:[X_{\mathrm{mis}}] for values that would have been observed without missingness.
+
+* *MCAR* (missing completely at random) requires stem:[P(M\mid X_{\mathrm{obs}},X_{\mathrm{mis}})=P(M)]. The missingness process is unrelated to observed and missing values.
+* *MAR* (missing at random) requires stem:[P(M\mid X_{\mathrm{obs}},X_{\mathrm{mis}})=P(M\mid X_{\mathrm{obs}})]. After accounting for recorded information, it does not additionally depend on the missing value.
+* *MNAR* (missing not at random) allows dependence on stem:[X_{\mathrm{mis}}] even after accounting for recorded information.
+
+The expression after the vertical bar describes the information being held fixed when comparing missingness probabilities. These mechanisms are assumptions about the data-collection process. The observed incomplete table generally cannot distinguish MAR from MNAR without external information or additional assumptions.
+****
+
+For concrete sensor examples and an operational audit, continue with xref:foundations/data-quality.adoc#_missingness_mechanisms_with_examples[Missingness mechanisms, with examples].
+
+== Robust summaries and anomaly flags
+
+The median and quartiles were defined above. A summary is called *robust* when a small number of extreme values has limited effect on it. The median is more robust than the mean. A robust measure of spread is the *median absolute deviation* (MAD):
+
+[stem]
+++++
+\operatorname{MAD}
+=\operatorname{median}_i\left|x_i-\operatorname{median}_k x_k\right|.
+++++
+
+For the values stem:[20,21,22,23,60], the median is 22. Their absolute distances from 22 are stem:[2,1,0,1,38], whose median is 1, so the MAD is 1.
+
+If the MAD is non-zero, stem:[|x_i-\operatorname{median}(x)|/\operatorname{MAD}] compares an observation's distance from the median with the typical distance. This is a *standardised distance*: it has no physical unit. A large value flags an observation for investigation; it is not proof of error. A unit mismatch, sensor failure, a mixture of groups with different typical values, or a scientifically important extreme can all produce a large score.
+
+=== Small Python example: mean, median, and one extreme value
+
+[#math-mean-median-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Five temperature observations appear on one horizontal axis at 20, 21, 22, 23, and 60 degrees Celsius; a solid line marks the median at 22 and a dashed line marks the mean at 29.2",figure-caption="One extreme value moves the mean from the centre of the four ordinary readings to 29.2 degrees Celsius, while the median remains at 22 degrees Celsius.",result-interpretation="The figure illustrates resistance, not an automatic deletion rule. The 60-degree observation still requires investigation of its unit, sensor range, and context."]
+----
+import matplotlib.pyplot as plt
+
+values = np.array([20.0, 21.0, 22.0, 23.0, 60.0])
+mean_value = values.mean()
+median_value = np.median(values)
+
+fig, ax = plt.subplots(figsize=(8.2, 2.8), constrained_layout=True)
+ax.scatter(
+    values,
+    np.zeros_like(values),
+    marker="o",
+    color="tab:blue",
+    label="observations",
+)
+ax.axvline(
+    median_value,
+    color="black",
+    linestyle="-",
+    label=f"median = {median_value:.1f} °C",
+)
+ax.axvline(
+    mean_value,
+    color="black",
+    linestyle="--",
+    label=f"mean = {mean_value:.1f} °C",
+)
+ax.set(
+    title="Effect of one extreme temperature on centre summaries",
+    xlabel="Recorded temperature (°C)",
+    yticks=[],
+)
+ax.legend()
+ax.grid(axis="x", alpha=0.25)
+plt.show()
+----
+
+The practical review questions and examples are given in xref:foundations/data-quality.adoc#_anomalies[Anomalies].
+
+== Uncertainty for quality measurements
+
+A *Bernoulli variable* is a zero/one random variable. The missingness indicators are Bernoulli variables because each entry is observed or missing. A *standard error* describes how much an estimate would vary across repeated samples generated in the same way. If the missingness indicators are independent, an estimated standard error for the observed missing rate is
+
+[stem]
+++++
+\widehat{\operatorname{SE}}(\widehat p_j)
+=\sqrt{\frac{\widehat p_j(1-\widehat p_j)}{n}}.
+++++
+
+This independence approximation is unsuitable when outages occur in bursts or affect a complete device, station, or group. *Resampling* constructs repeated pseudo-samples from the observed data to study variability. In this case it must preserve the relevant groups or time blocks rather than treating every row as independent.
+
+For a deterministic conversion stem:[y=ax+b], a small measurement uncertainty stem:[u_x] propagates as
+
+[stem]
+++++
+u_y=|a|u_x
+++++
+
+when stem:[a] and stem:[b] are treated as exact. The word *propagates* means that input uncertainty is transformed through the calculation. For example, stem:[20.0\pm0.2] degrees Celsius becomes stem:[68.0\pm0.36] degrees Fahrenheit. *Calibration parameters* are values used to translate an instrument's signal into a reported measurement. If they are estimated rather than exact, their uncertainty must be included separately.
 
 == Estimators, bias, variance, and mean-squared error
 
-Let stem:[\theta(P)] be a population quantity and stem:[\widehat\theta=\widehat\theta(\mathcal D_n)] an estimator computed from the sample.
+Let stem:[\theta(P)] be a parameter: a fixed but unknown population quantity determined by stem:[P]. An *estimator* is a rule that takes a sample as input. Applying that rule to the observed sample produces an *estimate*. We write the estimator and its resulting estimate as stem:[\widehat\theta=\widehat\theta(\mathcal D_n)]. The hat indicates that the quantity was estimated from data.
+
+Because another valid sample would usually give another estimate, stem:[\widehat\theta] is a random variable before the sample is observed. Its *bias* is the difference between its average over repeated samples and the target stem:[\theta]. Its *variance* describes how much it changes across those repeated samples.
 
 .Definition: Estimator bias
 [.def#def:estimator-bias]
@@ -120,7 +445,7 @@ Let stem:[\theta(P)] be a population quantity and stem:[\widehat\theta=\widehat\
 .Proposition: Bias–variance decomposition
 [.prop#prop:bias-variance]
 ****
-For a scalar estimator with finite second moment,
+The *mean-squared error* (MSE) is the repeated-sample average of the squared estimation error. For a scalar estimator—one that produces one number—with finite stem:[\mathbb E[\widehat\theta^2]],
 
 [stem]
 ++++
@@ -129,14 +454,16 @@ For a scalar estimator with finite second moment,
 +\operatorname{Bias}(\widehat\theta)^2.
 ++++
 
-Proof: write stem:[\widehat\theta-\theta=(\widehat\theta-\mathbb E\widehat\theta)+(\mathbb E\widehat\theta-\theta)], expand the square, and use stem:[\mathbb E(\widehat\theta-\mathbb E\widehat\theta)=0].
+The formula says that MSE has two parts: repeated-sample variation and squared systematic offset. To verify it, write stem:[\widehat\theta-\theta=(\widehat\theta-\mathbb E\widehat\theta)+(\mathbb E\widehat\theta-\theta)], expand the square, and use stem:[\mathbb E(\widehat\theta-\mathbb E\widehat\theta)=0].
 ****
 
-Regularisation may increase bias while reducing variance. The useful question is whether the total expected error decreases for the target population and sample size.
+Regularisation, defined in the earlier Ridge and Lasso note, may increase bias while reducing variance. The useful question is whether the total MSE decreases for the target population and sample size.
 
 == Loss, risk, and generalisation
 
-Let stem:[f:\mathcal X\to\mathcal A] be a prediction rule and stem:[L(y,f(x))] a loss.
+A *prediction rule* stem:[f] maps an input stem:[x] to an action or prediction stem:[f(x)] in a set of allowed outputs stem:[\mathcal A]. A *loss function* stem:[L(y,f(x))] assigns a numerical cost to the difference between the observed response stem:[y] and the prediction. Smaller loss means better performance according to the chosen criterion.
+
+*Population risk* is the expected loss for a new observation drawn from the target population. *Empirical risk* is the average loss on a finite sample. *Generalisation* means that performance measured on available data continues to hold for new observations from the intended population.
 
 .Definition: Population and empirical risk
 [.def#def:risk]
@@ -149,9 +476,20 @@ R(f)=\mathbb E_{(X,Y)\sim P}[L(Y,f(X))],
 ++++
 ****
 
-Training minimises an empirical objective. Evaluation tries to estimate a population risk or another explicitly declared estimand. Reusing evaluation observations for model choice makes the estimate optimistically biased.
+*Training* uses data to choose a fitted prediction rule, usually by minimising an empirical objective. *Evaluation* measures the fitted rule on observations not used to choose it. The population quantity that an analysis aims to estimate is called its *estimand*. Reusing evaluation observations to choose the model usually makes reported performance too favourable; this is *optimistic bias*.
 
-Let stem:[f^*] minimise risk over all admissible rules, stem:[f^*_{\mathcal H}] minimise risk in a model class stem:[\mathcal H], stem:[\widehat f_{\mathcal H}] be the fitted empirical minimiser, and stem:[\widetilde f] the numerically computed result. One useful error ledger is
+A *model class* stem:[\mathcal H] is the collection of prediction rules that the method is allowed to choose from. The following symbols separate four rules:
+
+[cols="2,5",options="header"]
+|===
+|Symbol |Meaning
+|stem:[f^*] |The best possible rule for the population among all rules under consideration.
+|stem:[f^*_{\mathcal H}] |The best population rule restricted to model class stem:[\mathcal H].
+|stem:[\widehat f_{\mathcal H}] |The rule selected from stem:[\mathcal H] using the finite training sample.
+|stem:[\widetilde f] |The rule actually returned by the numerical algorithm.
+|===
+
+This produces the following *error breakdown*:
 
 [stem]
 ++++
@@ -164,11 +502,11 @@ Let stem:[f^*] minimise risk over all admissible rules, stem:[f^*_{\mathcal H}] 
 \underbrace{R(\widetilde f)-R(\widehat f_{\mathcal H})}_{\text{optimisation/numerical}}.
 ++++
 
-In practice there is also data error: measurement, linkage, missingness, sampling, and dataset shift can change the target problem itself.
+The three terms respectively measure limits of the chosen model class, variation caused by fitting on a finite sample, and error introduced by an incomplete numerical solution. In practice there is also *data error*: incorrect measurements, incorrect linkage between tables, missingness, unrepresentative sampling, and *dataset shift*—a difference between the population represented by available data and the population where the result will be used.
 
 == Sampling uncertainty
 
-For independent observations with variance stem:[\sigma^2],
+The symbol stem:[\sigma^2] denotes the population variance and stem:[s^2] the sample variance. The *standard deviation* stem:[s] describes spread among observed values. The *standard error* of an estimate describes its variation across repeated samples. For an independent sample mean,
 
 [stem]
 ++++
@@ -177,7 +515,9 @@ For independent observations with variance stem:[\sigma^2],
 \widehat{\operatorname{SE}}(\bar X)=\frac{s}{\sqrt n}.
 ++++
 
-An approximate large-sample 95% confidence interval is stem:[\bar x\pm1.96\,s/\sqrt n]. This formula is invalid when rows are treated as independent despite strong temporal or group dependence. For correlated observations,
+An approximate large-sample 95% *confidence interval* is stem:[\bar x\pm1.96\,s/\sqrt n]. Under the stated sampling assumptions, this procedure covers the fixed population mean in about 95% of repeated samples. It does not mean that 95% of observations fall in the interval. The value 1.96 comes from the *standard normal distribution*, the bell-shaped probability model with mean 0 and standard deviation 1.
+
+This formula is invalid when rows are treated as independent despite strong temporal or group dependence. *Covariance* measures whether two variables tend to be above or below their means together. *Correlation* is covariance divided by the two standard deviations; it is a unit-free measure between -1 and 1. For correlated observations,
 
 [stem]
 ++++
@@ -185,7 +525,42 @@ An approximate large-sample 95% confidence interval is stem:[\bar x\pm1.96\,s/\s
 =\frac{1}{n^2}\sum_{i=1}^{n}\sum_{j=1}^{n}\operatorname{Cov}(X_i,X_j),
 ++++
 
-so positive covariance increases uncertainty. Use group-, block-, or time-aware resampling when the sampling unit is not a row.
+so positive covariance increases uncertainty. The *sampling unit* is the independently selected unit, which may be a patient, device, site, or time block rather than one row. Resampling must preserve that unit.
+
+=== Small Python example: the square-root rule
+
+The following curve holds the population standard deviation fixed at 4 and shows the independent-sample standard error stem:[4/\sqrt n].
+
+[#math-standard-error-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="A decreasing curve shows standard error falling rapidly for small sample sizes and more slowly for large sample sizes; sample size 25 is marked at standard error 0.8",figure-caption="Under independence and fixed population standard deviation 4, the standard error of the mean decreases as one divided by the square root of sample size. At n equals 25 it is 0.8.",result-interpretation="The curve illustrates the independent-sample formula only. Repeated readings from the same device or nearby times may contain less information than the same number of independent observations."]
+----
+sample_sizes = np.arange(1, 101)
+population_sd = 4.0
+standard_errors = population_sd / np.sqrt(sample_sizes)
+
+fig, ax = plt.subplots(figsize=(8.2, 4.0), constrained_layout=True)
+ax.plot(
+    sample_sizes,
+    standard_errors,
+    color="tab:blue",
+    label=r"$4 / \sqrt{n}$",
+)
+ax.scatter(
+    [25],
+    [population_sd / np.sqrt(25)],
+    color="black",
+    zorder=3,
+    label="n = 25, SE = 0.8",
+)
+ax.set(
+    title="Standard error decreases with sample size under independence",
+    xlabel="Sample size n",
+    ylabel="Standard error of the mean",
+)
+ax.legend()
+ax.grid(alpha=0.25)
+plt.show()
+----
 
 == Worked example: mean and standard error
 
@@ -194,7 +569,7 @@ so positive covariance increases uncertainty. Use group-, block-, or time-aware 
 
 *Importance:* Essential (P0)
 
-Twenty-five independent observations have sample mean stem:[\bar x=12] and sample standard deviation stem:[s=5]. Estimate the uncertainty of the sample mean and construct the usual large-sample 95% interval. Independence and a representative sampling mechanism are assumptions, not consequences of having 25 rows.
+Twenty-five independent observations have sample mean stem:[\bar x=12] and sample standard deviation stem:[s=5]. Estimate the uncertainty of the sample mean and construct the usual large-sample 95% interval. Independence and a sampling procedure that represents the target population are assumptions, not consequences of having 25 rows.
 
 [.worked-example-method#worked-mathematical-background-method]
 === Method
@@ -217,32 +592,48 @@ Under independent sampling with finite variance, estimate the standard error of 
 
 *Importance:* Essential (P0)
 
-This example is intentionally implemented as a transparent hand calculation and semantic table; executable Python would not add evidence to the arithmetic.
+The code follows the displayed formula directly. Assertions keep the numerical output connected to the hand calculation stem:[5/\sqrt{25}=1] and stem:[12\pm1.96].
 
-.Example: Mean and standard error
-[.examp#ex:mean-se]
-****
-For stem:[n=25], stem:[\bar x=12], and stem:[s=5], the estimated standard error is stem:[5/\sqrt{25}=1]. The large-sample interval is stem:[12\pm1.96], or approximately stem:[[10.04,13.96]]. It quantifies repeated-sample uncertainty under the sampling assumptions; it does not include instrument bias or population mismatch.
-****
+[#math-mean-standard-error-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Mean, spread, standard error, and approximate interval",table-description="Rows distinguish the sample mean 12, sample standard deviation 5, standard error 1, and approximate 95 percent interval endpoints 10.04 and 13.96."]
+----
+import math
 
-The calculation separates three quantities that students often conflate:
+import pandas as pd
 
-[cols="2,1,3",options="header"]
-|===
-|Quantity |Value |Operational meaning
+n = 25
+sample_mean = 12.0
+sample_sd = 5.0
+standard_error = sample_sd / math.sqrt(n)
+half_width_95 = 1.96 * standard_error
+interval_95 = (sample_mean - half_width_95, sample_mean + half_width_95)
 
-|Sample standard deviation stem:[s]
-|stem:[5]
-|Observed spread among individual rows
+assert math.isclose(standard_error, 1.0)
+assert all(
+    math.isclose(observed, expected)
+    for observed, expected in zip(interval_95, (10.04, 13.96), strict=True)
+)
 
-|Estimated standard error stem:[s/\sqrt n]
-|stem:[1]
-|Repeated-sample spread of the mean under independence
-
-|95% interval half-width
-|stem:[1.96]
-|Approximate uncertainty attached to this estimation procedure
-|===
+pd.DataFrame(
+    {
+        "quantity": [
+            "sample mean",
+            "sample standard deviation",
+            "estimated standard error",
+            "95% interval lower endpoint",
+            "95% interval upper endpoint",
+        ],
+        "value": [sample_mean, sample_sd, standard_error, *interval_95],
+        "meaning": [
+            "centre of the observed sample",
+            "spread among individual observations",
+            "estimated repeated-sample spread of the mean",
+            "lower endpoint under the stated approximation",
+            "upper endpoint under the stated approximation",
+        ],
+    }
+).round({"value": 2})
+----
 
 [.worked-example-results#worked-mathematical-background-results]
 === Results
@@ -256,11 +647,11 @@ The estimated standard error is stem:[1], and the large-sample 95% interval is a
 
 *Importance:* Essential (P0)
 
-Under the declared independent-sampling approximation, the sample mean is estimated with standard error stem:[1] and the interval reports finite-sample estimation uncertainty. If the 25 rows are repeated readings from five devices, the effective unit may be the device and the independence formula can be severely optimistic. Even a correctly computed interval excludes measurement bias and population mismatch. This is why the error ledger records data, sampling, model, and numerical errors separately.
+Under the declared independent-sampling approximation, the sample mean is estimated with standard error stem:[1] and the interval reports finite-sample estimation uncertainty. If the 25 rows are repeated readings from five devices, the effective sampling unit may be the device and the independence formula can be severely optimistic. Even a correctly computed interval excludes measurement bias and population mismatch. This is why the error breakdown records data, sampling, model, and numerical errors separately.
 
 == Error estimation for predictive performance
 
-If test losses stem:[\ell_i=L(Y_i,\widehat f(X_i))] are independent conditional on the fixed fitted model, then
+This section is a later reference. A *training set* is used to fit a model. A separate *test set* estimates its performance on unseen observations. Once the fitted model stem:[\widehat f] is held fixed, the test loss stem:[\ell_i=L(Y_i,\widehat f(X_i))] is the loss on test observation stem:[i]. If these test losses are independent, then
 
 [stem]
 ++++
@@ -270,33 +661,42 @@ If test losses stem:[\ell_i=L(Y_i,\widehat f(X_i))] are independent conditional 
 =\frac{s_\ell}{\sqrt m}.
 ++++
 
-The uncertainty includes finite test-sample variation but not training-sample variation. Repeating the complete split/fitting procedure, nested cross-validation, or an appropriate bootstrap can expose additional variability. Fold scores are correlated because training sets overlap; their naive standard deviation divided by stem:[\sqrt K] is not a universal confidence interval.
+This standard error includes variation caused by having a finite test set, but it does not include the variation that would arise from fitting the model on a different training sample.
 
-For classification counts, report denominators. If stem:[r=TP/(TP+FN)] estimates recall from stem:[m_+=TP+FN] positive cases, a rough binomial standard error is
+A *fold* is one subset of a dataset. *Cross-validation* divides data into folds and repeatedly trains on some folds while evaluating on another. *Nested cross-validation* adds an outer evaluation loop so that choices made in the inner loop do not reuse the final evaluation observations. A *bootstrap* repeatedly builds a sample by drawing observations from the available data and allowing the same observation to be drawn more than once; this is sampling “with replacement”. These procedures answer different questions and must preserve groups or time order when rows are dependent. Fold scores are correlated because their training sets overlap, so their ordinary standard deviation divided by stem:[\sqrt K] is not a universal confidence interval.
+
+For classification counts, always report denominators. A *true positive* (TP) is a positive case predicted positive; a *false negative* (FN) is a positive case predicted negative. *Recall* is the proportion of actual positive cases detected:
+
+[stem]
+++++
+r=\frac{TP}{TP+FN}.
+++++
+
+If stem:[m_+=TP+FN] is the number of positive cases, a rough binomial standard error is
 
 [stem]
 ++++
 \widehat{\operatorname{SE}}(r)
-=\sqrt{\frac{r(1-r)}{m_+}},
+=\sqrt{\frac{r(1-r)}{m_+}}.
 ++++
 
-but group dependence and threshold selection require a more appropriate resampling design.
+This *binomial approximation* treats the stem:[m_+] positive cases as independent trials with the same detection probability. The *decision threshold* is the score above which a case is labelled positive. Choosing that threshold on the same data used for final evaluation adds selection bias. Group dependence also requires a more appropriate resampling design.
 
 == Numerical, statistical, and modelling errors
 
 [cols="2,3,3",options="header"]
 |===
-|Error source |Question |Evidence
-|Data/measurement |Does the table represent the intended units and population? |Contracts, calibration records, sensitivity to repair
-|Approximation/model |Can the model class express the relevant relationship? |Residual structure, alternative model classes, domain argument
-|Estimation/sampling |Would another valid sample give a different result? |Standard errors, group/block bootstrap, repeated splits, learning curves
-|Selection |How much choice used validation evidence? |Nested evaluation, untouched test, candidate budget
-|Optimisation/numerical |Was the stated objective solved accurately and stably? |Residual/gradient norm, conditioning, tolerance and solver comparison
-|Monte Carlo |How much variation comes from finite random simulation? |Independent seeds, Monte Carlo standard error
-|Distribution shift |Does the evaluation population match intended use? |Time/site/group comparisons, drift and representativeness analysis
+|Error source |Plain-language question |Possible check
+|Data/measurement |Are values, units, links between tables, and represented cases correct? |Declared schema, calibration records, and results before and after a justified repair.
+|Approximation/model |Can the allowed prediction rules represent the relationship of interest? |Compare several reasonable model classes and inspect systematic prediction errors.
+|Estimation/sampling |Would another valid sample produce a different fitted result? |Standard errors, resampling that preserves groups or time, repeated train/test splits, and performance versus sample size.
+|Selection |Was evaluation information reused while choosing among methods? |A separate final test set or an outer evaluation loop.
+|Optimisation/numerical |Did the algorithm solve the stated calculation accurately and stably? |Compare numerical algorithms, their stopping thresholds, and the size of the remaining equation error.
+|Simulation |How much variation comes from using a finite number of random simulations? |Repeat independent simulation runs and report variation of the resulting average.
+|Population change |Does the evaluation population match the place and time of intended use? |Compare variables and performance across times, sites, devices, and groups.
 |===
 
-Every result card should state which rows of this ledger were estimated, bounded, diagnosed qualitatively, or left unknown.
+This table is an *error breakdown*: a checklist of distinct ways a result can be wrong or uncertain. For every reported result, state which sources were quantified, checked qualitatively, or left unknown.
 
 == Exercises
 
@@ -309,11 +709,11 @@ Two estimators of stem:[\theta] have biases stem:[0] and stem:[0.5], and varianc
 .Exercise: Dependence
 [.exer#ex:dependence]
 ****
-Derive stem:[\operatorname{Var}(\bar X)] when all observations have variance stem:[\sigma^2] and every distinct pair has covariance stem:[\rho\sigma^2]. What happens to the effective information as stem:[n\to\infty] for fixed stem:[\rho>0]?
+Suppose all observations have variance stem:[\sigma^2] and every distinct pair has covariance stem:[\rho\sigma^2], where stem:[\rho] is their common correlation. Derive stem:[\operatorname{Var}(\bar X)]. As stem:[n] grows with fixed stem:[\rho>0], does this variance continue towards zero? Explain why correlated rows contain less new information than the same number of independent rows.
 ****
 
-.Exercise: Error ledger
-[.exer#ex:error-ledger]
+.Exercise: Error breakdown
+[.exer#ex:error-breakdown]
 ****
-For one course notebook, identify one data, approximation, estimation, selection, and numerical error. For each, propose either a quantitative estimate or a falsifiable diagnostic.
+For one course notebook, identify one possible data, model, sampling, selection, and numerical error. For each, propose either a number that measures it or a check whose failure would reveal a problem.
 ****

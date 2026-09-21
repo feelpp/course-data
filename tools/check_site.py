@@ -424,6 +424,15 @@ def main() -> None:
             errors.append("Local KaTeX runtime is not loaded on the generated mathematical page")
         if "_attachments/vendor/katex/katex.min.css" not in mathematics_html:
             errors.append("Local KaTeX styles are not loaded on the generated mathematical page")
+        for term in (
+            "Missingness indicators and mechanisms",
+            "median absolute deviation",
+            "Uncertainty for quality measurements",
+        ):
+            if term not in mathematics_html:
+                errors.append(
+                    f"mathematical-background.html is missing required learning content: {term}"
+                )
     lesson_contracts = {
         "data-lifecycle.html": {
             "stem_blocks": 1,
@@ -436,7 +445,7 @@ def main() -> None:
             "terms": ("Join multiplicity", "many-to-one", "unit of analysis"),
         },
         "data-quality.html": {
-            "stem_blocks": 2,
+            "stem_blocks": 1,
             "table_results": 1,
             "terms": ("MCAR", "median absolute deviation", "Sensitivity analysis"),
         },
