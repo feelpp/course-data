@@ -449,6 +449,11 @@ def main() -> None:
             "table_results": 1,
             "terms": ("MCAR", "median absolute deviation", "Sensitivity analysis"),
         },
+        "data-quality-practical.html": {
+            "stem_blocks": 1,
+            "table_results": 8,
+            "terms": ("The big picture", "controlled defects", "Exit ticket"),
+        },
         "eda-sampling.html": {
             "stem_blocks": 3,
             "matplotlib_results": 1,

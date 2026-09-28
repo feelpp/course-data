@@ -1,0 +1,631 @@
+= Guided practical: audit a complete air-quality dataset
+:page-course-language: en
+:page-course-concepts: DP-QLT-01, DP-QLT-02, DP-QLT-03, DP-QLT-04, DP-TST-01
+:page-course-priority: P0
+:page-course-difficulty: D1
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO2, LO3, LO4, LO5, LO9
+:page-course-prerequisites: first pandas operations, grouping, table keys, and the data-quality reference page
+:page-course-assessed: yes
+:page-jupyter: true
+:page-course-execution-profile: fast
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d1]#D1 Guided#
+
+This is the practical companion to xref:foundations/data-quality.adoc[Data quality, schemas, missingness, and anomalies]. It applies the complete audit route to a real teaching extract rather than a succession of unrelated toy tables.
+
+The dataset contains *1,008 original hourly observations*: three Beijing monitoring stations × fourteen complete days, from 1 to 14 March 2013. It contains six air-pollution measurements, six meteorological variables, a wind category, time fields, and a station identifier. Values come from the UCI Beijing Multi-Site Air-Quality dataset and have not been statistically imputed or repaired.
+
+Use the notebook download in the page toolbar. At every stage: predict, run, inspect, and explain. Keep the loaded tables unchanged; create new variables for derived columns and practice defects.
+
+== The big picture
+
+The practical follows the complete path from a released file to a limited scientific statement:
+
+[cols="1,4",frame=none,grid=rows]
+|===
+|1 |*Source and manifest* — Which files are we using, where do they come from, and are they the declared release?
+|↓ |
+|2 |*Observation, key, and schema* — What does one row represent, which columns identify it, and what do the other columns mean?
+|↓ |
+|3 |*Completeness, validity, consistency, and plausibility* — Which values are absent, impossible, contradictory, or unusual enough to inspect?
+|↓ |
+|4 |*Analysis and denominators* — Which observations actually contribute to each comparison and summary?
+|↓ |
+|5 |*Audit report and limitations* — What can we conclude from this slice, what action is justified, and what remains unknown?
+|===
+
+Our working question is:
+
+_How do PM2.5 and NO2 measurements differ across the three stations during these fourteen days, and which data-quality findings limit that comparison?_
+
+This is a descriptive question about the released slice. It is not a claim about all Beijing stations, other seasons, current air quality, personal exposure, or causes of pollution.
+
+== Today's two-hour route
+
+[cols="1,4",options="header"]
+|===
+|Minutes |Activity
+|0–15 |Identify the source, files, coverage, variables, and intended use.
+|15–35 |Load all 1,008 rows; define one observation and its key; check registry and coverage.
+|35–55 |Build and run a repeatable audit for identity, validity, and consistency.
+|55–65 |Break.
+|65–85 |Map missingness by variable and station; inspect its effect on denominators.
+|85–105 |Review high PM2.5 values in temporal and station context; distinguish a flag from an error.
+|105–115 |Inject controlled defects into a copy and verify that the checks detect them.
+|115–120 |Complete the audit report and exit ticket.
+|===
+
+=== How to work through the page
+
+Do not run the whole notebook at once. Work in short cycles: read the question, predict what the check should reveal, complete the marked student cell, and only then open the reference checkpoint.
+
+[cols="2,2,4",options="header"]
+|===
+|Steps |Support |What students do
+|1–3 |Demonstration |Run the supplied setup, inspect the files, and explain the meaning of rows and columns.
+|4–6 |Guided construction |Complete a code skeleton for rules, coverage, and missingness; compare it with the folded checkpoint.
+|7–9 |Short instructions |Choose the pandas operations, expose denominators, and interpret unusual values in context.
+|10–11 |Independent synthesis |Design controlled defects and write the audit report and limited conclusion.
+|===
+
+The checkpoint code is present so that a blocked pair can continue and so that the class can compare approaches. On the webpage it is folded. Jupyter does not preserve that folding: in the downloaded notebook, stop at each *Checkpoint* label and do not run or read the following reference cell until you have attempted the task. Opening it before attempting the task removes most of the learning value.
+
+== Worked example: audit the complete teaching extract
+
+[.worked-example-context#worked-quality-practical-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+The course bundle contains three connected artifacts:
+
+* `observations.csv`: 1,008 hourly rows and 18 columns;
+* `stations.csv`: a three-row station registry;
+* `MANIFEST.yml`: file identities, row counts, byte sizes, and SHA-256 checksums.
+
+One intended observation is one station at one hour. Its key is `(station, year, month, day, hour)`. The registry relationship is many observations to one station.
+
+The dataset is complete in the sense that the released teaching artifact contains the full declared three-station, fourteen-day grid. This does not mean that every measurement cell is present or that the slice represents the complete upstream population.
+
+[.worked-example-method#worked-quality-practical-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+. Verify the artifact before analysing its values.
+. Check row identity, time coverage, and the station registry.
+. Test hard rules for types, categories, signs, and cross-field consistency.
+. Count missing values overall and by station.
+. Flag unusual PM2.5 values, then inspect their time and multi-station context.
+. Expose denominators in the station comparison.
+. Inject known defects into a copy to verify that the audit can fail when it should.
+. Record findings, actions, and remaining limitations.
+
+For a rule stem:[r], let stem:[I_{ir}=1] when row stem:[i] violates the rule and stem:[I_{ir}=0] otherwise. The reported count is
+
+[stem]
+++++
+c_r=\sum_{i=1}^{n} I_{ir}.
+++++
+
+.Mathematical insight — zero findings do not prove perfect data
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* An audit count of zero means that no row violated the stated rule. It does not prove that the measurements are accurate or representative. Conversely, a statistical anomaly flag means “inspect this observation”, not “delete it”. Every conclusion is conditional on the rules, data source, period, and intended use.
+====
+
+[.worked-example-implementation#worked-quality-practical-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+==== 1. Locate and verify the released artifacts
+
+The helper works from a repository checkout or the downloaded student bundle. SHA-256 identifies exact file contents: changing one byte changes the checksum.
+
+[#quality-practical-provenance]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Manifest and observed file properties",table-description="The released observations and station-registry files match their declared row counts, byte sizes, and SHA-256 checksums."]
+----
+from pathlib import Path
+import hashlib
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import yaml
+
+
+def course_file(relative: str) -> Path:
+    """Locate a course file in a repository checkout or student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+dataset_dir = "datasets/teaching/air-quality"
+manifest_path = course_file(f"{dataset_dir}/MANIFEST.yml")
+manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+
+integrity_rows = []
+for declared in manifest["files"]:
+    path = course_file(f"{dataset_dir}/{declared['path']}")
+    observed_sha = hashlib.sha256(path.read_bytes()).hexdigest()
+    observed_rows = len(pd.read_csv(path))
+    integrity_rows.append(
+        {
+            "file": declared["path"],
+            "declared rows": declared["rows"],
+            "observed rows": observed_rows,
+            "row count matches": observed_rows == declared["rows"],
+            "byte size matches": path.stat().st_size == declared["size_bytes"],
+            "checksum matches": observed_sha == declared["sha256"],
+        }
+    )
+
+integrity = pd.DataFrame(integrity_rows)
+assert integrity[["row count matches", "byte size matches", "checksum matches"]].all().all()
+integrity
+----
+
+*Pause:* What does a matching checksum establish? Name one scientific property that it does not establish.
+
+==== 2. Load all rows and establish the dataset shape
+
+Construct one timezone-aware timestamp while preserving the original time fields. The displayed overview should confirm 1,008 rows, 18 original columns, 3 stations, 14 days, and 24 hours per station-day.
+
+[#quality-practical-overview]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Overview of the complete teaching extract",table-description="The dataset contains 1,008 rows, 18 original columns, three stations, fourteen days, and a complete station-hour grid from 1 through 14 March 2013."]
+----
+observations_path = course_file(f"{dataset_dir}/observations.csv")
+stations_path = course_file(f"{dataset_dir}/stations.csv")
+
+observations = pd.read_csv(observations_path)
+stations = pd.read_csv(stations_path)
+time_fields = ["year", "month", "day", "hour"]
+observations["timestamp_utc"] = pd.to_datetime(
+    observations[time_fields], utc=True, errors="coerce"
+)
+
+overview = pd.DataFrame(
+    {
+        "quantity": [
+            "rows", "original columns", "stations", "calendar days",
+            "distinct hours", "first timestamp", "last timestamp",
+        ],
+        "value": [
+            len(observations), len(observations.columns) - 1,
+            observations["station"].nunique(), observations["day"].nunique(),
+            observations["timestamp_utc"].nunique(),
+            str(observations["timestamp_utc"].min()),
+            str(observations["timestamp_utc"].max()),
+        ],
+    }
+)
+overview
+----
+
+The 336 distinct timestamps are shared by all three stations: stem:[14\times24=336], and stem:[3\times336=1008] station-hour observations.
+
+==== 3. Write the schema and units before interpreting values
+
+[cols="2,3,3",options="header"]
+|===
+|Columns |Meaning and unit |Hard check used here
+|`station`, time fields |Observation identity |Non-missing, registered station, valid UTC timestamp, unique key.
+|`PM2.5`, `PM10`, `SO2`, `NO2`, `O3` |Pollutant concentration, µg/m³ |Numeric, missing allowed, non-negative when present.
+|`CO` |Carbon monoxide concentration, µg/m³ |Numeric, missing allowed, non-negative when present.
+|`TEMP`, `DEWP` |Temperature and dew-point temperature, °C |Numeric; check `DEWP` ≤ `TEMP` in this slice.
+|`PRES` |Pressure, hPa |Numeric and positive.
+|`RAIN` |Precipitation, mm |Numeric and non-negative.
+|`wd` |16-point compass direction |Declared category or missing.
+|`WSPM` |Wind speed, m/s |Numeric and non-negative.
+|===
+
+These hard checks detect impossible storage or domain values. They do not impose an arbitrary “normal pollution” range.
+
+==== 4. Audit identity, validity, consistency, and registry membership
+
+The function below returns one compact report. It keeps missingness separate because the next step studies its pattern in detail.
+
+*Guided task 1 — complete the audit function (10 minutes)*
+
+[source,python]
+----
+def hard_audit_student(frame: pd.DataFrame, station_registry: pd.DataFrame):
+    """Return one count for each declared hard rule."""
+    # TODO 1: create a Boolean mask for an unregistered station.
+    # TODO 2: create a Boolean mask for an invalid, non-missing wind direction.
+    # TODO 3: find rows with a negative pollutant or weather measurement.
+    # TODO 4: return counts for these masks, missing keys, invalid times,
+    #         exact duplicates, duplicate keys, and DEWP > TEMP.
+    pass
+----
+
+Before opening the checkpoint, explain why `duplicated(key)` and `duplicated()` answer different questions. Test the function on `observations` and expect zero rule violations, but do not assume this proves measurement accuracy.
+
+[%collapsible]
+.Checkpoint 1 — compare after your attempt
+====
+
+[#quality-practical-hard-audit]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Hard-rule audit of all 1,008 observations",table-description="Every row has a valid key and registered station; no exact or key duplicates, invalid wind categories, negative measurements, or dew-point-above-temperature inconsistencies are detected by the declared rules."]
+----
+key = ["station", "year", "month", "day", "hour"]
+pollutants = ["PM2.5", "PM10", "SO2", "NO2", "CO", "O3"]
+non_negative_weather = ["PRES", "RAIN", "WSPM"]
+valid_wind = {
+    "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+    "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
+}
+
+
+def hard_audit(frame: pd.DataFrame, station_registry: pd.DataFrame) -> dict[str, int]:
+    """Count violations of declared identity, validity, and consistency rules."""
+    registered = set(station_registry["station"])
+    invalid_wind = frame["wd"].notna() & ~frame["wd"].isin(valid_wind)
+    negative_measurement = frame[pollutants + non_negative_weather].lt(0).any(axis=1)
+    return {
+        "rows": len(frame),
+        "missing key field rows": int(frame[key].isna().any(axis=1).sum()),
+        "invalid timestamp rows": int(frame["timestamp_utc"].isna().sum()),
+        "exact duplicate rows": int(frame.drop(columns="timestamp_utc").duplicated(keep=False).sum()),
+        "duplicate key rows": int(frame.duplicated(key, keep=False).sum()),
+        "unregistered station rows": int((~frame["station"].isin(registered)).sum()),
+        "invalid wind direction rows": int(invalid_wind.sum()),
+        "negative pollutant/weather rows": int(negative_measurement.sum()),
+        "dew point above temperature rows": int(frame["DEWP"].gt(frame["TEMP"]).sum()),
+    }
+
+
+hard_findings = hard_audit(observations, stations)
+hard_report = pd.DataFrame.from_dict(
+    hard_findings, orient="index", columns=["affected rows"]
+)
+hard_report
+----
+====
+
+The zero duplicate count is a finding, not a reason to remove the check. The controlled-defect exercise later verifies that the check changes when a duplicate is introduced.
+
+==== 5. Check coverage by station
+
+Completeness includes rows as well as cells. Each station should have 336 distinct hours and the same start and end timestamps.
+
+*Guided task 2 — one row per station (8 minutes)*
+
+[source,python]
+----
+# Complete this expression without copying the checkpoint.
+# Choose the group column and suitable aggregation functions for each output.
+student_coverage = None
+# student_coverage = observations.groupby(...).agg(
+#     rows=(..., ...),
+#     distinct_hours=(..., ...),
+#     first_hour=(..., ...),
+#     last_hour=(..., ...),
+# )
+----
+
+Your result should have three rows. Add an `expected_hours` column from the design of the extract, then a Boolean column that compares observed and expected hours.
+
+[%collapsible]
+.Checkpoint 2 — compare after your attempt
+====
+
+[#quality-practical-coverage]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Hourly coverage by station",table-description="Each of the three stations contains 336 rows and 336 distinct timestamps covering the same first and last hour."]
+----
+coverage = (
+    observations.groupby("station", as_index=False)
+    .agg(
+        rows=("timestamp_utc", "size"),
+        distinct_hours=("timestamp_utc", "nunique"),
+        first_hour=("timestamp_utc", "min"),
+        last_hour=("timestamp_utc", "max"),
+    )
+)
+coverage["expected_hours"] = 14 * 24
+coverage["complete_hour_grid"] = coverage["distinct_hours"].eq(coverage["expected_hours"])
+coverage
+----
+====
+
+*Pause:* Explain the difference between a complete hour grid and complete pollutant measurements.
+
+==== 6. Map missingness by variable and station
+
+A single total would hide the concentration of missing NO2 at Dingling. The table reports both totals and station-specific counts.
+
+*Guided task 3 — locate the missing values (10 minutes)*
+
+[source,python]
+----
+measured_columns = [
+    "PM2.5", "PM10", "SO2", "NO2", "CO", "O3",
+    "TEMP", "PRES", "DEWP", "RAIN", "wd", "WSPM",
+]
+
+# Start with the whole-table count.
+student_missing_total = observations[measured_columns].isna().sum()
+
+# TODO: group by station, count missing values in each group, and transpose
+# the result so variables are rows and stations are columns.
+student_missing_by_station = None
+----
+
+First identify the variable with the largest total. Then identify the station that contributes most of that total. These are two separate questions.
+
+[%collapsible]
+.Checkpoint 3 — compare after your attempt
+====
+
+[#quality-practical-missingness]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Missing measurements overall and by station",table-description="NO2 has 46 missing values, 42 at Dingling. CO has 16 missing values across all stations; PM10 and SO2 each have six; O3 has one; PM2.5 and the meteorological variables are complete."]
+----
+measured_columns = [
+    "PM2.5", "PM10", "SO2", "NO2", "CO", "O3",
+    "TEMP", "PRES", "DEWP", "RAIN", "wd", "WSPM",
+]
+missing_by_station = (
+    observations.groupby("station")[measured_columns]
+    .apply(lambda group: group.isna().sum())
+    .T
+)
+missing_summary = pd.DataFrame(
+    {
+        "variable": measured_columns,
+        "missing total": observations[measured_columns].isna().sum().values,
+        "missing rate": observations[measured_columns].isna().mean().values,
+    }
+).set_index("variable")
+missing_summary = missing_summary.join(missing_by_station).reset_index()
+missing_summary
+----
+====
+
+The next figure makes the concentration visible. Darker cells mean a larger missing rate within one station.
+
+[#quality-practical-missingness-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="A heatmap of missing rates by variable and station shows the darkest cell for NO2 at Dingling, smaller missing rates for several other pollutants, and zero missingness for PM2.5 and the weather variables",figure-caption="Missingness is concentrated by variable and station rather than spread uniformly through the table.",result-interpretation="The figure describes the observed pattern but cannot identify MCAR, MAR, or MNAR without information about the measurement process."]
+----
+missing_rates = missing_by_station.div(
+    observations.groupby("station").size(), axis="columns"
+)
+
+fig, ax = plt.subplots(figsize=(8.5, 5.2), constrained_layout=True)
+image = ax.imshow(missing_rates, aspect="auto", cmap="Blues", vmin=0)
+ax.set_xticks(range(len(missing_rates.columns)), missing_rates.columns, rotation=20)
+ax.set_yticks(range(len(missing_rates.index)), missing_rates.index)
+ax.set(title="Missing rate by variable and station", xlabel="Station", ylabel="Variable")
+for row in range(len(missing_rates.index)):
+    for column in range(len(missing_rates.columns)):
+        value = missing_rates.iloc[row, column]
+        ax.text(column, row, f"{value:.1%}", ha="center", va="center")
+fig.colorbar(image, ax=ax, label="Missing rate")
+plt.show()
+----
+
+*Pair discussion:* Give one possible collection-process explanation for Dingling's NO2 pattern. State what additional information would be needed to support it.
+
+==== 7. Show how missingness changes analysis denominators
+
+PM2.5 is available for all 336 hours per station. NO2 is not. A mean without its count hides this difference.
+
+*Student task 4 — build the comparison (8 minutes)*
+
+Create one row per station with four columns: the number and mean of available PM2.5 values, then the number and mean of available NO2 values. Decide whether `size` or `count` answers each question. Round only the two means, after the aggregation.
+
+Write and run your own cell before opening the checkpoint.
+
+[%collapsible]
+.Checkpoint 4 — compare after your attempt
+====
+
+[#quality-practical-denominators]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Station means with their available-value counts",table-description="All PM2.5 means use 336 readings, while NO2 means use 334 readings at Aotizhongxin and Changping and only 294 at Dingling."]
+----
+station_comparison = (
+    observations.groupby("station", as_index=False)
+    .agg(
+        PM25_available=("PM2.5", "count"),
+        PM25_mean=("PM2.5", "mean"),
+        NO2_available=("NO2", "count"),
+        NO2_mean=("NO2", "mean"),
+    )
+)
+station_comparison[["PM25_mean", "NO2_mean"]] = station_comparison[
+    ["PM25_mean", "NO2_mean"]
+].round(2)
+station_comparison
+----
+====
+
+Dingling's observed NO2 mean is not directly comparable without discussing why 42 values are absent. Dropping all rows with any missing measurement would also discard complete PM2.5 values unnecessarily.
+
+==== 8. Flag unusual PM2.5 values within each station
+
+For each station, compute stem:[Q_1], stem:[Q_3], and stem:[\operatorname{IQR}=Q_3-Q_1]. Flag values above stem:[Q_3+1.5\operatorname{IQR}]. This is a review rule, not an atmospheric validity limit.
+
+[#quality-practical-anomaly-summary]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Station-specific PM2.5 review thresholds",table-description="The IQR rule flags six Aotizhongxin values, one Changping value, and two Dingling values; maxima reach 376, 443, and 410 micrograms per cubic metre respectively."]
+----
+pm25_groups = observations.groupby("station")["PM2.5"]
+q1 = pm25_groups.transform(lambda values: values.quantile(0.25))
+q3 = pm25_groups.transform(lambda values: values.quantile(0.75))
+iqr = q3 - q1
+observations["PM25_review_flag"] = observations["PM2.5"].gt(q3 + 1.5 * iqr)
+
+anomaly_summary = (
+    observations.groupby("station", as_index=False)
+    .agg(
+        Q1=("PM2.5", lambda values: values.quantile(0.25)),
+        median=("PM2.5", "median"),
+        Q3=("PM2.5", lambda values: values.quantile(0.75)),
+        flagged=("PM25_review_flag", "sum"),
+        maximum=("PM2.5", "max"),
+    )
+)
+anomaly_summary["review_threshold"] = (
+    anomaly_summary["Q3"] + 1.5 * (anomaly_summary["Q3"] - anomaly_summary["Q1"])
+)
+anomaly_summary.round(2)
+----
+
+==== 9. Inspect flagged values in time and across stations
+
+The line plot shows whether high readings are isolated or part of a shared episode. The same time axis is essential for this comparison.
+
+[#quality-practical-pm25-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Three PM2.5 time series for Aotizhongxin, Changping, and Dingling show a pronounced shared rise around 8 March, with the highest values above 400 at Changping and Dingling",figure-caption="High PM2.5 values cluster in time and appear across stations, so they should be investigated as a possible pollution episode rather than deleted mechanically.",result-interpretation="Temporal agreement supports plausibility but does not prove measurement accuracy or identify the cause of the episode."]
+----
+fig, ax = plt.subplots(figsize=(10, 4.8), constrained_layout=True)
+for station, group in observations.groupby("station"):
+    ax.plot(group["timestamp_utc"], group["PM2.5"], label=station, linewidth=1.3)
+flagged = observations.loc[observations["PM25_review_flag"]]
+ax.scatter(
+    flagged["timestamp_utc"],
+    flagged["PM2.5"],
+    color="black",
+    marker="x",
+    label="IQR review flag",
+    zorder=3,
+)
+ax.set(
+    title="Hourly PM2.5 across the complete fourteen-day extract",
+    xlabel="UTC time",
+    ylabel="PM2.5 (µg/m³)",
+)
+ax.legend(ncol=2)
+ax.grid(alpha=0.25)
+plt.show()
+----
+
+Display the most extreme rows with other measurements and weather context instead of viewing PM2.5 alone.
+
+[#quality-practical-flagged-rows]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Highest station-specific PM2.5 review flags",table-description="The largest flagged rows occur mainly around 7–8 March and include simultaneous high values at different stations alongside PM10 and weather context."]
+----
+flagged_rows = (
+    flagged[
+        ["station", "timestamp_utc", "PM2.5", "PM10", "TEMP", "PRES", "wd", "WSPM"]
+    ]
+    .sort_values("PM2.5", ascending=False)
+    .head(12)
+)
+flagged_rows
+----
+
+The appropriate action is to retain these rows, document the flag, and seek calibration or external air-quality information if the scientific question requires confirmation. The table contains no basis for silently replacing them.
+
+==== 10. Verify the audit with controlled defects in a copy
+
+The original artifact has no duplicate keys, negative pollutants, invalid station identifiers, or invalid wind categories under our rules. Introduce one of each into a copy to check that the audit fails as expected. The source table remains unchanged.
+
+*Student task 5 — make the checks fail for known reasons (10 minutes)*
+
+. Copy `observations` into a new variable.
+. Add one duplicated row without changing the original table.
+. In three other rows, introduce an unknown station, an invalid wind category, and one negative PM2.5 value.
+. Run your audit and predict the affected-row count for every rule before viewing the result.
+. Use Boolean masks to display the defective rows; do not identify them only by their row positions.
+
+[%collapsible]
+.Checkpoint 5 — one possible controlled-defect copy
+====
+
+[#quality-practical-controlled-defects]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Audit response to four controlled defects",table-description="After adding an exact duplicate and modifying three rows, the audit reports two exact and duplicate-key rows, one unregistered station, one invalid wind direction, and one negative pollutant or weather row."]
+----
+practice = observations.copy()
+practice = pd.concat([practice, practice.iloc[[0]]], ignore_index=True)
+practice.loc[1, "station"] = "UNKNOWN"
+practice.loc[2, "wd"] = "north"
+practice.loc[3, "PM2.5"] = -5.0
+
+practice_findings = hard_audit(practice, stations)
+controlled_comparison = pd.DataFrame(
+    {
+        "released data": hard_findings,
+        "controlled-defect copy": practice_findings,
+    }
+)
+
+assert hard_findings["duplicate key rows"] == 0
+assert practice_findings["duplicate key rows"] == 2
+assert practice_findings["unregistered station rows"] == 1
+assert practice_findings["invalid wind direction rows"] == 1
+assert practice_findings["negative pollutant/weather rows"] == 1
+controlled_comparison
+----
+====
+
+Different source rows can produce an equally valid test. What matters is that each introduced defect is known, detected, and absent from the unchanged source table.
+
+==== 11. Assemble the audit report
+
+The final report separates findings, consequences, and actions. It also records limitations that no cleaning operation can remove. The aspect names are supplied; complete the other three columns from your own outputs before reading the summary below.
+
+[#quality-practical-report]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Student audit report template",table-description="Six audit aspects are supplied; students complete the finding, consequence, and justified-action columns from the preceding outputs."]
+----
+audit_report = pd.DataFrame(
+    {
+        "aspect": [
+            "provenance",
+            "identity and coverage",
+            "validity and consistency",
+            "missingness",
+            "plausibility",
+            "population limit",
+        ],
+        "finding": [""] * 6,
+        "consequence": [""] * 6,
+        "action": [""] * 6,
+    }
+)
+audit_report
+----
+
+[.worked-example-results#worked-quality-practical-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The 1,008-row station-hour grid and registry are structurally complete. The declared hard checks find no duplicate keys, invalid categories, negative pollution or weather values, or dew-point inconsistency. Missingness is not uniform: NO2 has 46 absent values, including 42 at Dingling, so the station means use denominators 334, 334, and 294 rather than the common 336 used for PM2.5.
+
+The station-specific IQR rule flags nine high PM2.5 observations. Several occur during a shared rise around 7–8 March and across more than one station. They remain in the data because the audit provides no reason to classify them as errors.
+
+[.worked-example-conclusion#worked-quality-practical-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+The audit supports a limited descriptive comparison of this three-station, fourteen-day extract. It does not establish sensor calibration, explain the missing NO2 mechanism, represent other seasons or stations, identify causes, or measure individual exposure. The controlled-defect copy shows that the checks detect known failures, while the unchanged source preserves the released data for future review.
+
+== Exit ticket
+
+Answer in one or two sentences each:
+
+. Why can a dataset have a complete station-hour grid and still contain missing data?
+. Why is Dingling's NO2 mean harder to compare than its PM2.5 mean?
+. Why were the nine high PM2.5 flags retained?
+. What does the checksum establish, and what does it leave unresolved?
+. Which conclusion is supported by this extract, and which broader conclusion is not?
+
+Save the executed notebook with the audit report and your answers visible.
+
+== Acceptance criteria
+
+The notebook verifies provenance, states one-row meaning and key, checks station-hour coverage, runs hard validity rules, maps missingness by station, reports denominators beside means, reviews anomalies in temporal context, demonstrates that controlled defects are detected without modifying the source, and ends with a conclusion restricted to the released population and period.

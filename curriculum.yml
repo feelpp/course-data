@@ -58,6 +58,7 @@ foundation_release:
     - docs/course/modules/ROOT/pages/foundations/data-lifecycle.adoc
     - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
+    - docs/course/modules/ROOT/pages/foundations/data-quality-practical.adoc
     - docs/course/modules/ROOT/pages/foundations/eda-sampling.adoc
     - docs/course/modules/ROOT/pages/foundations/safe-pipelines.adoc
     - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc
@@ -70,6 +71,7 @@ foundation_release:
     - docs/course/modules/ROOT/pages/foundations/data-lifecycle.adoc
     - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
+    - docs/course/modules/ROOT/pages/foundations/data-quality-practical.adoc
     - docs/course/modules/ROOT/pages/foundations/probability-distributions-moments.adoc
     - docs/course/modules/ROOT/pages/foundations/quantiles-exceedance-risk.adoc
     - docs/course/modules/ROOT/pages/foundations/mean-uncertainty.adoc
@@ -161,6 +163,7 @@ worked_example_release:
     - docs/course/modules/ROOT/pages/foundations/data-lifecycle.adoc
     - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
+    - docs/course/modules/ROOT/pages/foundations/data-quality-practical.adoc
     - docs/course/modules/ROOT/pages/foundations/eda-sampling.adoc
     - docs/course/modules/ROOT/pages/foundations/safe-pipelines.adoc
     - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc
@@ -183,6 +186,7 @@ worked_example_release:
     - docs/course/modules/ROOT/pages/foundations/data-lifecycle.adoc
     - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
+    - docs/course/modules/ROOT/pages/foundations/data-quality-practical.adoc
     - docs/course/modules/ROOT/pages/foundations/eda-sampling.adoc
     - docs/course/modules/ROOT/pages/foundations/safe-pipelines.adoc
     - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc

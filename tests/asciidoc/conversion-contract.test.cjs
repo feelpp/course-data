@@ -124,6 +124,7 @@ test('course mathematics sequence uses the vendored Antora generator determinist
     'foundations/data-lifecycle.adoc',
     'foundations/tabular-data.adoc',
     'foundations/data-quality.adoc',
+    'foundations/data-quality-practical.adoc',
     'foundations/eda-sampling.adoc',
     'foundations/probability-distributions-moments.adoc',
     'foundations/quantiles-exceedance-risk.adoc',

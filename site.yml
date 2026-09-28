@@ -31,6 +31,7 @@ antora:
           - foundations/data-lifecycle.adoc
           - foundations/tabular-data.adoc
           - foundations/data-quality.adoc
+          - foundations/data-quality-practical.adoc
           - foundations/eda-sampling.adoc
           - foundations/safe-pipelines.adoc
           - foundations/metrics-errors.adoc

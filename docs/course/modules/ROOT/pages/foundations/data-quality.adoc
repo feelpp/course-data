@@ -20,6 +20,8 @@
 
 Data quality means that a table is suitable for a stated use. It is not a generic “clean/dirty” label. The same extreme measurement may be a sensor failure, a rare event of scientific interest, or a valid observation that strongly affects a result.
 
+After reading the audit route and examples on this page, work through xref:foundations/data-quality-practical.adoc[Guided practical: audit a complete air-quality dataset]. The companion notebook follows all 1,008 station-hour observations from file verification to a documented quality report in a two-hour session.
+
 Read the opening of xref:foundations/mathematical-background.adoc#_data_population_and_notation[Mathematical background: data, population, and notation] first. It defines an observation, a sample, a population, and an empirical mean. This page then shows how missing values, duplicates, and unusual values change the observations available for a calculation. Formal missingness notation and robust anomaly scores are kept on the xref:foundations/mathematical-background.adoc#_missingness_indicators_and_mechanisms[mathematical background page] so that the practical audit remains readable.
 
 == A repeatable audit route

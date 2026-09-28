@@ -156,6 +156,7 @@ test('generated notebooks preserve page code and contain no pre-filled outputs',
     'foundations/data-lifecycle.adoc',
     'foundations/tabular-data.adoc',
     'foundations/data-quality.adoc',
+    'foundations/data-quality-practical.adoc',
     'foundations/eda-sampling.adoc',
     'foundations/probability-distributions-moments.adoc',
     'foundations/quantiles-exceedance-risk.adoc',
@@ -188,8 +189,8 @@ test('generated notebooks preserve page code and contain no pre-filled outputs',
     }
     const notebook = JSON.parse(feelppJupyter.generateNotebook(page).toString('utf8'))
     const pageSource = contents.toString('utf8')
-    const dynamicCode = Array.from(
-      pageSource.matchAll(/\[[^\]]*%dynamic[^\]]*\]\n----\n([\s\S]*?)\n----/g),
+    const pythonCode = Array.from(
+      pageSource.matchAll(/\[(?:[^\]]*%dynamic[^\]]*,python[^\]]*|source,python[^\]]*)\]\n----\n([\s\S]*?)\n----/g),
       (match) => match[1].trim()
     )
     const codeCells = notebook.cells.filter((cell) => cell.cell_type === 'code')
@@ -198,8 +199,8 @@ test('generated notebooks preserve page code and contain no pre-filled outputs',
       return source.trim()
     })
 
-    assert.ok(dynamicCode.length > 0)
-    const expectedCode = dynamicCode.map((source) => feelppJupyter.normaliseCode(source, page))
+    assert.ok(pythonCode.length > 0)
+    const expectedCode = pythonCode.map((source) => feelppJupyter.normaliseCode(source, page))
     assert.deepEqual(codeSources, expectedCode)
     assert.ok(codeCells.every((cell) => cell.outputs.length === 0))
   }
