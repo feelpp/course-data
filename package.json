@@ -45,13 +45,15 @@
     "asciidoctor-jupyter": "0.7.0",
     "handlebars": "4.7.9",
     "handlebars-utils": "1.0.6",
-    "katex": "0.18.4"
+    "katex": "0.18.4",
+    "braces": "file:vendor/npm/course-data-braces-3.0.3-course.1.tgz"
   },
   "devDependencies": {
     "http-server": "14.1.1"
   },
   "overrides": {
-    "js-yaml@^4.0.0": "4.3.2"
+    "js-yaml@^4.0.0": "4.3.2",
+    "braces": "$braces"
   },
   "license": "SEE LICENSE.md"
 }

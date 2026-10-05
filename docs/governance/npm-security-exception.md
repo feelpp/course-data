@@ -18,6 +18,24 @@ and [nanoid advisory](https://github.com/advisories/GHSA-2v37-7h3g-55p8).
 failed audit response. Normal and full course checks verify parser compatibility;
 the absence of an advisory alone does not establish build compatibility.
 
+## Local parser mitigation (5 October 2026)
+
+The [braces nesting advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)
+affects upstream versions through `3.0.3`; no patched npm release was available at
+review. The course installs a private local fork, `@course-data/braces`, under
+the `braces` dependency name. It enforces a hard limit of 100 nested parser
+blocks and checks direct AST inputs iteratively before recursive walkers run.
+This also prevents a child-node cycle from exhausting the call stack.
+
+The complete patch, licence-preserving archive and rebuild instructions are in
+`vendor/npm`. Regression tests cover normal brace patterns and file discovery,
+deep and unclosed patterns, and direct AST inputs. The dependency override
+applies to every consumer, including Antora, fast-glob and Asciidoctor. Replace
+it when a compatible upstream fix is available and has passed course checks.
+
+This is a code mitigation, not an advisory allowlist entry. The audit gate still
+rejects every reported high or critical finding and incomplete audit reports.
+
 ## Historical scope (22 July–5 September 2026)
 
 Antora `3.1.15` and Collector `1.0.3` require `js-yaml` version 4 APIs. At the July review, the available fixed `js-yaml` release was `5.2.1`, whose schema and merge-type APIs were incompatible with that Antora release. An attempted transitive override failed before the playbook could be loaded. The audit tool's automatic remedy instead proposed an unsupported breaking downgrade to Antora `2.3.4`.

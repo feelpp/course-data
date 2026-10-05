@@ -1,0 +1,70 @@
+--- a/package.json
++++ b/package.json
+@@ -2 +2 @@
+-  "name": "braces",
++  "name": "@course-data/braces",
+@@ -4 +4 @@
+-  "version": "3.0.3",
++  "version": "3.0.3-course.1",
+@@ -76 +76,2 @@
+-  }
++  },
++  "private": true
+--- a/lib/parse.js
++++ b/lib/parse.js
+@@ -3,0 +4 @@
++const { checkDepth } = require('./depth-guard');
+@@ -146,0 +148 @@
++      checkDepth(stack.length);
+@@ -212,0 +215 @@
++      checkDepth(stack.length);
+--- a/lib/compile.js
++++ b/lib/compile.js
+@@ -1,0 +2,2 @@
++
++const { assertAstDepth } = require('./depth-guard');
+@@ -6,0 +9 @@
++  assertAstDepth(ast);
+--- a/lib/expand.js
++++ b/lib/expand.js
+@@ -1,0 +2,2 @@
++
++const { assertAstDepth } = require('./depth-guard');
+@@ -33,0 +36 @@
++  assertAstDepth(ast);
+--- a/lib/stringify.js
++++ b/lib/stringify.js
+@@ -1,0 +2,2 @@
++
++const { assertAstDepth } = require('./depth-guard');
+@@ -5,0 +8 @@
++  assertAstDepth(ast);
+--- /dev/null
++++ b/lib/depth-guard.js
+@@ -0,0 +1,26 @@
++'use strict';
++
++// Local mitigation for GHSA-vfj7-8cjw-p6xm; limits cannot be disabled by options.
++const MAX_DEPTH = 100;
++
++exports.checkDepth = depth => {
++  if (depth > MAX_DEPTH) {
++    throw new SyntaxError(`Brace nesting exceeds maximum depth (${MAX_DEPTH})`);
++  }
++};
++
++// Follow child nodes only: parsed ASTs also contain parent/previous backlinks.
++// Iterative validation protects callers supplying an AST directly to a walker.
++exports.assertAstDepth = ast => {
++  const stack = [{ node: ast, depth: 0 }];
++  while (stack.length) {
++    const { node, depth } = stack.pop();
++    // A leaf can sit one level below the deepest brace/parenthesis block.
++    exports.checkDepth(Math.max(0, depth - 1));
++    if (node && node.nodes) {
++      for (const child of node.nodes) {
++        stack.push({ node: child, depth: depth + 1 });
++      }
++    }
++  }
++};
