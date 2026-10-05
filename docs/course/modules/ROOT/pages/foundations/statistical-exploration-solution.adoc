@@ -499,54 +499,7 @@ plt.show()
 
 *Student prompt:* Write the two population questions these correlations could address. Why would treating 1,008 hourly rows as independent overstate the information available? For uncertainty and resampling, continue later with the xref:foundations/eda-sampling.adoc[sampling companion] and xref:foundations/mean-uncertainty.adoc[mean uncertainty reference].
 
-==== Part 9 — What evidence can we defend?
-
-*Student task:* Draft a one-page statistical evidence brief about this three-station, 14-day dataset extract (1–14 March 2013). Use *three well-chosen figures*: a distribution, a station/time comparison, and a paired relationship (possibly with station or aggregation panels), with the selected-variable summary table from Results.
-
-*Start here — assemble evidence you have already produced:*
-
-. *Choose two measured variables.* Use your Part 3 profile to fill the Results table, keeping units and valid counts. Give one sentence explaining your choice; you do not need to describe all eleven variables.
-. *Select three existing figures.* Reuse a distribution view from Part 2, a station/time view from Part 4, and a paired view from Part 5 or 8 (or your own comparable figures). Label them Figure 1, Figure 2 and Figure 3. Check their axes and captions before creating any additional plots.
-. *Write one checked claim per figure.* Start with “Figure … suggests …; the numerical evidence is …”. Fill the gaps with your observation and a relevant quantity, its unit and count. For the paired claim, give Pearson r and its paired n, then check whether the cloud supports a linear reading.
-. *State one concrete limitation.* Name a coverage, missingness, measurement, dependence or selection issue and say which broader conclusion it prevents. Use the fill-in outline in Results to organise the brief.
-
-In class, select the evidence and draft one claim for your neighbour to check; finish the one-page brief after class. Use these questions as a review checklist:
-
-. What are the main characteristics of two selected individual variables, with units and valid counts?
-. Which distributions are asymmetric or contain notable extremes? What numerical and graphical evidence supports that reading?
-. How do summaries change across stations or time, and which observational unit is being described?
-. Which pairs show the strongest observed linear associations? Exclude self-correlations and give paired counts.
-. Are those associations visible in scatter plots? Do grouping or aggregation change them?
-. Which coverage, missingness, measurement, dependence and selection limitations prevent broader or causal conclusions?
-
-Each claim must cite a number or figure; each caption must state the observation unit, missing-data rule, denominator and one limitation. Exchange one claim with a neighbour and check it against the evidence. Finish the brief independently after class and rerun the notebook from a fresh kernel.
-
-[.worked-example-results#worked-statistical-exploration-results]
-=== Results
-
-*Importance:* Essential (P0)
-
-The following completed example follows the student page's Results instructions: a selected-variable table, computation checks, three figures and a paired-association comparison. Other choices are valid when supported by the calculated evidence.
-
-==== Selected-variable summary
-
-Here we choose PM2.5 and RAIN. Each row uses that variable's valid station-hour readings, with the same linear quantile convention as the profile in Part 3. Units apply to the mean, median, IQR and maximum.
-
-[#exploration-results-summary]
-[%dynamic%open,python,fail-on-error=,output=table,table-caption="Example evidence-brief summary for two selected variables",table-description="Rows identify PM2.5 and RAIN. Columns give unit, valid count, mean, median, IQR and maximum, matching the student Results table."]
-----
-result_summary = profile.assign(IQR=profile["Q3"] - profile["Q1"]).loc[
-    ["PM2.5", "RAIN"], ["unit", "valid", "mean", "median", "IQR", "max"]
-].rename(columns={
-    "unit": "Unit", "valid": "Valid n", "mean": "Mean", "median": "Median",
-    "max": "Maximum",
-}).rename_axis("Variable")
-result_summary.round(3)
-----
-
-PM2.5 has mean 93.784, median 73, IQR 129 and maximum 443 µg/m³. Its mean is above its median, and the distribution panels in Part 2 show an extended upper tail. RAIN has median and IQR zero but a positive maximum: its middle half hides the nonzero rain readings. These are descriptions of the observed slice.
-
-==== Computation checks
+===== Computation checks — before the brief
 
 These are the same readiness flags used on the student page, now evaluated on the complete calculations. All should be true. They confirm that computations are supplied; plots, captions and reasoning still need separate review.
 
@@ -567,9 +520,53 @@ assert computation_ready.all()
 computation_ready.to_frame()
 ----
 
+==== Part 9 — Prepare your evidence brief
+
+*Purpose:* Choose and check the evidence you will communicate. Parts 0–8 produce the calculations and figures; the Results section below is the template for your finished brief.
+
+*Deliverable:* A one-page statistical evidence brief about the three-station, 14-day dataset extract (1–14 March 2013): two selected variables, a compact summary table, three figures, one supported claim per figure and a concrete limitation.
+
+*Preparation steps:*
+
+. *Choose two measured variables* from your completed Part 3 profile and give one sentence explaining your choice. Keep their own units and valid counts; you do not need to describe all eleven variables.
+. *Select three existing figures:* a distribution view from Part 2, a station/time view from Part 4, and a paired view from Part 5 or 8 (or your own comparable figures). Label them Figure 1, Figure 2 and Figure 3. Reuse the plots you have already prepared.
+. *Check one claim per figure* against a numerical summary and the plotted geometry. For a paired relationship, give Pearson r and the complete-pair count; exclude self-correlations and check whether a linear reading is supported. If comparing hourly and daily associations, state both observational units, r values and counts.
+. *Choose a concrete limitation* from coverage, missingness, measurement, dependence or selection. State which broader conclusion it prevents, then use Results to assemble the brief.
+
+*Review before exchanging:* Each claim cites a number or figure. Each caption states measurement units, observational unit, missing-data rule, valid count and one limitation. The distribution claim explains something the summary table hides; the grouped claim accounts for coverage and weighting; the paired claim distinguishes association from causation. Do not claim a sign reversal without evidence.
+
+In class, select the evidence and exchange one checked claim with a neighbour. Finish the brief independently after class and rerun the notebook from a fresh kernel. An unfinished calculation or plot should be reported as unfinished work, not presented as a result.
+
+[.worked-example-results#worked-statistical-exploration-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+*Purpose: present the completed evidence brief.* This example fills the student Results template with a selected-variable table, supported claims and three captioned figures. Part 9 contains the assignment and review instructions; the readiness checks are at the end of Part 8. Other choices are valid when supported by the calculated evidence.
+
+==== Selected-variable summary
+
+Here we choose PM2.5 and RAIN. Each row uses that variable's valid station-hour readings, with the same linear quantile convention as the profile in Part 3. Units apply to the mean, median, IQR and maximum.
+
+[#exploration-results-summary]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Example evidence-brief summary for two selected variables",table-description="Rows identify PM2.5 and RAIN. Columns give unit, valid count, mean, median, IQR and maximum, matching the student Results table."]
+----
+result_summary = profile.assign(IQR=profile["Q3"] - profile["Q1"]).loc[
+    ["PM2.5", "RAIN"], ["unit", "valid", "mean", "median", "IQR", "max"]
+].rename(columns={
+    "unit": "Unit", "valid": "Valid n", "mean": "Mean", "median": "Median",
+    "max": "Maximum",
+}).rename_axis("Variable")
+result_summary.round(3)
+----
+
+PM2.5 has mean 93.784, median 73, IQR 129 and maximum 443 µg/m³. Its mean is above its median, and the distribution panels in Part 2 show an extended upper tail. RAIN has median and IQR zero but a positive maximum: its middle half hides the nonzero rain readings. These are descriptions of the observed slice.
+
 ==== Example evidence brief
 
-The following filled outline corresponds to the student Results outline. It illustrates how to connect a claim to evidence before turning the rows into short paragraphs.
+*Variable choice:* We chose PM2.5 to describe concentration spread and RAIN to illustrate how central quartiles can hide occasional nonzero readings.
+
+The following filled outline corresponds to the student Results outline. Each claim is connected to supporting evidence.
 
 [cols="1,3,3",options="header"]
 |===
@@ -588,11 +585,11 @@ The following filled outline corresponds to the student Results outline. It illu
 |Only three stations and fourteen days are observed; hourly measurements share temporal conditions and are dependent.
 |===
 
-Use the distribution panels from Part 2, the station-day plot from Part 4, and the hourly/daily paired plot from Part 8 as the three figures. The association table in Part 8 supplies their numerical comparison and paired counts. Captions should make the following explicit:
+The three figures for this brief are the distribution panels from Part 2, the station-day plot from Part 4, and the hourly/daily paired plot from Part 8. The association table in Part 8 supplies the numerical comparison and paired counts. Their captions read:
 
-* *Distribution:* 1,008 valid station-hour PM2.5 concentrations in µg/m³, with missing concentrations excluded. The histogram, ECDF and boxplot use the same observations. The upper tail extends beyond the central half; bin choices affect the histogram's appearance, and boxplot flags do not establish measurement errors.
-* *Station/time:* 42 station-day mean PM2.5 concentrations in µg/m³, each based on 24 valid hourly readings. The station series show shared peaks and differences. Complete, equal coverage explains why the mean of daily means equals the global hourly mean here; daily averaging does not establish independent observations or explain the peaks' causes.
-* *Paired relationship:* PM2.5 in µg/m³ and TEMP in °C, comparing 1,008 complete station-hour pairs with 42 complete station-day mean pairs. Neither variable is missing in this slice. Pearson correlation changes from about 0.272 hourly to 0.484 daily; both signs remain positive. Shared axes and station markers allow comparison of the clouds, but the larger daily correlation does not establish a causal weather effect.
+* *Figure 1 — Distribution:* 1,008 valid station-hour PM2.5 concentrations in µg/m³, with missing concentrations excluded. The histogram, ECDF and boxplot use the same observations. The upper tail extends beyond the central half; bin choices affect the histogram's appearance, and boxplot flags do not establish measurement errors.
+* *Figure 2 — Station/time:* 42 station-day mean PM2.5 concentrations in µg/m³, each based on 24 valid hourly readings. The station series show shared peaks and differences. Complete, equal coverage explains why the mean of daily means equals the global hourly mean here; daily averaging does not establish independent observations or explain the peaks' causes.
+* *Figure 3 — Paired association:* PM2.5 in µg/m³ and TEMP in °C, comparing 1,008 complete station-hour pairs with 42 complete station-day mean pairs. Neither variable is missing in this slice. Pearson correlation changes from about 0.272 hourly to 0.484 daily; both signs remain positive. Shared axes and station markers allow comparison of the clouds, but the larger daily correlation does not establish a causal weather effect.
 
 The PM2.5 distribution is one example of information a summary table alone would hide: its upper tail and local concentration of values require a plot. The profile and pair-count table expose variable-specific missingness. These figures and numbers support the chosen claims about this slice; the short period, three-station selection, measurement limitations and hourly dependence prevent broader population or causal conclusions.
 
