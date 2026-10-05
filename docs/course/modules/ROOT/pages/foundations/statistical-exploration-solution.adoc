@@ -474,7 +474,10 @@ comparison_rows.append({
     "scope": "All stations, daily means", "unit": "station-day", "paired_n": len(daily),
     "r": daily[["pm25_mean", "temp_mean"]].corr().loc["pm25_mean", "temp_mean"],
 })
-pd.DataFrame(comparison_rows).set_index("scope").round(3)
+aggregation_comparison = pd.DataFrame(comparison_rows).rename(
+    columns={"unit": "observational_unit"}
+).set_index("scope")
+aggregation_comparison.round(3)
 ----
 
 [#exploration-aggregation-figure]
@@ -483,11 +486,11 @@ pd.DataFrame(comparison_rows).set_index("scope").round(3)
 fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharex=True, sharey=True, constrained_layout=True)
 markers = ["o", "s", "^"]
 for (station, group), marker in zip(air.groupby("station", observed=True), markers, strict=True):
-    axes[0].scatter(group["TEMP"], group["PM2.5"], label=station, marker=marker, s=14, alpha=0.35)
+    axes[0].scatter(group["PM2.5"], group["TEMP"], label=station, marker=marker, s=14, alpha=0.35)
 for (station, group), marker in zip(daily.groupby("station", observed=True), markers, strict=True):
-    axes[1].scatter(group["temp_mean"], group["pm25_mean"], label=station, marker=marker, s=35)
+    axes[1].scatter(group["pm25_mean"], group["temp_mean"], label=station, marker=marker, s=35)
 for ax, title in zip(axes, ["Station-hours: n=1008", "Station-day means: n=42"], strict=True):
-    ax.set(title=title, xlabel="TEMP (°C)", ylabel="PM2.5 (µg/m³)")
+    ax.set(title=title, xlabel="PM2.5 (µg/m³)", ylabel="TEMP (°C)")
 axes[1].legend(title="Station")
 plt.show()
 ----
@@ -498,7 +501,16 @@ plt.show()
 
 ==== Part 9 — What evidence can we defend?
 
-*Student task:* Draft a one-page statistical evidence brief about this slice. Use *three well-chosen figures*: a distribution, a station/time comparison, and a paired relationship (possibly with station or aggregation panels). A compact numerical table may accompany them. Answer:
+*Student task:* Draft a one-page statistical evidence brief about this three-station, 14-day dataset extract (1–14 March 2013). Use *three well-chosen figures*: a distribution, a station/time comparison, and a paired relationship (possibly with station or aggregation panels), with the selected-variable summary table from Results.
+
+*Start here — assemble evidence you have already produced:*
+
+. *Choose two measured variables.* Use your Part 3 profile to fill the Results table, keeping units and valid counts. Give one sentence explaining your choice; you do not need to describe all eleven variables.
+. *Select three existing figures.* Reuse a distribution view from Part 2, a station/time view from Part 4, and a paired view from Part 5 or 8 (or your own comparable figures). Label them Figure 1, Figure 2 and Figure 3. Check their axes and captions before creating any additional plots.
+. *Write one checked claim per figure.* Start with “Figure … suggests …; the numerical evidence is …”. Fill the gaps with your observation and a relevant quantity, its unit and count. For the paired claim, give Pearson r and its paired n, then check whether the cloud supports a linear reading.
+. *State one concrete limitation.* Name a coverage, missingness, measurement, dependence or selection issue and say which broader conclusion it prevents. Use the fill-in outline in Results to organise the brief.
+
+In class, select the evidence and draft one claim for your neighbour to check; finish the one-page brief after class. Use these questions as a review checklist:
 
 . What are the main characteristics of two selected individual variables, with units and valid counts?
 . Which distributions are asymmetric or contain notable extremes? What numerical and graphical evidence supports that reading?
@@ -514,7 +526,75 @@ Each claim must cite a number or figure; each caption must state the observation
 
 *Importance:* Essential (P0)
 
-The computed evidence gives PM2.5 mean 93.784, median 73, IQR 129 and maximum 443 µg/m³, and shows the upper tail that two location/spread numbers would hide. The station-day plot exposes temporal co-movement. Pairwise scatter plots and correlations show associations whose denominator and observational unit are declared; PM2.5–TEMP changes from about 0.272 hourly to 0.484 for station-day means. The profile and pair-count table expose variable-specific missingness rather than silently replacing it.
+The following completed example follows the student page's Results instructions: a selected-variable table, computation checks, three figures and a paired-association comparison. Other choices are valid when supported by the calculated evidence.
+
+==== Selected-variable summary
+
+Here we choose PM2.5 and RAIN. Each row uses that variable's valid station-hour readings, with the same linear quantile convention as the profile in Part 3. Units apply to the mean, median, IQR and maximum.
+
+[#exploration-results-summary]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Example evidence-brief summary for two selected variables",table-description="Rows identify PM2.5 and RAIN. Columns give unit, valid count, mean, median, IQR and maximum, matching the student Results table."]
+----
+result_summary = profile.assign(IQR=profile["Q3"] - profile["Q1"]).loc[
+    ["PM2.5", "RAIN"], ["unit", "valid", "mean", "median", "IQR", "max"]
+].rename(columns={
+    "unit": "Unit", "valid": "Valid n", "mean": "Mean", "median": "Median",
+    "max": "Maximum",
+}).rename_axis("Variable")
+result_summary.round(3)
+----
+
+PM2.5 has mean 93.784, median 73, IQR 129 and maximum 443 µg/m³. Its mean is above its median, and the distribution panels in Part 2 show an extended upper tail. RAIN has median and IQR zero but a positive maximum: its middle half hides the nonzero rain readings. These are descriptions of the observed slice.
+
+==== Computation checks
+
+These are the same readiness flags used on the student page, now evaluated on the complete calculations. All should be true. They confirm that computations are supplied; plots, captions and reasoning still need separate review.
+
+[#exploration-completion-check]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Readiness checks for the completed exploration",table-description="Eight rows show whether the requested summary, grouping, covariance, correlation and aggregation computations have been supplied. These checks do not assess figures or written interpretations."]
+----
+computation_ready = pd.Series({
+    "quantiles and variance": quantiles is not None and variance_explicit is not None,
+    "statistical profile": profile is not None,
+    "station summaries": station_summary is not None,
+    "station-day summaries": daily is not None,
+    "paired covariance": paired_pm is not None and covariance_explicit is not None,
+    "explicit correlation": r_explicit is not None,
+    "matrix and paired counts": correlation is not None and pair_counts is not None,
+    "aggregation comparison": aggregation_comparison is not None,
+}, name="Computation supplied")
+assert computation_ready.all()
+computation_ready.to_frame()
+----
+
+==== Example evidence brief
+
+The following filled outline corresponds to the student Results outline. It illustrates how to connect a claim to evidence before turning the rows into short paragraphs.
+
+[cols="1,3,3",options="header"]
+|===
+|Component |Example claim |Supporting evidence
+|Distribution
+|PM2.5 has an extended upper tail; RAIN's zero median and IQR hide occasional nonzero readings.
+|PM2.5 mean 93.784, median 73, IQR 129 and maximum 443 µg/m³; RAIN maximum 1.5 mm. Both variables have 1,008 valid readings. The PM2.5 panels in Part 2 form Figure 1.
+|Station/time
+|The station-day series show shared peaks and station differences. Equal coverage explains the agreement between the hourly mean and the mean of daily means.
+|Figure 2 is the Part 4 station-day plot: 42 station-days, each with 24 valid PM2.5 readings. The daily values have units µg/m³.
+|Paired association
+|PM2.5–TEMP has a positive linear association whose magnitude increases after daily averaging, with no sign reversal.
+|Figure 3 is the Part 8 paired plot, with PM2.5 in µg/m³ and TEMP in °C: hourly r ≈ 0.272 with 1,008 complete pairs; daily r ≈ 0.484 with 42 complete pairs.
+|Limitation
+|These observations cannot establish city-wide representativeness or a causal weather effect.
+|Only three stations and fourteen days are observed; hourly measurements share temporal conditions and are dependent.
+|===
+
+Use the distribution panels from Part 2, the station-day plot from Part 4, and the hourly/daily paired plot from Part 8 as the three figures. The association table in Part 8 supplies their numerical comparison and paired counts. Captions should make the following explicit:
+
+* *Distribution:* 1,008 valid station-hour PM2.5 concentrations in µg/m³, with missing concentrations excluded. The histogram, ECDF and boxplot use the same observations. The upper tail extends beyond the central half; bin choices affect the histogram's appearance, and boxplot flags do not establish measurement errors.
+* *Station/time:* 42 station-day mean PM2.5 concentrations in µg/m³, each based on 24 valid hourly readings. The station series show shared peaks and differences. Complete, equal coverage explains why the mean of daily means equals the global hourly mean here; daily averaging does not establish independent observations or explain the peaks' causes.
+* *Paired relationship:* PM2.5 in µg/m³ and TEMP in °C, comparing 1,008 complete station-hour pairs with 42 complete station-day mean pairs. Neither variable is missing in this slice. Pearson correlation changes from about 0.272 hourly to 0.484 daily; both signs remain positive. Shared axes and station markers allow comparison of the clouds, but the larger daily correlation does not establish a causal weather effect.
+
+The PM2.5 distribution is one example of information a summary table alone would hide: its upper tail and local concentration of values require a plot. The profile and pair-count table expose variable-specific missingness. These figures and numbers support the chosen claims about this slice; the short period, three-station selection, measurement limitations and hourly dependence prevent broader population or causal conclusions.
 
 [.worked-example-conclusion#worked-statistical-exploration-conclusion]
 === Conclusion

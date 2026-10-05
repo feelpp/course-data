@@ -53,11 +53,13 @@ The website shows code and questions, with no computed tables, finished figures 
 |0–1 |Supplied setup and location calculation |Predict, execute, record units/counts and explain the result; complete quantiles and variance.
 |2 |Partly supplied plotting code |Complete ECDF and boxplot, then compare what the three views reveal.
 |3–4 |Editable skeletons and checks |Build the profile and grouped summaries; create the daily figure.
-|5–7 |Code guidelines and consistency checks |Create paired plots, compute covariance explicitly, then construct correlations and their counts.
-|8–9 |Independent investigation |Choose comparisons, create the evidence and defend your interpretation.
+|5–7 |Commented plot skeletons and consistency checks |Prepare paired observations, compute covariance explicitly, then construct correlations and their counts.
+|8–9 |Independent investigation with layout hints |Choose comparisons, create the evidence and defend your interpretation.
 |===
 
 A `None` placeholder means *not yet computed*. Replace it with your implementation and rerun the relevant cells. A message asking you to complete a step is not successful completion. The starter notebook can run without errors while unfinished; the evidence brief requires you to complete the tasks. Write your interpretation before moving to the next question.
+
+*Plotting support:* Commented skeletons supply Matplotlib layout, labels, legends and colour settings so that configuration does not take over the investigation. First prepare the quantities to plot, replace each `...` with your own inputs, then uncomment the relevant lines. The skeletons do not compute those inputs. `fig` is the whole figure; `ax` is one panel; `axes` contains several panels. `constrained_layout=True` leaves room for labels, and `plt.show()` displays the finished figure. Reuse these settings for figures in your evidence brief.
 
 == Worked example: build your statistical exploration
 
@@ -239,10 +241,15 @@ axes[0].set(title="A: Histogram", xlabel="PM2.5 (µg/m³)", ylabel="Hourly count
 axes[0].legend()
 
 # TODO: sort the valid observations and compute the cumulative fractions 1/n, ..., n/n.
-# TODO: use axes[1].step(..., where="post"); ensure the ECDF is zero below the minimum.
+# Plot skeleton: replace BOTH inputs with your prepared arrays, then uncomment.
+# axes[1].step(..., ..., where="post", linewidth=1.8)
+# Include a starting point below the minimum with cumulative fraction zero.
 axes[1].set(title="B: ECDF — complete me", xlabel="PM2.5 (µg/m³)",
             ylabel="Fraction ≤ concentration", ylim=(0, 1))
-# TODO: use axes[2].boxplot(..., orientation="horizontal", whis=1.5).
+axes[1].grid(axis="y", alpha=0.25)
+# Supply the valid observations; Matplotlib draws the box and whiskers.
+# axes[2].boxplot(..., orientation="horizontal", whis=1.5,
+#                 flierprops={"markersize": 3, "alpha": 0.4})
 axes[2].set(title="C: Boxplot — complete me", xlabel="PM2.5 (µg/m³)")
 axes[2].set_yticks([])
 plt.show()
@@ -357,6 +364,20 @@ else:
 # Label date and concentration axes; distinguish stations by marker and line style.
 # Check coverage before treating each station-day as equally supported.
 # Write a caption with unit, valid-hour counts, missing-data rule and limitation.
+# Layout skeleton: replace the plot inputs, then uncomment when daily is ready.
+# fig, ax = plt.subplots(figsize=(10, 4), constrained_layout=True)
+# markers = ["o", "s", "^"]
+# line_styles = ["-", "--", ":"]
+# for i, station in enumerate(sorted(air["station"].unique())):
+#     # TODO: prepare this station's dates and daily values in chronological order.
+#     ax.plot(..., ..., label=station, marker=markers[i],
+#             linestyle=line_styles[i], markersize=4, linewidth=1.2)
+# ax.set(title="Daily PM2.5 by station", xlabel="Date",
+#        ylabel="Daily mean PM2.5 (µg/m³)")
+# ax.legend(title="Station")
+# ax.grid(axis="y", alpha=0.25)
+# ax.tick_params(axis="x", labelrotation=45)
+# plt.show()
 if daily is None:
     print("Complete daily before creating the station-day figure.")
 ----
@@ -382,7 +403,18 @@ pairs = [("PM2.5", "PM10"), ("TEMP", "DEWP"), ("TEMP", "PRES"), ("PM2.5", "WSPM"
 # Report that pair's n in its title; label axes using units[left] and units[right].
 # Use small transparent markers to reduce overplotting.
 # Predict the association before plotting. Do not calculate correlations yet.
+# Layout skeleton: fill the data preparation and scatter inputs, then uncomment.
+# fig, axes = plt.subplots(2, 2, figsize=(10, 7), constrained_layout=True)
+# for ax, (left, right) in zip(axes.flat, pairs, strict=True):
+#     paired = ...  # TODO: prepare the complete pairs for these two variables.
+#     ax.scatter(..., ..., s=12, alpha=0.3, edgecolors="none")
+#     ax.set(title=f"{left} and {right}: n={len(paired)}",
+#            xlabel=f"{left} ({units[left]})", ylabel=f"{right} ({units[right]})")
+#     ax.grid(alpha=0.2)
+# plt.show()
 ----
+
+*Reading the skeleton:* `axes.flat` visits the four panels row by row; `zip` matches each panel to one pair, and `strict=True` checks that their numbers agree. The first scatter input is horizontal and the second vertical. `s` controls marker area, `alpha` controls transparency, and `edgecolors="none"` removes marker outlines. Prepare each pair separately: its valid count can differ from the others.
 
 *Student prompt:* Describe the geometry before asking for a correlation. Pick one visible extreme and identify its station-hour in the table. Keep it unless the audit provides a reason to exclude it.
 
@@ -474,9 +506,27 @@ else:
 # Include a colour bar labelled "Pearson r (dimensionless)".
 # Choose two off-diagonal pairs, check their counts, and create scatter plots.
 # A heatmap alone is not evidence that a relationship is linear.
+# Layout skeleton: supply your matrix and its cell values, then uncomment.
+# fig, ax = plt.subplots(figsize=(9, 7), constrained_layout=True)
+# image = ax.imshow(..., cmap="RdBu_r", vmin=-1, vmax=1)
+# positions = np.arange(len(variables))
+# ax.set_xticks(positions, labels=variables, rotation=45, ha="right")
+# ax.set_yticks(positions, labels=variables)
+# ax.set_title("Pairwise Pearson correlations")
+# for row in positions:
+#     for col in positions:
+#         value = ...  # TODO: read the value at this row and column of your matrix.
+#         label = "NA" if pd.isna(value) else f"{value:.2f}"
+#         text_colour = "white" if abs(value) > 0.6 else "black"
+#         ax.text(col, row, label, ha="center", va="center",
+#                 color=text_colour, fontsize=8)
+# fig.colorbar(image, ax=ax, label="Pearson r (dimensionless)", shrink=0.85)
+# plt.show()
 if correlation is None:
     print("Complete correlation before making the matrix figure.")
 ----
+
+*Reading the skeleton:* `imshow` colours an already computed matrix. Keep the matrix's row/column order consistent with `variables`. The fixed limits make zero the colour midpoint and allow comparison across figures. In `ax.text(col, row, ...)`, the column is the horizontal position. The text-colour rule only improves readability; it is not a threshold for statistical importance. Keep the pair-count table beside the figure.
 
 *Student prompt:* Choose two off-diagonal pairs worth investigating and justify the choice. Check their valid counts, then draw their scatter plots with units. The heatmap does not replace that examination.
 
@@ -508,7 +558,23 @@ else:
 # State the paired counts and units in your captions.
 # Explain whether any numerical change is visible in the clouds.
 # Write your interpretation before discussing it with another pair.
+# Layout hint: reuse the scatter styling from Part 5 with a shared scale.
+# fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharex=True, sharey=True,
+#                          constrained_layout=True)
+# markers = ["o", "s", "^"]
+# colours = ["C0", "C1", "C2"]
+# for ax, title in zip(axes, ["Station-hours", "Station-day means"], strict=True):
+#     for i, station in enumerate(sorted(air["station"].unique())):
+#         # TODO: prepare this station's complete pairs at this panel's unit.
+#         ax.scatter(..., ..., label=station, marker=markers[i], color=colours[i],
+#                    s=18, alpha=0.4, edgecolors="none")
+#     ax.set(title=title, xlabel="PM2.5 (µg/m³)", ylabel="TEMP (°C)")
+#     ax.legend(title="Station", fontsize=8)
+#     ax.grid(alpha=0.2)
+# plt.show()
 ----
+
+`sharex=True, sharey=True` keeps both panels on the same concentration and temperature scales. Reuse each station's marker and colour across panels. Supply the hourly and daily pairs yourself, and report their respective counts; the layout does not perform aggregation or missing-value selection.
 
 *Your interpretation:* Report the correlations you computed. Does grouping or averaging change their magnitude, sign, or both? Is the change visible in your plots? Do not presume a Simpson reversal: only claim what your evidence shows. Shared time regimes and weather remain possible explanations; a larger absolute correlation is not evidence of causation or representativeness.
 
@@ -516,7 +582,16 @@ else:
 
 ==== Part 9 — What evidence can we defend?
 
-*Student task:* Draft a one-page statistical evidence brief about this slice. Use *three well-chosen figures*: a distribution, a station/time comparison, and a paired relationship (possibly with station or aggregation panels). A compact numerical table may accompany them. Answer:
+*Student task:* Draft a one-page statistical evidence brief about this three-station, 14-day dataset extract (1–14 March 2013). Use *three well-chosen figures*: a distribution, a station/time comparison, and a paired relationship (possibly with station or aggregation panels), with the selected-variable summary table from Results.
+
+*Start here — assemble evidence you have already produced:*
+
+. *Choose two measured variables.* Use your Part 3 profile to fill the Results table, keeping units and valid counts. Give one sentence explaining your choice; you do not need to describe all eleven variables.
+. *Select three existing figures.* Reuse a distribution view from Part 2, a station/time view from Part 4, and a paired view from Part 5 or 8 (or your own comparable figures). Label them Figure 1, Figure 2 and Figure 3. Check their axes and captions before creating any additional plots.
+. *Write one checked claim per figure.* Start with “Figure … suggests …; the numerical evidence is …”. Fill the gaps with your observation and a relevant quantity, its unit and count. For the paired claim, give Pearson r and its paired n, then check whether the cloud supports a linear reading.
+. *State one concrete limitation.* Name a coverage, missingness, measurement, dependence or selection issue and say which broader conclusion it prevents. Use the fill-in outline in Results to organise the brief.
+
+In class, select the evidence and draft one claim for your neighbour to check; finish the one-page brief after class. Use these questions as a review checklist:
 
 . What are the main characteristics of two selected individual variables, with units and valid counts?
 . Which distributions are asymmetric or contain notable extremes? What numerical and graphical evidence supports that reading?
@@ -532,13 +607,20 @@ Each claim must cite a number or figure; each caption must state the observation
 
 *Importance:* Essential (P0)
 
+==== Selected-variable summary
+
 Complete your results from the calculations you ran. No numerical results or finished figures are supplied on this page. Use a small table in this form, with one row per selected variable:
+
+Take the two variables you chose in Part 9 from your completed Part 3 profile. Add their IQRs using the declared quartiles; preserve each variable's own valid count. Keep the table compact and explain its meaning in the brief.
 
 [cols="2,1,1,1,1,1,1",options="header"]
 |===
 |Variable |Unit |Valid n |Mean |Median |IQR |Maximum
 |Your variable |… |… |… |… |… |…
+|Your second variable |… |… |… |… |… |…
 |===
+
+==== Computation checks
 
 Check that the computations below are ready before drafting conclusions. These flags do not assess your plots or written reasoning; check those against the evidence-brief instructions.
 
@@ -558,7 +640,28 @@ computation_ready = pd.Series({
 computation_ready
 ----
 
-Add three figures and a paired-association comparison with its counts. Explain one observation that a summary table alone would hide. If a skeleton still contains `None` or an uncompleted `TODO`, report it as unfinished work rather than as a result.
+==== Your evidence brief
+
+Use this outline to turn your evidence into short paragraphs. Replace the gaps with your own observations; the sentence starters do not prescribe a direction or a result.
+
+[cols="1,3,3",options="header"]
+|===
+|Component |Draft sentence |Evidence to attach
+|Distribution
+|For …, the mean and median …; Figure 1 reveals … that the table alone hides.
+|Your selected-variable table and Figure 1; include units and valid n.
+|Station/time
+|Figure 2 shows … across stations/dates. Each plotted point represents …, based on … valid readings.
+|Your grouped summaries and Figure 2; check coverage and weighting.
+|Paired association
+|For … and …, r = … using … complete pairs. Figure 3 supports/qualifies this linear reading because … .
+|Your paired-association table and Figure 3; state the observational unit. If comparing hourly and daily data, report both r values and counts.
+|Limitation
+|These observations cannot establish … because … .
+|A specific audit or analysis limitation, tied to the claim it restricts.
+|===
+
+Before exchanging the brief, check that every claim points to a number or figure, every figure caption gives units, observation unit, missing-data rule and count, and you have explained one feature that the summary table hides. The three figures, compact table and short paragraphs should fit the one-page brief. If a skeleton still contains `None` or an uncompleted `TODO`, report it as unfinished work rather than as a result.
 
 [.worked-example-conclusion#worked-statistical-exploration-conclusion]
 === Conclusion

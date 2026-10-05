@@ -479,10 +479,18 @@ def main() -> None:
         },
         "statistical-exploration-solution.html": {
             "stem_blocks": 6,
-            "table_results": 12,
+            "table_results": 14,
             "matplotlib_results": 5,
             "svg_results": 5,
-            "terms": ("Part 0", "Part 9", "is a tool, not the analysis", "station-day"),
+            "terms": (
+                "Part 0",
+                "Part 9",
+                "is a tool, not the analysis",
+                "station-day",
+                "Selected-variable summary",
+                "Computation checks",
+                "Example evidence brief",
+            ),
         },
         "covariance-correlation.html": {
             "stem_blocks": 4,
