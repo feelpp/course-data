@@ -1,0 +1,386 @@
+= Statistical plots: choose a question, then a view
+:page-course-language: en
+:page-course-concepts: DP-EDA-01, DP-REP-01
+:page-course-priority: P0
+:page-course-difficulty: D2
+:page-course-duration-minutes: 30
+:page-course-outcomes: LO1, LO4, LO6, LO9
+:page-course-prerequisites: mean, median, quartiles, and paired observations
+:page-course-assessed: yes
+:page-course-execution-profile: fast
+:page-jupyter: true
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
+
+Choose a plot from the question it should answer. Several views of the same observations can reveal different features. This reference explains how to read each plot used in the xref:foundations/statistical-exploration.adoc[guided investigation], using a small synthetic example rather than the Beijing answers.
+
+== Choose before drawing
+
+For every figure, state the observational unit, variables and units, retained sample, missing-data rule, grouping, and aggregation. Give the axes meaningful labels and the caption a question or conclusion. A plot of observed variation is not automatically a display of uncertainty.
+
+[cols="2,2,3",options="header"]
+|===
+|Question |View |Inspect first
+|Where are values concentrated? Are there several modes or a long tail? |Histogram |Bin edges, counts versus density, sample size
+|What fraction lies at or below a threshold? |ECDF |Threshold, denominator, steps and ties
+|How do centres and spreads compare across groups? |Boxplot |Median, IQR, group counts, whisker convention
+|How do two measurements vary together? |Scatter plot |Pairing, shape, groups, extremes, units
+|Which linear associations deserve closer inspection? |Correlation heatmap |Coefficient scale, pair counts, accompanying scatter plots
+|How does a measurement change in time within a group? |Grouped time plot |Time order, gaps, aggregation, coverage
+|===
+
+== Shared data for the code examples
+
+Run this setup once, then run the examples below in order. The six basic plot examples use these same eight invented requests. The histogram comparisons explicitly declare any repeated, rescaled, or additional synthetic values. The Python code is shown immediately before its figure and is also included in the downloadable notebook.
+
+[#plot-example-data]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Eight synthetic requests used in every view",table-description="Rows retain the paired payload, latency, group and hour. Each group contains four requests with no missing values."]
+----
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+requests = pd.DataFrame({
+    "hour": [8, 9, 10, 11, 8, 9, 10, 11],
+    "group": ["A"] * 4 + ["B"] * 4,
+    "payload (MB)": [2, 3, 1, 4, 3, 5, 2, 6],
+    "latency (s)": [1, 1, 2, 2, 3, 3, 4, 12],
+})
+latency = requests["latency (s)"].to_numpy()
+requests
+----
+
+[#histogram]
+== Histogram — shape through bins
+
+A histogram partitions the measurement axis into bins. Bin stem:[j] has count stem:[c_j=\sum_i\mathbf1\{x_i\in B_j\}]. With density normalization, its height is stem:[c_j/(n\,w_j)], where stem:[w_j] is the bin width: *area*, rather than height, is the fraction in a bin.
+
+Read clusters, empty regions, asymmetry and tails. Try another defensible bin width to check whether a claimed mode is stable. For group comparisons, use the same edges and clarify whether counts or normalized densities answer the question. Histograms lose within-bin detail and can change appearance with the bin boundaries. A density height can exceed one and has reciprocal measurement units.
+
+.Example Python
+[#plot-histogram-example]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Annotated histogram of eight synthetic latencies showing a cluster from one to four seconds, empty bins, a twelve-second upper tail, and distinct mean and median lines",figure-caption="Read the cluster, empty bins and long right tail; the mean and median lines help interpret the asymmetry in these eight observations.",result-interpretation="Seven requests are between one and four seconds and one is at twelve seconds. The mean is 3.5 seconds and the median is 2.5 seconds. Empty bins describe this sample, not impossible population values."]
+----
+# Use one-second-wide bins; their edges are explicit.
+fig, ax = plt.subplots(figsize=(5.5, 3.5), constrained_layout=True)
+ax.hist(latency, bins=np.arange(.5, 13.6, 1), edgecolor="black", color="#8aa7bf")
+ax.set(xlabel="Latency (s)", ylabel="Request count", title="Where are the latencies concentrated?")
+ax.set(yticks=[0, 1, 2], ylim=(0, 3))
+ax.axvline(latency.mean(), color="black", linestyle="--", label=f"Mean: {latency.mean():.1f} s")
+ax.axvline(np.median(latency), color="black", linestyle=":", label=f"Median: {np.median(latency):.1f} s")
+ax.annotate("Cluster: 1–4 s", xy=(2, 2), xytext=(4.8, 2.6), arrowprops={"arrowstyle": "->"})
+ax.annotate("Empty bins", xy=(7, 0), xytext=(5.2, 1), arrowprops={"arrowstyle": "->"})
+ax.annotate("Long right tail", xy=(12, 1), xytext=(8.4, 1.8), arrowprops={"arrowstyle": "->"})
+ax.legend(loc="upper right", fontsize=8)
+plt.show()
+----
+
+=== Bin width and boundaries — is a peak stable?
+
+These three panels use *exactly the same eight latencies* and the same count scale. The first two change bin width; the last two keep width two seconds but shift the edges. A bin beginning at 2 seconds includes the observed 2s and 3s values together, whereas a bin beginning at 0.5 seconds groups the 1s and 2s values. A claimed peak can move or merge without a single observation changing. With only eight values, none of these views establishes a population mode.
+
+.Bin sensitivity: change the view, keep the observations
+[#histogram-bin-sensitivity]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Three histograms of the same eight latencies compare one-second bins, two-second bins, and shifted two-second bins using identical count axes",figure-caption="Bin width and origin change which observations share a bar. The concentrated low values and separated twelve-second value persist, while the apparent peak changes.",result-interpretation="The first two panels change width from one to two seconds. The last two shift two-second bins by half a second. Compare bar positions and heights, then check the same raw values before claiming a stable mode."]
+----
+bin_views = [
+    (np.arange(.5, 13.6, 1), "A: Width 1 s; first edge 0.5 s"),
+    (np.arange(.5, 14.6, 2), "B: Width 2 s; first edge 0.5 s"),
+    (np.arange(0, 14.1, 2), "C: Width 2 s; first edge 0 s"),
+]
+fig, axes = plt.subplots(1, 3, figsize=(12, 3.8), sharex=True, sharey=True, constrained_layout=True)
+for ax, (edges, title) in zip(axes, bin_views):
+    counts, _ = np.histogram(latency, bins=edges)
+    assert counts.sum() == len(latency)  # Every view retains all eight observations.
+    ax.hist(latency, bins=edges, edgecolor="black", color="#8aa7bf")
+    # Rug marks retain the individual positions; ties can overlap.
+    ax.plot(latency, np.zeros_like(latency), "|", color="black", markersize=12, clip_on=False)
+    ax.set(title=title, xlabel="Latency (s)", xlim=(0, 15), ylim=(0, 5), yticks=range(6))
+axes[0].set_ylabel("Request count")
+plt.show()
+----
+
+*Read the picture:* Which values fall in the tallest bar in each panel? Which conclusions survive all three views? Rug marks on the horizontal axis show observed positions, but repeated values can overlap. Histogram bars retain their counts, not their exact within-bin positions.
+
+=== Comparing groups — volume or distribution shape?
+
+Use the *same edges for both groups*. To make unequal sample sizes visible, this demonstration repeats each original group-A latency three times: A has 12 synthetic entries and B has four. This repetition changes the count display without adding independent information. Counts answer how many entries fall in a range; separately normalized densities answer how each group's observed distribution allocates its mass. A density comparison gives each group total area one, regardless of its sample size.
+
+.Group comparison with shared edges and unequal sample sizes
+[#histogram-group-comparison]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Two overlaid group histograms use shared one-second bins, with solid lines for twelve repeated A entries and dashed lines for four B entries; one panel shows counts and the other separately normalized densities",figure-caption="Counts retain group volume; density normalization removes the sample-size factor. Shared edges make both comparisons meaningful.",result-interpretation="The count panel has six A entries in each low-latency bin. The density panel has height 0.5 per second in those bins, as in B's three-second bin: equal height here means equal within-group fraction for equal widths, not equal entry counts."]
+----
+a_original = requests.loc[requests["group"] == "A", "latency (s)"].to_numpy()
+b_original = requests.loc[requests["group"] == "B", "latency (s)"].to_numpy()
+group_values = [("A", np.repeat(a_original, 3), "-"), ("B", b_original, "--")]
+shared_edges = np.arange(.5, 13.6, 1)
+fig, axes = plt.subplots(1, 2, figsize=(10.5, 3.8), sharex=True, constrained_layout=True)
+for ax, density in zip(axes, [False, True]):
+    for group, values, style in group_values:
+        # histtype="step" and different line styles keep both groups visible.
+        ax.hist(values, bins=shared_edges, density=density, histtype="step",
+                linewidth=2, linestyle=style, label=f"{group}, n = {len(values)}")
+        heights, edges = np.histogram(values, bins=shared_edges, density=density)
+        if density:
+            assert np.isclose(np.sum(heights * np.diff(edges)), 1)
+        else:
+            assert heights.sum() == len(values)
+    ax.set(xlabel="Latency (s)", xlim=(0, 14))
+    ax.legend(title="Group; common bin edges")
+axes[0].set(title="Counts: how many entries?", ylabel="Entry count", yticks=[0, 2, 4, 6])
+axes[1].set(title="Densities: how is each group distributed?", ylabel="Density (s⁻¹)")
+plt.show()
+----
+
+*Read the picture:* Why does A's height fall from 6 entries to 0.5 per second? Which panel answers a workload question, and which compares distribution shape? Using different bin edges would change the ranges being compared; ignoring the group sizes would hide the denominators.
+
+=== Density is an area; bins hide exact positions
+
+The top row expresses the same eight latencies in seconds and minutes, with *equivalent bin boundaries*. A one-second bin becomes a stem:[1/60]-minute bin. Both highlighted bars contain stem:[2/8=25\%] of observations, but their density heights are 0.25 per second and 15 per minute. A height above one is valid: the dimensionless probability comes from *height × width*, and all bar areas sum to one when the bins cover all retained values.
+
+The bottom row declares two additional five-value examples. Their positions within the bins differ, but the bin counts are identical. The rug marks reveal information that the identical bars discard.
+
+.Units, density area and information lost within bins
+[#histogram-density-and-detail]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Four panels compare density in seconds and minutes with hatched first bins representing equal probabilities, then two identical count histograms whose rug marks show different positions inside the bins",figure-caption="Top: density height changes with measurement units while area stays fixed. Bottom: identical bin counts can conceal different observations.",result-interpretation="The hatched first bin in both top panels represents the same 25 percent fraction, although the minute-scale height is 15. The two bottom sets each have bin counts three and two, but different exact values; a histogram alone cannot recover those positions."]
+----
+seconds_edges = np.arange(.5, 13.6, 1)
+seconds_density, _ = np.histogram(latency, bins=seconds_edges, density=True)
+minute_values, minute_edges = latency / 60, seconds_edges / 60
+minute_density, _ = np.histogram(minute_values, bins=minute_edges, density=True)
+assert np.allclose(minute_density, 60 * seconds_density)
+assert np.isclose(np.sum(seconds_density * np.diff(seconds_edges)), 1)
+assert np.isclose(np.sum(minute_density * np.diff(minute_edges)), 1)
+assert np.isclose(seconds_density[0] * 1, 2 / 8)
+assert np.isclose(minute_density[0] * (1 / 60), 2 / 8)
+
+fig, axes = plt.subplots(2, 2, figsize=(10.5, 7), constrained_layout=True)
+for ax, values, edges, unit, height, width in [
+    (axes[0, 0], latency, seconds_edges, "s", seconds_density[0], "1 s"),
+    (axes[0, 1], minute_values, minute_edges, "min", minute_density[0], "1/60 min"),
+]:
+    heights, _, bars = ax.hist(values, bins=edges, density=True, edgecolor="black", color="#8aa7bf")
+    bars[0].set_hatch("//")  # Mark the same probability mass in both unit systems.
+    ax.set(title=f"Same observations in {unit}", xlabel=f"Latency ({unit})",
+           ylabel=f"Density ({unit}⁻¹)", ylim=(0, heights.max() * 1.6))
+    ax.text(.97, .95, f"First bar: height {height:g} {unit}⁻¹\nWidth {width}; area 2/8 = 25%",
+            transform=ax.transAxes, ha="right", va="top", fontsize=9)
+
+# Two explicitly invented sets with identical bin counts but different exact values.
+near_left = np.array([1.05, 1.10, 1.15, 2.05, 2.10])
+near_right = np.array([1.75, 1.85, 1.95, 2.80, 2.90])
+coarse_edges = np.array([1., 2., 3.])
+assert np.array_equal(np.histogram(near_left, coarse_edges)[0],
+                      np.histogram(near_right, coarse_edges)[0])
+for ax, values, title in [(axes[1, 0], near_left, "Positions near left edges"),
+                          (axes[1, 1], near_right, "Positions near right edges")]:
+    ax.hist(values, bins=coarse_edges, edgecolor="black", color="#cccccc")
+    ax.plot(values, np.zeros_like(values), "|", color="black", markersize=18,
+            markeredgewidth=2, clip_on=False, label="Exact positions (rug)")
+    ax.set(title=title, xlabel="Synthetic value (s)", ylabel="Entry count",
+           xlim=(1, 3), ylim=(0, 4), xticks=[1, 2, 3], yticks=[0, 1, 2, 3])
+    ax.legend(loc="upper right", fontsize=9)
+plt.show()
+----
+
+*Read the picture:* Calculate the top-row bar areas from their heights and widths. Why is 15 per minute not a probability of 15? In the bottom row, can either histogram alone tell you where the five individual values lie within their bins?
+
+[#ecdf]
+== ECDF — fractions and thresholds without bins
+
+The empirical cumulative distribution function is
+
+[stem]
+++++
+\widehat F_n(t)=\frac{1}{n}\sum_{i=1}^n\mathbf1\{x_i\leq t\}.
+++++
+
+From a threshold on the horizontal axis, move vertically to the curve, then horizontally to read the fraction on the vertical axis. The curve is zero below the minimum, jumps at observed values, and reaches one at the maximum. Ties produce larger jumps. A right-continuous step plot corresponds to the stem:[\leq] convention. Strict exceedance is stem:[1-\widehat F_n(t)]. The ECDF reveals cumulative fractions without bins but shows local concentration less directly than a histogram.
+
+For inverse questions and the difference between empirical inverse-CDF and interpolated quantiles, use the xref:foundations/quantiles-exceedance-risk.adoc[quantile and exceedance reference].
+
+.Example Python
+[#plot-ecdf-example]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Right-continuous empirical cumulative distribution of eight synthetic latencies, starting at zero below the minimum and marking seven eighths at four seconds",figure-caption="The ECDF answers a threshold question without histogram bins.",result-interpretation="Seven of eight requests have latency at most four seconds. Tied observations produce larger jumps; the curve reaches one at the maximum."]
+----
+# Sort values, then pair them with cumulative fractions 1/n, ..., n/n.
+ordered = np.sort(latency)
+cumulative = np.arange(1, len(ordered) + 1) / len(ordered)
+fraction_at_four = (latency <= 4).mean()
+fig, ax = plt.subplots(figsize=(5.5, 3.5), constrained_layout=True)
+# Include a zero level below the minimum; "post" makes the steps right-continuous.
+ax.step(np.r_[ordered[0] - .5, ordered], np.r_[0., cumulative], where="post", color="black")
+ax.plot([4], [fraction_at_four], "o", color="black", label="F(4) = 7/8")
+ax.set(xlabel="Latency (s)", ylabel="Fraction ≤ latency", ylim=(0, 1.05), title="What fraction is at most four seconds?")
+ax.legend()
+plt.show()
+----
+
+[#boxplot]
+== Boxplot — centre and spread in a compact comparison
+
+The box extends from stem:[Q_1] to stem:[Q_3], with a line at the median. Its length is stem:[\operatorname{IQR}=Q_3-Q_1]. Under the usual Tukey convention, whiskers reach the most extreme observed values still within stem:[Q_1-1.5\operatorname{IQR}] and stem:[Q_3+1.5\operatorname{IQR}]. They are not necessarily the minimum and maximum.
+
+Read the median, middle-half spread and asymmetry, then inspect flagged points. A flagged point is a value to investigate, not proof of a data error. Boxplots hide modes, exact values and sample size; overlay individual points when groups are small and always report group counts. Declare the quantile and whisker conventions. A box is not a confidence interval.
+
+.Example Python
+[#plot-boxplot-example]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Horizontal boxplot of eight synthetic latencies with a median at two and a half seconds and the twelve-second value flagged beyond the whisker",figure-caption="The boxplot compresses the median, middle-half spread and values beyond the declared whisker rule.",result-interpretation="The isolated twelve-second value is beyond the 1.5-IQR fence. This flag calls for inspection; it does not prove an error."]
+----
+fig, ax = plt.subplots(figsize=(5.5, 3), constrained_layout=True)
+# whis=1.5 declares the Tukey whisker rule; quartiles use linear interpolation.
+ax.boxplot(latency, orientation="horizontal", whis=1.5)
+ax.set(xlabel="Latency (s)", yticks=[], title=f"Centre, spread and flags (n = {len(latency)})")
+plt.show()
+----
+
+[#scatterplot]
+== Scatter plot — inspect the original pairs
+
+Each point is stem:[(x_i,y_i)] for one common observational unit. Look for direction, curvature, changing spread, clusters and isolated influential points. Preserve pairs and encode groups with marker shapes as well as colour. Use transparency or a density view if points overlap; do not infer the number of observations from the number of visible marks.
+
+Read the cloud before calculating xref:foundations/covariance-correlation.adoc[covariance or correlation]. A curved relationship can have zero Pearson correlation. A pooled trend can differ from trends within groups. Neither a cloud nor its coefficient identifies a causal effect.
+
+.Example Python
+[#plot-scatter-example]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Payload versus latency scatter plot with circles for group A and squares for group B, retaining eight complete paired observations",figure-caption="A scatter plot preserves the original pairs and exposes group structure.",result-interpretation="The long-latency request is in group B. Inspect its influence and the within-group clouds before attributing a relationship to payload."]
+----
+# Keep both measurements from the same row; remove only incomplete pairs.
+paired = requests.dropna(subset=["payload (MB)", "latency (s)"])
+fig, ax = plt.subplots(figsize=(5.5, 3.5), constrained_layout=True)
+for group, marker in [("A", "o"), ("B", "s")]:
+    subset = paired.loc[paired["group"] == group]
+    ax.scatter(subset["payload (MB)"], subset["latency (s)"],
+               marker=marker, label=f"{group}, n = {len(subset)}")
+ax.set(xlabel="Payload (MB)", ylabel="Latency (s)", title="How do the paired measurements vary together?")
+ax.legend(title="Group")
+plt.show()
+----
+
+[#correlation-heatmap]
+== Correlation heatmap — an overview of linear associations
+
+Rows and columns name measured variables; each cell shows Pearson stem:[r]. Fix the colour scale at stem:[-1,1], use a diverging palette centred at zero, and write values in the cells so meaning is not carried by colour alone. Undefined coefficients should remain visibly undefined.
+
+The diagonal normally equals one for nonconstant variables with enough pairs; it is not a discovery. The matrix is symmetric. Read selected off-diagonal cells alongside their xref:foundations/covariance-correlation.adoc#correlation-matrix[pair counts and missing-data policy], then inspect the corresponding scatter plots. The heatmap hides shape, outliers, grouping and the retained subsets behind each coefficient.
+
+.Example Python
+[#plot-heatmap-example]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Annotated two-variable Pearson correlation matrix on a fixed minus-one-to-one scale, with pair counts printed beside the result",figure-caption="A correlation heatmap summarizes linear association; its count matrix states the denominator for each cell.",result-interpretation="All cells here use eight complete rows. The off-diagonal coefficient is positive, but the scatter plot is needed to inspect group structure and the long-latency point."]
+----
+measurements = requests[["payload (MB)", "latency (s)"]]
+correlation = measurements.corr()
+# Integer validity masks count complete pairs through matrix multiplication.
+valid = measurements.notna().astype(int)
+pair_counts = valid.T @ valid
+print("Complete-pair counts:")
+print(pair_counts.to_string())
+fig, ax = plt.subplots(figsize=(5.5, 3.8), constrained_layout=True)
+image = ax.imshow(correlation, vmin=-1, vmax=1, cmap="coolwarm")
+ax.set(xticks=[0, 1], yticks=[0, 1], xticklabels=["Payload", "Latency"],
+       yticklabels=["Payload", "Latency"], title="Which linear association should we inspect?")
+# Write coefficients in the cells so colour is not the only encoding.
+for row in range(2):
+    for column in range(2):
+        value = correlation.iloc[row, column]
+        ax.text(column, row, f"{value:.2f}", ha="center", va="center",
+                color="white" if abs(value) > .8 else "black")
+fig.colorbar(image, ax=ax, label="Pearson r (dimensionless)")
+plt.show()
+----
+
+[#grouped-time-plot]
+== Grouped time plot — order, coverage and aggregation
+
+Place time on the horizontal axis and the measurement on the vertical axis. Sort within each group, use separate labelled lines with distinct markers or line styles, and preserve gaps. Connecting points helps follow a group through time; it does not show measurements between them or validate interpolation across long gaps.
+
+For daily means, each point is stem:[\bar x_{gd}=n_{gd}^{-1}\sum_{i\in(g,d)}x_i], where stem:[n_{gd}] counts valid observations in that group-day. Show coverage counts and units. Averaging changes the observational unit and removes within-day detail. A line through means shows their observed variation; uncertainty bands need an explicit estimation method. See xref:foundations/eda-sampling.adoc[dependence and sampling] before making population claims.
+
+.Example Python
+[#plot-time-example]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Separate time-ordered latency lines for groups A and B, with circles and a solid line for A and squares and a dashed line for B",figure-caption="A grouped time plot preserves order within each group and makes the recorded trajectories visible.",result-interpretation="Each line contains four requests. Group B ends with the twelve-second observation; the connecting lines do not show unrecorded measurements or uncertainty."]
+----
+fig, ax = plt.subplots(figsize=(5.5, 3.5), constrained_layout=True)
+for group, marker, style in [("A", "o", "-"), ("B", "s", "--")]:
+    # Sort within each group; never connect the end of one group to another.
+    subset = requests.loc[requests["group"] == group].sort_values("hour")
+    ax.plot(subset["hour"], subset["latency (s)"], marker=marker,
+            linestyle=style, label=f"{group}, n = {len(subset)}")
+ax.set(xlabel="Recorded hour (hour of day)", ylabel="Latency (s)",
+       xticks=[8, 9, 10, 11], title="How does latency change within each group?")
+ax.legend(title="Group")
+plt.show()
+----
+
+== Worked example: several views of eight invented requests
+
+[.worked-example-context#worked-plot-choice-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+Eight synthetic service requests have latencies stem:[(1,1,2,2,3,3,4,12)] seconds. Each also has a payload, a group A or B, and a recorded hour. Ask three questions: where are the latencies concentrated, what fraction is at most four seconds, and how do the paired or grouped patterns look? These invented requests illustrate plotting choices, not a real service benchmark.
+
+[.worked-example-method#worked-plot-choice-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+Use one table for every view. For the threshold question, stem:[\widehat F_8(4)=7/8=0.875]. Using linear-interpolated sample quartiles, stem:[Q_1=1.75], stem:[Q_3=3.25] and stem:[\operatorname{IQR}=1.5]; the upper boxplot fence is stem:[3.25+1.5(1.5)=5.5] seconds. The value 12 lies beyond it.
+
+.Mathematical insight — a summary view omits information deliberately
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* Binning retains counts but discards within-bin positions; quartiles retain order summaries but discard modes. The ECDF retains the empirical distribution of one variable, while neither it nor a histogram retains the original pairing with another variable. Use a scatter plot for pairs and a time plot for order.
+====
+
+[.worked-example-implementation#worked-plot-choice-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+The shared data table, six basic plot examples, and histogram comparisons above are the implementation: each shows its Python code immediately before its result. Use the histogram, ECDF, boxplot, scatter plot, heatmap, and time plot to answer the three questions about the original eight requests. The following calculation checks the facts read from those plots.
+
+[#plot-example-summary]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Distribution facts to locate in the plots",table-description="The sample size, median, linear-interpolated quartiles, maximum and fraction at most four seconds are computed from the same eight latencies."]
+----
+q1, median, q3 = np.quantile(latency, [.25, .5, .75], method="linear")
+fraction = (latency <= 4).mean()
+assert fraction == 7 / 8
+assert np.isclose(q3 + 1.5 * (q3 - q1), 5.5)
+pd.DataFrame({"quantity": ["valid n", "Q1", "median", "Q3", "maximum", "fraction ≤ 4 s"],
+              "value": [len(latency), q1, median, q3, latency.max(), fraction],
+              "unit": ["requests", "s", "s", "s", "s", "proportion"]})
+----
+
+[.worked-example-results#worked-plot-choice-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The histogram exposes a concentrated low-latency region and a separated high value. The ECDF gives exactly stem:[7/8] at four seconds regardless of histogram bins. The boxplot shows the median 2.5 seconds, the middle half from 1.75 to 3.25 seconds, and the flagged 12-second request. The paired and ordered views reveal the group membership and timing of that request, which the distribution summaries omit.
+
+[.worked-example-conclusion#worked-plot-choice-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+Use a caption to connect a visible feature to the question and denominator. These eight invented requests do not support a population estimate or causal claim. Bin sensitivity, quantile conventions, overlapping points, group sizes and coverage remain limitations to check in a real investigation.
+
+== Check your understanding
+
+. Change the histogram edges. Which visual features change, and why does the ECDF value at four seconds remain unchanged?
+. Remove the twelve-second request temporarily. Compare all views, then explain why sensitivity analysis is not permission to delete a valid observation.
+. Draw one boxplot per group with individual points and counts. Which detail is easier to see than in the pooled boxplot?
+. Explain which view preserves each of the following: distribution, original pairing, group, and time order.
+
+Download the xref:attachment$foundations/statistical-plots.ipynb[short plotting reference notebook]. Return to the xref:foundations/statistical-exploration.adoc[guided investigation] to choose and interpret your own plots.

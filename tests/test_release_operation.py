@@ -2,7 +2,7 @@ import csv
 import zipfile
 from pathlib import Path
 
-from tools.build_student_bundle import build_bundle
+from tools.build_student_bundle import build_bundle, iter_files
 from tools.qualify_release import canonical_digest, tree_records
 from tools.summarise_course_evidence import summarise_feedback, summarise_items
 from tools.validate_student_bundle import validate_bundle
@@ -13,11 +13,29 @@ def test_student_bundle_is_complete_and_public(tmp_path: Path) -> None:
     assert validate_bundle(bundle) == []
     with zipfile.ZipFile(bundle) as archive:
         names = set(archive.namelist())
+    assert not any(Path(name).stem.endswith("-solution") for name in names)
+    assert "docs/course/modules/ROOT/pages/foundations/statistical-exploration.adoc" in names
+    assert "notebooks/foundations/statistical-exploration.ipynb" in names
     assert "templates/block-feedback.csv" in names
     assert "templates/release-approval.md" not in names
     assert "templates/assessment-item-statistics.csv" not in names
     first = bundle.read_bytes()
     assert build_bundle(bundle).read_bytes() == first
+
+
+def test_reference_solution_files_are_excluded_and_rejected(tmp_path: Path) -> None:
+    student = tmp_path / "lesson.adoc"
+    reference = tmp_path / "lesson-solution.adoc"
+    student.write_text("Student task")
+    reference.write_text("Complete reference")
+    assert list(iter_files(tmp_path)) == [student]
+    assert list(iter_files(reference)) == []
+    bundle = tmp_path / "unexpected-reference.zip"
+    with zipfile.ZipFile(bundle, "w") as archive:
+        archive.writestr("docs/lesson-solution.adoc", "Complete reference")
+    assert "Reference solution in student bundle: docs/lesson-solution.adoc" in validate_bundle(
+        bundle
+    )
 
 
 def test_release_tree_fingerprint_is_path_order_independent(tmp_path: Path) -> None:

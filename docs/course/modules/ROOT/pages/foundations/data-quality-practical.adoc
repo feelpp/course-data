@@ -612,6 +612,8 @@ The station-specific IQR rule flags nine high PM2.5 observations. Several occur 
 
 *Importance:* Essential (P0)
 
+Continue with xref:foundations/statistical-exploration.adoc[Beijing Air Quality — From Data Audit to Statistical Exploration] to learn what the audited observations show: distributions, descriptive summaries, station/time structure, covariance and correlation.
+
 The audit supports a limited descriptive comparison of this three-station, fourteen-day extract. It does not establish sensor calibration, explain the missing NO2 mechanism, represent other seasons or stations, identify causes, or measure individual exposure. The controlled-defect copy shows that the checks detect known failures, while the unchanged source preserves the released data for future review.
 
 == Exit ticket

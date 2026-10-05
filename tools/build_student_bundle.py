@@ -166,10 +166,15 @@ def git_commit() -> str:
 
 def iter_files(path: Path):
     if path.is_file():
-        yield path
+        if not path.stem.endswith("-solution"):
+            yield path
         return
     for candidate in sorted(path.rglob("*")):
-        if candidate.is_file() and "__pycache__" not in candidate.parts:
+        if (
+            candidate.is_file()
+            and "__pycache__" not in candidate.parts
+            and not candidate.stem.endswith("-solution")
+        ):
             yield candidate
 
 
@@ -193,6 +198,8 @@ def collect_files(student_notebooks: Path) -> dict[str, bytes]:
             archive_name = path.relative_to(ROOT).as_posix()
             files[archive_name] = path.read_bytes()
     for path in sorted(student_notebooks.rglob("*.ipynb")):
+        if path.stem.endswith("-solution"):
+            continue
         archive_name = (Path("notebooks") / path.relative_to(student_notebooks)).as_posix()
         files[archive_name] = path.read_bytes()
     return files
@@ -231,6 +238,8 @@ def build_bundle(output: Path = DEFAULT_OUTPUT) -> Path:
         raise FileNotFoundError("Build the Antora site before preparing the student bundle")
     generated_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     for entry in generated_manifest["entries"]:
+        if Path(entry["source_path"]).stem.endswith("-solution"):
+            continue
         source = ROOT / "public" / entry["notebook_url"].lstrip("/")
         relative = Path(entry["source_path"]).with_suffix(".ipynb")
         destination = student_root / relative

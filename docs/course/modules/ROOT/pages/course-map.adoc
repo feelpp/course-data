@@ -20,9 +20,9 @@ If the first operations remain unclear, use the recap and targeted support befor
 
 == Preparation and mathematical support
 
-Before Block 4, spend at most 45 minutes on the named refresher sections: notation and expectation (15), mean standard error (15), and empirical quantile/exceedance (15). The corresponding references are xref:foundations/mathematical-background.adoc[mathematical background], xref:foundations/mean-uncertainty.adoc[mean uncertainty], and xref:foundations/quantiles-exceedance-risk.adoc[quantiles and risk]. Bring an unresolved question to class rather than silently extending this assignment to all six hours of reference chapters.
+Before Block 4, spend at most 20 minutes revisiting your audit report and one pandas selection/grouping example. Bring a limitation and a question. The xref:foundations/statistical-exploration.adoc[5 October notebook] introduces statistics when the investigation needs them, with links to the existing mathematical definitions and short examples.
 
-We apply sampling and mean/quantile uncertainty in Block 4, revisit vectors and conditioning in Block 6, and use xref:foundations/probability-distributions-moments.adoc[probability models and moments] for likelihood and classification in Blocks 6–7. Complete chapters remain available for support and further practice. The diagnostic guides additional individual support.
+We describe empirical distributions and associations in Block 4, introduce sampling limitations there and use the xref:foundations/eda-sampling.adoc[sampling companion] before Block 5. Mean/quantile uncertainty remains later support. We revisit vectors and conditioning in Block 6, and use xref:foundations/probability-distributions-moments.adoc[probability models and moments] for likelihood and classification in Blocks 6–7. Complete chapters remain available for support and further practice. The diagnostic guides additional individual support.
 
 == Sequence and time allocation
 
@@ -46,14 +46,14 @@ We apply sampling and mean/quantile uncertainty in Block 4, revisit vectors and 
 |20 min: Revisit one selection or missing-value example from Block 2 and bring an unresolved question.
 
 |4
-|Array and reshape bridge, EDA, sampling, and visual communication
-|Array shapes and column operations 10; Long and wide table demonstration 10; Sampling and summaries 15; EDA lab including shape and reshape practice 55; Mean and quantile uncertainty 20; Checkpoint 10
-|45 min: Bounded refresher: notation/expectation 15 min, mean standard error 15 min, empirical quantile/exceedance 15 min.
+|From data audit to descriptive statistical exploration
+|Reconnect with the audited slice 5; One variable, explicit summaries, and distribution plots 25; Build and interpret the statistical profile 15; Break 10; Station and station-day comparisons 20; Predict and inspect paired relationships 10; Centred arrays, covariance, and correlation 15; Aggregation and population limitations 10; Evidence brief and checked claim 10
+|20 min: Revisit the audit report and one pandas selection/grouping example; bring a limitation and a question. Theory references are consulted during the investigation.
 
 |5
 |Splits, leakage, preprocessing pipelines, and baselines
 |Validation design 25; Pipeline lab 75; Result and source record 10; Project launch 10
-|20 min: Read the splitting and leakage definitions; state an independent unit.
+|20 min: Read the sampling companion's representativeness and dependence sections, then the splitting/leakage definitions; state an independent unit. Mean/quantile uncertainty examples remain later support.
 
 |6
 |Regression, stable least squares, likelihood, and residuals
