@@ -1,0 +1,188 @@
+= Covariance and correlation: paired variation
+:page-course-language: en
+:page-course-concepts: DP-EDA-01, DP-SMP-01
+:page-course-priority: P0
+:page-course-difficulty: D2
+:page-course-duration-minutes: 20
+:page-course-outcomes: LO1, LO4, LO6
+:page-course-prerequisites: sample mean, sample variance, and paired observations
+:page-course-assessed: yes
+:page-course-execution-profile: fast
+:page-jupyter: true
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
+
+A mean describes one variable. Covariance asks whether two variables tend to move together relative to their own means. Correlation expresses that linear association on a dimensionless scale. Read this reference when those concepts arise in the xref:foundations/statistical-exploration.adoc[guided statistical investigation]. The short examples here are synthetic; they do not answer the Beijing investigation.
+
+== Start with pairs, then centre
+
+Each pair must describe the same observational unit: for example, temperature and concentration at the same station and hour. Choose the retained complete pairs first. Compute both means and standard deviations on that same subset. Two independently sorted columns no longer describe the original pairs.
+
+Use the xref:foundations/mathematical-background.adoc#_data_population_and_notation[mean and variance reference] for univariate summaries and the xref:foundations/statistical-plots.adoc#scatterplot[scatter plot reference] to inspect the paired observations before computing a coefficient.
+
+.Definition: Sample covariance
+[.def#def:covariance-correlation]
+****
+For stem:[n\geq2] complete pairs, let stem:[\bar x] and stem:[\bar y] be the means of the retained values. The sample covariance is
+
+[stem]
+++++
+s_{xy}=\frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar x)(y_i-\bar y).
+++++
+
+A pair contributes positively when both deviations have the same sign, negatively when their signs differ, and zero when either deviation is zero. The sum balances those contributions. The denominator stem:[n-1] matches sample variance with `ddof=1`.
+****
+
+Covariance has the product of the two variables' units. Its sign describes net joint movement; its magnitude cannot be compared across arbitrary units or variable pairs. The population definition is stem:[\operatorname{Cov}(X,Y)=\mathbb E[(X-\mathbb EX)(Y-\mathbb EY)]] when the moments exist. Interpreting sample covariance as a population estimate requires a sampling argument; dependent hourly records are not automatically IID.
+
+[#standardisation]
+== Standardisation and Pearson correlation
+
+.Definition: Sample Pearson correlation
+[.def#def:pearson-correlation]
+****
+With nonzero sample standard deviations stem:[s_x,s_y],
+
+[stem]
+++++
+r_{xy}=\frac{s_{xy}}{s_xs_y}
+=\frac{\sum_i(x_i-\bar x)(y_i-\bar y)}
+{\sqrt{\sum_i(x_i-\bar x)^2\sum_i(y_i-\bar y)^2}}.
+++++
+
+The Cauchy–Schwarz inequality gives stem:[-1\leq r_{xy}\leq1]. A value of stem:[+1] or stem:[-1] means the centred observations are proportional with positive or negative slope, respectively. If either variable is constant, the denominator is zero and correlation is undefined, not zero.
+****
+
+Changing hours to minutes multiplies covariance by 60 and stem:[s_x] by 60, so correlation stays the same. More generally,
+
+[stem]
+++++
+\operatorname{Cov}(aX+b,cY+d)=ac\operatorname{Cov}(X,Y).
+++++
+
+Translations do not change covariance or correlation. Positive unit changes preserve correlation; a negative scaling reverses its sign. Correlation measures linear association: a small value does not rule out a curved relationship. It does not establish a causal effect or predict an intervention.
+
+[#correlation-matrix]
+== From one pair to a matrix
+
+A correlation matrix places stem:[r_{jk}] at row stem:[j], column stem:[k]. It is symmetric, with diagonal one for nonconstant variables with enough observations. A xref:foundations/statistical-plots.adoc#correlation-heatmap[heatmap] helps select pairs for closer inspection; it does not show their shapes.
+
+Always show a pair-count matrix alongside it. Pairwise deletion can use a different subset for each coefficient. For an integer validity mask stem:[V_{ij}=\mathbf1\{x_{ij}\text{ is observed}\}], the count matrix is stem:[N=V^\mathsf TV]. Count agreement alone does not show that two pairs use the same rows. Pairwise covariance/correlation matrices need not be positive semidefinite; methods needing a common geometry require a justified common-row or missing-data policy.
+
+== Worked example: three pairs, calculated by hand
+
+[.worked-example-context#worked-paired-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+Take three synthetic pairs of practice time stem:[x=(1,2,3)] hours and quiz score stem:[y=(1,3,2)] points. These invented values illustrate a calculation; they are not evidence about teaching effectiveness. Both means equal 2. What do the centred pairs contribute?
+
+[.worked-example-method#worked-paired-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+The deviations are stem:[x-\bar x=(-1,0,1)] and stem:[y-\bar y=(-1,1,0)]. Their products are stem:[(1,0,0)], so
+
+[stem]
+++++
+s_{xy}=\frac{1}{3-1}=0.5\ \text{hour}\cdot\text{point},
+\qquad s_x^2=s_y^2=\frac{2}{2}=1,
+\qquad r_{xy}=0.5.
+++++
+
+.Mathematical insight — correlation cancels measurement units
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* Dividing covariance by stem:[s_xs_y] cancels both units and scales. It does not remove outliers, selection, or group structure. In the example, changing hours to minutes gives covariance 30 minute·point and stem:[s_x=60] minutes, while stem:[r=0.5] remains unchanged.
+====
+
+[.worked-example-implementation#worked-paired-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+Calculate the deviations and products before comparing with a library. The last example contrasts linear association with a nonlinear relationship.
+
+[#paired-deviations-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Centred synthetic pairs and their covariance contributions",table-description="Each row is one original pair, retaining practice hours, quiz points, both deviations, and their product."]
+----
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+x = np.array([1., 2., 3.])
+y = np.array([1., 3., 2.])
+dx, dy = x - x.mean(), y - y.mean()
+covariance = (dx * dy).sum() / (len(x) - 1)
+sx, sy = x.std(ddof=1), y.std(ddof=1)
+r = covariance / (sx * sy)
+assert np.isclose(covariance, 0.5)
+assert np.isclose(r, np.corrcoef(x, y)[0, 1])
+pd.DataFrame({"practice (hours)": x, "score (points)": y,
+              "x deviation (hours)": dx, "y deviation (points)": dy,
+              "product (hour·point)": dx * dy})
+----
+
+[#paired-units-table]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="A positive change of units preserves correlation",table-description="The same three pairs are expressed in hours and minutes. Covariance changes with units; Pearson correlation does not."]
+----
+minutes = 60 * x
+cov_minutes = np.cov(minutes, y, ddof=1)[0, 1]
+r_minutes = np.corrcoef(minutes, y)[0, 1]
+assert np.isclose(cov_minutes, 60 * covariance)
+assert np.isclose(r_minutes, r)
+pd.DataFrame({"time unit": ["hour", "minute"], "paired n": [len(x), len(x)],
+              "covariance (time unit·point)": [covariance, cov_minutes],
+              "Pearson r": [r, r_minutes]})
+----
+
+[#paired-shape-figure]
+[%dynamic%open,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Two scatter plots compare three positively associated practice-score pairs with five points on a symmetric parabola having zero Pearson correlation",figure-caption="A coefficient must be read with the paired cloud. Zero Pearson correlation can accompany a perfect nonlinear relationship.",result-interpretation="The three-pair example has r=0.5. The symmetric parabola has r=0 despite an exact squared relationship; the scatter plot reveals what the coefficient omits."]
+----
+u = np.array([-2., -1., 0., 1., 2.])
+v = u ** 2
+r_curve = np.corrcoef(u, v)[0, 1]
+assert np.isclose(r_curve, 0.0)
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.5), constrained_layout=True)
+axes[0].scatter(x, y, marker="o", color="black")
+for number, (xi, yi) in enumerate(zip(x, y), start=1):
+    axes[0].annotate(str(number), (xi, yi), xytext=(5, 5), textcoords="offset points")
+axes[0].set(xlabel="Practice (hours)", ylabel="Quiz score (points)", title="Three pairs: r = 0.5")
+axes[1].scatter(u, v, marker="s", color="black")
+axes[1].set(xlabel="u (dimensionless)", ylabel="u² (dimensionless)", title="A curved relationship: r = 0")
+plt.show()
+----
+
+[.worked-example-results#worked-paired-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+The centred-product table gives stem:[s_{xy}=0.5] hour·point and stem:[r=0.5]. Converting to minutes changes covariance to 30 minute·point without changing correlation. The second scatter plot gives stem:[r=0] for stem:[v=u^2] on five symmetric values: positive and negative centred-product contributions cancel.
+
+[.worked-example-conclusion#worked-paired-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+Report covariance with units and Pearson correlation with a paired sample count and scatter plot. Neither example supports a causal or population claim. Three pairs provide very limited evidence, and zero correlation does not imply independence. Missingness, extremes, grouping, and aggregation remain part of the interpretation.
+
+== Check your understanding
+
+. Replace the scores by stem:[(3,2,1)]. Predict the signs and compute covariance and correlation.
+. Replace all scores by 2. Explain why a library returns an undefined correlation.
+. Why must the standard deviations in the correlation calculation use the same retained rows as covariance?
+. If hourly and daily correlations differ, identify the observational unit and weighting rule for each before interpreting the difference.
+
+Download the xref:attachment$foundations/covariance-correlation.ipynb[short reference notebook]. Return to the xref:foundations/statistical-exploration.adoc[guided investigation] to compute and interpret your own pairs.

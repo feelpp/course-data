@@ -254,4 +254,4 @@ Both give the predicted result. This one comparison does not mean all SQL and pa
 
 Explain what one row represents before and after grouping, how a sensor description is attached, and how you find unmatched readings. Record that the data are invented and state one thing these measurements cannot tell us. Restart the notebook and run the examples in order.
 
-Block 4 then introduces array shapes and changing between long and wide tables, using the xref:foundations/tabular-data.adoc[tabular reference] before xref:foundations/eda-sampling.adoc[exploratory analysis]. More detail is available in the https://pandas.pydata.org/pandas-docs/version/2.3.1/getting_started/comparison/comparison_with_sql.html[official SQL–pandas comparison].
+Block 4 then introduces array shapes and changing between long and wide tables, using the xref:foundations/tabular-data.adoc[tabular reference] before xref:foundations/statistical-exploration.adoc[statistical exploration]. More detail is available in the https://pandas.pydata.org/pandas-docs/version/2.3.1/getting_started/comparison/comparison_with_sql.html[official SQL–pandas comparison].

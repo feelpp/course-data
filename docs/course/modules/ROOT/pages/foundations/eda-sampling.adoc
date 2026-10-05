@@ -1,11 +1,11 @@
-= Exploratory analysis, sampling, and truthful figures
+= Sampling, dependence, and truthful population claims
 :page-course-language: en
 :page-course-concepts: DP-EDA-01, DP-SMP-01, DP-QLT-04
 :page-course-priority: P0
 :page-course-difficulty: D2
-:page-course-duration-minutes: 120
+:page-course-duration-minutes: 45
 :page-course-outcomes: LO1, LO2, LO4, LO6
-:page-course-prerequisites: validated and documented table
+:page-course-prerequisites: statistical exploration of the audited Beijing slice
 :page-course-assessed: yes
 :page-jupyter: true
 :page-course-execution-profile: fast
@@ -18,22 +18,15 @@
 
 [.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
 
-Exploration is a disciplined search for structure, quality problems, assumptions, and alternative explanations. It is not permission to tune repeatedly on final-test data or to present attractive plots without a population claim.
+This follow-up begins after xref:foundations/statistical-exploration.adoc[Beijing statistical exploration]. Students have described individual variables, examined station/time structure, and computed covariance and correlation. Now ask which population claim the observations can support, and how dependence changes uncertainty. The descriptive investigation comes first; this page is later reading and practice.
+
+Allow about 45 minutes for the sampling argument, effective-information example, and uncertainty comparison. The synthetic Simpson exercise is optional. The daily PM2.5 example below reloads the same canonical slice so this companion notebook can run independently.
 
 Use xref:foundations/mathematical-background.adoc[Mathematical background and error estimation] for the distinction between population quantities, estimators, and uncertainty.
 
-== Distribution summaries
+== Distribution summaries — recall, then ask about the population
 
-Use xref:foundations/probability-distributions-moments.adoc[Probability distributions and statistical moments] for mass, density, support, and moment definitions. Use xref:foundations/quantiles-exceedance-risk.adoc[Quantiles, exceedance probabilities, and risk] for CDF inversion and tail uncertainty. This section applies their empirical counterparts during exploration.
-
-For observations stem:[x_1,\ldots,x_n], the empirical cumulative distribution function is
-
-[stem]
-++++
-\widehat F_n(t)=\frac1n\sum_{i=1}^{n}\mathbf 1\{x_i\le t\}.
-++++
-
-It preserves distributional information that a mean and standard deviation can hide. Quantiles, histograms, and box plots are summaries of the empirical distribution, not evidence that a particular parametric distribution generated the data.
+The xref:foundations/statistical-exploration.adoc[preceding notebook] develops the empirical CDF, quantiles, histograms, boxplots and descriptive profile on the Beijing observations. Use the xref:foundations/probability-distributions-moments.adoc[distribution reference] and xref:foundations/quantiles-exceedance-risk.adoc[quantile reference] for theory and short examples. Use the dedicated xref:foundations/covariance-correlation.adoc[covariance and correlation reference] for definitions, unit changes, pairing and short examples, and the xref:foundations/statistical-plots.adoc[plot-purpose reference] for choosing and reading figures. The following stable definition is retained for earlier links.
 
 .Definition: Empirical covariance and correlation
 [.def#def:covariance-correlation]
@@ -54,7 +47,7 @@ For every figure, write the question, population/sample, unit, grouping, scale, 
 
 == Sampling and representativeness
 
-The Beijing slice contains three stations and fourteen days from March 2013. It can support exercises about those recorded observations; it cannot represent all Beijing stations, seasons, current air quality, Strasbourg, or causal effects of weather. Temporal autocorrelation means hourly rows are not automatically independent. A random row split can exaggerate forecasting evidence by placing near-neighbour times in both train and test.
+The Beijing slice contains three stations and fourteen days from March 2013. It can support exercises about those recorded observations; it cannot represent all Beijing stations, seasons, current air quality, Strasbourg, or causal effects of weather. Temporal autocorrelation means hourly rows are not automatically independent.
 
 Let stem:[S_i=1] indicate inclusion of population unit stem:[i]. The inclusion probability stem:[\pi_i=P(S_i=1)] matters: if it varies with the measurement or relevant covariates, the unweighted sample mean need not estimate the population mean. A larger convenience sample reduces neither coverage error nor selection bias by itself.
 
@@ -202,15 +195,9 @@ Recorded daily PM2.5 varies across stations and time in this reviewed 14-day sli
 
 Use the page toolbar to download the generated notebook. Its code is the code shown here, with empty outputs so students must execute and inspect the evidence themselves.
 
-== Independent evidence brief
+== Follow-up to the statistical evidence brief
 
-Produce one page with exactly three figures:
-
-. coverage/missingness over time or station;
-. a distribution showing scale and extremes;
-. a relationship stratified by a relevant group or time unit.
-
-Each caption must state what is shown, the observation count after missing-data handling, and one limitation. Include a paragraph defining the target population and explaining whether the sample can support it.
+Reuse the xref:foundations/statistical-exploration.adoc#_part_9_what_evidence_can_we_defend[descriptive evidence brief] rather than producing another set of plots. Add a paragraph defining a proposed target population, the independent sampling or resampling unit it would require, and one selection or coverage limitation that a confidence interval cannot repair. Distinguish variation among recorded values from uncertainty about a population mean.
 
 == Acceptance criteria
 

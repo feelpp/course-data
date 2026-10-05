@@ -125,6 +125,9 @@ test('course mathematics sequence uses the vendored Antora generator determinist
     'foundations/tabular-data.adoc',
     'foundations/data-quality.adoc',
     'foundations/data-quality-practical.adoc',
+    'foundations/statistical-exploration.adoc',
+    'foundations/covariance-correlation.adoc',
+    'foundations/statistical-plots.adoc',
     'foundations/eda-sampling.adoc',
     'foundations/probability-distributions-moments.adoc',
     'foundations/quantiles-exceedance-risk.adoc',
@@ -155,6 +158,29 @@ test('course mathematics sequence uses the vendored Antora generator determinist
     assert.ok(notebook.cells.every((cell) => /^[0-9a-f]{16}$/.test(cell.id)))
     assert.ok(notebook.cells.filter((cell) => cell.cell_type === 'code').every((cell) => cell.outputs.length === 0))
   }
+
+  const exploration = notebooks.get('foundations/statistical-exploration.adoc')
+  const explorationMarkdown = notebookText(exploration, 'markdown')
+  const explorationCode = notebookText(exploration, 'code')
+  for (let part = 0; part <= 9; part++) {
+    assert.match(explorationMarkdown, new RegExp(`Part ${part} `))
+  }
+  assert.match(explorationMarkdown, /describe\(\)\x60? is a tool, not the analysis/)
+  assert.match(explorationMarkdown, /do not presume a Simpson reversal/i)
+  assert.match(explorationMarkdown, /inverse ECDF/)
+  assert.match(explorationMarkdown, /not a representative sample/)
+  assert.match(explorationMarkdown, /one-page statistical evidence brief/)
+  assert.match(explorationMarkdown, /How the support changes/)
+  assert.match(explorationCode, /profile = None/)
+  assert.match(explorationCode, /daily = None/)
+  assert.match(explorationCode, /covariance_explicit = None/)
+  assert.match(explorationCode, /r_explicit = None/)
+  assert.match(explorationCode, /computation_ready/)
+  assert.doesNotMatch(explorationMarkdown, /93\.784|0\.272|0\.484|129 µg/)
+  assert.doesNotMatch(explorationCode, /centered\.T @ centered/)
+  assert.doesNotMatch(explorationMarkdown, /statistical-exploration-solution/)
+  assert.ok(explorationCode.indexOf('x.sum() / n') < explorationCode.indexOf('measurements.describe()'))
+  assert.ok(explorationCode.indexOf('create four scatter panels') < explorationCode.indexOf('covariance_explicit ='))
 
   const distributions = notebooks.get('foundations/probability-distributions-moments.adoc')
   const distributionMarkdown = notebookText(distributions, 'markdown')

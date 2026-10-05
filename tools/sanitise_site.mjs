@@ -39,6 +39,10 @@ if (/url\(\s*['"]?(?:https?:)?\/\//.test(source)) {
 await writeFile(stylesheet, source, 'utf8');
 
 let sitemapSource = await readFile(sitemap, 'utf8');
+// Reference pages remain available by direct URL without discovery links.
+sitemapSource = sitemapSource.replace(/<url\b[^>]*>[\s\S]*?<\/url>/g, (entry) =>
+  /<loc>[^<]*-solution\.html<\/loc>/.test(entry) ? '' : entry,
+);
 const buildEpochSeconds = Number(process.env.SOURCE_DATE_EPOCH ?? '1767225600');
 const buildTimestamp = new Date(buildEpochSeconds * 1000).toISOString();
 const lastModifiedEntries = sitemapSource.match(/<lastmod>[^<]+<\/lastmod>/g) ?? [];
@@ -63,15 +67,34 @@ async function versionCourseStyles(directory) {
       await versionCourseStyles(filename);
     } else if (entry.isFile() && entry.name.endsWith('.html')) {
       const html = await readFile(filename, 'utf8');
-      const versioned = html.replace(
+      let versioned = html.replace(
         /(href="[^"?]*\/css\/course\.css)(?:\?[^"\s]*)?("|&quot;)/g,
         `$1?v=${courseCssVersion}$2`,
       );
+      if (entry.name.endsWith('-solution.html') && !/name="robots"/.test(versioned)) {
+        versioned = versioned.replace(
+          '</head>', '<meta name="robots" content="noindex, nofollow">\n</head>',
+        );
+      }
+      if (entry.name.endsWith('-solution.html')) {
+        // Antora's current-page breadcrumb otherwise links to the reference itself.
+        versioned = versioned.replace(
+          /<a\b[^>]*href="[^"#?]*-solution\.html(?:[?#][^"]*)?"[^>]*>([\s\S]*?)<\/a>/g,
+          '<span>$1</span>',
+        );
+      }
       if (versioned !== html) await writeFile(filename, versioned, 'utf8');
     }
   }
 }
 await versionCourseStyles(siteDirectory);
+
+const searchIndexPath = path.join(siteDirectory, 'search-index.json');
+const searchIndex = JSON.parse(await readFile(searchIndexPath, 'utf8'));
+searchIndex.documents = searchIndex.documents.filter((document) =>
+  !/-solution\.html(?:$|[?#])/.test(document.url),
+);
+await writeFile(searchIndexPath, JSON.stringify(searchIndex, null, 2), 'utf8');
 
 console.log(
   `Localised UI fonts, versioned course styles, and normalised ${lastModifiedEntries.length} sitemap timestamps`,

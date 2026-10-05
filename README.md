@@ -48,7 +48,7 @@ Every site build includes the validated current student ZIP and its checksum und
 `public/course-data/_downloads/`, served by the green Antora UI download button.
 This current study bundle is separate from approved immutable tagged releases.
 
-Run one complete candidate preparation, including all 29 notebooks:
+Run one complete candidate preparation, including all declared notebooks:
 
 ```sh
 npm run release:prepare

@@ -1,0 +1,685 @@
+= Beijing Air Quality — From Data Audit to Statistical Exploration
+:page-course-language: en
+:page-course-concepts: DP-ARR-01, DP-TAB-02, DP-EDA-01, DP-SMP-01, DP-QLT-04
+:page-course-priority: P0
+:page-course-difficulty: D2
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO1, LO2, LO3, LO4, LO6, LO8
+:page-course-prerequisites: completed data-quality practical; pandas selection, missing values, and grouping
+:page-course-assessed: yes
+:page-course-format: guided-practice
+:page-jupyter: true
+:page-course-execution-profile: fast
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 60
+:dynamic-blocks-max-output-bytes: 5242880
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+
+[.course-badge.priority-p0]#P0 Essential# [.course-badge.difficulty-d2]#D2 Independent#
+
+*Session: 5 October 2026.* We have audited the dataset and established what the observations mean and what their limitations are. What can we now learn from the observations themselves?
+
+This notebook is the live-session route after the xref:foundations/data-quality-practical.adoc[guided audit]. Work in pairs and run one section at a time: *question → inspect → identify a statistical need → define → compute → visualise → interpret → next question*. Predict before executing each plot. Keep the audit report beside the notebook; do not repeat the audit.
+
+== Two-hour route and learning outcomes
+
+[cols="1,4",options="header"]
+|===
+|Minutes |Essential live material
+|0–5 |Part 0: reconnect with the audit and load the canonical slice.
+|5–30 |Parts 1–2: describe PM2.5, then compare histogram, ECDF, and boxplot.
+|30–45 |Part 3: build and interpret a profile; only now use `describe()`.
+|45–55 |Break.
+|55–75 |Part 4: station and station-day summaries; explain the changed unit.
+|75–85 |Part 5: predict associations, then inspect paired observations.
+|85–100 |Parts 6–7: compute covariance explicitly, standardise it, read correlations.
+|100–110 |Part 8: investigate whether aggregation changes the association.
+|110–120 |Part 9: draft the evidence brief and exchange one checked claim.
+|===
+
+By the end, explain and compute location, quantiles and dispersion; compare numerical summaries with distributions; expose valid counts; distinguish hourly from daily quantities; compute covariance and correlation; and support a bounded claim with numerical and graphical evidence. This session ends with descriptive association.
+
+*Student exercises* are the prediction and interpretation prompts and the final brief. *Optional extensions* are labelled at the end and are outside the live timing. The xref:foundations/mathematical-background.adoc[mathematical foundation], xref:foundations/probability-distributions-moments.adoc[distribution and moment reference], and xref:foundations/quantiles-exceedance-risk.adoc[quantile reference] already contain theory and small examples. Follow the links when a concept arises; reading those complete chapters is not a prerequisite for this investigation. Use the short xref:foundations/covariance-correlation.adoc[covariance and correlation reference] for paired variation and the xref:foundations/statistical-plots.adoc[plot-purpose reference] to choose and read each figure.
+
+== How the support changes
+
+The website shows code and questions, with no computed tables, finished figures or numerical interpretations. Execute the downloaded notebook to obtain your own evidence. Early complete code demonstrates the operations; it is not an answer to the written interpretation. Later cells deliberately leave work for you.
+
+[cols="1,2,4",options="header"]
+|===
+|Parts |Support |Your responsibility
+|0–1 |Supplied setup and location calculation |Predict, execute, record units/counts and explain the result; complete quantiles and variance.
+|2 |Partly supplied plotting code |Complete ECDF and boxplot, then compare what the three views reveal.
+|3–4 |Editable skeletons and checks |Build the profile and grouped summaries; create the daily figure.
+|5–7 |Commented plot skeletons and consistency checks |Prepare paired observations, compute covariance explicitly, then construct correlations and their counts.
+|8–9 |Independent investigation with layout hints |Choose comparisons, create the evidence and defend your interpretation.
+|===
+
+A `None` placeholder means *not yet computed*. Replace it with your implementation and rerun the relevant cells. A message asking you to complete a step is not successful completion. The starter notebook can run without errors while unfinished; the evidence brief requires you to complete the tasks. Write your interpretation before moving to the next question.
+
+*Plotting support:* Commented skeletons supply Matplotlib layout, labels, legends and colour settings so that configuration does not take over the investigation. First prepare the quantities to plot, replace each `...` with your own inputs, then uncomment the relevant lines. The skeletons do not compute those inputs. `fig` is the whole figure; `ax` is one panel; `axes` contains several panels. `constrained_layout=True` leaves room for labels, and `plt.show()` displays the finished figure. Reuse these settings for figures in your evidence brief.
+
+== Worked example: build your statistical exploration
+
+[.worked-example-context#worked-statistical-exploration-context]
+=== Context
+
+*Importance:* Essential (P0)
+
+We describe the existing UCI Beijing teaching extract: *1,008 hourly station records, three stations, 1–14 March 2013*. Each row is one station-hour. The source, licence, units, missingness and limitations were checked in the audit; the dataset remains unmodified. Recorded concentrations are in µg/m³, temperature and dew point in °C, pressure in hPa, rain in mm, and wind speed in m/s. This short slice is not a representative sample of all Beijing air quality, other seasons, current conditions, or personal exposure.
+
+[.worked-example-method#worked-statistical-exploration-method]
+=== Method
+
+*Importance:* Essential (P0)
+
+Begin with one observed variable, expose its denominator, and let the next question determine the next summary or figure. Use valid observations for each univariate statistic and complete pairs for each association; retain missing counts. No statistical imputation is needed for this descriptive task. Do not delete an unusual observation simply because it is unusual.
+
+.Mathematical insight — the denominator and unit define the quantity
+[IMPORTANT]
+====
+[.notebook-insight-label]
+*Mathematical insight.*
+
+*Essential (P0).* The empirical mean stem:[\bar x=n^{-1}\sum_i x_i] weights the retained observations equally. Averaging station-day means weights station-days equally instead. With unequal valid counts these need not agree. A statistic describes the chosen observed values; its formula does not establish representativeness, independence, or causation.
+====
+
+[.worked-example-implementation#worked-statistical-exploration-implementation]
+=== Implementation
+
+*Importance:* Essential (P0)
+
+==== Part 0 — What did the audit establish?
+
+The audit asks whether we understand and can legitimately use the data. Statistical exploration asks what the observed data tell us. Recall one limitation from your audit, then load the canonical file. Run the supplied setup and inspect the starting dimensions and units yourself.
+
+[#exploration-start-table]
+[source,python]
+----
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+
+def course_file(relative: str) -> Path:
+    """Find canonical data in a checkout or an extracted student bundle."""
+    for root in [Path.cwd(), *Path.cwd().parents]:
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+air = pd.read_csv(course_file("datasets/teaching/air-quality/observations.csv"))
+assert air.shape == (1008, 18)
+assert air["station"].nunique() == 3
+units = {
+    "PM2.5": "µg/m³", "PM10": "µg/m³", "SO2": "µg/m³", "NO2": "µg/m³",
+    "CO": "µg/m³", "O3": "µg/m³", "TEMP": "°C", "PRES": "hPa",
+    "DEWP": "°C", "RAIN": "mm", "WSPM": "m/s",
+}
+variables = list(units)
+measurements = air[variables]
+plt.style.use("tableau-colorblind10")
+pd.DataFrame({
+    "unit": pd.Series(units),
+    "valid": measurements.count(),
+    "missing": measurements.isna().sum(),
+})
+----
+
+*Your interpretation:* Which variables are complete? Which have missing readings? Explain why station IDs, calendar fields and the upstream row number should not enter a correlation matrix as measured quantities.
+
+==== Part 1 — What does PM2.5 look like in our observations?
+
+Inspect a few actual readings before summarising all of them. The selected values stem:[x_1,\ldots,x_n] form a finite observed collection, not an assumed probability model.
+
+[#exploration-first-values]
+[source,python]
+----
+air[["station", "year", "month", "day", "hour", "PM2.5"]].head(6)
+----
+
+*Question:* What single value could describe the centre? Could a few high concentrations move it? The xref:foundations/mathematical-background.adoc#_data_population_and_notation[notation and summary reference] explains mean, median, quartiles and variance with short examples. Here we apply them to PM2.5.
+
+For sorted valid values stem:[x_{(1)}\le\cdots\le x_{(n)}],
+
+[stem]
+++++
+\bar x=\frac1n\sum_{i=1}^n x_i,\qquad
+\operatorname{median}(x)=
+\begin{cases}
+x_{((n+1)/2)},&n\text{ odd},\\
+\bigl(x_{(n/2)}+x_{(n/2+1)}\bigr)/2,&n\text{ even}.
+\end{cases}
+++++
+
+Compute these directly before using convenience methods. `x` is a one-dimensional NumPy array of shape `(n,)`; reducing its observation axis produces a scalar.
+
+[#exploration-location-table]
+[source,python]
+----
+pm25 = air["PM2.5"].dropna()
+x = pm25.to_numpy(dtype=float)
+n = len(x)
+ordered = np.sort(x)
+mean_explicit = x.sum() / n
+median_explicit = (
+    ordered[n // 2] if n % 2 else (ordered[n // 2 - 1] + ordered[n // 2]) / 2
+)
+assert np.isclose(mean_explicit, pm25.mean())
+assert np.isclose(median_explicit, pm25.median())
+pd.DataFrame({
+    "method": ["sum and sorted values", "pandas"],
+    "valid_n": [n, n],
+    "mean_µg_m3": [mean_explicit, pm25.mean()],
+    "median_µg_m3": [median_explicit, pm25.median()],
+}).set_index("method").round(3)
+----
+
+*Your interpretation:* Record the computed mean and median with units. Which is larger, and by how much? Which statistic responds more to a few large readings? Predict what the distribution plot might show without claiming a distribution shape yet.
+
+*Next question:* Where do the middle observations end and the tails begin? The empirical CDF and its inverse are defined in the xref:foundations/quantiles-exceedance-risk.adoc#_empirical_estimation_and_uncertainty[empirical quantile reference]:
+
+[stem]
+++++
+\widehat F_n(t)=\frac1n\sum_{i=1}^n\mathbf1\{x_i\le t\},\qquad
+\widehat Q(p)=\inf\{t:\widehat F_n(t)\ge p\},\quad 0<p<1,
+\qquad \operatorname{IQR}=Q_3-Q_1.
+++++
+
+The inverse ECDF chooses an observed order statistic. Pandas' default `linear` quantile interpolates between neighbours using stem:[h=(n-1)p] in zero-based indexing. We declare that convention for our summary table; on a finite dataset it need not equal the inverse ECDF. Q1, median, and Q3 correspond to levels 0.25, 0.5, and 0.75. Minimum and maximum mark the full observed range.
+
+*Next question:* How far do values spread around the centre? For stem:[n>1],
+
+[stem]
+++++
+s^2=\frac1{n-1}\sum_{i=1}^n(x_i-\bar x)^2,\qquad s=\sqrt{s^2}.
+++++
+
+The xref:foundations/probability-distributions-moments.adoc#def:moments[population moment reference] defines stem:[\mu=\mathbb E[X]] and stem:[\sigma^2=\mathbb E[(X-\mu)^2]]. Our stem:[\bar x,s^2] are observed sample statistics; the variance of the finite empirical distribution itself uses denominator stem:[n]. We use `ddof=1` consistently. The usual unbiasedness argument for stem:[s^2] needs IID sampling; these hourly rows are dependent. Standard deviation describes row spread, not uncertainty of the mean. Variance has squared concentration units; standard deviation and IQR have concentration units. IQR is less sensitive to a few extremes.
+
+[#exploration-spread-table]
+[source,python]
+----
+# Complete these two calculations before continuing.
+quantiles = None          # TODO: Q1, median, Q3; optional 5% and 95% quantiles.
+variance_explicit = None  # TODO: sum squared centred values, then divide by n - 1.
+
+if quantiles is not None and variance_explicit is not None:
+    assert np.isclose(variance_explicit, pm25.var(ddof=1))
+    std_explicit = np.sqrt(variance_explicit)
+    iqr = quantiles.loc[0.75] - quantiles.loc[0.25]
+    display(pd.DataFrame([{
+        "valid_n": n, "min": x.min(), "Q1": quantiles.loc[0.25],
+        "median": quantiles.loc[0.5], "Q3": quantiles.loc[0.75], "max": x.max(),
+        "IQR": iqr, "variance_(µg/m³)²": variance_explicit, "std_µg_m3": std_explicit,
+    }], index=["PM2.5"]).round(3))
+else:
+    print("Complete quantiles and variance_explicit; no spread result has been computed.")
+----
+
+*Student prompt:* Compare the minimum, maximum, and middle half of the readings. Predict whether many observations will lie below the mean, and whether the upper tail will extend further than the lower tail.
+
+==== Part 2 — Can summary numbers reveal the shape?
+
+Read the xref:foundations/statistical-plots.adoc#histogram[histogram], xref:foundations/statistical-plots.adoc#ecdf[ECDF], and xref:foundations/statistical-plots.adoc#boxplot[boxplot] explanations, then use the same valid observations for three views. A histogram exposes concentrations of values but depends on bin choice. An ECDF shows the fraction at or below every concentration without binning, but does not directly show local density. A boxplot compresses quartiles and possible extremes, hiding modes and much of the distribution. Predict all three before running.
+
+[#exploration-distribution-figure]
+[source,python]
+----
+# The histogram is supplied; complete the ECDF and boxplot panels.
+fig, axes = plt.subplots(1, 3, figsize=(12, 3.8), constrained_layout=True)
+axes[0].hist(x, bins=18, edgecolor="black", alpha=0.7)
+axes[0].axvline(mean_explicit, color="black", linestyle="--", label="Mean")
+axes[0].axvline(median_explicit, color="black", linestyle=":", label="Median")
+axes[0].set(title="A: Histogram", xlabel="PM2.5 (µg/m³)", ylabel="Hourly count")
+axes[0].legend()
+
+# TODO: sort the valid observations and compute the cumulative fractions 1/n, ..., n/n.
+# Plot skeleton: replace BOTH inputs with your prepared arrays, then uncomment.
+# axes[1].step(..., ..., where="post", linewidth=1.8)
+# Include a starting point below the minimum with cumulative fraction zero.
+axes[1].set(title="B: ECDF — complete me", xlabel="PM2.5 (µg/m³)",
+            ylabel="Fraction ≤ concentration", ylim=(0, 1))
+axes[1].grid(axis="y", alpha=0.25)
+# Supply the valid observations; Matplotlib draws the box and whiskers.
+# axes[2].boxplot(..., orientation="horizontal", whis=1.5,
+#                 flierprops={"markersize": 3, "alpha": 0.4})
+axes[2].set(title="C: Boxplot — complete me", xlabel="PM2.5 (µg/m³)")
+axes[2].set_yticks([])
+plt.show()
+----
+
+*Your interpretation:* Calculate stem:[\bar x\pm s] and compare it with the full range and IQR. What does this symmetric summary hide in your plots? It is neither a confidence interval nor a guaranteed coverage interval. Boxplot whiskers reach observations within 1.5 IQR of the quartiles; flagged points require inspection, not automatic deletion. Write the numerical and graphical evidence for your reading.
+
+*Student prompt:* Read the fraction at or below 150 µg/m³ from the ECDF, then calculate `(x <= 150).mean()`. Would changing the histogram bins change this fraction? Would mean and standard deviation alone answer it?
+
+==== Part 3 — What statistical profile describes the measured variables?
+
+Only now generalise the calculation. Each column uses its own valid observations. Never fill a missing concentration with zero to simplify a summary.
+
+[#exploration-profile-table]
+[source,python]
+----
+# TODO: construct a DataFrame indexed by the measured variable names.
+# Columns: unit, valid, missing, missing_rate, mean, std, min, Q1, median, Q3, max.
+# Use only measurements; do not include station/time identifiers.
+# Keep ddof=1 and interpolation="linear" consistent with Part 1.
+profile = None
+
+if profile is not None:
+    assert profile.index.tolist() == variables
+    assert (profile["valid"] + profile["missing"]).eq(len(air)).all()
+    assert profile["missing_rate"].between(0, 1).all()
+    assert (profile["Q1"] <= profile["median"]).all()
+    assert (profile["median"] <= profile["Q3"]).all()
+    display(profile.round(3))
+else:
+    print("Build profile before interpreting or comparing summaries.")
+----
+
+*Question:* Once your profile is complete, which computations does `describe()` package for us? Its default includes numerical identifiers if they are present, and it omits units and missingness. Apply it to the declared measured columns, not the whole table.
+
+[#exploration-describe-table]
+[source,python]
+----
+# Run this comparison only after constructing your own profile.
+if profile is not None:
+    description = measurements.describe()
+    for pandas_name, profile_name in [
+        ("count", "valid"), ("mean", "mean"), ("std", "std"), ("min", "min"),
+        ("25%", "Q1"), ("50%", "median"), ("75%", "Q3"), ("max", "max"),
+    ]:
+        assert np.allclose(description.loc[pandas_name], profile[profile_name])
+    display(description.T.round(3))
+else:
+    print("Complete your profile first; describe() is not the starting analysis.")
+----
+
+*`describe()` is a tool, not the analysis.* Choose three variables and support your answers with numbers:
+
+* Where do mean and median differ substantially? What plot would check the suggested asymmetry?
+* Which maximum is far from the central quartiles? Why does this deserve inspection rather than deletion?
+* Which positive ratio-scale variables have large spread relative to their mean? A coefficient of variation stem:[s/\bar x] can help for positive concentrations or wind speed; ratios using Celsius temperatures or means near zero are misleading because their origin or denominator is unsuitable.
+* Inspect RAIN's quartiles and maximum: does either summary hide something? Compare valid counts for NO2 and PM2.5: which recorded values contribute to each mean?
+
+==== Part 4 — Are global summaries hiding station or time structure?
+
+Use the xref:foundations/statistical-plots.adoc#grouped-time-plot[grouped time plot explanation] to decide what an ordered line can show and which coverage counts it needs.
+
+Hourly station readings are not an unordered IID table. Build timestamps and ask how PM2.5 changes across stations and calendar days. For station stem:[s] and day stem:[d],
+
+[stem]
+++++
+\bar x_{sd}=\frac1{n_{sd}}\sum_{i\in(s,d),\,x_i\text{ valid}}x_i.
+++++
+
+`groupby` appears because the question requires different groups, not as an isolated programming feature. Construct and compare the global hourly mean, station hourly means, and station-day means. Each daily value must retain its own valid count.
+
+[#exploration-grouped-table]
+[source,python]
+----
+# Timestamp construction is supplied; the station summaries are your work.
+air = air.assign(timestamp=pd.to_datetime(air[["year", "month", "day", "hour"]]))
+air = air.assign(date=air["timestamp"].dt.floor("D"))
+# TODO: group by station and summarise PM2.5: valid count, mean, median, std.
+# TODO: add a global row using the same summaries and compare the two units.
+station_summary = None
+if station_summary is not None:
+    assert station_summary["valid"].sum() == pm25.count()
+    display(station_summary.round(3))
+else:
+    print("Construct station_summary using the declared station-hour observations.")
+----
+
+[#exploration-daily-table]
+[source,python]
+----
+# TODO: group by ["station", "date"] and return one row per station-day.
+# Required columns: station, date, pm25_mean, valid_pm25, temp_mean, valid_temp.
+# Hint: use named aggregation with as_index=False; count valid readings, not just rows.
+daily = None
+if daily is not None:
+    assert not daily.duplicated(["station", "date"]).any()
+    assert len(daily) == air.groupby(["station", "date"]).ngroups
+    assert daily["valid_pm25"].sum() == pm25.count()
+    assert daily["valid_temp"].sum() == air["TEMP"].count()
+    display(daily.head())
+else:
+    print("Construct daily with both means and valid-hour counts.")
+----
+
+*Predict:* Will station differences be stable over time, or will common peaks dominate? Create the station-day plot from your own daily table and test your prediction.
+
+[#exploration-daily-figure]
+[source,python]
+----
+# TODO: plot daily PM2.5 means, with one series per station.
+# Use the SAME daily table as your numerical summary.
+# Label date and concentration axes; distinguish stations by marker and line style.
+# Check coverage before treating each station-day as equally supported.
+# Write a caption with unit, valid-hour counts, missing-data rule and limitation.
+# Layout skeleton: replace the plot inputs, then uncomment when daily is ready.
+# fig, ax = plt.subplots(figsize=(10, 4), constrained_layout=True)
+# markers = ["o", "s", "^"]
+# line_styles = ["-", "--", ":"]
+# for i, station in enumerate(sorted(air["station"].unique())):
+#     # TODO: prepare this station's dates and daily values in chronological order.
+#     ax.plot(..., ..., label=station, marker=markers[i],
+#             linestyle=line_styles[i], markersize=4, linewidth=1.2)
+# ax.set(title="Daily PM2.5 by station", xlabel="Date",
+#        ylabel="Daily mean PM2.5 (µg/m³)")
+# ax.legend(title="Station")
+# ax.grid(axis="y", alpha=0.25)
+# ax.tick_params(axis="x", labelrotation=45)
+# plt.show()
+if daily is None:
+    print("Complete daily before creating the station-day figure.")
+----
+
+*Your interpretation:* A daily value is a station-day, not a station-hour. Compare the hourly mean with the mean of daily means. Are they equal in this slice? Check valid-hour counts and explain why they agree or differ. With unequal coverage, equal-day and equal-hour weighting can differ. Aggregation does not create independent observations.
+
+*Student prompt:* Explain why the denominator changes from 1,008 readings to 42 station-days. Is the mean of 14 days at one station the same target quantity as the mean over three stations during one day?
+
+==== Part 5 — What do two variables do together?
+
+Use the xref:foundations/statistical-plots.adoc#scatterplot[scatter plot purpose and reading guide] before inspecting pairs.
+
+Knowing the distribution of stem:[X] and the distribution of stem:[Y] separately does not tell us how they vary together. We need *paired* measurements from the same station-hour. PM2.5 and PM10 share particulate processes, temperature and dew point describe weather, pressure may reflect weather regimes, and wind speed may relate to dispersal. These motivations propose questions, not causal conclusions.
+
+Before plotting each pair, predict positive, negative, or weak association. Also look for curvature, influential points, station mixtures, or temporal effects. Use pairwise valid observations and report their counts.
+
+[#exploration-scatter-figure]
+[source,python]
+----
+pairs = [("PM2.5", "PM10"), ("TEMP", "DEWP"), ("TEMP", "PRES"), ("PM2.5", "WSPM")]
+# TODO: create four scatter panels, one for each pair.
+# For EACH pair, select its two columns and drop missing values in those columns only.
+# Report that pair's n in its title; label axes using units[left] and units[right].
+# Use small transparent markers to reduce overplotting.
+# Predict the association before plotting. Do not calculate correlations yet.
+# Layout skeleton: fill the data preparation and scatter inputs, then uncomment.
+# fig, axes = plt.subplots(2, 2, figsize=(10, 7), constrained_layout=True)
+# for ax, (left, right) in zip(axes.flat, pairs, strict=True):
+#     paired = ...  # TODO: prepare the complete pairs for these two variables.
+#     ax.scatter(..., ..., s=12, alpha=0.3, edgecolors="none")
+#     ax.set(title=f"{left} and {right}: n={len(paired)}",
+#            xlabel=f"{left} ({units[left]})", ylabel=f"{right} ({units[right]})")
+#     ax.grid(alpha=0.2)
+# plt.show()
+----
+
+*Reading the skeleton:* `axes.flat` visits the four panels row by row; `zip` matches each panel to one pair, and `strict=True` checks that their numbers agree. The first scatter input is horizontal and the second vertical. `s` controls marker area, `alpha` controls transparency, and `edgecolors="none"` removes marker outlines. Prepare each pair separately: its valid count can differ from the others.
+
+*Student prompt:* Describe the geometry before asking for a correlation. Pick one visible extreme and identify its station-hour in the table. Keep it unless the audit provides a reason to exclude it.
+
+==== Part 6 — Can we measure joint movement?
+
+Use the xref:foundations/covariance-correlation.adoc#def:covariance-correlation[covariance definition and three-pair example]. For the stem:[n] complete pairs,
+
+[stem]
+++++
+s_{xy}=\frac1{n-1}\sum_{i=1}^n(x_i-\bar x)(y_i-\bar y).
+++++
+
+A pair above both means or below both means contributes positively. A pair on opposite sides contributes negatively. The sign summarises joint movement, but the magnitude has product units and changes with scale. Compute the centred product directly for PM2.5 and PM10 before calling `cov()`.
+
+[#exploration-covariance-table]
+[source,python]
+----
+# TODO: retain complete PM2.5/PM10 pairs from the same station-hour.
+paired_pm = None
+covariance_explicit = None
+# TODO: convert to an (n_pairs, 2) array; centre each column on its paired mean.
+# TODO: sum the products of paired deviations and divide by n_pairs - 1.
+# Compute explicitly BEFORE comparing with paired_pm.cov().
+if paired_pm is not None and covariance_explicit is not None:
+    assert np.isclose(covariance_explicit, paired_pm.cov().loc["PM2.5", "PM10"])
+    display(pd.DataFrame([{
+        "paired_n": len(paired_pm), "covariance_(µg/m³)²": covariance_explicit,
+    }]))
+else:
+    print("Construct complete pairs and calculate their centred product explicitly.")
+----
+
+*Your interpretation:* State your covariance's sign and product units. Does the scatter plot support that sign? Convert just PM10 from µg/m³ to mg/m³, recompute covariance and explain the change. Why would it be difficult to compare covariance magnitudes across pairs with different units?
+
+==== Part 7 — How does standardisation help?
+
+Read the xref:foundations/covariance-correlation.adoc#standardisation[standardisation and Pearson correlation explanation], including the example where a curved relationship has zero correlation.
+
+For nonzero sample standard deviations computed on the *same pairs*, Pearson correlation is
+
+[stem]
+++++
+r_{xy}=\frac{s_{xy}}{s_xs_y},\qquad -1\le r_{xy}\le1.
+++++
+
+It is dimensionless and measures strength and direction of *linear* association. Positive affine rescaling of either variable leaves it unchanged; a negative rescaling reverses its sign. Constant variables have undefined correlation. Correlation does not imply causation; near-zero correlation does not imply independence (a symmetric variable and its square illustrate why). Outliers, mixtures, restricted ranges and time trends can change it.
+
+[#exploration-correlation-table]
+[source,python]
+----
+r_explicit = None
+# TODO: compute BOTH sample standard deviations on paired_pm (not separate full columns).
+# TODO: divide your covariance by their product.
+# TODO: make a table of pair, paired_n, and r for each scatter plot from Part 5.
+if r_explicit is not None and paired_pm is not None:
+    assert -1 <= r_explicit <= 1
+    assert np.isclose(r_explicit, paired_pm.corr().loc["PM2.5", "PM10"])
+    print("Direct correlation agrees with pandas on the same paired rows.")
+else:
+    print("Compute standardised covariance before asking for a correlation matrix.")
+----
+
+*Your interpretation:* Does each sign agree with your prediction? Does its magnitude agree with the cloud's spread? Compare two pairs using both numbers and plots. Avoid universal cutoffs for what counts as a meaningful association.
+
+Use the xref:foundations/statistical-plots.adoc#correlation-heatmap[heatmap purpose and reading guide]. Now construct the matrix of the declared measured variables, with a count matrix beside it. Pandas uses pairwise deletion, so entries can describe different retained subsets; such a matrix need not be positive semidefinite. We are reading descriptive associations here. Methods requiring a common covariance geometry need a separately justified common-row or missing-data policy.
+
+[#exploration-pair-count-table]
+[source,python]
+----
+correlation = None
+pair_counts = None
+# TODO: compute correlations on measurements only.
+# TODO: count complete pairs for every pair of variables.
+# Hint: an integer validity-mask matrix V gives counts through V.T @ V.
+# Do not use boolean matrix multiplication to count pairs.
+if correlation is not None and pair_counts is not None:
+    assert correlation.index.tolist() == variables
+    assert np.array_equal(np.diag(pair_counts), measurements.count().to_numpy())
+    display(pair_counts)
+else:
+    print("Produce the correlation matrix AND its pair-count table.")
+----
+
+[#exploration-correlation-figure]
+[source,python]
+----
+# TODO: display correlation on a fixed [-1, 1] scale using matplotlib.
+# Label both axes with variable names; write each value in its cell.
+# Include a colour bar labelled "Pearson r (dimensionless)".
+# Choose two off-diagonal pairs, check their counts, and create scatter plots.
+# A heatmap alone is not evidence that a relationship is linear.
+# Layout skeleton: supply your matrix and its cell values, then uncomment.
+# fig, ax = plt.subplots(figsize=(9, 7), constrained_layout=True)
+# image = ax.imshow(..., cmap="RdBu_r", vmin=-1, vmax=1)
+# positions = np.arange(len(variables))
+# ax.set_xticks(positions, labels=variables, rotation=45, ha="right")
+# ax.set_yticks(positions, labels=variables)
+# ax.set_title("Pairwise Pearson correlations")
+# for row in positions:
+#     for col in positions:
+#         value = ...  # TODO: read the value at this row and column of your matrix.
+#         label = "NA" if pd.isna(value) else f"{value:.2f}"
+#         text_colour = "white" if abs(value) > 0.6 else "black"
+#         ax.text(col, row, label, ha="center", va="center",
+#                 color=text_colour, fontsize=8)
+# fig.colorbar(image, ax=ax, label="Pearson r (dimensionless)", shrink=0.85)
+# plt.show()
+if correlation is None:
+    print("Complete correlation before making the matrix figure.")
+----
+
+*Reading the skeleton:* `imshow` colours an already computed matrix. Keep the matrix's row/column order consistent with `variables`. The fixed limits make zero the colour midpoint and allow comparison across figures. In `ax.text(col, row, ...)`, the column is the horizontal position. The text-colour rule only improves readability; it is not a threshold for statistical importance. Keep the pair-count table beside the figure.
+
+*Student prompt:* Choose two off-diagonal pairs worth investigating and justify the choice. Check their valid counts, then draw their scatter plots with units. The heatmap does not replace that examination.
+
+==== Part 8 — Does aggregation change the association?
+
+Use PM2.5 and TEMP to compare an hourly question with a daily question. Both are fully observed here, so the change is not caused by different missing-data filters. Predict whether averaging daily cycles will strengthen or weaken the linear association.
+
+[#exploration-aggregation-table]
+[source,python]
+----
+# Independent investigation: PM2.5 and TEMP.
+# 1. Compute hourly correlation globally and separately for each station.
+# 2. Compute correlation between pm25_mean and temp_mean in daily.
+# 3. Make a comparison table: scope, observational_unit, paired_n, r.
+# 4. Verify coverage before attributing a difference to aggregation.
+aggregation_comparison = None
+if aggregation_comparison is not None:
+    display(aggregation_comparison)
+else:
+    print("Build the aggregation comparison; do not assume a change or a reversal.")
+----
+
+[#exploration-aggregation-figure]
+[source,python]
+----
+# Independent investigation: two PM2.5–TEMP scatter panels.
+# Compare station-hours with station-day means using shared axis limits.
+# Distinguish stations by marker shape as well as colour.
+# State the paired counts and units in your captions.
+# Explain whether any numerical change is visible in the clouds.
+# Write your interpretation before discussing it with another pair.
+# Layout hint: reuse the scatter styling from Part 5 with a shared scale.
+# fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharex=True, sharey=True,
+#                          constrained_layout=True)
+# markers = ["o", "s", "^"]
+# colours = ["C0", "C1", "C2"]
+# for ax, title in zip(axes, ["Station-hours", "Station-day means"], strict=True):
+#     for i, station in enumerate(sorted(air["station"].unique())):
+#         # TODO: prepare this station's complete pairs at this panel's unit.
+#         ax.scatter(..., ..., label=station, marker=markers[i], color=colours[i],
+#                    s=18, alpha=0.4, edgecolors="none")
+#     ax.set(title=title, xlabel="PM2.5 (µg/m³)", ylabel="TEMP (°C)")
+#     ax.legend(title="Station", fontsize=8)
+#     ax.grid(alpha=0.2)
+# plt.show()
+----
+
+`sharex=True, sharey=True` keeps both panels on the same concentration and temperature scales. Reuse each station's marker and colour across panels. Supply the hourly and daily pairs yourself, and report their respective counts; the layout does not perform aggregation or missing-value selection.
+
+*Your interpretation:* Report the correlations you computed. Does grouping or averaging change their magnitude, sign, or both? Is the change visible in your plots? Do not presume a Simpson reversal: only claim what your evidence shows. Shared time regimes and weather remain possible explanations; a larger absolute correlation is not evidence of causation or representativeness.
+
+*Student prompt:* Write the two population questions these correlations could address. Why would treating 1,008 hourly rows as independent overstate the information available? For uncertainty and resampling, continue later with the xref:foundations/eda-sampling.adoc[sampling companion] and xref:foundations/mean-uncertainty.adoc[mean uncertainty reference].
+
+===== Computation checks — before the brief
+
+Check that the computations below are ready before drafting conclusions. These flags do not assess your plots or written reasoning; check those against the evidence-brief instructions.
+
+[#exploration-completion-check]
+[source,python]
+----
+computation_ready = pd.Series({
+    "quantiles and variance": quantiles is not None and variance_explicit is not None,
+    "statistical profile": profile is not None,
+    "station summaries": station_summary is not None,
+    "station-day summaries": daily is not None,
+    "paired covariance": paired_pm is not None and covariance_explicit is not None,
+    "explicit correlation": r_explicit is not None,
+    "matrix and paired counts": correlation is not None and pair_counts is not None,
+    "aggregation comparison": aggregation_comparison is not None,
+}, name="Computation supplied")
+computation_ready
+----
+
+==== Part 9 — Prepare your evidence brief
+
+*Purpose:* Choose and check the evidence you will communicate. Parts 0–8 produce the calculations and figures; the Results section below is the template for your finished brief.
+
+*Deliverable:* A one-page statistical evidence brief about the three-station, 14-day dataset extract (1–14 March 2013): two selected variables, a compact summary table, three figures, one supported claim per figure and a concrete limitation.
+
+*Preparation steps:*
+
+. *Choose two measured variables* from your completed Part 3 profile and give one sentence explaining your choice. Keep their own units and valid counts; you do not need to describe all eleven variables.
+. *Select three existing figures:* a distribution view from Part 2, a station/time view from Part 4, and a paired view from Part 5 or 8 (or your own comparable figures). Label them Figure 1, Figure 2 and Figure 3. Reuse the plots you have already prepared.
+. *Check one claim per figure* against a numerical summary and the plotted geometry. For a paired relationship, give Pearson r and the complete-pair count; exclude self-correlations and check whether a linear reading is supported. If comparing hourly and daily associations, state both observational units, r values and counts.
+. *Choose a concrete limitation* from coverage, missingness, measurement, dependence or selection. State which broader conclusion it prevents, then use Results to assemble the brief.
+
+*Review before exchanging:* Each claim cites a number or figure. Each caption states measurement units, observational unit, missing-data rule, valid count and one limitation. The distribution claim explains something the summary table hides; the grouped claim accounts for coverage and weighting; the paired claim distinguishes association from causation. Do not claim a sign reversal without evidence.
+
+In class, select the evidence and exchange one checked claim with a neighbour. Finish the brief independently after class and rerun the notebook from a fresh kernel. An unfinished calculation or plot should be reported as unfinished work, not presented as a result.
+
+[.worked-example-results#worked-statistical-exploration-results]
+=== Results
+
+*Importance:* Essential (P0)
+
+*Purpose: present your evidence brief.* Fill the table and short-paragraph outline below with the evidence selected in Part 9, and attach your three figures. This is the writing template for the deliverable; the preparation and review instructions are in Part 9. No numerical results or finished figures are supplied here.
+
+==== Selected-variable summary
+
+One row per selected variable, using the completed profile and declared quartiles. Units apply to the mean, median, IQR and maximum; Valid n counts the readings used for that variable.
+
+[cols="2,1,1,1,1,1,1",options="header"]
+|===
+|Variable |Unit |Valid n |Mean |Median |IQR |Maximum
+|Your variable |… |… |… |… |… |…
+|Your second variable |… |… |… |… |… |…
+|===
+
+==== Your evidence brief
+
+*Variable choice:* We chose … and … because … .
+
+The following outline is for your short paragraphs. Replace the gaps with your own observations and evidence; the sentence starters do not prescribe a direction or a result.
+
+[cols="1,3,3",options="header"]
+|===
+|Component |Draft sentence |Supporting evidence
+|Distribution
+|For …, the mean and median …; Figure 1 reveals … that the table alone hides.
+|Selected-variable table and Figure 1; units and valid n.
+|Station/time
+|Figure 2 shows … across stations/dates. Each plotted point represents …, based on … valid readings.
+|Grouped summaries and Figure 2; coverage and weighting.
+|Paired association
+|For … and …, r = … using … complete pairs. Figure 3 supports/qualifies this linear reading because … .
+|Paired-association table and Figure 3; observational unit, r and paired n for each comparison.
+|Limitation
+|These observations cannot establish … because … .
+|A specific audit or analysis limitation, tied to the claim it restricts.
+|===
+
+*Figure 1 — Distribution:* Attach your selected distribution figure and its caption here.
+
+*Figure 2 — Station/time:* Attach your selected grouped figure and its caption here.
+
+*Figure 3 — Paired association:* Attach your selected paired figure and its caption here.
+
+The compact table, short paragraphs and three captioned figures together form your one-page evidence brief.
+
+[.worked-example-conclusion#worked-statistical-exploration-conclusion]
+=== Conclusion
+
+*Importance:* Essential (P0)
+
+*Your conclusion:* Close your evidence brief with three sentences: one finding about a distribution, one about grouping or association, and one limitation. Each finding must cite your numerical or graphical evidence. State why this short three-station slice does not establish city-wide representativeness, independence, sensor calibration or causation.
+
+Download the xref:attachment$foundations/statistical-exploration.ipynb[student notebook]. Complete the skeletons in your copy, add your written interpretations, then restart the kernel and run all cells. No reference answers are embedded in this notebook.
+
+== Optional extensions — after the live session
+
+* *Distribution sensitivity:* change histogram bins, compare inverse-ECDF and interpolated quantiles, and explain which conclusions change. Use the xref:foundations/quantiles-exceedance-risk.adoc#def:generalized-quantile[quantile definition and examples].
+* *Weighting:* choose a variable with missing values, aggregate station-day means and valid counts, and compare equal-day with valid-hour weighting. Do not introduce fabricated defects into the canonical data.
+* *Matrix reading:* explain why `centered.T @ centered / (n - 1)` is a covariance matrix when every column uses the same retained rows. Relate its diagonal to sample variances and its off-diagonal entries to centred products.
+* *Long and wide views:* pivot the 42 station-day means to a date-by-station table; explain its shape and verify that reshaping preserves the values. Use the xref:foundations/tabular-data.adoc[arrays and tables reference].
+* *Counterexamples:* attempt the xref:foundations/eda-sampling.adoc#ex:simpson[synthetic Simpson exercise], labelled as synthetic, or explain why a symmetric stem:[X] and stem:[Y=X^2] can be dependent with zero covariance. Neither phenomenon is claimed for the Beijing slice.
+* *Uncertainty:* continue with xref:foundations/eda-sampling.adoc#_error_estimation[dependence and sampling] and the existing xref:foundations/mean-uncertainty.adoc[mean-estimation examples]. These follow the descriptive investigation, outside today's live route.

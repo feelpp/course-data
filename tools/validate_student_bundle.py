@@ -98,6 +98,8 @@ def validate_bundle(bundle: Path = DEFAULT_BUNDLE) -> list[str]:
             path = PurePosixPath(name)
             if path.is_absolute() or ".." in path.parts:
                 errors.append(f"Unsafe archive path: {name}")
+            if path.stem.endswith("-solution"):
+                errors.append(f"Reference solution in student bundle: {name}")
             if FORBIDDEN_PARTS & {part.lower() for part in path.parts}:
                 errors.append(f"Private or quarantined path in bundle: {name}")
             if {".venv", ".ruff_cache", ".pytest_cache", "__pycache__"} & set(path.parts):

@@ -96,6 +96,21 @@ Begin with the answer to the context question. Then state:
 
 Do not turn association into causation, training fit into future performance, a tolerance into statistical confidence, or one deterministic split into population certainty.
 
+## Guided practice and complete references
+
+Pages declared in `foundation_release.guided_practice_sources` with
+`page-course-format: guided-practice` preserve the five-part reasoning structure,
+but students complete the code, results, and conclusions. Supply early examples,
+then reduce support to skeletons and guidelines. The webpage shows no computed
+answers; the generated student notebook has cleared outputs and no embedded
+reference implementation for the later tasks.
+
+A requested complete teaching reference may remain published as an unlinked
+`-solution.adoc` page with `page-course-role: solution`. Exclude it from navigation,
+incoming hyperlinks, search, sitemap, and the student bundle. It is a website
+reference rather than a student notebook source. This teaching-practice exception
+does not change the private boundary for live assessments, hidden tests, or keys.
+
 ## Page and notebook parity
 
 The AsciiDoc page is canonical. Generated notebooks must preserve:

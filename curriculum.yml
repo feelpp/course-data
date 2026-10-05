@@ -1,5 +1,5 @@
 schema_version: 2
-decision_version: "2026-09-14-guided-python-pandas"
+decision_version: "2026-10-05-guided-statistical-exploration"
 
 course:
   id: course-data
@@ -46,6 +46,8 @@ execution_contract:
     - CPU correctness is the baseline; accelerator use is optional.
 
 foundation_release:
+  guided_practice_sources:
+    - docs/course/modules/ROOT/pages/foundations/statistical-exploration.adoc
   implementation_status: complete
   external_academic_review: pending
   pages:
@@ -59,6 +61,9 @@ foundation_release:
     - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality-practical.adoc
+    - docs/course/modules/ROOT/pages/foundations/statistical-exploration.adoc
+    - docs/course/modules/ROOT/pages/foundations/covariance-correlation.adoc
+    - docs/course/modules/ROOT/pages/foundations/statistical-plots.adoc
     - docs/course/modules/ROOT/pages/foundations/eda-sampling.adoc
     - docs/course/modules/ROOT/pages/foundations/safe-pipelines.adoc
     - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc
@@ -75,6 +80,9 @@ foundation_release:
     - docs/course/modules/ROOT/pages/foundations/probability-distributions-moments.adoc
     - docs/course/modules/ROOT/pages/foundations/quantiles-exceedance-risk.adoc
     - docs/course/modules/ROOT/pages/foundations/mean-uncertainty.adoc
+    - docs/course/modules/ROOT/pages/foundations/statistical-exploration.adoc
+    - docs/course/modules/ROOT/pages/foundations/covariance-correlation.adoc
+    - docs/course/modules/ROOT/pages/foundations/statistical-plots.adoc
     - docs/course/modules/ROOT/pages/foundations/eda-sampling.adoc
     - docs/course/modules/ROOT/pages/foundations/safe-pipelines.adoc
     - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc
@@ -164,6 +172,9 @@ worked_example_release:
     - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality-practical.adoc
+    - docs/course/modules/ROOT/pages/foundations/statistical-exploration.adoc
+    - docs/course/modules/ROOT/pages/foundations/covariance-correlation.adoc
+    - docs/course/modules/ROOT/pages/foundations/statistical-plots.adoc
     - docs/course/modules/ROOT/pages/foundations/eda-sampling.adoc
     - docs/course/modules/ROOT/pages/foundations/safe-pipelines.adoc
     - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc
@@ -187,6 +198,9 @@ worked_example_release:
     - docs/course/modules/ROOT/pages/foundations/tabular-data.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality.adoc
     - docs/course/modules/ROOT/pages/foundations/data-quality-practical.adoc
+    - docs/course/modules/ROOT/pages/foundations/statistical-exploration.adoc
+    - docs/course/modules/ROOT/pages/foundations/covariance-correlation.adoc
+    - docs/course/modules/ROOT/pages/foundations/statistical-plots.adoc
     - docs/course/modules/ROOT/pages/foundations/eda-sampling.adoc
     - docs/course/modules/ROOT/pages/foundations/safe-pipelines.adoc
     - docs/course/modules/ROOT/pages/foundations/metrics-errors.adoc
@@ -1046,14 +1060,14 @@ learning_activities:
     deliverable: Grouped counts and means, validated registry join, and written quality decisions
     acceptance_criteria: [The change in unit after grouping is explained., 'Join cardinality, key preservation, and unmatched metadata are checked.', 'Missing measurements, duplicate keys, and unusual values receive distinct justified treatment.']
   - id: E04
-    title: Evidence-based exploratory brief
-    type: independent_analysis
+    title: Statistical evidence brief from the audited Beijing slice
+    type: guided_analysis
     duration_minutes: 55
     concepts: [DP-ARR-01, DP-TAB-02, DP-EDA-01, DP-SMP-01]
     outcomes: [LO1, LO2, LO3, LO4, LO6, LO8]
     datasets: [uci-501]
-    deliverable: One-page brief with three labelled figures and a representativeness warning
-    acceptance_criteria: [Each figure answers a stated question without hiding missingness or scale., 'Population, sample, selection limits, and unsupported generalisations are explicit.', Array axes and the long-table observation key are explained before plotting.]
+    deliverable: One-page brief with a distribution, station/time comparison, paired relationship, and explicit limitations
+    acceptance_criteria: [Each conclusion cites numerical or graphical evidence with units and valid counts., 'Summary statistics and covariance are computed explicitly before convenience methods.', 'Aggregation, pairwise missingness, and the observational unit are explained.', 'Population, sample, selection limits, and unsupported generalisations are explicit.']
   - id: E05
     title: Repair a leaking baseline
     type: guided_lab_and_code_review
@@ -1235,31 +1249,40 @@ schedule:
       minutes: 20
       task: Revisit one selection or missing-value example from Block 2 and bring an unresolved question.
   - block: 4
-    title: Array and reshape bridge, EDA, sampling, and visual communication
+    title: From data audit to descriptive statistical exploration
     concepts: [DP-ARR-01, DP-TAB-02, DP-EDA-01, DP-SMP-01]
     outcomes: [LO1, LO2, LO3, LO4, LO6, LO8]
     prerequisites: [DP-QLT-02, DP-QLT-03]
     datasets: [uci-501]
     activities: [E04]
     assessment_evidence: [A1, A2, A3, A4]
-    checkpoint: One-page evidence-based EDA brief
+    checkpoint: Statistical evidence brief with declared units, paired counts, and limitations
     contact_plan:
-      - label: Array shapes and column operations
-        minutes: 10
-      - label: Long and wide table demonstration
-        minutes: 10
-      - label: Sampling and summaries
+      - label: Reconnect with the audited slice
+        minutes: 5
+      - label: One variable, explicit summaries, and distribution plots
+        minutes: 25
+      - label: Build and interpret the statistical profile
         minutes: 15
-      - label: EDA lab including shape and reshape practice
-        minutes: 55
         activity: E04
-      - label: Mean and quantile uncertainty
-        minutes: 20
-      - label: Checkpoint
+      - label: Break
         minutes: 10
+      - label: Station and station-day comparisons
+        minutes: 20
+        activity: E04
+      - label: Predict and inspect paired relationships
+        minutes: 10
+        activity: E04
+      - label: Centred arrays, covariance, and correlation
+        minutes: 15
+      - label: Aggregation and population limitations
+        minutes: 10
+      - label: Evidence brief and checked claim
+        minutes: 10
+        activity: E04
     preparation:
-      minutes: 45
-      task: 'Bounded refresher: notation/expectation 15 min, mean standard error 15 min, empirical quantile/exceedance 15 min.'
+      minutes: 20
+      task: Revisit the audit report and one pandas selection/grouping example; bring a limitation and a question. Theory references are consulted during the investigation.
   - block: 5
     title: Splits, leakage, preprocessing pipelines, and baselines
     concepts: [DP-EVAL-01, DP-EVAL-02, DP-PIPE-01, DP-EVAL-03, DP-TST-01, DP-DOC-01, DP-AI-01]
@@ -1282,7 +1305,7 @@ schedule:
         minutes: 10
     preparation:
       minutes: 20
-      task: Read the splitting and leakage definitions; state an independent unit.
+      task: Read the sampling companion's representativeness and dependence sections, then the splitting/leakage definitions; state an independent unit. Mean/quantile uncertainty examples remain later support.
   - block: 6
     title: Regression, stable least squares, likelihood, and residuals
     concepts: [DP-LIN-01, DP-PROB-01, DP-NUM-01, DP-MET-01]

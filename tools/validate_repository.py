@@ -388,6 +388,15 @@ def validate_blueprint(curriculum: dict[str, Any], errors: list[str]) -> None:
         source = page.read_text(encoding="utf-8")
         if "stem:[" not in source and "[stem]" not in source:
             errors.append(f"Foundation page lacks mathematical notation: {relative}")
+    declared_guided = set(release.get("guided_practice_sources", []))
+    actual_guided = {
+        relative
+        for relative in release["pages"]
+        if (ROOT / relative).exists()
+        and parse_header(ROOT / relative).get("page-course-format") == "guided-practice"
+    }
+    if declared_guided != actual_guided or declared_guided - set(release["notebook_sources"]):
+        errors.append("Guided-practice sources must match declared foundation notebook pages")
     mathematical_background = ROOT / release["pages"][0]
     if mathematical_background.exists():
         source = mathematical_background.read_text(encoding="utf-8")
@@ -807,8 +816,8 @@ def validate_pages(concepts: set[str], outcomes: set[str], errors: list[str]) ->
         if attrs["page-course-assessed"] not in {"yes", "no"}:
             errors.append(f"{path.relative_to(ROOT)}: assessed must be yes or no")
 
-        # Required teaching pages must contain a complete solved example, not a
-        # labelled observation followed by evidence deferred to a laboratory.
+        # References contain a complete worked example. Declared guided practice
+        # keeps the same reasoning structure while students produce the evidence.
         if attrs["page-course-priority"] in {"P0", "P1"} and path.parent.name in {
             "foundations",
             "analytical",
@@ -876,7 +885,12 @@ def validate_pages(concepts: set[str], outcomes: set[str], errors: list[str]) ->
                 errors.append(
                     f"{path.relative_to(ROOT)}: worked example lacks a bounded result table"
                 )
-            if "page-jupyter" in attrs and "[%dynamic" not in worked:
+            guided = attrs.get("page-course-format") == "guided-practice"
+            if guided and ("[source,python]" not in worked or "TODO" not in worked):
+                errors.append(
+                    f"{path.relative_to(ROOT)}: guided practice needs editable code tasks"
+                )
+            if "page-jupyter" in attrs and "[%dynamic" not in worked and not guided:
                 errors.append(
                     f"{path.relative_to(ROOT)}: notebook-backed worked example lacks "
                     "executable evidence"
@@ -932,7 +946,11 @@ def validate_executable_pages(errors: list[str]) -> None:
                 f"{path.relative_to(ROOT)}: executable code cannot depend on generated site data"
             )
         attrs = parse_header(path)
-        missing = sorted(required_attributes - set(attrs))
+        page_required = required_attributes
+        if attrs.get("page-course-role") == "solution" and path.stem.endswith("-solution"):
+            # Unlinked website references are not student notebook sources.
+            page_required = required_attributes - {"page-jupyter"}
+        missing = sorted(page_required - set(attrs))
         if missing:
             relative = path.relative_to(ROOT)
             errors.append(f"{relative}: executable page is missing contract attributes {missing}")

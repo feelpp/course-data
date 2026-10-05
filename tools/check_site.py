@@ -291,7 +291,14 @@ def main() -> None:
             jupyter_links += 1
             for error in validate_jupyter_target(page, target):
                 errors.append(f"{page.relative_to(SITE)}: {error}")
+        if (
+            page.name.endswith("-solution.html")
+            and '<meta name="robots" content="noindex, nofollow">' not in page_html
+        ):
+            errors.append(f"{page.relative_to(SITE)}: solution reference must be unindexed")
         for target in parser.targets:
+            if unquote(urlsplit(target).path).endswith("-solution.html"):
+                errors.append(f"{page.relative_to(SITE)}: hyperlink exposes a solution reference")
             destination = target_path(page, target)
             if destination is None:
                 continue
@@ -300,6 +307,18 @@ def main() -> None:
                 candidates.extend([destination / "index.html", destination.with_suffix(".html")])
             if not any(candidate.exists() for candidate in candidates):
                 errors.append(f"{page.relative_to(SITE)} -> {target}")
+    search_path = SITE / "search-index.json"
+    if search_path.exists():
+        search = json.loads(search_path.read_text(encoding="utf-8"))
+        if any("-solution.html" in doc.get("url", "") for doc in search.get("documents", [])):
+            errors.append("Search index exposes a solution reference")
+    if sitemap.exists() and "-solution.html" in sitemap.read_text(encoding="utf-8"):
+        errors.append("Sitemap exposes a solution reference")
+    student_html = SITE / "course-data/foundations/statistical-exploration.html"
+    if student_html.exists():
+        text = student_html.read_text(encoding="utf-8")
+        if "dynamic-py-result" in text or "data:image/svg+xml;base64" in text:
+            errors.append("Guided statistical exploration must not publish computed results")
     generated_notebooks, exercise_by_source, worked_sources = expected_notebook_contracts()
     for generated_notebook in generated_notebooks:
         if not generated_notebook.exists():
@@ -454,8 +473,48 @@ def main() -> None:
             "table_results": 8,
             "terms": ("The big picture", "controlled defects", "Exit ticket"),
         },
+        "statistical-exploration.html": {
+            "stem_blocks": 6,
+            "terms": ("Part 0", "Part 9", "How the support changes", "TODO", "Your interpretation"),
+        },
+        "statistical-exploration-solution.html": {
+            "stem_blocks": 6,
+            "table_results": 14,
+            "matplotlib_results": 5,
+            "svg_results": 5,
+            "terms": (
+                "Part 0",
+                "Part 9",
+                "is a tool, not the analysis",
+                "station-day",
+                "Selected-variable summary",
+                "Computation checks",
+                "Example evidence brief",
+            ),
+        },
+        "covariance-correlation.html": {
+            "stem_blocks": 4,
+            "table_results": 2,
+            "matplotlib_results": 1,
+            "svg_results": 1,
+            "terms": ("Sample covariance", "Sample Pearson correlation", "three pairs"),
+        },
+        "statistical-plots.html": {
+            "stem_blocks": 1,
+            "table_results": 2,
+            "matplotlib_results": 9,
+            "svg_results": 9,
+            "terms": (
+                "Histogram",
+                "ECDF",
+                "Boxplot",
+                "Scatter plot",
+                "Correlation heatmap",
+                "Grouped time plot",
+            ),
+        },
         "eda-sampling.html": {
-            "stem_blocks": 3,
+            "stem_blocks": 2,
             "matplotlib_results": 1,
             "svg_results": 1,
             "terms": ("Empirical covariance and correlation", "Sampling and representativeness"),
