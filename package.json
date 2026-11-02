@@ -46,7 +46,7 @@
     "braces": "file:vendor/npm/course-data-braces-3.0.3-course.1.tgz",
     "handlebars": "4.7.10",
     "handlebars-utils": "1.0.6",
-    "katex": "0.18.4"
+    "katex": "0.19.1"
   },
   "devDependencies": {
     "http-server": "14.1.1"
