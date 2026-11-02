@@ -34,6 +34,9 @@ antora:
           - foundations/data-quality-practical.adoc
           - foundations/statistical-exploration.adoc
           - foundations/covariance-correlation.adoc
+          - sessions/joint-variation.adoc
+          - sessions/matrix-geometry.adoc
+          - sessions/pca-practical.adoc
           - foundations/statistical-plots.adoc
           - foundations/eda-sampling.adoc
           - foundations/safe-pipelines.adoc

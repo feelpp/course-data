@@ -1,0 +1,159 @@
+{
+  "asOf": "2 November 2026",
+  "introduced": "Pandas · audit · descriptions · covariance · Pearson matrix",
+  "next": "PCA / SVD and reconstruction on 2 November; regression planned for 9 November",
+  "stages": [
+    {
+      "title": "1. Reliable observations",
+      "question": "What can these measurements tell us?",
+      "blocks": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "title": "2. Model and validate",
+      "question": "Can a fitted rule generalise?",
+      "blocks": [
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "title": "3. Compare and understand",
+      "question": "Which complexity and geometry help?",
+      "blocks": [
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "title": "4. Deliver and defend",
+      "question": "Can someone check and reuse the result?",
+      "blocks": [
+        12,
+        13,
+        14
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "number": 1,
+      "short": "Question and audit",
+      "math": "Units · populations · measurement error",
+      "practice": "State the observation unit; document missingness and provenance.",
+      "evidence": "An audit with one justified quality decision",
+      "page": "foundations/data-quality-practical.html"
+    },
+    {
+      "number": 2,
+      "short": "Python and pandas",
+      "math": "Sets · masks · finite sums",
+      "practice": "Select, derive and summarise a small sensor table; check by hand.",
+      "evidence": "An explained calculation and a rerunnable notebook",
+      "page": "foundations/python-pandas.html"
+    },
+    {
+      "number": 3,
+      "short": "Groups, joins and SQL",
+      "math": "Partitions · keys · cardinality",
+      "practice": "Aggregate observations and join sensor metadata without duplication.",
+      "evidence": "A checked join and a quality record",
+      "page": "foundations/pandas-sql.html"
+    },
+    {
+      "number": 4,
+      "short": "Describe and relate",
+      "math": "Empirical distributions · covariance · Pearson",
+      "practice": "Explain distribution plots, centred products and common-row matrices.",
+      "evidence": "A statistical profile and a qualified joint claim",
+      "page": "foundations/statistical-exploration.html"
+    },
+    {
+      "number": 5,
+      "short": "Splits and baselines",
+      "math": "Conditioning · empirical loss · information boundaries",
+      "practice": "Choose a split; fit preprocessing on training rows; evaluate a baseline.",
+      "evidence": "A leakage-safe pipeline and a project question",
+      "page": "foundations/safe-pipelines.html"
+    },
+    {
+      "number": 6,
+      "short": "Regression",
+      "math": "Least squares · QR/SVD · likelihood",
+      "practice": "Use a stable solver; inspect residuals and numerical conditioning.",
+      "evidence": "A checked fit with residual interpretation",
+      "page": "analytical/linear-probabilistic.html"
+    },
+    {
+      "number": 7,
+      "short": "Classification",
+      "math": "Conditional probability · log loss · thresholds",
+      "practice": "Fit logistic/softmax models; interpret confusion counts and metrics.",
+      "evidence": "A justified metric and decision threshold",
+      "page": "analytical/linear-probabilistic.html"
+    },
+    {
+      "number": 8,
+      "short": "Control 1 + regularisation",
+      "math": "Validity checks · penalised objectives",
+      "practice": "Demonstrate the foundations; begin the regularisation/CV comparison.",
+      "evidence": "Individual evidence, then a regularisation prediction",
+      "page": "assessment/overview.html"
+    },
+    {
+      "number": 9,
+      "short": "Select complexity",
+      "math": "Bias–variance · penalties · cross-validation",
+      "practice": "Search over full pipelines and interpret learning curves.",
+      "evidence": "A justified model-selection result",
+      "page": "analytical/model-selection.html"
+    },
+    {
+      "number": 10,
+      "short": "Trees and ensembles",
+      "math": "Partitions · impurity · averaging · additive losses",
+      "practice": "Compare a tree and forest; explain a supplied boosting comparison.",
+      "evidence": "A model comparison with interpretation limits",
+      "page": "analytical/tree-ensembles.html"
+    },
+    {
+      "number": 11,
+      "short": "PCA and clustering",
+      "math": "Covariance · SVD · distances · stability",
+      "practice": "Project the data; compare k-means, hierarchical and density geometries.",
+      "evidence": "A geometric interpretation and a stability check",
+      "page": "analytical/pca-clustering.html"
+    },
+    {
+      "number": 12,
+      "short": "Performance and delivery",
+      "math": "Memory size · complexity · numerical equivalence",
+      "practice": "Measure a columnar workflow and rerun a documented analysis.",
+      "evidence": "A measured comparison and reproducible delivery",
+      "page": "analytical/performance-columnar.html"
+    },
+    {
+      "number": 13,
+      "short": "Mini-project clinic",
+      "math": "Assumptions · uncertainty · comparison criteria",
+      "practice": "Defend the question, data decisions, baseline and selection procedure.",
+      "evidence": "A revised project and result card",
+      "page": "assessment/mini-project.html"
+    },
+    {
+      "number": 14,
+      "short": "Control 2 and synthesis",
+      "math": "Validity · generalisation · synthesis",
+      "practice": "Audit an analysis and connect the mathematical and computational choices.",
+      "evidence": "An individual validity audit and course synthesis",
+      "page": "assessment/overview.html"
+    }
+  ]
+}

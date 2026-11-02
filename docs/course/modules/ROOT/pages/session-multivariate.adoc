@@ -1,0 +1,87 @@
+= Class sessions — 20 October and 2 November 2026
+:page-course-language: en
+:page-course-concepts: DP-EDA-01, DP-SMP-01, DP-PCA-01, DP-NUM-01, DP-LIN-01, DP-CV-01
+:page-course-priority: P1
+:page-course-difficulty: D2
+:page-course-duration-minutes: 360
+:page-course-outcomes: LO4, LO6, LO7, LO8
+:page-course-prerequisites: audit, univariate exploration, inner products, elementary probability
+:page-course-assessed: no
+
+This dated route follows the actual progress reported by the instructor.
+On *20 October (4 hours)* the class reached the *Pearson correlation matrix*;
+students were asked to finish the existing 5 October practical. PCA, SVD and
+regression were not completed that day.
+
+The *2 November session (2 hours)* starts from those matrices: why choose new
+coordinates, how to find directions of greatest variance, and how to interpret
+their combinations of physical measurements. Theory alternates with a guided
+PCA practical. The closing question introduces the purpose of regression,
+planned for *9 November*, together with the first steps in supervised machine
+learning. No regression fit is required on 2 November.
+
+The slides are in French. English AsciiDoc lesson pages are the authoritative
+sources for the downloadable notebooks, which have no stored outputs.
+
+[cols="2,3,3",options="header"]
+|===
+|Date and scope |French oral support |English lesson and practical
+|20 October · 4 h · through the Pearson matrix
+|xref:attachment$slides/multivariate/session-1.pdf[Covariance and the Pearson matrix (38 slides)]
+|xref:sessions/joint-variation.adoc[Dated lesson] · xref:attachment$sessions/joint-variation.ipynb[Download notebook] · xref:foundations/statistical-exploration.adoc#exploration-paired-work[5 October TP to finish]
+|2 November · 2 h · PCA, SVD and reconstruction
+|xref:attachment$slides/multivariate/session-2.pdf[PCA, SVD and reconstruction (18 slides)]
+|xref:sessions/matrix-geometry.adoc[Theory and worked reference] · xref:attachment$sessions/matrix-geometry.ipynb[Download reference notebook] · xref:sessions/pca-practical.adoc[Guided PCA practical, 45 min] · xref:attachment$sessions/pca-practical.ipynb[Download practical notebook]
+|9 November · planned continuation
+|Regression and first steps in supervised learning
+|Introduce regression, then develop training/validation, error metrics and a simple reference rule. This is an announced direction, not a completed session.
+|===
+
+== The transition: why principal components?
+
+The covariance matrix S and correlation matrix R describe pairs of original
+variables. PCA asks a new question: can combinations of those variables
+represent observations with fewer coordinates while retaining much of their
+variance? Projection defines scores; a unit-length constraint makes the
+variance maximization meaningful; eigenvectors solve it and SVD computes it.
+A principal axis need not represent a directly measured physical quantity.
+Its coefficients and the original observations support its interpretation.
+
+The xref:sessions/pca-practical.adoc[dedicated practical] reuses Beijing data
+and the existing worked demonstrations. It supplies data loading and plot
+layouts while students calculate directions, scores, retained variance and
+reconstruction error, with three checkpoints and a common comparison of two
+and three components. It occupies 45 minutes of the two-hour November class,
+not an additional contact session.
+
+== How to use the materials
+
+The 20 October page groups the paired analysis and matrix introduction under
+one date. Its final checklist returns to the students' own
+xref:foundations/statistical-exploration.adoc[5 October notebook]. Complete the
+existing Results brief instead of creating a second report. Finishing this
+assignment remains distinct from declaring it completed by every student.
+
+On 2 November, recall S and R, derive the core PCA argument on the board,
+then work on the guided practical. Full demonstrations remain a reference.
+The chronological regression experiment and detailed least-squares proofs
+are preparation for the following week, rather than compulsory work in the
+PCA practical. Mathematical results stay visible; proofs, code and results
+use separate collapsible panels on the website and remain readable in notebooks.
+
+== Data and scope
+
+The unchanged canonical Beijing table contains 1,008 station-hours from
+Aotizhongxin, Changping and Dingling, 1–14 March 2013. The matrix and PCA
+examples use the same 1,002 complete rows for six variables. The separate
+xref:attachment$datasets/air-quality-seasonal/DATASET.md[licensed seasonal supplement]
+is optional; its March rows repeat the canonical slice and must not be
+concatenated as additional observations. All required data are in the bundle.
+
+PCA is descriptive here. A later predictive transformation must be fitted
+only on training data. The supplied regression estimates same-hour PM2.5
+from available same-hour measurements, not unknown future covariates. The
+already explored extract cannot provide a pristine final test.
+
+This dated delivery route reuses the existing covariance, PCA and regression
+chapters. It does not add hours to the fourteen-block, 28-hour semester contract.

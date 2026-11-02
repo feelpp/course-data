@@ -14,6 +14,32 @@
 - French legacy material may be retained in the private/raw archive for provenance, but it is rewritten in English before publication. It is not exposed as a parallel French site.
 - Technical terms follow standard international English usage. A glossary may explain synonyms, but the surrounding page remains English.
 - Student submissions are expected in English. An instructor may approve an individual language accommodation without creating a second public course version.
+- Dated teaching exception, 19 October 2026, explicitly requested by the instructor:
+  the 20 October covariance/Pearson Typst class slides, accompanying exercise sheet
+  and offline Plotly experiment are in French. The Antora reference pages,
+  navigation, ordinary notebooks and assessment language remain English. This is
+  a class-support exception, not a parallel translation of the course site.
+- Teaching exception extended on 20 October 2026 at the instructor's explicit
+  request: the two-session multivariate Typst decks and instructor notes are
+  French. Their canonical AsciiDoc pages and generated notebooks remain English.
+  This supplies a teaching route across existing topics without changing the
+  fourteen-block contact-time allocation or assessment contract.
+- On 20 October 2026 the instructor requested removal of the earlier four-hour
+  session page. Its public page, attachments and Plotly collector were removed;
+  navigation and the course map now point to the two-session multivariate route.
+  The superseded authoring sources remain outside the published site.
+
+- Progress correction requested on 2 November 2026: the four-hour 20 October
+  class reached the Pearson correlation matrix; the 5 October practical was
+  assigned for completion. Its matrix introduction is grouped with that dated
+  lesson. The two-hour 2 November session combines the covariance/correlation
+  to PCA transition, SVD and a 45-minute guided PCA practical. The instructor
+  subsequently confirmed that centering and matrix multiplication are feasible
+  but take time, and regression is not required on 2 November. The common
+  practical compares two then three components with optional hints and three
+  checkpoints; minutes 60–105 are reserved for it. Regression and supervised
+  learning begin the following week, with only a closing question on 2 November. These
+  dated records do not assert mastery or add contact hours to the semester.
 
 ### Course identity and workload
 

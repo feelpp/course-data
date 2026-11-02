@@ -1,0 +1,59 @@
+{
+  "sessions": [
+    {
+      "id": "session-1",
+      "title": "20 octobre 2026 — Covariance et matrice de Pearson",
+      "notebook": "joint-variation",
+      "slides": 38,
+      "schedule": [],
+      "date": "2026-10-20",
+      "label": "20 octobre 2026",
+      "minutes": 240,
+      "timing_mode": "record"
+    },
+    {
+      "id": "session-2",
+      "title": "2 novembre 2026 — ACP et SVD : directions, scores et reconstruction",
+      "notebook": "matrix-geometry",
+      "slides": 18,
+      "schedule": [
+        [
+          10,
+          "Rappel : matrice de Pearson, unité d’observation et centrage"
+        ],
+        [
+          15,
+          "Exemple à deux variables : variation commune, contraste et projection"
+        ],
+        [
+          20,
+          "Au tableau : variance projetée, contrainte unitaire et vecteurs propres"
+        ],
+        [
+          10,
+          "SVD : dimensions et calcul de l’ACP"
+        ],
+        [
+          5,
+          "Pause et ouverture du notebook"
+        ],
+        [
+          45,
+          "TP ACP : calcul, interprétation, reconstruction à deux puis trois composantes"
+        ],
+        [
+          10,
+          "Mise en commun et limites"
+        ],
+        [
+          5,
+          "Question pour le 9 novembre : estimer une réponse"
+        ]
+      ],
+      "date": "2026-11-02",
+      "label": "2 novembre 2026",
+      "minutes": 120,
+      "timing_mode": "planned"
+    }
+  ]
+}

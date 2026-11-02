@@ -12,6 +12,14 @@ The course contains fourteen two-hour blocks. Essential (P0) and Core (P1) mater
 
 Use the block guide below for the teaching sequence. Page-duration labels describe complete reference and practice routes; they are not additional contact hours. Each block below totals 120 minutes, including its stated activities. The final examination is separate from these 28 contact hours.
 
+== A graphical route through the course
+
+image::course-roadmap.svg[Planned fourteen-block progression from reliable observations to validated models and reproducible delivery,width=100%]
+
+xref:attachment$course-roadmap.html[Open the roadmap with expandable questions, mathematical tools and practical evidence]. The diagram follows the planned curriculum; it does not mark blocks as completed. As of 2 November, pandas, audit, descriptive statistics, covariance and the Pearson matrix have been introduced. The 20 October class stopped at that matrix. PCA and SVD are the 2 November focus; regression is planned for 9 November. Introduced topics still need checks of understanding.
+
+The xref:session-multivariate.adoc[dated class route] distinguishes the xref:sessions/joint-variation.adoc[20 October covariance/Pearson lesson] from the xref:sessions/matrix-geometry.adoc[2 November PCA/SVD lesson] and its xref:sessions/pca-practical.adoc[guided practical]. The 2 November session includes a 45-minute PCA practical; regression and its validation are planned for 9 November. These materials reuse existing course topics without adding contact hours.
+
 == Learning Python and pandas together
 
 No pandas experience is required at entry. Block 2 follows xref:foundations/python-pandas.adoc[Python refresher and first steps with pandas]: the same four-sensor table as the first class, predictions by hand, short code cells, and time to explain. Block 3 follows xref:foundations/pandas-sql.adoc[grouping, joins, and the SQL bridge]. Block 4 introduces array shapes and reshaping, then practises them during EDA. The full xref:foundations/tabular-data.adoc[tabular reference] supports this progression; reading it in advance is not required.

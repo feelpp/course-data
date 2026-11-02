@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1180" role="img" aria-labelledby="title desc">
+<title id="title">CSMI Data Processing and Mining: 14 two-hour blocks</title>
+<desc id="desc">Planned progression from audit and pandas to joint description, validated models and reproducible delivery. Introduced topics are shown separately; the dated delivery route is shown separately.</desc>
+<style>text{font-family:Arial,sans-serif;fill:#142a24}.muted{fill:#50675e}.green{fill:#155f46}.label{font-weight:bold;font-size:14px;letter-spacing:1px}</style>
+<rect width="1600" height="1180" fill="#faf8f2"/>
+<text x="44" y="50" font-size="14" class="green label" font-weight="normal">FROM OBSERVATIONS TO DEFENSIBLE RESULTS</text>
+<text x="44" y="102" font-size="38" class="" font-weight="bold">Data Processing and Mining · CSMI M1</text>
+<text x="44" y="138" font-size="21" class="" font-weight="normal">14 × 2 h = 28 contact hours · Planned sequence, not a record of completed classes</text>
+<rect x="44" y="165" width="1512" height="121" rx="12" fill="#eaf0e9"/>
+<text x="64" y="193" font-size="14" class="green label" font-weight="normal">TEACHING POSITION · 2 November 2026</text>
+<text x="64" y="227" font-size="22" class="" font-weight="normal">Introduced: Pandas · audit · descriptions · covariance · Pearson matrix</text>
+<text x="64" y="261" font-size="20" class="green" font-weight="normal">Next: PCA / SVD and reconstruction on 2 November; regression planned for 9 November. Introduced does not mean mastered.</text>
+<text x="44" y="333" font-size="24" class="green" font-weight="bold">1. Reliable observations</text>
+<text x="44" y="362" font-size="17" class="muted" font-weight="normal">What can these measurements tell</text>
+<text x="44" y="384" font-size="17" class="muted" font-weight="normal">us?</text>
+<rect x="44" y="415" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="59" y="443" font-size="20" class="" font-weight="bold">01  Question and audit</text>
+<text x="59" y="472" font-size="16" class="green" font-weight="normal">Units · populations · measurement error</text>
+<text x="59" y="523" font-size="16" class="" font-weight="normal">An audit with one justified quality</text>
+<text x="59" y="544" font-size="16" class="" font-weight="normal">decision</text>
+<rect x="44" y="584" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="59" y="612" font-size="20" class="" font-weight="bold">02  Python and pandas</text>
+<text x="59" y="641" font-size="16" class="green" font-weight="normal">Sets · masks · finite sums</text>
+<text x="59" y="692" font-size="16" class="" font-weight="normal">An explained calculation and a</text>
+<text x="59" y="713" font-size="16" class="" font-weight="normal">rerunnable notebook</text>
+<rect x="44" y="753" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="59" y="781" font-size="20" class="" font-weight="bold">03  Groups, joins and SQL</text>
+<text x="59" y="810" font-size="16" class="green" font-weight="normal">Partitions · keys · cardinality</text>
+<text x="59" y="861" font-size="16" class="" font-weight="normal">A checked join and a quality record</text>
+<rect x="44" y="922" width="364" height="153" rx="10" fill="white" stroke="#155f46" stroke-width="2"/>
+<text x="59" y="950" font-size="20" class="" font-weight="bold">04  Describe and relate</text>
+<text x="59" y="979" font-size="16" class="green" font-weight="normal">Empirical distributions · covariance ·</text>
+<text x="59" y="1000" font-size="16" class="green" font-weight="normal">Pearson</text>
+<text x="59" y="1030" font-size="16" class="" font-weight="normal">A statistical profile and a qualified</text>
+<text x="59" y="1051" font-size="16" class="" font-weight="normal">joint claim</text>
+<text x="426" y="333" font-size="24" class="green" font-weight="bold">2. Model and validate</text>
+<text x="426" y="362" font-size="17" class="muted" font-weight="normal">Can a fitted rule generalise?</text>
+<rect x="426" y="415" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="441" y="443" font-size="20" class="" font-weight="bold">05  Splits and baselines</text>
+<text x="441" y="472" font-size="16" class="green" font-weight="normal">Conditioning · empirical loss ·</text>
+<text x="441" y="493" font-size="16" class="green" font-weight="normal">information boundaries</text>
+<text x="441" y="523" font-size="16" class="" font-weight="normal">A leakage-safe pipeline and a project</text>
+<text x="441" y="544" font-size="16" class="" font-weight="normal">question</text>
+<rect x="426" y="584" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="441" y="612" font-size="20" class="" font-weight="bold">06  Regression</text>
+<text x="441" y="641" font-size="16" class="green" font-weight="normal">Least squares · QR/SVD · likelihood</text>
+<text x="441" y="692" font-size="16" class="" font-weight="normal">A checked fit with residual</text>
+<text x="441" y="713" font-size="16" class="" font-weight="normal">interpretation</text>
+<rect x="426" y="753" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="441" y="781" font-size="20" class="" font-weight="bold">07  Classification</text>
+<text x="441" y="810" font-size="16" class="green" font-weight="normal">Conditional probability · log loss ·</text>
+<text x="441" y="831" font-size="16" class="green" font-weight="normal">thresholds</text>
+<text x="441" y="861" font-size="16" class="" font-weight="normal">A justified metric and decision</text>
+<text x="441" y="882" font-size="16" class="" font-weight="normal">threshold</text>
+<rect x="426" y="922" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="441" y="950" font-size="20" class="" font-weight="bold">08  Control 1 + regularisation</text>
+<text x="441" y="979" font-size="16" class="green" font-weight="normal">Validity checks · penalised objectives</text>
+<text x="441" y="1030" font-size="16" class="" font-weight="normal">Individual evidence, then a</text>
+<text x="441" y="1051" font-size="16" class="" font-weight="normal">regularisation prediction</text>
+<text x="808" y="333" font-size="24" class="green" font-weight="bold">3. Compare and understand</text>
+<text x="808" y="362" font-size="17" class="muted" font-weight="normal">Which complexity and geometry</text>
+<text x="808" y="384" font-size="17" class="muted" font-weight="normal">help?</text>
+<rect x="808" y="415" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="823" y="443" font-size="20" class="" font-weight="bold">09  Select complexity</text>
+<text x="823" y="472" font-size="16" class="green" font-weight="normal">Bias–variance · penalties · cross-</text>
+<text x="823" y="493" font-size="16" class="green" font-weight="normal">validation</text>
+<text x="823" y="523" font-size="16" class="" font-weight="normal">A justified model-selection result</text>
+<rect x="808" y="584" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="823" y="612" font-size="20" class="" font-weight="bold">10  Trees and ensembles</text>
+<text x="823" y="641" font-size="16" class="green" font-weight="normal">Partitions · impurity · averaging ·</text>
+<text x="823" y="662" font-size="16" class="green" font-weight="normal">additive losses</text>
+<text x="823" y="692" font-size="16" class="" font-weight="normal">A model comparison with interpretation</text>
+<text x="823" y="713" font-size="16" class="" font-weight="normal">limits</text>
+<rect x="808" y="753" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="823" y="781" font-size="20" class="" font-weight="bold">11  PCA and clustering</text>
+<text x="823" y="810" font-size="16" class="green" font-weight="normal">Covariance · SVD · distances ·</text>
+<text x="823" y="831" font-size="16" class="green" font-weight="normal">stability</text>
+<text x="823" y="861" font-size="16" class="" font-weight="normal">A geometric interpretation and a</text>
+<text x="823" y="882" font-size="16" class="" font-weight="normal">stability check</text>
+<text x="1190" y="333" font-size="24" class="green" font-weight="bold">4. Deliver and defend</text>
+<text x="1190" y="362" font-size="17" class="muted" font-weight="normal">Can someone check and reuse the</text>
+<text x="1190" y="384" font-size="17" class="muted" font-weight="normal">result?</text>
+<rect x="1190" y="415" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="1205" y="443" font-size="20" class="" font-weight="bold">12  Performance and delivery</text>
+<text x="1205" y="472" font-size="16" class="green" font-weight="normal">Memory size · complexity · numerical</text>
+<text x="1205" y="493" font-size="16" class="green" font-weight="normal">equivalence</text>
+<text x="1205" y="523" font-size="16" class="" font-weight="normal">A measured comparison and reproducible</text>
+<text x="1205" y="544" font-size="16" class="" font-weight="normal">delivery</text>
+<rect x="1190" y="584" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="1205" y="612" font-size="20" class="" font-weight="bold">13  Mini-project clinic</text>
+<text x="1205" y="641" font-size="16" class="green" font-weight="normal">Assumptions · uncertainty · comparison</text>
+<text x="1205" y="662" font-size="16" class="green" font-weight="normal">criteria</text>
+<text x="1205" y="692" font-size="16" class="" font-weight="normal">A revised project and result card</text>
+<rect x="1190" y="753" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
+<text x="1205" y="781" font-size="20" class="" font-weight="bold">14  Control 2 and synthesis</text>
+<text x="1205" y="810" font-size="16" class="green" font-weight="normal">Validity · generalisation · synthesis</text>
+<text x="1205" y="861" font-size="16" class="" font-weight="normal">An individual validity audit and course</text>
+<text x="1205" y="882" font-size="16" class="" font-weight="normal">synthesis</text>
+<text x="44" y="1126" font-size="23" class="green" font-weight="bold">Every block: question → mathematical tool → code → checked claim</text>
+<text x="44" y="1160" font-size="18" class="muted" font-weight="normal">Beijing is the recurring dataset. Project work begins in Block 5. Assessments: Blocks 8 and 14.</text>
+</svg>

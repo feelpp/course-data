@@ -386,7 +386,20 @@ if daily is None:
 
 *Student prompt:* Explain why the denominator changes from 1,008 readings to 42 station-days. Is the mean of 14 days at one station the same target quantity as the mean over three stations during one day?
 
+[#exploration-paired-work]
 ==== Part 5 — What do two variables do together?
+
+[NOTE]
+====
+*Practical to finish after the 20 October class.* The class reached the Pearson
+correlation matrix. Keep your existing
+work. Reuse the scatter plots below, then prioritize Part 6's explicit covariance
+and Part 7's Pearson calculation on the same complete pairs. If time remains,
+finish the correlation heatmap and pair counts, then continue Part 8.
+Use Part 9 and Results to update your existing evidence brief with one checked
+paired finding. The xref:./../sessions/joint-variation.adoc[20 October lesson] gives
+the derivations and the final practical checklist.
+====
 
 Use the xref:foundations/statistical-plots.adoc#scatterplot[scatter plot purpose and reading guide] before inspecting pairs.
 

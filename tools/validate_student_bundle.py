@@ -50,6 +50,8 @@ REQUIRED_PATHS = {
     "templates/project-starter/.github/workflows/check.yml",
     "templates/project-starter/uv.lock",
     "datasets/teaching/air-quality/MANIFEST.yml",
+    "datasets/teaching/air-quality-seasonal/MANIFEST.yml",
+    "datasets/teaching/air-quality-seasonal/observations.csv",
     "datasets/teaching/predictive-maintenance/MANIFEST.yml",
     "templates/result-card.md",
     "templates/block-feedback.csv",
@@ -68,6 +70,7 @@ def expected_notebooks(curriculum: dict) -> tuple[set[str], dict[str, str]]:
         *curriculum["analytical_release"]["notebook_sources"],
         *curriculum["enrichment_release"]["page_notebook_sources"],
         *curriculum["practice_release"]["notebook_sources"],
+        *curriculum["classroom_routes"]["multivariate"]["notebook_sources"],
         *[specimen["source"] for specimen in curriculum["exercise_release"]["public_specimens"]],
     ]
     expected = {

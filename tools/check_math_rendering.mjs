@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import katex from 'katex';
+import { courseMathContent } from './math-course-content.mjs';
 
 const siteRoot = fileURLToPath(new URL('../public/course-data/', import.meta.url));
 
@@ -35,13 +36,11 @@ const errors = [];
 for await (const path of filesBelow(siteRoot)) {
   if (!path.endsWith('.html')) continue;
   const html = await readFile(path, 'utf8');
-  const mainStart = html.indexOf('<main ');
-  const mainEnd = html.indexOf('</main>', mainStart);
-  if (mainStart === -1 || mainEnd === -1) {
+  const courseContent = courseMathContent(html);
+  if (courseContent === null) {
     errors.push(`${path}: main course-content landmark is missing`);
     continue;
   }
-  const courseContent = html.slice(mainStart, mainEnd);
   const expressions = courseContent.matchAll(/\\\(([\s\S]*?)\\\)|\\\[([\s\S]*?)\\\]/g);
   for (const match of expressions) {
     const displayMode = match[2] !== undefined;

@@ -1,0 +1,12 @@
+schema_version: 1
+source_id: uci-501
+licence: CC-BY-4.0
+generated_by: teaching/sessions/multivariate/build_seasonal_data.py
+snapshot_sha256: d1b9261c54132f04c374f762f1e5e512af19f95c95fd6bfa1e8ac7e927e3b0b8
+note: "Days 1\u201314 of March, June, September, December 2013 at three stations;\
+  \ unmodified values, selected windows, not a seasonal climatology."
+files:
+- path: observations.csv
+  rows: 4032
+  sha256: 31763fcd5acede871e2e2261fa93b6b0ce2940941ba73cf7007233eb825040f6
+  size_bytes: 349889

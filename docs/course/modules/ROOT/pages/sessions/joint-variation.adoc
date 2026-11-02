@@ -1,0 +1,1433 @@
+= 20 October 2026 — Covariance and the Pearson matrix
+:page-course-language: en
+:page-course-concepts: DP-EDA-01, DP-SMP-01, DP-NUM-01
+:page-course-priority: P0
+:page-course-difficulty: D2
+:page-course-duration-minutes: 240
+:page-course-outcomes: LO4, LO6, LO7
+:page-course-prerequisites: univariate statistics, paired observations, inner products, expectation
+:page-course-assessed: no
+:page-jupyter: true
+:page-course-execution-profile: fast
+:stem: latexmath
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 8388608
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+:session-hub-link: xref:session-multivariate.adoc[the session hub]
+ifdef::backend-jupyter[]
+:session-hub-link: https://feelpp.github.io/course-data/course-data/session-multivariate.html[the session hub on the course website]
+endif::[]
+:audit-denominators-link: xref:./../foundations/data-quality-practical.adoc#_7_show_how_missingness_changes_analysis_denominators[missing-value exercise]
+ifdef::backend-jupyter[]
+:audit-denominators-link: xref:./../foundations/data-quality-practical.adoc[missing-value exercise]
+endif::[]
+
+:october-practical-link: xref:./../foundations/statistical-exploration.adoc#exploration-paired-work[the 5 October Statistical Exploration practical, Parts 5–7]
+ifdef::backend-jupyter[]
+:october-practical-link: xref:./../foundations/statistical-exploration.adoc[the 5 October Statistical Exploration practical, Parts 5–7]
+endif::[]
+
+*Question:* How do two variables vary together, and what does a correlation actually measure?
+
+This executable teaching notebook follows the
+xref:./../foundations/data-quality-practical.adoc[guided data audit] and the
+xref:./../foundations/statistical-exploration.adoc[description of one variable at a time].
+Predict before running each demonstration. Guided exercises leave the choice of
+quantities and the interpretation to you; supplied plotting layouts save time.
+The website displays the code; run the notebook to produce the evidence.
+On the website, open a proof or code panel when needed; computed results have their own nested panel. In the notebook, all proof steps remain readable and code stays executable. French slides and the two-session route are on {session-hub-link}.
+
+== Probability recall: model, sampling and observations
+
+*Probabilistic model before the data.* Let stem:[(\Omega,\mathcal F,\mathbb P)]
+be the underlying probability space: stem:[\Omega] lists possible outcomes,
+stem:[\mathcal F] specifies the events to which probabilities are assigned,
+and stem:[\mathbb P] assigns those probabilities. We do not need further
+measure theory here. A generic real random pair stem:[(X,Y)] has joint law
+stem:[P_{XY}]; expectation stem:[\mathbb E] refers to this probability model.
+Assume finite second moments, stem:[\mathbb E(X^2)<\infty] and
+stem:[\mathbb E(Y^2)<\infty]. The population means and covariance are
+*deterministic parameters*, generally unknown:
+
+[stem]
+++++
+\mu_X=\mathbb E[X],\qquad \mu_Y=\mathbb E[Y],\qquad
+\sigma_{XY}=\operatorname{Cov}(X,Y)
+=\mathbb E[(X-\mu_X)(Y-\mu_Y)].
+++++
+
+Variance is the special case Y=X:
+
+[stem]
+++++
+\sigma_X^2=\operatorname{Var}(X)=\mathbb E[(X-\mu_X)^2].
+++++
+
+Fix an integer stem:[n\geq2]. Before observation, stem:[(X_i,Y_i)] is the
+random pair with index stem:[i=1,\ldots,n]. Its actual observed values are
+stem:[x_i=X_i(\omega_0)] and stem:[y_i=Y_i(\omega_0)], where
+stem:[\omega_0\in\Omega] is the realized outcome of the whole sampling
+experiment. The file contains these lowercase numerical values. We will
+state the same-law and independence assumptions explicitly before the
+unbiasedness proof; a numerical file does not establish them by itself.
+
+*Check the objects:* a new sample can change the observed values and the
+sample mean. It does not change the population parameter in the fixed model.
+
+=== Basic expectation and covariance rules
+
+For square-integrable random variables U,V,W and deterministic constants a,b,
+linearity of expectation and bilinearity of covariance give
+
+[stem]
+++++
+\mathbb E[aU+bV]=a\mathbb E[U]+b\mathbb E[V],\qquad
+\operatorname{Cov}(aU+bV,W)
+=a\operatorname{Cov}(U,W)+b\operatorname{Cov}(V,W).
+++++
+
+The second formula also holds in the second argument. Independence of U and V
+gives stem:[\mathbb E(UV)=\mathbb E(U)\mathbb E(V)], hence zero covariance;
+the converse does not hold. The proof below uses these rules on finite sums
+of the random sample variables, not on already fixed numerical estimates.
+
+.Proposition: Independence implies zero covariance
+[.thm#thm:joint-independence]
+****
+For independent real random variables U and V with finite second moments,
+stem:[\mathbb E(UV)=\mathbb E(U)\mathbb E(V)] and
+stem:[\operatorname{Cov}(U,V)=0]. The converse is false: zero covariance
+alone does not establish independence.
+****
+
+[%collapsible,id=joint-independence-proof]
+.Proof — Independence, factorization and zero covariance
+====
+*Step 1 — Factor the joint probabilities.* To see the mechanism explicitly,
+first suppose U and V take finitely many possible values, denoted by u and v.
+Here stem:[\mathbb P(U=u,V=v)] is the probability that both equalities hold
+in the same experiment. Independence means
+
+[stem]
+++++
+\mathbb P(U=u,V=v)=\mathbb P(U=u)\mathbb P(V=v).
+++++
+
+*Step 2 — Compute the expectation of the product.* Each possible pair (u,v)
+contributes its product uv, weighted by the probability of that pair. Insert
+the factorization from Step 1, and then separate the two sums:
+
+[stem]
+++++
+\begin{aligned}
+\mathbb E[UV]
+&=\sum_u\sum_v uv\,\mathbb P(U=u,V=v)\\
+&=\sum_u\sum_v u\,\mathbb P(U=u)\;v\,\mathbb P(V=v)\\
+&=\left(\sum_u u\,\mathbb P(U=u)\right)
+  \left(\sum_v v\,\mathbb P(V=v)\right)\\
+&=\mathbb E[U]\mathbb E[V].
+\end{aligned}
+++++
+
+The factor stem:[u\mathbb P(U=u)] depends only on u, and
+stem:[v\mathbb P(V=v)] only on v: the double sum is therefore the product
+of the two sums. This calculation displays the mechanism for finite-valued
+variables. The same expectation factorization holds for independent
+variables with finite second moments in general; for variables with a
+density, the analogous calculation uses integrals instead of sums.
+
+*Step 3 — Expand the covariance.* Define the constants
+stem:[\mu_U=\mathbb E(U)] and stem:[\mu_V=\mathbb E(V)]. First expand the
+product, then use linearity of expectation, and finally replace each mean
+by its definition:
+
+[stem]
+++++
+\begin{aligned}
+\operatorname{Cov}(U,V)
+&=\mathbb E[(U-\mu_U)(V-\mu_V)]\\
+&=\mathbb E[UV-\mu_VU-\mu_UV+\mu_U\mu_V]\\
+&=\mathbb E[UV]-\mu_V\mathbb E[U]-\mu_U\mathbb E[V]+\mu_U\mu_V\\
+&=\mathbb E[UV]-\mu_V\mu_U-\mu_U\mu_V+\mu_U\mu_V\\
+&=\mathbb E[UV]-\mu_U\mu_V.
+\end{aligned}
+++++
+
+This identity holds without independence. Under independence, Step 2 gives
+stem:[\mathbb E(UV)=\mu_U\mu_V], so
+
+[stem]
+++++
+\operatorname{Cov}(U,V)=\mu_U\mu_V-\mu_U\mu_V=0.
+++++
+
+*Small example.* Let U and V record two independent fair coin tosses, with
+1 for heads and 0 for tails. Then stem:[\mu_U=\mu_V=1/2]. The product UV
+equals 1 only when both tosses are heads, with probability 1/4; otherwise
+it equals 0. Thus stem:[\mathbb E(UV)=1/4=(1/2)(1/2)] and the covariance
+is zero. Each centered product is nevertheless either +1/4 or −1/4:
+independence makes their average over the probability law zero, not each
+individual product. An observed finite sample need not have exactly zero
+sample covariance.
+====
+
+=== I.i.d. means independent pairs with the same joint law
+
+For the following estimation result, assume that
+stem:[(X_1,Y_1),\ldots,(X_n,Y_n)] are *independent and identically distributed*
+(*i.i.d.*) with joint law stem:[P_{XY}], finite second moments and fixed n≥2.
+
+. *Same joint law:* each pair has the same means stem:[\mu_X,\mu_Y] and the
+  same within-pair covariance stem:[\sigma_{XY}]. In particular,
+  stem:[\operatorname{Cov}(X_i,Y_i)=\sigma_{XY}].
+. *Independence between indices:* for stem:[i\ne j], the two random vectors
+  stem:[(X_i,Y_i)] and stem:[(X_j,Y_j)] are independent. Consequently their
+  components stem:[X_i] and stem:[Y_j] are independent, so
+  stem:[\mathbb E(X_iY_j)=\mathbb E(X_i)\mathbb E(Y_j)]. Therefore
+
+[stem]
+++++
+\operatorname{Cov}(X_i,Y_j)
+=\mathbb E[X_iY_j]-\mathbb E[X_i]\mathbb E[Y_j]=0\qquad(i\ne j).
+++++
+
+Independence *between pairs* does not require independence *within a pair*:
+temperature and dew point recorded together may be dependent. Let stem:[C_n]
+be the n-by-n matrix whose (i,j) entry is stem:[\operatorname{Cov}(X_i,Y_j)].
+The diagonal refers to the same observation index; the other entries refer
+to different indices:
+
+[stem]
+++++
+C_n=\begin{pmatrix}
+\sigma_{XY}&0&\cdots&0\\
+0&\sigma_{XY}&\cdots&0\\
+\vdots&\vdots&\ddots&\vdots\\
+0&0&\cdots&\sigma_{XY}
+\end{pmatrix}=\sigma_{XY}I_n.
+++++
+
+Here stem:[I_n] is the identity matrix of size n. Exactly n diagonal terms
+remain. This matrix indexes *observations*, not the different measured
+variables of the feature covariance matrix introduced in §§ 10–12.
+
+*Pause:* Which assumption gives the same diagonal entries? Which assumption
+sets the off-diagonal entries to zero? Could the latter hold automatically
+for consecutive meteorological hours?
+
+== Class record: 20 October, through the Pearson matrix
+
+The four-hour class reached covariance, scalar Pearson correlation and the
+*Pearson correlation matrix*. The matrix introduction formerly at the start
+of the former second lesson is now included in §§ 10–12 of this dated lesson. PCA and SVD are planned for 2 November; regression for 9 November; they are not
+listed as completed on 20 October.
+
+Students were asked to finish the existing 5 October Statistical Exploration
+practical, using the covariance and Pearson calculations developed here.
+The checklist in § 13 supports that assignment; it does not claim that every
+student completed the practical during class. The independent station/period
+investigation and simulation variations remain optional study material.
+
+[cols="1,3",options="header"]
+|===
+|Status |Material
+|Introduced on 20 October |Centered products; population versus sample quantities; the n−1 correction under its assumptions; Pearson and its limits; common-row covariance and Pearson matrices.
+|Practical to finish |The existing 5 October notebook: paired plots, covariance, Pearson, heatmap and pair counts; update the existing Results brief.
+|Next: 2 November |Principal component analysis (PCA/ACP), singular value decomposition (SVD), and first steps in regression.
+|===
+
+Use the xref:./../foundations/covariance-correlation.adoc[mathematical reference]
+and xref:./../foundations/statistical-plots.adoc[plot guide] for revision.
+
+== 1. Observe pairs before summarizing
+
+Each row records measurements at *one monitoring station during one hour*:
+we call this a *station-hour*. To compare temperature and dew point, take both
+measurements from that same row. These two values form a *paired observation*.
+Pairing values from different hours would answer a different question.
+
+In the previous investigation, a histogram or an ECDF described the values of
+*one variable at a time*: which values occurred and how often. This is its
+*distribution*. When we consider one variable separately within a dataset
+containing several variables, we also call this its *marginal distribution*.
+For example, the temperature histogram describes temperature alone; it does
+not tell us which dew-point reading accompanied each temperature.
+
+We now ask whether higher temperatures tend to occur at the same hours as
+higher or lower dew points. This is what *joint movement* means here: how
+the two measurements vary together across paired observations. Two separate
+histograms cannot answer that question, because they do not show the pairing.
+We compare paired recorded values, not changes between successive hours.
+A *scatter plot* represents each pair by a point; the collection of points is
+also called a *point cloud*.
+
+Reuse the xref:./../foundations/data-quality-practical.adoc[previous audit report]
+before interpreting that plot. Its checks establish the *key* (the columns
+identifying one row, here station and timestamp), *validity* (whether recorded
+values satisfy the declared rules), measurement units and *missingness*
+(which measurements are absent). Use the report rather than repeating the audit.
+
+A *complete pair* has both selected measurements available in the same row.
+For each comparison, keep those pairs and leave out rows where either selected
+measurement is missing. A missing value in an unrelated column does not exclude
+the row from this particular comparison. *Imputation* means replacing a missing
+value with an estimated one, for example a mean or an interpolated value.
+We do not impute values in this descriptive exercise. Record how many pairs
+remain: this is the sample size stem:[n], which determines the divisor used
+in a calculation. This follows the audit's
+{audit-denominators-link}.
+
+[%collapsible]
+.Code demonstration 1 — open, predict, then inspect Results
+====
+
+[#joint-variation-code-1]
+[%dynamic,python,fail-on-error=]
+----
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+
+def course_file(relative):
+    """Find prepared data in a checkout or an extracted student bundle."""
+    for root in (Path.cwd(), *Path.cwd().parents):
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(f"Extract the student bundle or use the checkout: {relative}")
+
+
+air = pd.read_csv(course_file("datasets/teaching/air-quality/observations.csv"))
+air["timestamp"] = pd.to_datetime(air[["year", "month", "day", "hour"]])
+stations = ["Aotizhongxin", "Changping", "Dingling"]
+assert sorted(air.station.unique()) == stations
+assert air.shape[0] == 1008
+assert not air.duplicated(["station", "timestamp"]).any()
+units = {"PM2.5": "µg/m³", "PM10": "µg/m³", "TEMP": "°C",
+         "DEWP": "°C", "PRES": "hPa", "WSPM": "m/s"}
+print(air.groupby("station").size())
+print(air.timestamp.min(), air.timestamp.max())
+----
+====
+
+Here `TEMP` is air temperature and `DEWP` is dew-point temperature, both in °C.
+The dew point is the temperature to which air would need to cool, at the same
+pressure and water-vapour content, to become saturated. These are two different
+measurements, not two names for temperature.
+
+*Predict:* Should TEMP and DEWP tend to move together? Does that prediction
+imply a straight line, that one measurement causes the other, or a statement
+about every season? In the next cell, `dropna()` keeps rows with both values.
+
+[%collapsible]
+.Code demonstration 2 — open, predict, then inspect Results
+====
+
+[#joint-variation-code-2]
+[%dynamic,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="The cloud contains March station-hours; inspect direction and spread before reading a coefficient.",figure-caption="Paired temperature and dew point",result-interpretation="The cloud contains March station-hours; inspect direction and spread before reading a coefficient."]
+----
+paired = air[["TEMP", "DEWP"]].dropna()
+fig, ax = plt.subplots(figsize=(6, 4), constrained_layout=True)
+ax.scatter(paired.TEMP, paired.DEWP, s=12, alpha=0.3, edgecolors="none")
+ax.set(xlabel="Temperature (°C)", ylabel="Dew point (°C)",
+       title=f"March 1–14, 2013: complete station-hours, n={len(paired)}")
+plt.show()
+----
+====
+
+Read direction, spread, curvature, groups and unusual points separately.
+This combined scatter plot includes three stations and fourteen days.
+Combining groups is also called *pooling*. Nearby hours can share the same
+weather conditions, so the points are not independent repeats of a weather
+experiment. We will also examine the stations separately.
+
+== 2. Why center and multiply deviations?
+
+Uncentered products mix the variables' mean levels with how their deviations
+vary together. Centering
+makes zero mean deviations; products are positive for deviations with the
+same sign and negative for opposite signs. Averaging adds reinforcement and
+cancellation. Symmetry follows from multiplication, and
+stem:[\operatorname{Cov}(X,X)=\operatorname{Var}(X)]. The unit is the product
+of the measurement units. Large covariance need not mean tight alignment.
+
+*Define the statistic before computing it.* The random sample means are
+stem:[\bar X=n^{-1}\sum_{i=1}^nX_i] and
+stem:[\bar Y=n^{-1}\sum_{i=1}^nY_i]. Their realizations are numerical means:
+stem:[\bar x=\bar X(\omega_0)=n^{-1}\sum_{i=1}^nx_i], and similarly for y.
+The capital stem:[\bar X] is a random variable; stem:[\mu_X] is a fixed
+population parameter. Even when stem:[\mathbb E(\bar X)=\mu_X], the two
+objects are not interchangeable.
+
+Define the random sum stem:[Q_{XY}], which depends on the fixed sample size n,
+and its realized value stem:[q_{xy}]:
+
+[stem]
+++++
+Q_{XY}=\sum_{i=1}^n(X_i-\bar X)(Y_i-\bar Y),\qquad
+q_{xy}=Q_{XY}(\omega_0)=\sum_{i=1}^n(x_i-\bar x)(y_i-\bar y).
+++++
+
+Our notation for the observed calculations is stem:[c_n=q_{xy}/n] for the
+covariance of the empirical distribution and stem:[s_{xy}=q_{xy}/(n-1)] for
+the corrected sample covariance. Similarly,
+stem:[s_x^2=\sum_i(x_i-\bar x)^2/(n-1)]. An *estimator* is a statistic of
+the random sample; an *estimate* is its realized numerical value. Thus the
+random estimator stem:[S_{XY}=Q_{XY}/(n-1)] realizes to
+stem:[s_{xy}=S_{XY}(\omega_0)]. Defining this rule does not yet prove it unbiased.
+
+*Board exercise:* For stem:[x=(1,2,3,4)] hours and
+stem:[y=(1,3,2,4)] points, find both means, the four products, stem:[q_{xy}],
+stem:[c_n], stem:[s_{xy}], and their units before running this cell.
+
+[%collapsible]
+.Code demonstration 3 — open, predict, then inspect Results
+====
+
+[#joint-variation-code-3]
+[%dynamic,python,fail-on-error=]
+----
+x = np.array([1., 2., 3., 4.])
+y = np.array([1., 3., 2., 4.])
+xc, yc = x - x.mean(), y - y.mean()
+q_xy = xc @ yc  # realized Q_XY, not a population parameter
+cn, sxy = q_xy / len(x), q_xy / (len(x) - 1)
+assert np.allclose([q_xy, cn, sxy], [4., 1., 4 / 3])
+print(pd.DataFrame({"x": x, "y": y, "xc": xc, "yc": yc, "product": xc * yc}))
+print({"q_xy (observed centered-product sum)": q_xy, "empirical covariance": cn, "sample covariance": sxy})
+----
+====
+
+Replacing stem:[y] by stem:[5-y] gives stem:[(4,2,3,1)]: exactly the same four
+individual values, reordered. Its marginal distribution therefore stays the
+same, but the centered products reverse sign. This shows why pairing, rather
+than two separate histograms, determines covariance.
+
+== 3. Why n−1? Three different statistical objects
+
+Three objects answer different questions:
+
+[cols="2,3,3",options="header"]
+|===
+|Object |Definition |Question
+|Population parameter
+|stem:[\sigma_{XY}=\operatorname{Cov}_{P_{XY}}(X,Y)], an expectation under the population law.
+|How do the model's two variables vary together?
+|Covariance of the observed empirical law
+|stem:[c_n=q_{xy}/n], a number computed from the observed pairs.
+|What is the exact covariance of the probability distribution giving equal weight to these recorded pairs?
+|Estimator of the population covariance
+|stem:[S_{XY}=Q_{XY}/(n-1)], a random variable; its observed value is stem:[s_{xy}].
+|What rule has the correct expectation under specified sampling assumptions?
+|===
+
+The *empirical probability measure* is
+stem:[\widehat P_n=n^{-1}\sum_{i=1}^n\delta_{(x_i,y_i)}], where
+stem:[\delta_{(x_i,y_i)}] puts all its probability at the recorded pair.
+It assigns weight 1/n to each pair, counting repeated values with their
+multiplicity. For the coordinate variables on these recorded pairs, its
+covariance is exactly
+
+[stem]
+++++
+\operatorname{Cov}_{\widehat P_n}(X,Y)
+=\frac1n\sum_{i=1}^n(x_i-\bar x)(y_i-\bar y)=c_n.
+++++
+
+In this expression the distribution is the observed empirical law, not the
+population law stem:[P_{XY}]. Division by n is correct for that question.
+
+=== Sampling assumptions used below
+
+Use the opening probability recap: fixed n≥2, common joint law, finite second
+moments and independence between pairs. In particular, the cross-index matrix
+has exactly n diagonal entries equal to the population covariance; its other
+entries vanish by independence, not just by centering.
+
+=== The unbiasedness proof: a random estimator, then its realized value
+
+An estimator is *unbiased* when its expectation under repeated sampling equals
+the population parameter. The statement concerns the random statistic
+stem:[S_{XY}], not an expectation taken over the already fixed number stem:[s_{xy}].
+
+.Proposition: Unbiased covariance under i.i.d. sampling
+[.thm#thm:joint-unbiased]
+****
+Under the assumptions just stated, the estimator stem:[S_{XY}=Q_{XY}/(n-1)]
+satisfies stem:[\mathbb E(S_{XY})=\sigma_{XY}]. Its observed value
+stem:[s_{xy}=q_{xy}/(n-1)] is not guaranteed to equal stem:[\sigma_{XY}].
+****
+
+[%collapsible]
+.Proof — Unbiased covariance under i.i.d. sampling
+====
+*Step 1 — Identify the random algebra.* Expand each centered deviation as
+stem:[X_i-\bar X=(X_i-\mu_X)-(\bar X-\mu_X)], and likewise for Y.
+The population means are fixed constants; the sample means are random.
+Multiplication gives all four terms:
+
+[stem]
+++++
+\begin{aligned}
+Q_{XY}
+={}&\sum_{i=1}^n(X_i-\mu_X)(Y_i-\mu_Y)\\
+&-(\bar Y-\mu_Y)\sum_{i=1}^n(X_i-\mu_X)\\
+&-(\bar X-\mu_X)\sum_{i=1}^n(Y_i-\mu_Y)\\
+&+n(\bar X-\mu_X)(\bar Y-\mu_Y).
+\end{aligned}
+++++
+
+*Step 2 — Collect the cross terms, without independence.* By the definition of
+the sample mean, stem:[\sum_i(X_i-\mu_X)=n(\bar X-\mu_X)], and similarly for Y.
+Each of the two subtracted terms is therefore
+stem:[n(\bar X-\mu_X)(\bar Y-\mu_Y)]. The last term adds one copy back:
+
+[stem]
+++++
+Q_{XY}=\sum_{i=1}^n(X_i-\mu_X)(Y_i-\mu_Y)
+-n(\bar X-\mu_X)(\bar Y-\mu_Y).
+++++
+
+This is an algebraic identity. Neither independence nor taking expectations
+was needed. It also holds for realized numbers with lowercase means.
+
+*Step 3 — Locate exactly where the sampling assumptions enter.* Same joint
+law gives stem:[\mathbb E(\bar X)=\mu_X], stem:[\mathbb E(\bar Y)=\mu_Y], and
+an expectation stem:[n\sigma_{XY}] for the first sum. Hence
+
+[stem]
+++++
+\mathbb E[Q_{XY}]=n\sigma_{XY}-n\operatorname{Cov}(\bar X,\bar Y).
+++++
+
+Bilinearity of covariance (expanding sums in either argument) gives
+
+[stem]
+++++
+\begin{aligned}
+\operatorname{Cov}(\bar X,\bar Y)
+&=\operatorname{Cov}\left(\frac1n\sum_{i=1}^nX_i,\frac1n\sum_{j=1}^nY_j\right)\\
+&=\frac1{n^2}\sum_{i=1}^n\sum_{j=1}^n\operatorname{Cov}(X_i,Y_j)\\
+&=\frac1{n^2}\left(\sum_{i=1}^n\sigma_{XY}+\sum_{i\ne j}0\right)
+=\frac{n\sigma_{XY}}{n^2}=\frac{\sigma_{XY}}n.
+\end{aligned}
+++++
+
+The off-diagonal zeros follow from independence between pairs, as derived
+above; the n equal diagonal entries follow from their common joint law.
+
+*Step 4 — Take the expectation of the estimator, not of a fixed estimate.*
+Substitute this covariance of means:
+
+[stem]
+++++
+\mathbb E[Q_{XY}]=n\sigma_{XY}-n\frac{\sigma_{XY}}n
+=(n-1)\sigma_{XY},\qquad
+\boxed{\mathbb E[S_{XY}]=\sigma_{XY}}.
+++++
+
+Across independent repetitions of the whole n-pair experiment, the estimator's
+average approaches this expectation. One realized estimate can be above or
+below the target. The theorem does not assert its accuracy on one file.
+====
+
+*Variance is the same calculation with Y=X.* In that special case
+stem:[\sigma_{XX}=\sigma_X^2=\operatorname{Var}(X)] and
+stem:[Q_{XX}=\sum_i(X_i-\bar X)^2]. The same expansion and
+stem:[\operatorname{Var}(\bar X)=\sigma_X^2/n] yield
+
+[stem]
+++++
+\mathbb E[Q_{XX}]=(n-1)\sigma_X^2,\qquad
+S_{XX}=\frac{Q_{XX}}{n-1},\qquad
+\mathbb E[S_{XX}]=\sigma_X^2.
+++++
+
+Its realized value is stem:[s_x^2=\sum_i(x_i-\bar x)^2/(n-1)].
+
+*Why the other divisor remains legitimate.* Before realization, define
+stem:[\widehat\sigma_{XY,n}=Q_{XY}/n]. Under the same i.i.d. assumptions,
+
+[stem]
+++++
+\mathbb E[\widehat\sigma_{XY,n}]=\frac{n-1}{n}\sigma_{XY},\qquad
+\operatorname{Bias}(\widehat\sigma_{XY,n})
+=\mathbb E[\widehat\sigma_{XY,n}]-\sigma_{XY}=-\frac{\sigma_{XY}}n.
+++++
+
+Bias is expected estimator minus target. The divisor-n estimator's expectation
+is contracted towards zero: its bias is negative for a positive covariance,
+positive for a negative covariance, and zero when the covariance is zero.
+The realized value stem:[c_n] is still the exact covariance of the empirical
+law. These are two different questions about the same formula. Divisor n also
+arises for covariance maximum likelihood in an unconstrained i.i.d. Gaussian
+model with unknown mean; that is an optional separate estimation criterion.
+
+*Connection to Beijing.* Consecutive station-hours can share weather patterns;
+for different indices, stem:[\operatorname{Cov}(X_i,Y_j)] need not vanish.
+Even if all indices had the same means and joint law, the correct intermediate
+formula would retain every cross-time term:
+
+[stem]
+++++
+\mathbb E[Q_{XY}]=n\sigma_{XY}
+-\frac1n\sum_{i=1}^n\sum_{j=1}^n\operatorname{Cov}(X_i,Y_j).
+++++
+
+With differing station or period distributions even the common-law assumption
+needs justification. The descriptive calculation stem:[s_{xy}] remains
+computable, but the i.i.d. unbiasedness conclusion does not transfer unchanged.
+Selecting complete pairs also does not establish representative sampling from
+an original population: missingness and the sampling protocol matter.
+
+[%collapsible]
+.Code demonstration 4 — open, predict, then inspect Results
+====
+
+[#joint-variation-code-4]
+[%dynamic,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="The two histograms illustrate bias and spread under the explicitly simulated i.i.d. model.",figure-caption="Covariance estimator simulation",result-interpretation="The two histograms illustrate bias and spread under the explicitly simulated i.i.d. model."]
+----
+# Independent Monte Carlo datasets; arrays contain realized random draws.
+rng = np.random.default_rng(20261020)
+repetitions = 20000
+true_covariance, true_variance = 0.7, 1.0
+sizes = [5, 20, 100]
+mc_rows = []
+fig, axes = plt.subplots(1, 3, figsize=(11, 3.5), constrained_layout=True)
+for ax, sample_size in zip(axes, sizes, strict=True):
+    draws = rng.multivariate_normal([0., 0.], [[1., .7], [.7, 1.]],
+                                   size=(repetitions, sample_size))
+    centered = draws - draws.mean(axis=1, keepdims=True)
+    q_rep = (centered[:, :, 0] * centered[:, :, 1]).sum(axis=1)
+    squared_rep = (centered[:, :, 0]**2).sum(axis=1)
+    for ddof in [0, 1]:
+        covariance = q_rep / (sample_size - ddof)
+        variance = squared_rep / (sample_size - ddof)
+        factor = (sample_size - 1) / (sample_size - ddof)
+        # NumPy conventions, checked on one realized dataset.
+        assert np.isclose(covariance[0], np.cov(draws[0], rowvar=False, ddof=ddof)[0, 1])
+        assert np.isclose(variance[0], draws[0, :, 0].var(ddof=ddof))
+        mc_rows.append({"n": sample_size, "ddof": ddof,
+                        "MC covariance mean": covariance.mean(),
+                        "theoretical covariance mean": factor * true_covariance,
+                        "MC variance mean": variance.mean(),
+                        "theoretical variance mean": factor * true_variance})
+        ax.hist(covariance, bins=50, density=True, histtype="step",
+                linestyle="--" if ddof == 0 else "-", label=f"ddof={ddof}")
+    ax.axvline(true_covariance, color="black", label="Population covariance")
+    ax.set(xlabel="Estimated covariance", ylabel="Density", title=f"n={sample_size}")
+axes[-1].legend(fontsize=7)
+print(pd.DataFrame(mc_rows).round(5).to_string(index=False))
+print("Monte Carlo averages approximate expectations; the algebra is the proof.")
+plt.show()
+----
+====
+
+*Interpret:* Unbiased does not mean exact for one sample, minimum variance,
+or robust to outliers. Which part of this experiment justifies the expected values?
+
+== 4. Units motivate Pearson; transformations have different purposes
+
+Define the population standard deviations stem:[\sigma_X=\sqrt{\operatorname{Var}(X)}] and stem:[\sigma_Y=\sqrt{\operatorname{Var}(Y)}], and assume both are positive. Define
+
+[stem]
+++++
+\rho_{XY}=\frac{\operatorname{Cov}(X,Y)}{\sigma_X\sigma_Y},\qquad
+Z_X=\frac{X-\mu_X}{\sigma_X},\quad Z_Y=\frac{Y-\mu_Y}{\sigma_Y}.
+++++
+
+.Proposition: Pearson is covariance after standardization
+[.thm#thm:joint-standardization]
+****
+For the population-standardized variables just defined, stem:[\operatorname{Cov}(Z_X,Z_Y)=\rho_{XY}].
+****
+
+[%collapsible]
+.Proof — Pearson is covariance after standardization
+====
+
+*Step 1.* Linearity of expectation gives stem:[\mathbb E(Z_X)=(\mathbb E(X)-\mu_X)/\sigma_X=0], and similarly for Y.
+
+*Step 2.* Their covariance is therefore stem:[\mathbb E(Z_XZ_Y)]. Pulling the constant denominator outside the expectation gives
+stem:[\operatorname{Cov}(Z_X,Z_Y)=\rho_{XY}]. Standardization removes the
+product of units and makes each variance one. It does not linearize a curve,
+remove outliers, or make a distribution Gaussian.
+====
+
+[cols="2,2,3",options="header"]
+|===
+|Operation |Observed vector |Purpose and condition
+|Centering |stem:[x_c=x-\bar x\mathbf1] |Remove the level; preserve units.
+|Scaling |stem:[a x] |Change units or relative weights.
+|Standardization |stem:[x_c/s_x] |Sample variance one, divisor n−1; requires stem:[s_x>0].
+|Min-max |stem:[(x-\min x)/(\max x-\min x)] |Observed range [0,1]; requires nonzero range.
+|Euclidean normalization |stem:[x/\lVert x\rVert_2] |Length one; requires nonzero vector, does not center.
+|===
+
+For a nonconstant observed pair, sample Pearson is
+stem:[r_{xy}=s_{xy}/(s_xs_y)]. Using the same divisor in all three quantities
+also gives the same ratio with stem:[n]. The observed Pearson coefficient estimates population correlation only under
+an appropriate sampling model. The unbiasedness result for stem:[S_{XY}] does
+not imply unbiasedness of Pearson: taking a ratio is a nonlinear operation.
+Sample standard deviations with
+stem:[\texttt{ddof}=1] and population-law standard deviations are different
+objects. NumPy's default `std()` uses `ddof=0`; state your convention.
+
+An *affine transformation* has the form stem:[aX+b], with fixed real numbers
+a and b: multiply by a scale factor, then add an offset. Changing °C to °F is
+one example. We now check what such changes do to correlation.
+
+.Proposition: Affine rescaling and constants
+[.thm#thm:joint-affine]
+****
+For fixed real stem:[a,b,c,d] with stem:[ac\ne0], stem:[\operatorname{Corr}(aX+b,cY+d)=\operatorname{sign}(ac)\rho_{XY}]. Constant variables have undefined Pearson correlation.
+****
+
+[%collapsible]
+.Proof — Affine rescaling and constants
+====
+*Proof of affine behavior:* For nonzero stem:[a,c], centering
+stem:[aX+b] gives stem:[a(X-\mu_X)], so covariance multiplies by stem:[ac]
+and standard deviations by stem:[|a|,|c|]. Thus
+stem:[\operatorname{Corr}(aX+b,cY+d)=\operatorname{sign}(ac)\rho_{XY}].
+Positive rescalings preserve the sign, one negative rescaling reverses it.
+Constants have zero denominator: their Pearson correlation is undefined.
+====
+
+== 5. Pearson is a cosine in observation space
+
+Define stem:[x_c=x-\bar x\mathbf1] and stem:[y_c=y-\bar y\mathbf1], where stem:[\mathbf1] is the n-vector of ones. Let stem:[\lVert u\rVert_2=\sqrt{u^\top u}] and let stem:[\theta] be the angle between these nonzero centered vectors. Cancel stem:[n-1]:
+
+[stem]
+++++
+r_{xy}=\frac{x_c^\top y_c}{\lVert x_c\rVert_2\lVert y_c\rVert_2}
+=\cos\theta.
+++++
+
+.Proposition: Pearson bounds and equality cases
+[.thm#thm:joint-cosine]
+****
+For two nonconstant complete observed vectors, stem:[-1\leq r_{xy}\leq1]. Equality means proportional centered vectors; zero means orthogonality.
+****
+
+[%collapsible]
+.Proof — Pearson bounds and equality cases
+====
+
+*Step 1.* Cauchy–Schwarz gives stem:[|x_c^\top y_c|\leq\lVert x_c\rVert\lVert y_c\rVert],
+hence stem:[-1\leq r_{xy}\leq1] after division by the positive product of norms.
+
+*Step 2.* Equality in Cauchy–Schwarz holds exactly when the two
+nonzero centered vectors are proportional: stem:[y_c=a x_c], with positive
+stem:[a] for +1 and negative stem:[a] for −1. This is an exact affine
+relationship in the observed pairs. Zero correlation is orthogonality
+(a right angle, with zero dot product), not
+absence of every possible relationship.
+====
+
+[%collapsible]
+.Code demonstration 5 — open, predict, then inspect Results
+====
+
+[#joint-variation-code-5]
+[%dynamic,python,fail-on-error=]
+----
+def centered_pearson(left, right):
+    """Finite complete vectors; a constant has undefined Pearson correlation."""
+    left, right = np.asarray(left, dtype=float), np.asarray(right, dtype=float)
+    if left.ndim != 1 or left.shape != right.shape or len(left) < 2:
+        raise ValueError("Use equally sized vectors with at least two paired values")
+    if not (np.isfinite(left).all() and np.isfinite(right).all()):
+        raise ValueError("Select complete pairs first")
+    lc, rc = left - left.mean(), right - right.mean()
+    denominator = np.linalg.norm(lc) * np.linalg.norm(rc)
+    return np.nan if denominator == 0 else (lc @ rc) / denominator
+
+
+assert np.isclose(centered_pearson(x, y), .8)
+assert np.isclose(centered_pearson(60*x + 2, y), .8)
+assert np.isclose(centered_pearson(-x, y), -.8)
+assert np.isnan(centered_pearson(np.ones(4), y))
+print("Sample Pearson:", centered_pearson(x, y))
+----
+====
+
+=== Optional reading: the centering constraint and the n−1 dimension
+
+This geometric view complements the expectation proof; it does not replace
+its sampling assumptions. Let stem:[I_n] be the identity and stem:[\mathbf1]
+the column of n ones. Define the *centering matrix*
+
+[stem]
+++++
+H=I_n-\frac1n\mathbf1\mathbf1^\top.
+++++
+
+It acts on the observed vectors as stem:[x_c=Hx] and stem:[y_c=Hy]. Let
+stem:[\mathbf1^\perp=\{v\in\mathbb R^n:\mathbf1^\top v=0\}] be the space
+of vectors whose coordinates sum to zero. The *rank* of H is its image's
+dimension; its *trace* stem:[\operatorname{tr}(H)] is the sum of its diagonal entries.
+
+.Proposition: Centering projects onto an n−1 dimensional space
+[.thm#thm:joint-centering]
+****
+H is symmetric and idempotent, stem:[H^\top=H] and stem:[H^2=H]. Its image is
+stem:[\mathbf1^\perp], and stem:[\operatorname{rank}(H)=\operatorname{tr}(H)=n-1].
+****
+
+[%collapsible]
+.Proof — Centering, one constraint, rank and trace
+====
+*Step 1.* Let stem:[P=\mathbf1\mathbf1^\top/n]. Because
+stem:[\mathbf1^\top\mathbf1=n], direct multiplication gives stem:[P^2=P]
+and transposition gives stem:[P^\top=P]. Thus
+stem:[H^\top=H] and stem:[H^2=(I_n-P)^2=I_n-2P+P^2=H].
+
+*Step 2.* We have stem:[H\mathbf1=0]. For every vector v with
+stem:[\mathbf1^\top v=0], stem:[Hv=v]. So H removes the constant component
+and keeps exactly the zero-sum vectors: it is their orthogonal projector.
+
+*Step 3.* The constraint stem:[\sum_i(x_i-\bar x)=0] fixes the last centered
+coordinate once the first n−1 are given. Thus this subspace has dimension
+n−1 and H has rank n−1. Its n diagonal entries are each 1−1/n, so
+stem:[\operatorname{tr}(H)=n(1-1/n)=n-1]. Estimating the mean has removed
+one constant direction; this is the geometric degree of freedom.
+
+*Step 4 — Optional connection to the expectation.* Let
+stem:[\mathbf X=(X_1,\ldots,X_n)^\top] and
+stem:[\mathbf Y=(Y_1,\ldots,Y_n)^\top] be the random sample columns.
+Then stem:[Q_{XY}=\mathbf X^\top H\mathbf Y]. Under the i.i.d. assumptions
+already proved, stem:[\mathbb E(X_iY_j)] equals stem:[\mu_X\mu_Y] off the
+diagonal and stem:[\sigma_{XY}+\mu_X\mu_Y] on it. Therefore
+
+[stem]
+++++
+\mathbb E[Q_{XY}]=\sigma_{XY}\sum_iH_{ii}
++\mu_X\mu_Y\sum_{i,j}H_{ij}
+=\sigma_{XY}\operatorname{tr}(H)=(n-1)\sigma_{XY},
+++++
+
+because stem:[\sum_{i,j}H_{ij}=\mathbf1^\top H\mathbf1=0]. The trace explains
+where the factor appears geometrically; independence and common law still
+supply the required cross-moments.
+====
+
+*Bridge to the matrix sections below:* for an observed table A with n rows, centering every
+column gives stem:[A_c=HA]. Since H is symmetric and idempotent, its observed
+sample covariance matrix can also be written
+stem:[S=A_c^\top A_c/(n-1)=A^\top HA/(n-1)]. No randomness is needed for
+this matrix identity.
+
+== 6. Why does covariance select a linear relationship?
+
+.Proposition: Best affine approximation is an orthogonal projection
+[.thm#thm:joint-projection]
+****
+For stem:[\operatorname{Var}(X)>0], the centered approximation stem:[a^\star U] minimizing stem:[\mathbb E((V-aU)^2)] has stem:[a^\star=\operatorname{Cov}(X,Y)/\operatorname{Var}(X)] and residual orthogonal to U. Here stem:[U=X-\mathbb E(X)] and stem:[V=Y-\mathbb E(Y)].
+****
+
+[%collapsible]
+.Proof — Best affine approximation is an orthogonal projection
+====
+Centering an affine response yields stem:[aX+b-\mathbb E(aX+b)=a(X-\mu_X)],
+so stem:[\operatorname{Cov}(X,aX+b)=a\operatorname{Var}(X)]. More generally,
+put stem:[U=X-\mathbb E(X)] and stem:[V=Y-\mathbb E(Y)]. The space of
+centered random variables with finite expected squares is a vector space.
+The name *square-integrable*, or stem:[L^2], means that
+stem:[\mathbb E(W^2)<\infty] for a random variable W. We identify two variables
+when they are equal *almost surely*, meaning with probability one. The inner product is
+stem:[\langle U,V\rangle=\mathbb E(UV)] and squared norm is variance.
+This identification makes the inner product positive definite:
+stem:[\mathbb E(W^2)=0] means that W is zero with probability one.
+
+Which multiple of stem:[U] best approximates stem:[V]? For stem:[\operatorname{Var}(X)>0],
+
+[stem]
+++++
+\begin{aligned}
+J(a)&=\mathbb E[(V-aU)^2]
+=\mathbb E[V^2]-2a\mathbb E[UV]+a^2\mathbb E[U^2],\\
+J'(a)&=-2\operatorname{Cov}(X,Y)+2a\operatorname{Var}(X),\\
+a^\star&=\frac{\operatorname{Cov}(X,Y)}{\operatorname{Var}(X)}.
+\end{aligned}
+++++
+
+*Step 1.* Expansion of the squared residual gives the quadratic above.
+
+*Step 2.* Differentiation gives the stationary coefficient. Its second derivative is stem:[J^{\prime\prime}(a)=2\operatorname{Var}(X)>0], so this is the unique minimum.
+
+*Step 3.* Substitute this coefficient into stem:[\mathbb E(U(V-a^\star U))] to obtain zero. The residual
+stem:[e=V-a^\star U] satisfies stem:[\mathbb E(Ue)=0]; this is the orthogonal
+projection of stem:[V] onto the line spanned by stem:[U]. Restoring means
+gives the best affine predictor stem:[\mu_Y+a^\star(X-\mu_X)]. No Gaussian
+assumption is needed for this projection identity. A linear approximation
+need not equal the *conditional mean* stem:[\mathbb E(Y\mid X)], the expected
+value of Y when X is known: that dependence may follow a curve rather than a line.
+
+*Bridge:* Replacing the expectation inner product by the finite dot product
+gives simple least squares. the 2 November lesson generalizes the line to a column space.
+====
+
+== 7. Beijing investigation: implement, check, interpret
+
+*Worked demonstration:* Compare explicit NumPy calculations with pandas on
+exactly the same complete pairs. Record the row count with every statistic.
+
+[%collapsible]
+.Code demonstration 6 — open, predict, then inspect Results
+====
+
+[#joint-variation-code-6]
+[%dynamic,python,fail-on-error=]
+----
+pair = air[["PM2.5", "PM10"]].dropna()
+b = pair.to_numpy()
+bc = b - b.mean(axis=0)
+S_pair = bc.T @ bc / (len(b) - 1)
+r_pair = centered_pearson(b[:, 0], b[:, 1])
+assert np.allclose(S_pair, pair.cov())
+assert np.allclose(S_pair, np.cov(b, rowvar=False, ddof=1))
+assert np.isclose(r_pair, pair.corr().iloc[0, 1])
+changed = b * [1., .001]  # PM10: µg/m³ to mg/m³; same observations.
+assert np.isclose(np.cov(changed, rowvar=False)[0, 1], S_pair[0, 1] * .001)
+assert np.isclose(centered_pearson(*changed.T), r_pair)
+print({"n": len(pair), "sample covariance (µg/m³)²": S_pair[0, 1],
+       "Pearson (unitless)": r_pair})
+----
+====
+
+*Optional guided exercise A, about 15 minutes:* After completing the priority
+work in the 5 October practical (§ 13), choose TEMP–DEWP or PM2.5–WSPM. Predict the
+direction, select complete pairs, calculate covariance from deviations and
+Pearson from a cosine, then check against pandas. Show n, units and a cloud.
+Repeat within each station. Does the coefficient obtained by combining all
+stations describe each station separately? Keep only complete pairs, without
+filling missing values; different variable pairs may have different valid counts.
+
+[source,python]
+----
+# Layout hint: compute your inputs before uncommenting these lines.
+# left, right = ...
+# selected = ...
+# report = ...  # station, n, sample covariance, Pearson; keep the same pairs.
+# fig, axes = plt.subplots(1, 3, figsize=(11, 3.5), constrained_layout=True)
+# for ax, station in zip(axes, stations, strict=True):
+#     subset = ...
+#     ax.scatter(subset[left], subset[right], s=12, alpha=.3, edgecolors="none")
+#     ax.set(title=f"{station}: n={len(subset)}",
+#            xlabel=f"{left} ({units[left]})", ylabel=f"{right} ({units[right]})")
+# plt.show()
+----
+
+Write three sentences: observed pattern, agreement or disagreement between
+cloud and coefficient, and one boundary on the claim. A negative coefficient
+means opposite centered deviations tend to contribute; it does not say every
+increase in one variable forces a decrease in the other.
+
+*Optional extension: compare stations and four 14-day periods.* The usual data
+file contains only March observations. To ask whether the TEMP–DEWP relationship
+changes at other times of year, we provide a separate file for the same three
+stations, with these selected periods:
+
+[cols="2,2",options="header"]
+|===
+|Recorded dates in 2013 |Season in Beijing
+|1–14 March |Spring
+|1–14 June |Summer
+|1–14 September |Autumn
+|1–14 December |Winter
+|===
+
+A *time window* simply means the period selected for an analysis; here each
+window lasts fourteen days. The experiment compares measured relationships in
+these periods, not the averages of whole seasons. All values come from the
+recorded observations, with no replacement of missing values. The March rows
+are the same as in the usual file: do not append them as additional observations.
+
+[%collapsible]
+.Code demonstration 8 — open, predict, then inspect Results
+====
+
+[#joint-variation-code-8]
+[%dynamic,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Symbols identify four 14-day periods at each station; each period is only a small part of a season.",figure-caption="Station and selected-period comparison",result-interpretation="Symbols identify four 14-day periods at each station; each period is only a small part of a season."]
+----
+seasonal = pd.read_csv(course_file("datasets/teaching/air-quality-seasonal/observations.csv"))
+assert seasonal.shape == (4032, 18)
+period_names = {3: "March 1–14 (spring)", 6: "June 1–14 (summer)",
+                9: "September 1–14 (autumn)", 12: "December 1–14 (winter)"}
+period_rows = []
+for (station, month), group in seasonal.groupby(["station", "month"]):
+    valid = group[["TEMP", "DEWP"]].dropna()
+    period_rows.append({"station": station, "period": period_names[month],
+                        "n": len(valid), "r": valid.corr().iloc[0, 1]})
+period_report = pd.DataFrame(period_rows)
+print(period_report.to_string(index=False))
+fig, axes = plt.subplots(1, 3, figsize=(11, 3.5), constrained_layout=True)
+markers = {3: "o", 6: "s", 9: "^", 12: "x"}
+for ax, station in zip(axes, stations, strict=True):
+    for month, label in period_names.items():
+        subset = seasonal.loc[(seasonal.station == station) & (seasonal.month == month),
+                              ["TEMP", "DEWP"]].dropna()
+        ax.scatter(subset.TEMP, subset.DEWP, s=10, alpha=.25,
+                   marker=markers[month], label=label)
+    ax.set(title=station, xlabel="Temperature (°C)", ylabel="Dew point (°C)")
+axes[-1].legend(fontsize=7)
+plt.show()
+----
+====
+
+Which correlations differ across these periods? Show the corresponding scatter
+plots before explaining a sign or strength. Four selected periods of fourteen
+days cannot establish what is typical of whole seasons across many years.
+Nearby hours and stations can share weather conditions: the 4,032 rows must
+not be treated as 4,032 independent repetitions of an experiment.
+
+== 8. Limits: a curve can be perfectly dependent and uncorrelated
+
+.Proposition: Zero Pearson does not imply independence
+[.thm#thm:joint-nonlinear]
+****
+There are nonconstant variables with deterministic dependence and zero Pearson correlation. Take stem:[X\sim\mathcal U(-1,1)] and stem:[Y=X^2].
+****
+
+[%collapsible]
+.Proof — Zero Pearson does not imply independence
+====
+
+*Step 1.* Let stem:[X\sim\mathcal U(-1,1)] and stem:[Y=X^2]. For an integrable function g, stem:[\mathbb E(g(X))=\tfrac12\int_{-1}^1g(x)\,dx]. Symmetry of the odd integrands gives
+stem:[\mathbb E(X)=\mathbb E(X^3)=0], hence
+stem:[\operatorname{Cov}(X,Y)=\mathbb E(X^3)-\mathbb E(X)\mathbb E(X^2)=0].
+
+*Step 2.* Compute the even moments stem:[\mathbb E(X^2)=1/3] and stem:[\mathbb E(X^4)=1/5]. Both variances are positive: stem:[\operatorname{Var}(X)=1/3] and
+stem:[\operatorname{Var}(Y)=1/5-1/9=4/45]. Thus Pearson is zero although
+stem:[Y] is a nonconstant deterministic function of stem:[X]. For example,
+the identical events stem:[\{|X|\leq1/2\}] and stem:[\{Y\leq1/4\}] each have
+probability 1/2; their intersection has probability 1/2 rather than 1/4.
+
+*Step 3.* Independence would require the intersection probability to equal the product. It does not; this directly disproves independence. Independence implies zero covariance
+under the stated moments; the converse fails.
+====
+
+[%collapsible]
+.Code demonstration 9 — open, predict, then inspect Results
+====
+
+[#joint-variation-code-9]
+[%dynamic,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="The curve has zero Pearson while the added point changes a separate cloud strongly.",figure-caption="Nonlinearity and point influence",result-interpretation="The curve has zero Pearson while the added point changes a separate cloud strongly."]
+----
+grid_x = np.linspace(-1., 1., 401)
+grid_y = grid_x**2
+assert abs(centered_pearson(grid_x, grid_y)) < 1e-12
+base_x = np.arange(6., dtype=float)
+base_y = np.array([1., 3., 0., 4., 2., 1.])
+fig, axes = plt.subplots(1, 3, figsize=(11, 3.4), constrained_layout=True)
+axes[0].plot(grid_x, grid_y)
+axes[0].set(title="Deterministic curve, r ≈ 0", xlabel="x", ylabel="x²")
+for ax, extra in zip(axes[1:], [False, True], strict=True):
+    xx = np.r_[base_x, 30.] if extra else base_x
+    yy = np.r_[base_y, 30.] if extra else base_y
+    ax.scatter(base_x, base_y, marker="o", label="Original pairs")
+    if extra:
+        ax.scatter([30], [30], marker="x", s=90, label="Added point")
+    ax.set(xlim=(-2, 33), ylim=(-2, 33), xlabel="x", ylabel="y",
+           title=f"n={len(xx)}, r={centered_pearson(xx, yy):.2f}")
+    ax.legend(fontsize=7)
+plt.show()
+----
+====
+
+*Guided exercise B:* Explain why the added point changes the centered products
+so strongly. Do not delete a Beijing observation merely because it is unusual.
+Check where the value came from and whether it satisfies the audit rules.
+If you compare a coefficient with and without a flagged point, report both
+values and explain why you selected that point. Correlation alone does not
+establish that one variable causes the other.
+
+== 9. Synthesis and exit question
+
+Centering defines deviations; their inner product defines covariance;
+standardization gives Pearson; normalized centered vectors reveal its angle.
+Projection explains the best linear approximation and the limitations of zero
+correlation. Sampling assumptions explain an estimator's expectation, whereas
+an observed scatter plot describes only the retained pairs.
+
+*Use this synthesis in your existing evidence brief:* name the station/time
+window, pair, n and units; give one checked computation and one labeled cloud;
+explain the linear pattern and one limitation. Update the 5 October
+notebook's Results section when finishing the practical, rather than write
+a second brief. As a quick check without code, explain: why does changing µg to mg leave
+Pearson unchanged, and why can a zero coefficient coexist with a perfect curve?
+
+
+== 10. One table, two geometric spaces
+
+Let n be the number of observations, with stem:[n>1], and p the number of
+selected numeric variables (also called *features*). The data matrix is
+stem:[A\in\mathbb R^{n\times p}]: n rows and p columns. Its entry stem:[A_{ij}]
+is the *observed numerical value* of variable j in observation i, where stem:[i=1,\ldots,n] and
+stem:[j=1,\ldots,p]. A *complete observation* has a recorded value for every
+selected variable. This extends the complete-pair rule above to p variables;
+we remove incomplete rows rather than fill missing values with estimates
+(*imputation*). Use the xref:./../foundations/data-quality-practical.adoc[audit]
+to check keys, valid values, units and missing entries before this selection.
+
+A is a realized table, held fixed in the algebra below. Its uppercase letter
+follows the matrix convention and does not by itself declare a random variable.
+Likewise S and R below are observed sample matrices; they are not population
+parameters. We introduce their random counterparts separately.
+
+A row is a point in *feature space* stem:[\mathbb R^p], the space of p numeric
+coordinates. A column is a vector in *observation space* stem:[\mathbb R^n],
+one coordinate per row. For example:
+
+[stem]
+++++
+A=\begin{pmatrix}1&2\\3&4\\5&6\end{pmatrix},\qquad n=3,\quad p=2.
+++++
+
+The first row is the point (1,2); the first column is the vector (1,3,5).
+Changing a unit stretches one feature axis. Centering subtracts each column's
+mean, moving the row cloud so its mean point is zero.
+
+*Notation before the calculation.* Superscript stem:[\top] transposes a matrix
+or vector. For vectors u and v of the same length, stem:[u^\top v=\sum_i u_iv_i]
+is their Euclidean inner product; stem:[\lVert u\rVert_2=\sqrt{u^\top u}]
+is length. Orthogonal means this product is zero. Let stem:[I_n] be the
+identity matrix of size n, stem:[\mathbf1\in\mathbb R^n] the column of ones,
+and stem:[\bar a\in\mathbb R^p] the vector of column means, with
+stem:[\bar a_j=n^{-1}\sum_{i=1}^n A_{ij}]. Define H as the centering matrix
+and stem:[A_c] as the centered table:
+
+[stem]
+++++
+H=I_n-\frac1n\mathbf1\mathbf1^\top,\qquad
+A_c=HA=A-\mathbf1\bar a^\top.
+++++
+
+In the small example, stem:[\bar a=(3,4)^\top] and the centered rows are
+(−2,−2), (0,0), (2,2). An *orthogonal projection* keeps the component in a
+subspace and removes a perpendicular component. Here we remove the constant
+part of each column. The notation stem:[\mathbf1^\perp] means all vectors
+orthogonal to stem:[\mathbf1], namely those whose coordinates sum to zero.
+*Symmetric* means unchanged by transposition; *idempotent* means that applying
+the same matrix twice has the same effect as applying it once.
+
+.Proposition: Centering is an orthogonal projection
+[.thm#thm:matrix-centering]
+****
+The matrix H is symmetric and idempotent: stem:[H^\top=H], stem:[H^2=H]. It projects orthogonally onto stem:[\mathbf1^\perp], the vectors whose coordinates sum to zero.
+****
+
+[%collapsible]
+.Proof — Centering is an orthogonal projection
+====
+Let stem:[P=\mathbf1\mathbf1^\top/n] keep the constant component of a column.
+Its entries are all 1/n, so applying P gives the column mean in every position.
+
+*Step 1.* Since stem:[\mathbf1^\top\mathbf1=n],
+stem:[P^2=P] and stem:[P^\top=P].
+
+*Step 2.* Subtract P from the identity. Consequently
+stem:[H^\top=H] and stem:[H^2=I-2P+P^2=H].
+
+*Step 3.* The image is the set of possible outputs. For any column vector
+stem:[u\in\mathbb R^n],
+stem:[H\mathbf1=0] and stem:[Hu=u] whenever stem:[\mathbf1^\top u=0].
+Thus H projects orthogonally onto stem:[\mathbf1^\perp]. This space has
+dimension n−1: its last coordinate is determined by the first n−1. In code,
+NumPy subtracts a row of means from every row (broadcasting); storing H
+instead would require n² entries.
+====
+
+In the Beijing table, PM2.5
+and PM10 are particulate concentrations (µg/m³); TEMP is temperature and DEWP
+the dew-point temperature at which condensation starts (°C); PRES is pressure
+(hPa), and WSPM wind speed (m/s). A station-hour means one station observed
+at one hour. All six variables use the same complete station-hours.
+
+[%collapsible]
+.Matrix demonstration 1 — open, predict, then inspect Results
+====
+
+[#joint-variation-matrix-code-1]
+[%dynamic,python,fail-on-error=]
+----
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+
+def course_file(relative):
+    """Find prepared data in a checkout or extracted student bundle."""
+    for root in (Path.cwd(), *Path.cwd().parents):
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+air = pd.read_csv(course_file("datasets/teaching/air-quality/observations.csv"))
+air["timestamp"] = pd.to_datetime(air[["year", "month", "day", "hour"]])
+features = ["PM2.5", "PM10", "TEMP", "PRES", "DEWP", "WSPM"]
+complete = air.dropna(subset=features).copy()
+A = complete[features].to_numpy(dtype=float)
+n, p = A.shape
+mean = A.mean(axis=0)
+Ac = A - mean
+assert (n, p) == (1002, 6)
+assert np.allclose(Ac.mean(axis=0), 0., atol=1e-10)
+# Explicit H only on a small table, to verify the projection algebra.
+B = A[:5]
+H = np.eye(5) - np.ones((5, 5)) / 5
+assert np.allclose(H.T, H) and np.allclose(H @ H, H)
+assert np.allclose(H @ B, B - B.mean(axis=0))
+assert np.allclose(H @ np.ones(5), 0.)
+print({"n complete station-hours": n, "p features": p,
+       "excluded rows": len(air) - n})
+----
+====
+
+*Check:* Choose a feature-direction vector stem:[v\in\mathbb R^p], one
+coefficient per variable. What do the shapes of stem:[HA] and stem:[A_cv] tell you? Does the
+space of row points have the same dimension as the space of column vectors?
+
+== 11. Covariance is a Gram matrix
+
+A *Gram matrix* collects all pairwise inner products between a set of vectors.
+Here those vectors are the centered columns. On this *one common set of complete
+rows*, define S, the sample covariance matrix; j and k index variables and i
+indexes observations:
+
+[stem]
+++++
+S=\frac1{n-1}A_c^\top A_c=\frac1{n-1}A^\top HA\in\mathbb R^{p\times p},\qquad
+S_{jk}=\frac1{n-1}\sum_i(A_{ij}-\bar a_j)(A_{ik}-\bar a_k).
+++++
+
+The second equality uses stem:[H^\top H=H]. It is a finite-table identity,
+independent of any sampling assumption.
+
+*When is this an estimator of a population matrix?* Let
+stem:[\mathbf W=(W_1,\ldots,W_p)^\top] be a generic random observation with
+finite second moments; here j indexes variables. Its population mean is
+stem:[\mu=\mathbb E(\mathbf W)], and its deterministic covariance matrix
+stem:[\Gamma] has entries stem:[\Gamma_{jk}=\operatorname{Cov}(W_j,W_k)].
+The letter stem:[\Gamma] distinguishes population covariance from the singular-value matrix used on 2 November.
+Let stem:[\mathbf W_i] be the random vector for sample index i, so that
+stem:[A_{ij}=W_{ij}(\omega_0)] is its observed j-th entry. Define the random
+sample mean and covariance estimator:
+
+[stem]
+++++
+\bar{\mathbf W}=\frac1n\sum_{i=1}^n\mathbf W_i,\qquad
+\widehat\Gamma_n=\frac1{n-1}\sum_{i=1}^n
+(\mathbf W_i-\bar{\mathbf W})(\mathbf W_i-\bar{\mathbf W})^\top.
+++++
+
+For i.i.d. random vectors, the scalar proof above applied to every pair of
+components gives stem:[\mathbb E(\widehat\Gamma_n)=\Gamma]. The computed
+matrix is its realized estimate stem:[S=\widehat\Gamma_n(\omega_0)], not a
+matrix whose entries are guaranteed to equal the population values. The
+complete-row selection and the sampling assumptions require separate justification.
+The Gram, centering and PCA identities for the observed table remain valid
+without that unbiasedness claim.
+
+The diagonal entry stem:[S_{jj}=s_j^2] is the corrected sample variance of
+column j, with stem:[s_j] its sample standard deviation. A symmetric matrix
+is *positive semidefinite* when stem:[v^\top Sv\geq0] for every vector v.
+It is *positive definite* if the inequality is strict for every nonzero v.
+The *rank* is the number of linearly independent columns. The *kernel*
+stem:[\ker(B)] of a matrix B is the set of vectors v such that stem:[Bv=0].
+These definitions explain the next result, rather than assuming invertibility.
+
+*Small example:* our centered table has two identical columns, so its rank is
+one and stem:[A_c(1,-1)^\top=0]. Here
+stem:[S=\left(\begin{smallmatrix}4&4\\4&4\end{smallmatrix}\right)].
+It is positive semidefinite but singular: a square matrix is *singular* when
+its rank is smaller than its size, so it has no inverse. Collinear columns
+(proportional vectors) are one possible reason.
+
+.Proposition: A centered Gram matrix is positive semidefinite
+[.thm#thm:matrix-gram]
+****
+For stem:[n>1], S is symmetric positive semidefinite with stem:[\operatorname{rank}(S)\leq\min(p,n-1)] and diagonal stem:[S_{jj}=s_j^2].
+****
+
+[%collapsible]
+.Proof — A centered Gram matrix is positive semidefinite
+====
+The diagonal stem:[S_{jj}=s_j^2] contains sample variances.
+
+*Step 1.* Transposing the product proves symmetry.
+
+*Step 2.* For every stem:[v\in\mathbb R^p],
+
+[stem]
+++++
+v^\top Sv=\frac{\lVert A_cv\rVert_2^2}{n-1}\geq0.
+++++
+
+Thus S is positive semidefinite, not necessarily positive definite.
+
+*Step 3.* If stem:[Sv=0], the norm identity forces stem:[A_cv=0]. Conversely, stem:[A_cv=0] implies stem:[Sv=0] by the product formula. The kernels are equal. The rank-nullity identity says that the number of
+columns equals rank plus kernel dimension; both matrices have p columns,
+so they have equal ranks. Since stem:[A_c=HA] and H has rank n−1,
+stem:[\operatorname{rank}(S)=\operatorname{rank}(A_c)\leq\min(p,n-1)].
+Centering loses a degree of freedom, and collinear features may lose more.
+These are algebraic identities for a finite table, independent of any i.i.d.
+assumption. Calling S an unbiased population estimator needs the sampling assumptions stated above.
+====
+
+*Pairwise deletion* drops missing values separately for each pair of variables.
+It can use a different table for each covariance entry and
+destroy this Gram structure. A symmetric pairwise-complete covariance matrix
+need not be positive semidefinite. Do not mix that construction with this proof.
+
+[%collapsible]
+.Matrix demonstration 2 — open, predict, then inspect Results
+====
+
+[#joint-variation-matrix-code-2]
+[%dynamic,python,fail-on-error=]
+----
+S = Ac.T @ Ac / (n - 1)
+assert np.allclose(S, complete[features].cov())
+assert np.allclose(S, S.T)
+assert np.allclose(np.diag(S), A.var(axis=0, ddof=1))
+assert np.linalg.matrix_rank(S) <= min(p, n - 1)
+print(pd.DataFrame(S, index=features, columns=features).round(3))
+----
+====
+
+== 12. Correlation changes the geometry
+
+Why reduce the columns? A distance between rows adds squared coordinate
+differences. With mixed units, the variable with the largest numerical scale
+can dominate it. A *metric* is a rule for measuring distances; choosing scales
+changes this rule.
+
+The notation stem:[\operatorname{diag}] builds a matrix with the supplied
+values on its diagonal and zeros elsewhere. If all variances are positive, define
+stem:[D=\operatorname{diag}(s_1^2,\ldots,s_p^2)] and
+stem:[A_z=A_cD^{-1/2}], the sample-standardized table. Here
+stem:[D^{-1/2}=\operatorname{diag}(1/s_1,\ldots,1/s_p)]: multiply each
+centered column j by stem:[1/s_j]. Let R denote the correlation matrix. Then
+
+[stem]
+++++
+R=D^{-1/2}SD^{-1/2}=\frac1{n-1}A_z^\top A_z.
+++++
+
+.Proposition: The correlation matrix is a standardized Gram matrix
+[.thm#thm:matrix-correlation]
+****
+With positive variances, stem:[R=A_z^\top A_z/(n-1)] and stem:[R_{jj}=1]. Each off-diagonal entry is sample Pearson on the same complete rows.
+****
+
+[%collapsible]
+.Proof — The correlation matrix is a standardized Gram matrix
+====
+
+*Step 1.* Substitute stem:[A_z=A_cD^{-1/2}] into its Gram product. Since the diagonal scaling is symmetric, stem:[A_z^\top A_z/(n-1)=D^{-1/2}SD^{-1/2}].
+
+*Step 2.* Its j-th diagonal entry is stem:[S_{jj}/s_j^2=1]; off-diagonal entries are stem:[S_{jk}/(s_js_k)]. R is the covariance matrix of *sample-standardized*
+columns, and each off-diagonal entry is a Pearson coefficient. The same
+complete observations must be used in S, D and R. Constant columns cannot be
+standardized and require a declared removal or separate treatment.
+
+Standardizing gives every variable unit sample variance and changes distances
+between observations. A small-variance but noisy measurement can then receive
+substantial weight. The 2 November lesson examines how this scaling choice
+affects a low-dimensional summary of the table.
+
+====
+
+*Reading the coming plot.* A *heatmap* maps each matrix entry to a colour;
+its legend gives the Pearson scale from −1 to 1.
+
+[%collapsible]
+.Matrix demonstration 3 — open, predict, then inspect Results
+====
+
+[#joint-variation-matrix-code-3]
+[%dynamic,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="All six variables use the same 1002 complete station-hours; the diagonal is one.",figure-caption="Common-row Pearson matrix",result-interpretation="All six variables use the same 1002 complete station-hours; the diagonal is one."]
+----
+sd = np.sqrt(np.diag(S))
+assert (sd > 0).all()
+D = np.diag(sd**2)
+D_inv_half = np.diag(1 / sd)
+Az = Ac / sd
+R = D_inv_half @ S @ D_inv_half
+assert np.allclose(R, Az.T @ Az / (n - 1))
+assert np.allclose(R, complete[features].corr())
+fig, ax = plt.subplots(figsize=(6, 5), constrained_layout=True)
+image = ax.imshow(R, vmin=-1, vmax=1, cmap="RdBu_r")
+ax.set(xticks=range(p), yticks=range(p), xticklabels=features,
+       yticklabels=features, title=f"Common-row Pearson matrix, n={n}")
+for j in range(p):
+    for k in range(p):
+        ax.text(k, j, f"{R[j, k]:.2f}", ha="center", va="center",
+                color="white" if abs(R[j, k]) > .6 else "black")
+fig.colorbar(image, ax=ax, label="Pearson r (unitless)")
+plt.show()
+----
+====
+
+*Interpret:* Read one entry together with a scatter plot. Does a heatmap
+reveal curvature or establish causality? Which missing-row convention made
+the positivity proof applicable here?
+
+
+== 13. Finish the 5 October practical
+
+Reopen *your own partly completed notebook* for {october-practical-link}.
+This was the practical to finish after the 20 October class. Keep your audit,
+previous plots and calculations; extend the same notebook rather than start
+another assignment or write a second report.
+
+. *Part 5 — Check the pairing.* Reuse the PM2.5–PM10 scatter plot. State the
+  station-hour unit, the measurement units and the number of complete pairs.
+. *Part 6 — Covariance.* Calculate it from centered products, then check
+  against pandas. Explain sign and units; convert PM10 from µg/m³ to mg/m³.
+. *Part 7 — Pearson.* Use exactly the same pairs and divisor convention for
+  covariance and both variances. Explain why the positive unit conversion
+  changes covariance but leaves Pearson unchanged.
+. *Finish the matrix and counts.* Complete the other pairs, heatmap and
+  pair-count table. The practical's pairwise-complete coefficients may use
+  different rows; compare this explicitly with the common-row matrix in § 12.
+. *Part 9 and Results.* Select one checked paired finding and update the
+  existing brief: variables, n, units, covariance, Pearson, a plot and a limit.
+  Mark any remaining work. Part 8's hourly/daily comparison is a continuation
+  after the core paired calculations.
+
+Before starting the 2 November lesson, be ready to read a Pearson matrix entry,
+identify its rows and distinguish a linear association from a causal claim.
+
+== 14. Next: 2 November PCA, then 9 November regression
+
+The 20 October question was how the measured variables vary together. S and R
+now organize all their pairwise covariances and correlations on a common table.
+They make two new questions possible:
+
+. *Summarize several variables.* Can a few new coordinates retain much of
+  the cloud's variation? Principal component analysis (*PCA*, *ACP* in French)
+  selects such directions; singular value decomposition (*SVD*) computes them.
+. *Estimate one designated response.* Can PM10 and meteorological measurements
+  help estimate PM2.5? Regression uses explanatory variables to approximate
+  that chosen response; it does not optimize reconstruction of the input table.
+
+The xref:./../sessions/matrix-geometry.adoc[2 November lesson] develops PCA and
+SVD and a guided reconstruction practical. Regression and the first steps
+in supervised machine learning are planned for the following week, 9 November.
+The closing question on 2 November introduces that purpose without requiring
+a fitted line. This progression reuses the same data and the same centering and
+projection ideas; it does not imply that regression was already covered on
+20 October.

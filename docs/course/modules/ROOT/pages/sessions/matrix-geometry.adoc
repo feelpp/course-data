@@ -1,0 +1,875 @@
+= 2 November 2026 — PCA and SVD: directions, scores and reconstruction
+:page-course-language: en
+:page-course-concepts: DP-PCA-01, DP-NUM-01, DP-LIN-01, DP-CV-01
+:page-course-priority: P1
+:page-course-difficulty: D3
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO4, LO6, LO7, LO8
+:page-course-prerequisites: 20 October covariance and Pearson matrices, centered vectors, elementary linear algebra
+:page-course-assessed: no
+:page-jupyter: true
+:page-course-execution-profile: fast
+:stem: latexmath
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 8388608
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+:session-hub-link: xref:session-multivariate.adoc[the session hub]
+ifdef::backend-jupyter[]
+:session-hub-link: https://feelpp.github.io/course-data/course-data/session-multivariate.html[the session hub on the course website]
+endif::[]
+
+*Question:* Starting from a Pearson matrix, how can we summarize the data
+with a few coordinates and explain what those coordinates preserve?
+
+The xref:./../sessions/joint-variation.adoc[20 October lesson] reached the
+Pearson correlation matrix. Students were asked to finish the
+xref:./../foundations/statistical-exploration.adoc[5 October practical]; bring
+that notebook and identify any unfinished paired calculations. This session
+continues from the matrix, rather than reteaching it as a new topic.
+
+*Principal component analysis* (*PCA*, *ACP* in the French slides) chooses
+new coordinates that preserve variance. *Singular value decomposition*
+(*SVD*) supplies a matrix factorization for computing them. On 9 November,
+*regression* will ask a different question: estimating a designated response
+from other measured variables. Today ends by posing that question; fitting a
+regression is not required. The slides and downloads are on {session-hub-link}.
+
+== Objectives and 120-minute route: 2 November
+
+[cols="1,4",options="header"]
+|===
+|Minutes |Live work
+|0–10 |Recall the Pearson matrix; check the observation unit, centering and scaling.
+|10–25 |Two-variable example: common variation, contrast and projection.
+|25–45 |Projected variance, unit constraint, eigenvectors and scores; board derivation.
+|45–55 |Economy SVD, dimensions and the link to PCA; brief numerical demonstration.
+|55–60 |Break and open the practical notebook.
+|60–105 |Guided Beijing PCA practical: calculate, interpret, reconstruct with two then three components.
+|105–115 |Compare interpretations and defend one limitation.
+|115–120 |Pose next week's question: estimating a selected response.
+|===
+
+The core practical is the dedicated
+xref:./../sessions/pca-practical.adoc[45-minute guided PCA practical], also
+available as a notebook from that page. Data loading and plotting layouts
+are supplied; the calculations and interpretation are yours.
+
+Centering and matrix multiplication are expected student calculations; allow
+time to perform and check them. The practical adds optional hints and three
+checkpoints without supplying computed PCA answers. Complete regression
+derivations and the chronological Beijing validation experiment below are
+*reference/preparation for 9 November*, outside today's required route.
+
+== Recall: the Pearson matrix introduced on 20 October
+
+Let n>1 be the number of common complete observations and p the number of
+selected measured variables (*features*). A row is a point of feature space,
+with p measured coordinates; a column contains n observations of one variable.
+The matrices here contain *observed numbers*. Their uppercase names follow
+matrix notation, rather than declaring random variables.
+
+[cols="1,3",options="header"]
+|===
+|Notation |Meaning
+|stem:[A\in\mathbb R^{n\times p}] |Observed data table; n rows and p variables.
+|stem:[\bar a_j=n^{-1}\sum_i A_{ij}] |Mean of column j; stem:[\bar a] collects the p means.
+|stem:[A_c=A-\mathbf1\bar a^\top] |Centered table; stem:[\mathbf1] contains n ones and stem:[\top] means transpose.
+|stem:[S=A_c^\top A_c/(n-1)] |Sample covariance matrix on the same rows.
+|stem:[s_j=\sqrt{S_{jj}}] |Positive sample standard deviation of column j.
+|stem:[D=\operatorname{diag}(s_1^2,\ldots,s_p^2)] |Diagonal matrix of variances; zeros off the diagonal.
+|stem:[A_z=A_cD^{-1/2}] |Centered columns divided by their standard deviations.
+|stem:[R=A_z^\top A_z/(n-1)] |Pearson matrix, with diagonal one.
+|===
+
+For vectors u and v of the same length, stem:[u^\top v=\sum_i u_iv_i] is
+the inner product and stem:[\lVert u\rVert_2=\sqrt{u^\top u}] is length.
+A unit vector has length one; orthogonal vectors have inner product zero.
+The matrix proofs, centering projector H, population-versus-observed
+quantities and complete-row convention are in the
+xref:./../sessions/joint-variation.adoc#thm:matrix-centering[20 October matrix introduction].
+
+Our small example remains stem:[A=\left(\begin{smallmatrix}1&2\\3&4\\5&6\end{smallmatrix}\right)]:
+its centered rows are (−2,−2), (0,0), (2,2), and
+stem:[S=\left(\begin{smallmatrix}4&4\\4&4\end{smallmatrix}\right)].
+The following cell reconstructs the common Beijing table so this notebook
+runs independently of the previous notebook.
+
+[%collapsible]
+.Recall computation — rebuild the 20 October Pearson matrix
+====
+[#matrix-geometry-recall]
+[%dynamic,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Recall of the Pearson matrix on the same 1002 complete rows.",figure-caption="Recall: the 20 October Pearson matrix",result-interpretation="This is the common-row matrix introduced on 20 October, reconstructed before PCA; its entries describe linear associations."]
+----
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LinearRegression
+
+
+def course_file(relative):
+    """Find prepared data in a checkout or extracted student bundle."""
+    for root in (Path.cwd(), *Path.cwd().parents):
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+air = pd.read_csv(course_file("datasets/teaching/air-quality/observations.csv"))
+air["timestamp"] = pd.to_datetime(air[["year", "month", "day", "hour"]])
+features = ["PM2.5", "PM10", "TEMP", "PRES", "DEWP", "WSPM"]
+complete = air.dropna(subset=features).copy()
+A = complete[features].to_numpy(dtype=float)
+n, p = A.shape
+mean = A.mean(axis=0)
+Ac = A - mean
+assert (n, p) == (1002, 6)
+assert np.allclose(Ac.mean(axis=0), 0., atol=1e-10)
+# Explicit H only on a small table, to verify the projection algebra.
+B = A[:5]
+H = np.eye(5) - np.ones((5, 5)) / 5
+assert np.allclose(H.T, H) and np.allclose(H @ H, H)
+assert np.allclose(H @ B, B - B.mean(axis=0))
+assert np.allclose(H @ np.ones(5), 0.)
+print({"n complete station-hours": n, "p features": p,
+       "excluded rows": len(air) - n})
+S = Ac.T @ Ac / (n - 1)
+assert np.allclose(S, complete[features].cov())
+sd = np.sqrt(np.diag(S))
+assert (sd > 0).all()
+D = np.diag(sd**2)
+D_inv_half = np.diag(1 / sd)
+Az = Ac / sd
+R = D_inv_half @ S @ D_inv_half
+assert np.allclose(R, Az.T @ Az / (n - 1))
+assert np.allclose(R, complete[features].corr())
+fig, ax = plt.subplots(figsize=(6, 5), constrained_layout=True)
+image = ax.imshow(R, vmin=-1, vmax=1, cmap="RdBu_r")
+ax.set(xticks=range(p), yticks=range(p), xticklabels=features,
+       yticklabels=features, title=f"Common-row Pearson matrix, n={n}")
+for j in range(p):
+    for k in range(p):
+        ax.text(k, j, f"{R[j, k]:.2f}", ha="center", va="center",
+                color="white" if abs(R[j, k]) > .6 else "black")
+fig.colorbar(image, ax=ax, label="Pearson r (unitless)")
+plt.show()
+----
+====
+
+== 1. Why does PCA lead to eigenvectors?
+
+=== From covariance and correlation to a new question
+
+S and R describe relationships between pairs of original variables. We now
+ask whether *combinations* of variables can summarize the cloud using fewer
+coordinates. A direction stem:[v=(w_1,\ldots,w_p)^\top] has one weight
+stem:[w_j] per original variable. On standardized values, the score of
+observation i on this direction is
+
+[stem]
+++++
+z_i=\sum_{j=1}^p (A_z)_{ij}w_j.
+++++
+
+This new coordinate need not be a physical sensor reading. It may describe
+a common pattern or a contrast between several measurements; interpretation
+requires reading its weights with the original variables. Here the input
+columns and scores are dimensionless because the measurements were
+standardized. A descriptive name for an axis is an interpretation to justify,
+not an additional measurement or a causal mechanism.
+
+The new mathematical tools answer specific questions: a projection gives
+coordinates; variance measures retained spread; a unit-length constraint
+prevents arbitrary rescaling; eigenvectors solve the maximization; SVD
+computes the directions. PCA on S preserves spread in the chosen original
+scales; PCA on R preserves spread after giving every variable unit variance.
+In the formulas below use stem:[A_c,S] for covariance PCA, or substitute
+stem:[A_z,R] for correlation PCA.
+
+[cols="1,2,2",options="header"]
+|===
+|Choice |Table and matrix |What counts as a large variation?
+|Covariance PCA |stem:[A_c] and stem:[S] |A large numerical departure in the chosen original scales.
+|Correlation PCA (today's practical) |stem:[A_z] and stem:[R] |A departure measured in each variable's standard deviations.
+|===
+
+Standardization is a scientific choice. It prevents the mixed units in today's
+six-variable table from determining the result, but also gives each variable
+unit variance, including a noisy one. It does not make all measurements equally
+reliable. The projection and eigenvector arguments are the same for both rows.
+
+*Two-variable example.* The four pairs already studied have sample Pearson
+0.8. After standardization their matrix is
+stem:[R=\left(\begin{smallmatrix}1&0.8\\0.8&1\end{smallmatrix}\right)].
+The unit directions stem:[(1,1)^\top/\sqrt2] and
+stem:[(1,-1)^\top/\sqrt2] give a common-variation coordinate and a contrast.
+Their score variances are 1.8 and 0.2; the first retains 90% of the total 2.
+Neither direction is simply one of the original physical variables.
+
+We want a direction preserving as much centered spread as possible. Project
+the row cloud onto a unit feature direction stem:[v\in\mathbb R^p]. The
+score vector is stem:[z=A_cv\in\mathbb R^n]. Each score is one observation’s coordinate along v. For example, choosing
+v with first coordinate 1 and the rest zero selects the first centered
+column; in our small table, the scores are (−2,0,2), of variance 4.
+All these are *observed* scores, not a new random sample model. Their
+empirical mean is zero, and their sample variance, denoted stem:[s_z^2], is
+
+[stem]
+++++
+s_z^2=\frac{z^\top z}{n-1}=v^\top Sv.
+++++
+
+Recall the linear algebra vocabulary: a nonzero *eigenvector* stem:[v_j]
+satisfies stem:[Sv_j=\lambda_jv_j]; stem:[\lambda_j] is its *eigenvalue*.
+For symmetric S, the spectral theorem supplies an *orthonormal* eigenbasis:
+each vector has length one, and distinct vectors have inner product zero.
+Order eigenvalues stem:[\lambda_1\geq\cdots\geq\lambda_p\geq0].
+A *principal direction* is a maximizing feature direction. The corresponding
+*principal component scores* are its n projected coordinates.
+
+.Proposition: PCA maximizes projected variance
+[.thm#thm:matrix-pca]
+****
+The maximum of stem:[v^\top Sv] over unit v is stem:[\lambda_1], attained by a leading eigenvector. Scores stem:[z_j=A_cv_j] have variance stem:[\lambda_j] and are mutually uncorrelated.
+****
+
+[%collapsible]
+.Proof — PCA maximizes projected variance
+====
+Without a norm constraint, scaling v makes this arbitrarily large. Therefore
+the first principal direction solves
+stem:[\max_{v^\top v=1}v^\top Sv].
+
+*Step 1.* Define the objective stem:[f(v)=v^\top Sv] and write the constraint
+as stem:[g(v)=v^\top v-1=0]. A *Lagrangian* combines them using an unknown
+scalar multiplier stem:[\lambda]:
+
+[stem]
+++++
+L(v,\lambda)=f(v)-\lambda g(v)=v^\top Sv-\lambda(v^\top v-1).
+++++
+
+The gradient is the vector of coordinate derivatives. Symmetry of S gives
+stem:[\nabla_v f=2Sv], and stem:[\nabla_v g=2v]. At a constrained extremum
+the objective cannot improve in a direction tangent to the unit sphere;
+these gradients are parallel. The stationarity equations are
+
+[stem]
+++++
+\nabla_vL=2Sv-2\lambda v=0,\qquad
+\frac{\partial L}{\partial\lambda}=-(v^\top v-1)=0.
+++++
+
+The first equation gives stem:[Sv=\lambda v]; the second enforces unit
+length. Multiplying the first by stem:[v^\top] gives stem:[v^\top Sv=\lambda]:
+the multiplier is the projected variance at this candidate. We do not
+maximize L jointly over v and the multiplier; these are stationary candidates.
+
+*Step 2.* This gives stationary candidates; the spectral theorem proves the maximum: writing
+stem:[v=\sum_j\alpha_jv_j], where stem:[\alpha_j=v_j^\top v] are its
+coordinates in the orthonormal eigenbasis, and
+stem:[\sum_j\alpha_j^2=1], gives
+stem:[v^\top Sv=\sum_j\lambda_j\alpha_j^2\leq\lambda_1].
+
+*Step 3.* Successive maxima under orthogonality constraints give the remaining
+directions stem:[v_j]. The eigenvalue stem:[\lambda_j] is the variance of
+score stem:[z_j=A_cv_j], and stem:[z_j^\top z_k/(n-1)=0] for distinct
+orthogonal eigenvectors. Uncorrelated scores need not be independent.
+The *explained variance ratio* is the fraction of total variance retained by
+one component: stem:[\lambda_j/\sum_{\ell=1}^p\lambda_\ell], when
+total variance is positive. Directions (p numbers) and scores (n numbers) are
+different objects. Signs are arbitrary; repeated eigenvalues allow rotations
+inside their eigenspaces.
+====
+
+Choose an integer stem:[1\leq k\leq p], the number of retained directions.
+Let stem:[V_k=(v_1,\ldots,v_k)\in\mathbb R^{p\times k}] collect them as
+columns and stem:[Z_k=A_cV_k\in\mathbb R^{n\times k}] collect the scores.
+The *reconstruction*, denoted stem:[\widehat A], returns these k coordinates
+to the original variables and restores the means:
+
+[stem]
+++++
+\widehat A=\mathbf1\bar a^\top+Z_kV_k^\top.
+++++
+
+For example, with k=1, the reconstructed centered row i is its single score
+multiplied by stem:[v_1^\top]. The *squared Frobenius error* sums the squared
+errors of every table cell. For any matrix B, its Frobenius norm satisfies
+stem:[\lVert B\rVert_F^2=\sum_{i,j}B_{ij}^2]; here use
+stem:[B=A-\widehat A]. Orthogonal projection minimizes this error within
+the retained subspace. Among centered approximations of rank at most k,
+the leading principal directions minimize it globally. The SVD below makes
+the omitted error explicit. This reconstruction objective uses no response
+to predict, so it does not prove predictive relevance.
+
+For today's *standardized* calculation, use stem:[Z_k=A_zV_k] and first
+reconstruct stem:[\widehat A_z=Z_kV_k^\top]. This is an n-by-p table of
+standardized values. To recover physical measurements, undo the scaling
+column by column, then restore the means:
+
+[stem]
+++++
+\widehat A_{ij}=\bar a_j+s_j(\widehat A_z)_{ij}.
+++++
+
+Measure the practical's reconstruction error in standardized coordinates,
+so temperature, pressure and concentrations use the declared geometry.
+
+== 2. Why SVD computes PCA
+
+A *singular value decomposition* (SVD) factors a table into orthonormal
+directions and nonnegative scales. The *economy* form keeps stem:[q=\min(n,p)]
+columns, even if some scales are zero. Introduce its three matrices U,
+stem:[\Sigma] and V with the dimensions below. Their columns, denoted
+stem:[u_j] and stem:[v_j] for stem:[j=1,\ldots,q], satisfy
+stem:[U^\top U=V^\top V=I_q]. Here stem:[I_q] is the identity of size q.
+The diagonal matrix stem:[\Sigma=\operatorname{diag}(\sigma_1,\ldots,\sigma_q)]
+contains the *singular values*, ordered stem:[\sigma_1\geq\cdots\geq\sigma_q\geq0].
+The notation stem:[\sigma_j] denotes a singular value of a matrix, not the
+feature sample standard deviation stem:[s_j] used above. Write the factorization:
+
+[stem]
+++++
+A_c=U\Sigma V^\top,\quad
+U\in\mathbb R^{n\times q},\quad\Sigma\in\mathbb R^{q\times q},\quad
+V\in\mathbb R^{p\times q}.
+++++
+
+.Proposition: SVD yields PCA directions and variances
+[.thm#thm:matrix-svd]
+****
+For this economy SVD, stem:[S=V\Sigma^\top\Sigma V^\top/(n-1)] and stem:[\lambda_j=\sigma_j^2/(n-1)] for stem:[j\leq q]. The associated scores are stem:[\sigma_ju_j].
+****
+
+[%collapsible]
+.Proof — SVD yields PCA directions and variances
+====
+The columns of V may be chosen as the eigenvectors of S associated with
+these singular values. We now verify both their directions and their variances.
+
+*Step 1.* Transpose stem:[A_c=U\Sigma V^\top] to obtain stem:[A_c^\top=V\Sigma^\top U^\top].
+
+*Step 2.* Multiply and use stem:[U^\top U=I_q]. This gives
+
+[stem]
+++++
+S=V\frac{\Sigma^\top\Sigma}{n-1}V^\top,\qquad
+\lambda_j=\frac{\sigma_j^2}{n-1},\quad
+A_cv_j=\sigma_j u_j.
+++++
+
+*Step 3.* Multiply the SVD by stem:[v_j] and use stem:[V^\top v_j=e_j], the vector with 1 at coordinate j and 0 elsewhere, to obtain stem:[A_cv_j=\sigma_ju_j]. If stem:[q<p], the other stem:[p-q] eigenvalues of S are zero. Additional
+zeros follow from centering or collinearity. The same calculation applies
+to stem:[A_z] for correlation PCA.
+====
+
+Keeping only the first k singular values and their directions is called
+*truncation*. It gives the previous PCA reconstruction. Its squared error
+is the sum of omitted squared singular values, as checked in § 3.
+
+*Optional numerical reference — outside today's required derivation.*
+Why avoid forming the Gram matrix? *Conditioning* describes sensitivity to
+small input changes. Let stem:[r_A=\operatorname{rank}(A_c)>0], the number
+of nonzero singular values. Their largest-to-smallest ratio is the
+*restricted condition number*, denoted stem:[\kappa_+]:
+
+[stem]
+++++
+\kappa_+(A_c)=\frac{\sigma_1}{\sigma_{r_A}},\qquad
+\kappa_+(A_c^\top A_c)=\kappa_+(A_c)^2.
+++++
+
+The Gram matrix has positive eigenvalues stem:[\sigma_j^2], which proves
+the squared ratio. For example, a ratio 10⁴ in the data becomes 10⁸ in its
+Gram matrix. Small directions become harder to compute accurately.
+The ordinary condition number is infinite for a singular matrix; the finite
+ratio above only concerns the nonzero directions. In floating-point arithmetic,
+a threshold decides which singular values count as zero: this defines the
+*numerical rank*. SVD works directly on the data, although it cannot recover
+information below numerical precision.
+
+[%collapsible]
+.Code demonstration 4 — open, predict, then inspect Results
+====
+
+[#matrix-geometry-code-4]
+[%dynamic,python,fail-on-error=]
+----
+# A small controlled example: nonzero-subspace condition numbers.
+Bc = np.array([[1., 0.], [-1., 0.], [0., 1e-4], [0., -1e-4]])
+sv = np.linalg.svd(Bc, compute_uv=False)
+positive = np.linalg.eigvalsh(Bc.T @ Bc)
+assert np.isclose(positive[-1] / positive[0], (sv[0] / sv[-1])**2)
+print({"condition of Bc": sv[0] / sv[-1],
+       "condition of its Gram matrix": positive[-1] / positive[0]})
+----
+====
+
+== 3. Beijing PCA: transparent calculation, then a library implementation
+
+For the main student activity, open the
+xref:./../sessions/pca-practical.adoc[guided PCA practical]. The complete
+calculations below are a worked reference and a check after your attempt.
+
+The following is *descriptive PCA* of the selected March rows: all selected
+observations define this geometry. It makes no claim about new observations.
+If PCA is used to transform inputs before prediction (*preprocessing*), learn
+its means, scales and directions only on the observations used to fit the
+model (*training data*), then apply the same transformation to later observations.
+
+In NumPy, `Vt` stores the transpose of V, `singular` its singular values,
+`variances` the component variances, `ratios` their explained variance ratios
+and `scores` the projected coordinates. The returned component directions
+are sometimes called *loadings*; here the plotted direction coefficients
+mean the entries of a unit vector, not a different scaled-loading convention.
+`PC1` and `PC2` on English plots mean the first and second principal components.
+
+[%collapsible]
+.Code demonstration 5 — open, predict, then inspect Results
+====
+
+[#matrix-geometry-code-5]
+[%dynamic,python,fail-on-error=]
+----
+U, singular, Vt = np.linalg.svd(Az, full_matrices=False)
+eigenvalues = np.linalg.eigvalsh(S)
+assert eigenvalues.min() >= -1e-10 * np.linalg.norm(S, 2)
+variances = singular**2 / (n - 1)
+ratios = variances / variances.sum()
+scores = Az @ Vt.T
+k = 2  # A prescribed visualization choice, not tuned on a validation target.
+reconstructed_z = scores[:, :k] @ Vt[:k]
+error2 = np.linalg.norm(Az - reconstructed_z, "fro")**2
+assert np.allclose(R, Vt.T @ np.diag(variances) @ Vt)
+assert np.allclose(scores, U * singular)
+assert np.isclose(error2, np.sum(singular[k:]**2))
+assert np.allclose(np.cov(scores, rowvar=False), np.diag(variances), atol=1e-10)
+api = PCA(n_components=k, svd_solver="full").fit(Az)
+assert np.allclose(api.explained_variance_, variances[:k])
+# Projectors ignore sign choices and basis rotations within retained eigenspaces.
+assert variances[k-1] - variances[k] > 1e-8  # separated retained subspace here
+assert np.allclose(api.components_.T @ api.components_, Vt[:k].T @ Vt[:k])
+assert np.allclose(api.inverse_transform(api.transform(Az)), reconstructed_z)
+print(pd.DataFrame({"variance": variances, "ratio": ratios,
+                    "cumulative ratio": ratios.cumsum()}, index=np.arange(1, p+1)))
+print("Two-component squared standardized reconstruction error:", error2)
+----
+====
+
+scikit-learn PCA centers but does not standardize features automatically.
+We supplied Az explicitly. `StandardScaler` uses divisor n for its fitted
+variance; our convention uses n−1. On one complete table this is a common
+factor, so directions and explained ratios agree, but eigenvalues and score
+scales differ by that factor. State the convention when comparing results.
+
+The cumulative explained ratio adds the ratios of the first k components.
+A score plot places each row at its first two scores; the direction-coefficient
+plot instead shows the p entries of the first principal direction.
+
+[%collapsible]
+.Code demonstration 6 — open, predict, then inspect Results
+====
+
+[#matrix-geometry-code-6]
+[%dynamic,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Scaling changes the reconstruction objective; station score separation is descriptive.",figure-caption="PCA scaling and station scores",result-interpretation="Scaling changes the reconstruction objective; station score separation is descriptive."]
+----
+raw_singular = np.linalg.svd(Ac, compute_uv=False)
+raw_ratios = raw_singular**2 / np.sum(raw_singular**2)
+fig, axes = plt.subplots(1, 3, figsize=(12, 3.6), constrained_layout=True)
+axes[0].plot(range(1, p+1), raw_ratios.cumsum(), "o--", label="Original scales")
+axes[0].plot(range(1, p+1), ratios.cumsum(), "s-", label="Standardized")
+axes[0].set(xlabel="Number of components", ylabel="Cumulative explained ratio",
+            ylim=(0, 1.05), title="Scaling changes the objective")
+axes[0].legend(fontsize=8)
+for station, marker in zip(sorted(complete.station.unique()), ["o", "s", "^"], strict=True):
+    mask = complete.station.to_numpy() == station
+    axes[1].scatter(scores[mask, 0], scores[mask, 1], s=10, alpha=.3,
+                    marker=marker, label=station)
+axes[1].set(xlabel="PC1 score (standardized coordinates)",
+            ylabel="PC2 score (standardized coordinates)", title=f"Projected station-hours: n={n}")
+axes[1].legend(fontsize=7)
+axes[2].barh(features, Vt[0])
+axes[2].set(xlabel="PC1 direction coefficient", title="Direction in feature space")
+plt.show()
+----
+====
+
+*Main practical comparison:* Reconstruct with two then three components on
+the same standardized table. Predict the change in variance and error first.
+
+*Optional extension after the main practical:* Investigate a declared change
+of physical units before covariance PCA, or removal of PM10 as a related
+pollutant. Compute the
+new quantities yourself. Keep a common complete table for each controlled
+comparison. State which geometry changed, the retained variance and the
+reconstruction loss. A separated station cloud is not evidence of causal
+station effects or of a validated clustering algorithm.
+
+[source,python]
+----
+# Plot layout only; calculate the compared ratios and residuals yourself.
+# fig, axes = plt.subplots(1, 2, figsize=(9, 3.5), constrained_layout=True)
+# axes[0].plot(..., ..., "o-", label="Declared alternative")
+# axes[0].set(xlabel="Retained components", ylabel="Explained variance ratio")
+# axes[1].scatter(..., ..., s=12, alpha=.3)
+# axes[1].set(xlabel="Observed standardized value", ylabel="Reconstructed value")
+# plt.show()
+----
+
+== Optional perspective: PCA and model order reduction in M2
+
+A *snapshot* is one recorded state of a system, for example all temperatures
+at the mesh nodes of a numerical simulation at one time. Instead of six
+sensor variables, a state may have thousands of coordinates. *Proper
+orthogonal decomposition* (*POD*) also seeks a few modes that reconstruct
+such states with small error; SVD supplies a shared computational idea.
+
+The conventions can differ: snapshots are often columns rather than rows,
+centering depends on whether the mean state should be retained separately,
+and a physical inner product can replace the ordinary Euclidean one. Automatic
+unit-variance scaling is not the defining step of POD. The M2/S3 model order
+reduction course will develop reduced dynamical models; deriving reduced PDE
+operators is outside today's lesson. This paragraph is optional reading, not
+another required exercise.
+
+== 4. Preparation for 9 November: choose a response and fit a line
+
+[NOTE]
+====
+*Next lesson's reference.* The required 2 November work ends with PCA and
+reconstruction. Read this section to prepare the regression lesson; no fitted
+line or regression exercise is required in today's practical.
+====
+
+*Live on 2 November:* identify a response and predictors, read a fitted line,
+and run the four-pair example. The full projection and slope proofs are
+reference material for the continuation on 9 November.
+
+*Regression* estimates a designated variable, the *response*, from other
+variables, called *predictors* or explanatory variables. Let m be the number
+of training observations and d the number of model-input columns. The
+*design matrix* stem:[\mathbf X\in\mathbb R^{m\times d}] collects those
+inputs. Bold stem:[\mathbf X] differs from the random variable X on 20 October
+and from the exploratory data matrix A. Let stem:[y\in\mathbb R^m] collect
+the observed responses and stem:[\beta\in\mathbb R^d] the model coefficients.
+An *intercept* is a constant term, represented by a column of ones.
+
+*Small example:* with one predictor x and an intercept, d=2 and row i of the
+design is stem:[(1,x_i)]. Its estimated response is
+stem:[\beta_0+\beta_1x_i]: stem:[\beta_0] is the intercept (level at x=0),
+and stem:[\beta_1] is the slope (change in estimated response per unit of x).
+
+*Ordinary least squares* (OLS) chooses coefficients to minimize the sum of
+squared differences between estimates and observations. Write stem:[J(\beta)]
+for this objective and stem:[\widehat\beta] for a minimizing coefficient vector.
+The fitted response vector is stem:[\widehat y=\mathbf X\widehat\beta];
+the *residual* vector stem:[e=y-\widehat y] is observed minus fitted.
+The gradient stem:[\nabla_\beta J] collects the coordinate derivatives:
+
+[stem]
+++++
+J(\beta)=\lVert\mathbf X\beta-y\rVert_2^2,\qquad
+\min_\beta J(\beta),\qquad
+\nabla_\beta J=2\mathbf X^\top(\mathbf X\beta-y).
+++++
+
+Here the design and response are held at their observed values. The hats
+label fitted coefficients, not population parameters. Orthogonality is an
+algebraic property of the least-squares minimum; it does not establish
+unbiased coefficients, a correct conditional-mean model or causal effects.
+
+The design's *column space* is all linear combinations of its columns.
+*Full column rank* means those columns are linearly independent. Unlike PCA,
+OLS uses a designated response: preserving input variance and minimizing
+response error are different objectives.
+
+.Proposition: Least squares projects onto the design column space
+[.thm#thm:matrix-ols]
+****
+Every least-squares minimizer satisfies stem:[\mathbf X^\top e=0], with stem:[e=y-\mathbf X\widehat\beta]. The fitted vector is unique; coefficients require full column rank for uniqueness.
+****
+
+[%collapsible]
+.Proof — Least squares projects onto the design column space
+====
+
+*Step 1.* Differentiate the objective as above and set the gradient to zero. The normal equations are stem:[\mathbf X^\top\mathbf X\widehat\beta=\mathbf X^\top y].
+
+*Step 2.* The residual stem:[e=y-\mathbf X\widehat\beta] obeys
+stem:[\mathbf X^\top e=0]. Every column-space vector is stem:[\mathbf Xh]
+for some coefficient vector stem:[h\in\mathbb R^d], and stem:[e^\top\mathbf Xh=0]. Therefore,
+for any other coefficient vector stem:[\gamma\in\mathbb R^d], Pythagoras gives
+
+[stem]
+++++
+\lVert y-\mathbf X\gamma\rVert_2^2
+=\lVert e+\mathbf X(\widehat\beta-\gamma)\rVert_2^2
+=\lVert e\rVert_2^2+\lVert\mathbf X(\widehat\beta-\gamma)\rVert_2^2
+\geq\lVert e\rVert_2^2.
+++++
+
+This proves global minimality. Equality requires the same fitted vector.
+
+*Step 3.* Orthogonal projection onto a fixed subspace is unique. Coefficients are unique only for full column rank. With rank deficiency,
+adding a vector in the design kernel leaves fitted values unchanged; among
+the possible solutions, the SVD-based solver selects coefficients of smallest
+Euclidean length (a minimum-norm solution).
+====
+
+For the one-predictor model above, let stem:[\bar x,\bar y] be the means
+of the m observed pairs and stem:[x_c,y_c] their centered vectors.
+Reuse 20 October's sample standard deviations stem:[s_x,s_y], covariance
+stem:[s_{xy}] and Pearson stem:[r_{xy}], now with divisor m−1.
+Assume both sample variances are positive when using Pearson. The slope
+stem:[\widehat\beta_1] and intercept stem:[\widehat\beta_0] have the following form.
+
+.Proposition: The simple-regression slope is scaled Pearson
+[.thm#thm:matrix-slope]
+****
+With a nonconstant predictor and an intercept, stem:[\widehat\beta_1=s_{xy}/s_x^2]
+and stem:[\widehat\beta_0=\bar y-\widehat\beta_1\bar x]. If the response
+is also nonconstant, stem:[\widehat\beta_1=r_{xy}s_y/s_x].
+****
+
+[%collapsible]
+.Proof — The simple-regression slope is scaled Pearson
+====
+
+*Step 1.* For simple regression with intercept, differentiate with respect to the
+intercept to obtain stem:[\widehat\beta_0=\bar y-\widehat\beta_1\bar x].
+
+*Step 2.* Substitute this into the objective: it becomes
+stem:[\sum_i(y_{c,i}-\beta_1 x_{c,i})^2].
+
+*Step 3.* Differentiating again yields
+
+[stem]
+++++
+\widehat\beta_1=\frac{x_c^\top y_c}{x_c^\top x_c}
+=\frac{s_{xy}}{s_x^2}=r_{xy}\frac{s_y}{s_x},\qquad s_x>0,\ s_y>0.
+++++
+
+The covariance normalization cancels; a correlation coefficient is not a
+slope because slope retains response/predictor units. This is 20 October's
+population projection with finite sums replacing expectations. If the
+predictor is constant, slope and intercept cannot be separately identified.
+====
+
+Normal equations characterize the projection but forming the Gram matrix
+squares conditioning. QR factors a full-column-rank design into a matrix with orthonormal columns
+and an upper triangular matrix (zeros below the diagonal). QR or SVD avoids that
+step. Use `np.linalg.lstsq`, inspect rank and singular values, and avoid an
+explicit inverse. No Gaussian assumption is needed to compute this fit;
+uncertainty or causal interpretations need additional assumptions.
+
+*Numerical example:* reuse the four observed pairs, x in hours and y in points.
+The fitted line has intercept 0.5 point and slope 0.8 point/hour. The code
+checks this slope and the residual orthogonality. `X_design` is the design;
+`lstsq` returns coefficients, residual sums of squares (possibly an empty
+array, depending on dimensions and rank), rank and singular values. The
+residual vector itself is `y - X_design @ beta`.
+
+[%collapsible]
+.Code demonstration 8 — open, predict, then inspect Results
+====
+
+[#matrix-geometry-code-8]
+[%dynamic,python,fail-on-error=]
+----
+x = np.array([1., 2., 3., 4.])
+y = np.array([1., 3., 2., 4.])
+X_design = np.column_stack([np.ones(len(x)), x])
+beta, _, rank, sv = np.linalg.lstsq(X_design, y, rcond=None)
+xc, yc = x - x.mean(), y - y.mean()
+assert np.isclose(beta[1], (xc @ yc) / (xc @ xc))
+assert np.isclose(beta[1], np.corrcoef(x, y)[0, 1] * y.std(ddof=1) / x.std(ddof=1))
+assert np.allclose(X_design.T @ (y - X_design @ beta), 0., atol=1e-12)
+print({"intercept": beta[0], "slope (points/hour)": beta[1], "rank": rank})
+----
+====
+
+== 5. Next week: Beijing regression and chronological validation
+
+[NOTE]
+====
+*Preparation/reference for 9 November.* This supplied experiment and exercise D
+belong to the continuation of regression and first steps in supervised
+machine learning. They are available for study; they are not part of the
+required PCA practical on 2 November.
+====
+
+*Scientific task:* Estimate same-hour PM2.5 from PM10 and meteorological
+measurements when those predictor sensors are available and PM2.5 is withheld.
+This is conditional same-hour estimation, *not a future forecast*: future
+weather and PM10 are not assumed available in advance. `source_row`, timestamps
+and station labels are not numeric predictors. Measurement co-movement does
+not make a causal model.
+
+*Training* means fitting transformations and coefficients on designated rows.
+*Validation* applies that fixed rule to other rows and measures its errors.
+A *window* here simply means a selected period of dates. Prescribe the split
+and model before fitting. Train March 1–10; inspect a later validation period
+March 11–14. Split by timestamp across all stations,
+so the same hour does not enter both partitions. Drop incomplete required
+rows within each partition, report coverage, and use no imputation. Fit mean,
+sample scale and coefficients on training rows only. If PCA were added, its
+directions must also be fitted on training rows alone; k must be fixed or
+selected inside a separate training-only validation procedure.
+
+This short extract has already been explored. Its later window illustrates
+validation mechanics; it is not an untouched final test. Do not tune after
+seeing its error and then describe that error as an independent evaluation. Hourly dependence
+also prevents a naive i.i.d. error-bar interpretation.
+
+*How will we compare errors?* A *baseline* is a simple reference rule: here,
+always predict the training-response mean. It is the constant that minimizes
+squared training error. *Coverage* reports how many available rows remain
+complete (give both counts and their proportion). For b validation rows, let
+stem:[y_i] be the observed value and stem:[\widehat y_i] its estimate.
+*RMSE* means root mean squared error:
+
+[stem]
+++++
+\operatorname{RMSE}=\sqrt{\frac1b\sum_{i=1}^b(y_i-\widehat y_i)^2}.
+++++
+
+RMSE has the response's units; a smaller value means a smaller mean squared
+error on these same rows. It does not by itself establish accuracy on other dates.
+A *preprocessing leak* would use validation information to learn a transformation,
+for example centering by a mean computed on all fourteen days.
+In the code, `mu_train` and `sd_train` are predictor means and sample standard
+deviations learned on training rows; both partitions use those same values.
+`Atr` and `Ava` are the standardized training and validation inputs;
+`Xtr` and `Xva` add the intercept column. `ytr` and `yva` are their responses.
+The variable `prediction` is the fitted model applied to validation inputs.
+
+[%collapsible]
+.Code demonstration 9 — open, predict, then inspect Results
+====
+
+[#matrix-geometry-code-9]
+[%dynamic,python,fail-on-error=,output=matplotlib,figure-format=svg,figure-alt="Same-hour estimation is evaluated on later rows; residual structure must still be inspected.",figure-caption="Later regression validation",result-interpretation="Same-hour estimation is evaluated on later rows; residual structure must still be inspected."]
+----
+predictors = ["PM10", "TEMP", "PRES", "DEWP", "WSPM"]
+target = "PM2.5"
+cutoff = pd.Timestamp("2013-03-11")
+past = air.loc[air.timestamp < cutoff]
+later = air.loc[air.timestamp >= cutoff]
+train = past.dropna(subset=predictors + [target])
+valid = later.dropna(subset=predictors + [target])
+assert train.timestamp.max() < valid.timestamp.min()
+mu_train = train[predictors].mean()
+sd_train = train[predictors].std(ddof=1)
+assert (sd_train > 0).all()
+Atr = ((train[predictors] - mu_train) / sd_train).to_numpy()
+Ava = ((valid[predictors] - mu_train) / sd_train).to_numpy()
+Xtr = np.column_stack([np.ones(len(train)), Atr])
+Xva = np.column_stack([np.ones(len(valid)), Ava])
+ytr, yva = train[target].to_numpy(), valid[target].to_numpy()
+beta, _, rank, singular_design = np.linalg.lstsq(Xtr, ytr, rcond=None)
+prediction = Xva @ beta
+reference = np.full(len(valid), ytr.mean())  # mean is the squared-loss constant fit
+api_regression = LinearRegression().fit(Atr, ytr)
+assert np.allclose(api_regression.predict(Ava), prediction)
+assert np.allclose(Xtr.T @ (ytr - Xtr @ beta), 0., atol=1e-7)
+rmse = lambda observed, fitted: np.sqrt(np.mean((observed - fitted)**2))
+print(pd.DataFrame({"raw rows": [len(past), len(later)],
+                    "complete rows": [len(train), len(valid)]},
+                   index=["training", "later validation"]))
+print(pd.Series({"OLS validation RMSE (µg/m³)": rmse(yva, prediction),
+                 "Training-mean validation RMSE (µg/m³)": rmse(yva, reference),
+                 "design rank": rank, "design columns": Xtr.shape[1],
+                 "design condition": singular_design[0] / singular_design[-1]}))
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.7), constrained_layout=True)
+axes[0].scatter(yva, prediction, s=12, alpha=.3)
+limits = [min(yva.min(), prediction.min()), max(yva.max(), prediction.max())]
+axes[0].plot(limits, limits, "k--", label="Perfect agreement")
+axes[0].set(xlabel="Observed PM2.5 (µg/m³)", ylabel="Estimated PM2.5 (µg/m³)",
+            title="Later validation: conditional same-hour estimation")
+axes[0].legend(fontsize=8)
+axes[1].scatter(prediction, yva - prediction, s=12, alpha=.3)
+axes[1].axhline(0, color="black", linestyle="--")
+axes[1].set(xlabel="Estimated PM2.5 (µg/m³)", ylabel="Residual (µg/m³)",
+            title="Does residual structure remain?")
+plt.show()
+----
+====
+
+*Guided exercise D:* Record both RMSE values and the coverage. Explain whether
+the fitted model improves this prescribed baseline on this window, using
+the computed values rather than an expected ranking. Identify residual
+structure and one reason this does not validate a forecast. Explain exactly
+where a preprocessing leak would occur if mu_train used all fourteen days.
+
+== 6. Optional preparation: high variance can be irrelevant to prediction
+
+Let stem:[u=(-1,-1,1,1)^\top] and stem:[v=(-1,1,-1,1)^\top]. These centered
+vectors are orthogonal and have the same variance, 4/3. Construct predictors
+100u and v, and choose the response y=v, the small-variance second predictor. The leading PCA direction preserves the large
+variance coordinate and loses the entire response signal. This is an exact
+controlled counterexample, not a claim about Beijing.
+
+[%collapsible]
+.Code demonstration 10 — open, predict, then inspect Results
+====
+
+[#matrix-geometry-code-10]
+[%dynamic,python,fail-on-error=]
+----
+u = np.array([-1., -1., 1., 1.])
+v = np.array([-1., 1., -1., 1.])
+example = np.column_stack([100 * u, v])
+_, ss, vv = np.linalg.svd(example, full_matrices=False)
+first_score = example @ vv[0]
+assert abs(first_score @ v) < 1e-10
+assert ss[0]**2 / np.sum(ss**2) > .999
+print("Leading explained ratio:", ss[0]**2 / np.sum(ss**2))
+print("Response = second feature; the first PC is orthogonal to it.")
+----
+====
+
+*Optional numerical extension:* replace a full-rank design's second predictor
+by its first plus a progressively smaller perturbation. Compare singular
+values, numerical rank, coefficient sensitivity and fitted-value sensitivity.
+Use QR/SVD; computing an inverse of the normal matrix is not required.
+
+== 7. Synthesis: same algebra, different questions
+
+[cols="1,2,2,2",options="header"]
+|===
+|Object |Question |Geometry |Limit
+|Covariance/Pearson |How do selected variables move together? |Centered inner products; normalized angles. |No causal or general dependence guarantee.
+|PCA |Which feature directions retain variance? |Eigenvectors/SVD; row-cloud reconstruction. |High variance may miss a target.
+|Least squares |How well can columns approximate a response? |Projection onto the design column space. |Training orthogonality does not guarantee future accuracy.
+|===
+
+*Today's exit question:* derive stem:[v^\top Sv] in one line, give the
+dimensions of one direction and its scores, and explain what is lost by
+retaining two components. Relate your reconstruction error to the variance
+you discarded. Which original measurements support your interpretation of
+one axis? The regression row above is a question for the next lesson.
+
+== Next week: introduce regression and supervised learning
+
+For the planned 9 November lesson, keep the PCA result and your interpretation
+of one axis. No first fitted line is assumed. *Supervised learning* means learning a rule
+from examples with a known response, then evaluating it on observations
+that were not used to fit the rule. The response is often called the target.
+
+. Introduce slope, intercept and residuals; extend from one predictor to several.
+. Separate training (fit transformations and coefficients) from validation
+  (apply the fixed rule to other observations); inspect the experiment in § 5.
+. Compare prediction error with a simple reference rule, then explain one
+  limitation of the result. Model comparison and generalization begin here.
+
+Use the xref:./../analytical/linear-probabilistic.adoc[regression reference],
+xref:./../foundations/safe-pipelines.adoc[training and validation guide] and
+xref:./../foundations/metrics-errors.adoc[error-metric guide]. The detailed
+9 November session remains to be prepared; this is its announced direction.

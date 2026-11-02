@@ -1,0 +1,3 @@
+# Preserve binary teaching artifacts without text diffs or line-ending conversion.
+*.pdf binary
+*.zip binary

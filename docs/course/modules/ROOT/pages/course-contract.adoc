@@ -37,5 +37,5 @@ No pandas experience is required. Block 2 includes a Python refresher and guided
 |Final practical and written examination |40% |Individual, no generative AI
 |===
 
-All official material and submissions use English. Approved individual accommodations do not create a second public course version.
+The reference site, ordinary notebooks, assessments and submissions use English. At the instructor's request, the xref:session-multivariate.adoc[20 October and 2 November class slides] use French for live teaching. This class-support exception and approved individual accommodations do not create a second public course version.
 
