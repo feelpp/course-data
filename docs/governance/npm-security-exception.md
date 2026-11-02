@@ -36,6 +36,18 @@ it when a compatible upstream fix is available and has passed course checks.
 This is a code mitigation, not an advisory allowlist entry. The audit gate still
 rejects every reported high or critical finding and incomplete audit reports.
 
+## Patched dependencies (2 November 2026)
+
+The CI and Pages workflows both stopped at the audit gate after new advisories
+affected the locked build dependencies. The direct Handlebars dependency is
+updated to `4.7.10`; the lock resolves `follow-redirects` to `1.16.2` and
+`source-map-js` to `1.2.2`, within their consumers' existing compatible ranges.
+The audit policy and the existing parser mitigations remain unchanged.
+
+References: [Handlebars own-property bypass](https://github.com/advisories/GHSA-p8wg-vrv2-v86f),
+[cross-realm redirect headers](https://github.com/advisories/GHSA-mrwp-f3q8-3g9p),
+and [indexed source-map offsets](https://github.com/advisories/GHSA-68fv-2mgg-jv7q).
+
 ## Historical scope (22 July–5 September 2026)
 
 Antora `3.1.15` and Collector `1.0.3` require `js-yaml` version 4 APIs. At the July review, the available fixed `js-yaml` release was `5.2.1`, whose schema and merge-type APIs were incompatible with that Antora release. An attempted transitive override failed before the playbook could be loaded. The audit tool's automatic remedy instead proposed an unsupported breaking downgrade to Antora `2.3.4`.
