@@ -1,0 +1,413 @@
+{
+  "title": "Covariance, Pearson et première validation",
+  "date": "2026-10-20",
+  "language": "fr",
+  "notesLanguage": "fr",
+  "durationMinutes": 240,
+  "publicBase": "https://feelpp.github.io/course-data/course-data/",
+  "width": 1280,
+  "height": 720,
+  "schedule": [
+    [
+      "00–25",
+      "Rappel actif et ciblé",
+      25
+    ],
+    [
+      "25–70",
+      "Couples et covariance · TP A",
+      45
+    ],
+    [
+      "70–100",
+      "Matrice de covariance · TP A2",
+      30
+    ],
+    [
+      "100–110",
+      "Pause",
+      10
+    ],
+    [
+      "110–175",
+      "Unités, Pearson, limites et TP B",
+      65
+    ],
+    [
+      "175–185",
+      "Pause",
+      10
+    ],
+    [
+      "185–200",
+      "Première séparation et règle de référence",
+      15
+    ],
+    [
+      "200–225",
+      "TP C et restitution",
+      25
+    ],
+    [
+      "225–240",
+      "Bilan individuel",
+      15
+    ]
+  ],
+  "slides": [
+    {
+      "id": "opening",
+      "title": "De la description aux variations conjointes",
+      "minutes": 1,
+      "chapter": "Objectif de la séance",
+      "notes": "Partir de ce que les étudiants ont réellement abordé. Présenter la question avant les outils.",
+      "page": "foundations/statistical-exploration.html",
+      "anchor": ""
+    },
+    {
+      "id": "purpose",
+      "title": "Ce que nous voulons savoir faire",
+      "minutes": 2,
+      "chapter": "Pourquoi ces nouveaux outils ?",
+      "notes": "Annoncer les trois niveaux : comprendre un couple, construire une matrice, interpréter sans surconclure.",
+      "page": "foundations/statistical-exploration.html",
+      "anchor": ""
+    },
+    {
+      "id": "route",
+      "title": "Quatre heures pour comprendre et pratiquer",
+      "minutes": 2,
+      "chapter": "Organisation",
+      "notes": "Les diapositives sont des supports de questions, pas un texte à lire intégralement. Deux pauses de dix minutes.",
+      "page": "foundations/statistical-exploration.html",
+      "anchor": ""
+    },
+    {
+      "id": "diagnostic",
+      "title": "Avant de rouvrir le notebook",
+      "minutes": 8,
+      "chapter": "Rappel actif",
+      "notes": "Trois minutes seul, trois en binôme, deux de restitution. Repérer les difficultés sans refaire tout le chapitre.",
+      "page": "foundations/statistical-exploration.html",
+      "anchor": ""
+    },
+    {
+      "id": "recall",
+      "title": "Position et dispersion : deux questions",
+      "minutes": 8,
+      "chapter": "Rappel au tableau",
+      "notes": "Sur 1,2,2,3,12 : moyenne 4, médiane 2, variance 20.5 et écart-type environ 4.53. Faire distinguer dispersion des observations et incertitude sur la moyenne.",
+      "page": "foundations/statistical-exploration.html",
+      "anchor": ""
+    },
+    {
+      "id": "plots",
+      "title": "Un nombre ne décrit pas une distribution",
+      "minutes": 4,
+      "chapter": "Rappel graphique",
+      "notes": "Faire choisir histogramme, fonction de répartition empirique et boîte à moustaches selon la question. F(3)=4/5 sur les cinq lectures.",
+      "page": "foundations/statistical-exploration.html",
+      "anchor": ""
+    },
+    {
+      "id": "joint-question",
+      "title": "Que perd-on en séparant les colonnes ?",
+      "minutes": 3,
+      "chapter": "Une nouvelle question",
+      "notes": "Évoquer PM2.5 et PM10 observés à la même station et à la même heure. Prédire une association avant de calculer.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "pairing",
+      "title": "Même distribution, autres couples",
+      "minutes": 3,
+      "chapter": "Observer avant de calculer",
+      "notes": "Les marges sont inchangées. Faire prédire les signes. Trier indépendamment les colonnes détruirait les couples.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "notation",
+      "title": "Nos notations, une fois pour toutes",
+      "minutes": 3,
+      "chapter": "Convention de la séance",
+      "notes": "Distinguer les valeurs observées, les moyennes, les écarts-types et la covariance. Ces notations restent les mêmes dans les fiches et dans le code.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "products",
+      "title": "Des écarts aux produits des écarts",
+      "minutes": 6,
+      "chapter": "Construction au tableau",
+      "notes": "Faire compléter la table puis lire une contribution positive et une négative. La somme des produits vaut 4. Le signe est un bilan, pas une loi observation par observation.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "covariance",
+      "title": "La covariance résume ces contributions",
+      "minutes": 5,
+      "chapter": "Définition et calcul",
+      "notes": "Diviser 4 par n-1=3. Rappeler ddof=1, sans argument automatique IID pour les lectures horaires.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "tp-a",
+      "title": "TP A — calculer puis expliquer une covariance",
+      "minutes": 25,
+      "chapter": "À vous · 45–70 min",
+      "notes": "Jalon 1 après cinq minutes : table appariée et n. Jalon 2 après dix minutes : signe prévu et nuage. Puis calcul explicite et comparaison pandas. Aucun résultat Beijing donné sur les slides.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "matrix-purpose",
+      "title": "Pourquoi réunir les covariances en matrice ?",
+      "minutes": 4,
+      "chapter": "Passer à plusieurs variables",
+      "notes": "Introduire X à n lignes et p colonnes. Les minuscules du couple correspondent aux deux premières colonnes. Les moyennes de colonnes sont m_j.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "matrix-centre",
+      "title": "Centrer une colonne à la fois",
+      "minutes": 3,
+      "chapter": "Rendre le calcul visible",
+      "notes": "Calculer les deux moyennes 2.5, puis les quatre lignes de C. La première ligne est (-1.5,-1.5) ; la seconde a deux signes opposés. Lire la soustraction diffusée de m dans le code. Ne pas passer directement de X à S.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "matrix-build",
+      "title": "Une matrice construite avec les mêmes écarts",
+      "minutes": 3,
+      "chapter": "Construction matricielle",
+      "notes": "Décomposer C.T @ C entrée par entrée sur les quatre couples. Vérifier les dimensions avant le calcul.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "matrix-read",
+      "title": "Lire la matrice avant de la colorer",
+      "minutes": 4,
+      "chapter": "Sens des cases",
+      "notes": "Relier diagonale et variance, hors-diagonale et covariance. Chaque case porte sa propre unité. Ne pas classer la force des liens par la taille brute des nombres.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "tp-a2",
+      "title": "TP A2 — construire une matrice cohérente",
+      "minutes": 16,
+      "chapter": "À vous · 84–100 min",
+      "notes": "Même ensemble de 1002 lignes pour PM2.5, PM10, WSPM. Ne pas comparer la variance WSPM de cette matrice à sa variance sur les 1008 lignes. Pause 100–110.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "matrix-limits",
+      "title": "Ce que la matrice ne raconte pas",
+      "minutes": 5,
+      "chapter": "Les limites de la covariance",
+      "notes": "Une synthèse des produits centrés ne donne pas toute la forme du nuage. Mélanges et tendances peuvent contribuer. Introduire explicitement la question des unités.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "units-plot",
+      "title": "Changer l’unité change-t-il la relation ?",
+      "minutes": 4,
+      "chapter": "Expérience à prédire",
+      "notes": "Convertir x uniquement, heures vers minutes. Faire prédire les effets avant de montrer les deux matrices numériques.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "units-matrix",
+      "title": "La même relation, des nombres très différents",
+      "minutes": 4,
+      "chapter": "Constater le problème",
+      "notes": "S11 est multiplié par 3600, S12 par 60, S22 inchangé. La covariance est 4/3 puis 80. Ces différences ne signifient pas que la relation est devenue plus forte.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "normalise-purpose",
+      "title": "Comparer des associations : enlever les échelles",
+      "minutes": 3,
+      "chapter": "Pourquoi introduire Pearson ?",
+      "notes": "Diviser chaque écart centré par son écart-type. Il faut utiliser les mêmes lignes pour les deux moyennes et les deux écarts-types.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "standardise",
+      "title": "Exprimer les écarts en écarts-types",
+      "minutes": 4,
+      "chapter": "Standardiser",
+      "notes": "Expliquer chaque terme de z_xi, z_yi. Moyenne empirique zéro et variance empirique un avec ddof=1. Une colonne constante ne peut pas être standardisée.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "pearson",
+      "title": "Pearson : la covariance standardisée",
+      "minutes": 5,
+      "chapter": "Définition",
+      "notes": "Donner r_xy=s_xy/(s_x s_y), puis la somme des produits standardisés. Les deux unités s’annulent. Positif/négatif décrit une direction d’association linéaire, pas chaque variation.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "pearson-example",
+      "title": "Reprendre exactement les quatre couples",
+      "minutes": 3,
+      "chapter": "Calcul à la main",
+      "notes": "r=(4/3)/(5/3)=4/5=0.8. En minutes r=0.8 encore. Une transformation positive conserve r ; renverser une variable inverse son signe.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "curvature",
+      "title": "Une corrélation nulle peut cacher une relation",
+      "minutes": 4,
+      "chapter": "Limite : forme du nuage",
+      "notes": "Sur x symétrique et y=x², le coefficient vaut zéro. Cela ne signifie pas indépendance. Faire décrire les trois nuages avant de lire les coefficients.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "outlier",
+      "title": "Un point peut dominer le coefficient",
+      "minutes": 3,
+      "chapter": "Limite : observations influentes",
+      "notes": "Un point supplémentaire peut créer une forte corrélation sur cet exemple synthétique. Demander de repérer l’observation, pas de la supprimer automatiquement.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "tp-b",
+      "title": "TP B — vérifier ce que Pearson corrige",
+      "minutes": 20,
+      "chapter": "À vous · 145–165 min",
+      "notes": "Même sous-ensemble apparié que TP A, ddof=1. Comparer avec pandas puis changer positivement l’unité. Finir par une phrase sur ce que r ne résout pas.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "correlation-matrix",
+      "title": "La matrice de corrélation répond à une autre lecture",
+      "minutes": 5,
+      "chapter": "Passer aux corrélations",
+      "notes": "Définir s_j=sqrt(S_jj), puis Z_ij=C_ij/s_j. R=Z.T @ Z/(n-1). Pas de nouvelle lettre non définie dans la formule.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "heatmap",
+      "title": "Dans la pratique : matrice, effectifs et nuages",
+      "minutes": 5,
+      "chapter": "Un résultat à contrôler",
+      "notes": "Échelle couleur fixe de -1 à 1. Les étudiants préparent R et les effectifs, le squelette de figure est fourni. Une case de heatmap sélectionne un couple à inspecter ; elle n’en montre pas la forme. Pause 175–185.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "prediction",
+      "title": "Décrire un lien et prévoir sont deux questions",
+      "minutes": 5,
+      "chapter": "Ouvrir la suite du cours",
+      "notes": "La corrélation contemporaine ne garantit pas une information disponible à l’instant de prévision. Ne pas entreprendre le chapitre complet de modélisation.",
+      "page": "foundations/safe-pipelines.html",
+      "anchor": ""
+    },
+    {
+      "id": "split",
+      "title": "Attribuer un rôle aux périodes",
+      "minutes": 5,
+      "chapter": "Apprentissage et validation",
+      "notes": "Le jeu entier a déjà été exploré. Ces partitions illustrent des rôles, pas un test final redevenu indépendant.",
+      "page": "foundations/safe-pipelines.html",
+      "anchor": ""
+    },
+    {
+      "id": "baseline",
+      "title": "Une règle de référence, puis son erreur",
+      "minutes": 5,
+      "chapter": "Calcul au tableau",
+      "notes": "Petit exemple indépendant : apprentissage 1,2,3 ; validation 4,6. Constante 2 et erreur absolue moyenne 3. La médiane minimise la somme des erreurs absolues sur apprentissage.",
+      "page": "foundations/safe-pipelines.html",
+      "anchor": ""
+    },
+    {
+      "id": "tp-c",
+      "title": "TP C — un premier résultat de validation",
+      "minutes": 20,
+      "chapter": "À vous · 200–220 min",
+      "notes": "Les masques temporels et la structure de code sont fournis sur la fiche. Les étudiants calculent la médiane d’apprentissage, les prédictions et l’erreur absolue moyenne. Ne pas utiliser les 13–14 mars.",
+      "page": "foundations/safe-pipelines.html",
+      "anchor": ""
+    },
+    {
+      "id": "return",
+      "title": "Deux résultats, deux interprétations",
+      "minutes": 5,
+      "chapter": "Restitution · 220–225 min",
+      "notes": "Faire produire une phrase sur l’association et une sur l’erreur de prédiction, avec les effectifs, unités et limites.",
+      "page": "foundations/safe-pipelines.html",
+      "anchor": ""
+    },
+    {
+      "id": "exit",
+      "title": "Vérifier ce qui est compris",
+      "minutes": 15,
+      "chapter": "Bilan individuel · 225–240 min",
+      "notes": "Cinq minutes seul, cinq de discussion, cinq de reprise. Vérifier le sens des unités, des lignes retenues, de la standardisation et de la validation.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "gram",
+      "title": "Complément — géométrie de la covariance",
+      "minutes": 0,
+      "chapter": "Après les objectifs essentiels",
+      "notes": "Facultatif : produits scalaires, symétrie et semi-définie positivité sur un même ensemble de lignes. Point de départ pour l’ACP, pas un nouvel exercice obligatoire.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    },
+    {
+      "id": "cosine",
+      "title": "Complément — Pearson comme cosinus",
+      "minutes": 0,
+      "chapter": "Après les objectifs essentiels",
+      "notes": "Facultatif : définir les deux vecteurs centrés avant le produit scalaire. Cauchy–Schwarz donne les bornes. Ne pas présenter cette preuve comme un prérequis au TP.",
+      "page": "foundations/covariance-correlation.html",
+      "anchor": ""
+    }
+  ],
+  "synthetic": {
+    "x": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "y": [
+      1,
+      3,
+      2,
+      4
+    ],
+    "xUnit": "heures",
+    "yUnit": "points"
+  },
+  "baseline": {
+    "trainingEnd": "2013-03-11",
+    "validationEnd": "2013-03-13",
+    "testEnd": "2013-03-15"
+  }
+}

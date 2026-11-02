@@ -108,6 +108,7 @@ def expected_notebook_contracts() -> tuple[list[Path], dict[str, dict], set[str]
         *curriculum["analytical_release"]["notebook_sources"],
         *curriculum["enrichment_release"]["page_notebook_sources"],
         *curriculum["practice_release"]["notebook_sources"],
+        *curriculum["classroom_routes"]["multivariate"]["notebook_sources"],
     ]
     exercise_by_source: dict[str, dict] = {}
     for specimen in curriculum["exercise_release"]["public_specimens"]:
@@ -262,8 +263,11 @@ def main() -> None:
             destination = target_path(page, target)
             if destination is None or destination.resolve() != bundle.resolve():
                 errors.append(f"{page.relative_to(SITE)}: bundle button has wrong target {target}")
-        if parser.language != "en":
-            errors.append(f"{page.relative_to(SITE)}: rendered document language must be en")
+        expected_language = "en"
+        if parser.language != expected_language:
+            errors.append(
+                f"{page.relative_to(SITE)}: rendered document language must be {expected_language}"
+            )
         if uses_antora_ui and (
             "fontawesome-icon-defs.js" not in page_html or "fontawesome.js" not in page_html
         ):

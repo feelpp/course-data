@@ -1,0 +1,286 @@
+= 2 November 2026 practical — Build and interpret principal components
+:page-course-language: en
+:page-course-concepts: DP-PCA-01, DP-NUM-01, DP-EDA-01
+:page-course-priority: P1
+:page-course-difficulty: D2
+:page-course-duration-minutes: 45
+:page-course-outcomes: LO4, LO6, LO7, LO8
+:page-course-prerequisites: common-row Pearson matrix, centered vectors, PCA directions and scores
+:page-course-assessed: no
+:page-jupyter: true
+:page-course-execution-profile: fast
+:stem: latexmath
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 8388608
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+
+*Question:* Can a few new coordinates summarize six physical measurements,
+and what do those coordinates mean?
+
+This is the *45-minute practical inside the two-hour 2 November class*.
+Use the xref:./../sessions/matrix-geometry.adoc[theory and worked demonstrations]
+for support. The data loading and plotting layouts are supplied below;
+you calculate the quantities and write the interpretation. Commented lines
+are a scaffold to complete, not computed answers. The notebook has no stored
+results. Keep your xref:./../foundations/statistical-exploration.adoc[5 October
+practical] separately: that assignment concerned covariance and Pearson.
+
+Work in pairs, but each student keeps a rerunnable notebook and a short
+conclusion. Calculate before opening the optional hints. Centering and matrix
+multiplication are part of your work; the checkpoints help locate mistakes
+before plotting. The common route compares two then three components on the
+same table. Keep five minutes for the written conclusion in step 5. If you
+run short of time, explain the two-component result before completing the
+three-component comparison after class.
+
+== 1. Prepare a common table and choose a geometry — 8 minutes
+
+Each row is a *station-hour*: one monitoring station observed at one hour.
+The six variables are PM2.5 and PM10 (particulate concentrations, µg/m³),
+TEMP and DEWP (temperature and dew point, °C), PRES (pressure, hPa), and
+WSPM (wind speed, m/s). Retain rows complete for all six variables, without
+replacing missing values. Reuse the previous audit rather than repeat it.
+
+[%collapsible]
+.Provided setup — load the same observations as in the lesson
+====
+[#pca-practical-setup]
+[%dynamic,python,fail-on-error=]
+----
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+
+def course_file(relative):
+    for root in (Path.cwd(), *Path.cwd().parents):
+        candidate = root / relative
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(relative)
+
+
+air = pd.read_csv(course_file("datasets/teaching/air-quality/observations.csv"))
+air["timestamp"] = pd.to_datetime(air[["year", "month", "day", "hour"]])
+features = ["PM2.5", "PM10", "TEMP", "PRES", "DEWP", "WSPM"]
+complete = air.dropna(subset=features).copy()
+A = complete[features].to_numpy(dtype=float)
+n, p = A.shape
+print({"available rows": len(air), "common complete rows": n,
+       "variables": p, "excluded rows": len(air) - n})
+----
+====
+
+Before calculating, predict which variables might dominate an analysis using
+their original numerical scales. A variable's units can affect its numerical
+variance; numerical dominance alone does not establish scientific importance.
+
+For the main experiment use *correlation PCA*: center every column and divide
+it by its sample standard deviation (divisor n−1). Call the centered table
+stem:[A_c] and the standardized table stem:[A_z]. A column with zero standard
+deviation cannot be standardized; check this condition.
+
+[source,python]
+----
+# Complete the calculations before plotting.
+# mean = ...                       # one mean per column
+# Ac = ...                         # centered table
+# sd = ...                         # sample standard deviations, ddof=1
+# assert ...                       # every selected standard deviation is positive
+# Az = ...                         # standardized table
+# Check column means near zero and sample variances near one.
+----
+
+[%collapsible]
+.Optional hint 1 — keep track of the column axis
+====
+Rows are observations; columns are variables. Averaging over rows leaves
+one number per column (`axis=0`). Subtracting that vector from A uses NumPy
+*broadcasting*: the same column means are subtracted from every row. Keep
+the same column order for the means, scales and standardized table. Use the
+sample convention `ddof=1` for the scales.
+====
+
+*Checkpoint 1 — before SVD.* Print the shapes: A, Ac and Az should all have
+n rows and p columns; mean and sd each have p entries. Check that every scale
+is positive, column means of Az are close to zero, and its sample variances
+are close to one. Allow floating-point rounding, for example an absolute
+tolerance of 10⁻¹⁰ here. A changed row count means the experiment changed.
+
+== 2. Calculate directions, scores and variance — 12 minutes
+
+A principal *direction* has p coefficients, one per input variable. A *score*
+is the coordinate of one observation on that direction; one component has n
+scores. Use an economy SVD of stem:[A_z] with `full_matrices=False`.
+NumPy returns `U`, `singular` and `Vt`, where `Vt` is the transpose of the
+direction matrix V. Determine which orientation gives directions as columns.
+
+For component j, its sample variance is the squared singular value divided
+by n−1. Its explained variance ratio divides that variance by the sum of all
+component variances. The cumulative ratio adds the ratios of the first k
+components. Here k is the number of retained directions.
+
+[source,python]
+----
+# U, singular, Vt = ...
+# directions = ...                 # p rows, one component direction per column
+# scores = ...                     # n rows, one component per column
+# variances = ...
+# ratios = ...
+# cumulative = ...
+# Print shapes and a table with variance, ratio and cumulative ratio.
+# Check nonnegative variances, ratios summing to one, orthonormal directions.
+----
+
+Before running, state the expected shapes. After running, check them and
+compare score variances with your calculated component variances. Explain
+why directions and scores have different numbers of entries.
+
+[%collapsible]
+.Optional hint 2 — transpose the direction matrix, not the observations
+====
+For this table n is larger than p. Economy SVD therefore returns U of shape
+(n, p), singular of shape (p,), and Vt of shape (p, p). NumPy stores directions
+as *rows* of Vt; your variable directions must store them as *columns*.
+The projected table must still have one row per observation. Check that the
+inner dimensions of each matrix product agree before calculating it.
+====
+
+*Checkpoint 2 — before plotting.* For this table, directions has shape
+(p, p) and scores has shape (n, p). A single direction has p coefficients;
+one component has n scores. Check that directions have unit length and are
+mutually orthogonal. Score means should be close to zero; each score column's
+sample variance should match the corresponding calculated variance. The
+ratios should sum to one, within rounding. If they do not, repair this step
+before drawing a figure.
+
+== 3. Plot and interpret new coordinates — 10 minutes
+
+First plot the cumulative explained ratio. The axis settings are supplied;
+replace the omitted quantities with your calculations.
+
+[source,python]
+----
+# fig, ax = plt.subplots(figsize=(6, 3.5), constrained_layout=True)
+# ax.plot(..., ..., "o-")          # component counts, cumulative ratios
+# ax.set(xlabel="Number of retained components",
+#        ylabel="Cumulative explained variance ratio", ylim=(0, 1.05))
+# ax.grid(alpha=.2)
+# plt.show()
+----
+
+Next, compare *where observations project* with *what defines an axis*.
+PC1 and PC2 mean the first and second principal components. Plot observations
+at their first two scores, using station names only as descriptive labels.
+Alongside, plot the coefficients of the first direction against the original
+variable names. Coefficients here are entries of a unit direction vector;
+other conventions sometimes scale them differently under the name loadings.
+
+[source,python]
+----
+# fig, axes = plt.subplots(1, 2, figsize=(11, 4), constrained_layout=True)
+# for station, marker in zip(sorted(complete.station.unique()),
+#                            ["o", "s", "^"], strict=True):
+#     mask = complete.station.to_numpy() == station
+#     axes[0].scatter(..., ..., s=12, alpha=.3, marker=marker, label=station)
+# axes[0].set(xlabel="PC1 score", ylabel="PC2 score",
+#             title=f"Projected station-hours: n={n}")
+# axes[0].legend(fontsize=8)
+# axes[1].barh(features, ...)       # coefficients of the first direction
+# axes[1].axvline(0, color="grey", linewidth=.8)
+# axes[1].set(xlabel="PC1 direction coefficient", title="What defines this axis?")
+# plt.show()
+----
+
+Write a short reading before changing the analysis:
+
+. Which two or three variables have the largest coefficient magnitudes?
+  Explain what a large positive score means with this sign convention.
+. Is PC1 a directly measured temperature, concentration or pressure? Explain
+  how its coordinate combines standardized physical measurements. The score
+  has no original physical unit here.
+. Choose one station-hour with an extreme score and inspect its original
+  measurements. Do they support your reading of the coefficients?
+. If all coefficients and scores of an axis change sign, what changes in the
+  reconstruction? A separated station cloud alone does not prove causality
+  or validate a clustering method.
+
+== 4. Reconstruct and change one decision — 10 minutes
+
+Retain the first two components. Reconstruct the standardized table by
+projecting onto the retained directions and returning to the original p
+coordinate axes. The squared Frobenius error is the sum of squared errors
+over all reconstructed cells; compute it on standardized values so the
+comparison uses the declared geometry.
+
+Compare with the standardized table reconstructed as all zeros, corresponding
+to the original column means. Then retain *three components instead of two*,
+on exactly the same table and with the same geometry. Predict the changes
+in retained variance and reconstruction error before calculating.
+
+[source,python]
+----
+# k = 2
+# reconstructed_z = ...            # combine the first k scores and directions
+# error2 = ...                     # squared Frobenius reconstruction error
+# baseline_error2 = ...            # same geometry, zero centered reconstruction
+# retained_ratio = ...
+# Repeat with k = 3; keep the row selection and geometry fixed.
+# For plots, reuse the layouts above and label the changed decision.
+----
+
+[%collapsible]
+.Optional hint 3 — return from component coordinates to variable coordinates
+====
+The first k score columns form an n-by-k table. The first k direction columns
+form a p-by-k table. Find the transpose that makes their product n-by-p:
+each reconstructed cell must correspond to an original row and variable.
+Check the error in standardized coordinates before changing any units.
+To recover physical values afterwards, multiply each reconstructed column
+by its original sample standard deviation, then add its original mean.
+That last conversion is optional today.
+====
+
+*Checkpoint 3 — before writing the conclusion.* The reconstructed standardized
+table must have shape (n, p), not (n, k). Its error cannot exceed the zero-table
+baseline. Compare `error2 / baseline_error2` with the fraction of variance
+discarded. Does the comparison agree, within rounding? Moving from two to
+three components cannot increase reconstruction error or decrease retained
+variance. Explain why these checks concern the same standardized table.
+
+Present a two-row table, one row for k=2 and one for k=3, with retained variance
+ratio, squared reconstruction error and error divided by the baseline error.
+Say whether the gain is worth keeping an extra coordinate for your purpose.
+
+*Optional extensions after the common route:* Convert PM10 from µg/m³ to
+mg/m³ on the same complete rows and compare covariance PCA with correlation
+PCA. Or remove PM10 and repeat, explaining why raw reconstruction errors for
+different-sized tables do not describe the same objective. These experiments
+are not required in the 45-minute route.
+
+== 5. Write and defend the result — 5 minutes
+
+Finish with four sentences answering these prompts:
+
+. Which variables, common rows and geometry did you use, and why?
+. What did two components retain, and what changed with three?
+. What does a high score on one axis mean, supported by its coefficients
+  and one actual station-hour?
+. What does this reconstruction result leave unestablished?
+
+A high
+retained variance does not establish that the same coordinates predict a
+particular response well: PCA has not used a target variable.
+
+== Connection to the next lesson
+
+Today ends by asking how the task would change if PM2.5 were the response
+to estimate. No regression fit is required. The planned 9 November lesson
+will fit and evaluate such a rule using training and validation observations.
+Keep the distinction explicit:
+*PCA reconstructs inputs; regression estimates a chosen response*.
