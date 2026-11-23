@@ -18,7 +18,7 @@
 
 [.course-badge.priority-p1]#P1 Core# [.course-badge.difficulty-d2]#D2 Independent#
 
-Linear regression is both a predictive baseline and a bridge between linear algebra, numerical analysis, and probability. The algebraic normal equations do not justify explicitly computing stem:[(X^\top X)^{-1}] in production code.
+How can a fitted linear rule predict a measurement, and how can we check its errors on new observations? Start with the model and its least-squares algorithm, then evaluate the fixed rule on later data. The probability section develops an optional interpretation of squared errors and fitted coefficients.
 
 == Mathematical setting
 
@@ -37,78 +37,302 @@ The ordinary least-squares estimator minimises the empirical squared loss
 ++++
 ****
 
-Differentiating gives
+Let stem:[x_i^\top] be row stem:[i] of stem:[X]. It contains the
+predictor values for observation stem:[i], including a leading 1 when we fit
+an intercept. For a trial vector stem:[\beta], the prediction is
+stem:[x_i^\top\beta] and the residual is stem:[e_i(\beta)=y_i-x_i^\top\beta].
+Write stem:[J(\beta)=\sum_{i=1}^n e_i(\beta)^2] for the sum of squared
+residuals. The factor stem:[1/n] in the definition changes the scale of the
+objective and leaves its minimizers unchanged.
+
+[%collapsible]
+.Proof: differentiate one coefficient at a time
+====
+The entry stem:[X_{ij}] is the rate of change of prediction stem:[i]
+when coefficient stem:[\beta_j] changes. The corresponding derivative of
+the residual is stem:[-X_{ij}]. The chain rule gives
 
 [stem]
 ++++
-\nabla_\beta\lVert y-X\beta\rVert_2^2
-=2X^\top(X\beta-y).
+\begin{aligned}
+\frac{\partial J}{\partial\beta_j}
+  &= \sum_{i=1}^n 2e_i(\beta)(-X_{ij}),\\
+\nabla_\beta J(\beta)
+  &= -2X^\top e(\beta)=2X^\top(X\beta-y).
+\end{aligned}
 ++++
 
-At a minimiser, stem:[X^\top X\widehat\beta=X^\top y]. These *normal equations* characterise the solution; they do not prescribe an explicit matrix inverse. If stem:[X] has deficient column rank, several coefficient vectors can produce the same fitted values.
-
-== Probability connection
-
-Assume temporarily that
+The entries of the gradient are the stem:[p] partial derivatives. Setting
+each to zero gives
 
 [stem]
 ++++
-Y_i=x_i^\top\beta+\varepsilon_i,
-\qquad
-\varepsilon_i\overset{\mathrm{iid}}{\sim}\mathcal N(0,\sigma^2).
+\begin{aligned}
+X^\top (y-X\widehat\beta)&=0,\\
+X^\top X\widehat\beta&=X^\top y.
+\end{aligned}
 ++++
 
-The negative log-likelihood, up to an additive constant, is
+These are two forms of the *normal equations*. The first says that the
+residual is perpendicular to every column of stem:[X]. For example, an
+intercept column of ones makes the residuals sum to zero on the training
+rows. For any other coefficient vector stem:[\gamma], the difference
+stem:[X(\widehat\beta-\gamma)] lies in the column space and is perpendicular
+to the fitted residual. Expanding the squared norm gives
 
 [stem]
 ++++
--\log p(y\mid X,\beta,\sigma^2)
-=\frac n2\log\sigma^2
-+\frac{1}{2\sigma^2}\lVert y-X\beta\rVert_2^2.
+\lVert y-X\gamma\rVert_2^2
+  = \lVert y-X\widehat\beta\rVert_2^2
+    + \lVert X(\widehat\beta-\gamma)\rVert_2^2.
 ++++
 
-For fixed stem:[\sigma^2], maximum likelihood and least squares have the same stem:[\widehat\beta]. The Gaussian, independence, linear-mean, and constant-variance assumptions are needed for the likelihood and classical uncertainty statements—not for computing a squared-error baseline.
+The second term is nonnegative, which proves that a solution of the normal
+equations minimizes the error. It vanishes only when the predictions
+agree. If the columns are independent, it vanishes only for
+stem:[\gamma=\widehat\beta].
+====
 
-== Numerical contract
+[#_numerical_contract]
+== Least-squares algorithm
 
-For stem:[y=X\beta+\varepsilon], ordinary least squares minimises stem:[\lVert X\beta-y\rVert_2^2]. Under independent Gaussian errors with constant variance, the same coefficient estimate maximises the likelihood. These are distinct statements: the numerical objective can be used without believing every probabilistic assumption, while confidence or likelihood interpretations require the assumptions.
+*What do we compute?* From a training design stem:[X] and its measured
+responses stem:[y], compute coefficients stem:[\widehat\beta], fitted
+values stem:[X\widehat\beta], and residuals stem:[y-X\widehat\beta].
+Use a separate design with the same columns to estimate responses on
+new rows.
 
-The normal-equation matrix stem:[X^\top X] squares the condition number. Use `lstsq`, QR, or SVD; inspect singular values and scaling; use Ridge when shrinkage is substantively and computationally justified. Residual plots must challenge linearity, variance, dependence, and subgroup/time structure.
+. Build the design in a fixed column order. Fit any centering and scaling
+  using the training window. Add a column of ones if the model has an intercept.
+. Call `beta, _, rank, singular = np.linalg.lstsq(X, y, rcond=None)`.
+  Here `rank` counts singular values above the solver's threshold,
+  and `singular` lists the singular values. Compute the fitted values and
+  residuals with `X @ beta` and `y - X @ beta`.
+. Check `X.T @ residual` is close to zero on the training rows, up to
+  numerical precision. If the rank is smaller than the number of columns,
+  several coefficient vectors can yield the same fitted values. Check for
+  duplicate predictors or linear combinations of existing predictors.
 
-With the singular-value decomposition stem:[X=U\Sigma V^\top], the least-squares solution uses stem:[\Sigma^+] rather than dividing blindly by near-zero singular values:
+=== How the SVD gives the algorithm
+
+For stem:[n\ge p], write the reduced SVD as
+stem:[X=U\Sigma V^\top]. The columns stem:[u_j] of stem:[U] are
+orthonormal directions in the space of fitted responses, the columns
+stem:[v_j] of stem:[V] are orthonormal directions for the coefficients,
+and stem:[\Sigma] has the singular values stem:[\sigma_j] on its diagonal.
+Each pair satisfies stem:[Xv_j=\sigma_j u_j]. In PCA we previously used
+the right singular vectors as directions in the variable space. Here
+they specify combinations of coefficients.
+
+. Compute stem:[c_j=u_j^\top y], the coordinates of the observed response
+  along the columns of stem:[U].
+. In coefficient coordinates stem:[z=V^\top\beta], prediction
+  stem:[X\beta=U\Sigma z] has coordinate stem:[\sigma_j z_j] along
+  stem:[u_j]. The part of stem:[y] perpendicular to these directions is
+  the same for every fit. By orthogonality, minimize each squared difference
+  stem:[(c_j-\sigma_j z_j)^2] separately.
+. For each positive stem:[\sigma_j], take stem:[z_j=c_j/\sigma_j].
+  For a zero singular value, take stem:[z_j=0] to get the
+  smallest Euclidean norm among all minimizing coefficient vectors.
+  In floating-point arithmetic the solver treats sufficiently small
+  singular values as zero. This leaves a numerical rank that depends
+  on the tolerance.
+. Return to the original coefficient coordinates with
+  stem:[\widehat\beta=Vz]. The notation stem:[\Sigma^+] denotes
+  the diagonal operation that divides by retained singular values
+  and leaves all other coordinates at zero, so
+  stem:[\widehat\beta=V\Sigma^+U^\top y].
+
+A small nonzero singular value means that a large change in a particular
+combination of coefficients makes only a small change in predictions.
+For example, a change of stem:[0.01] in stem:[c_j] changes stem:[z_j]
+by stem:[10] when stem:[\sigma_j=0.001]. If both predictors are nearly
+copies of one another, increasing one coefficient and decreasing the
+other can leave the predictions almost unchanged.
+
+[%collapsible]
+.Why solve using X directly?
+====
+For full column rank, define the 2-norm condition number of stem:[X] as
+stem:[\kappa_2(X)=\sigma_{\max}/\sigma_{\min}], the ratio of its largest
+to its smallest singular value. The eigenvalues of
+stem:[X^\top X=V\Sigma^2V^\top] are stem:[\sigma_j^2], so
+stem:[\kappa_2(X^\top X)=\kappa_2(X)^2].
+For example, a ratio of stem:[10^5] becomes stem:[10^{10}] in the normal
+matrix. Solvers based on SVD or on QR factorization work directly with
+stem:[X] and avoid this extra amplification. Tiny singular values of
+stem:[X] still limit how precisely the data determine the coefficients.
+====
+
+[#_error_estimation]
+== Error estimation on later data
+
+*Question for the data.* How far are the estimates from the measurements on
+the period of interest? Once the rule is fitted, use it to make predictions
+stem:[\widehat y_i] on stem:[m] held-out rows. A *held-out* row belongs
+to a period set aside for evaluation. It contributes to the error
+calculation after the parameters and the preprocessing have been fixed.
+
+. For each evaluated row, compute stem:[e_i=y_i-\widehat y_i] in the
+  units of the response. A positive value means the estimate was too low.
+. Square each difference to get a loss stem:[\ell_i=e_i^2].
+  Average these losses to estimate the mean squared prediction error,
+  stem:[\widehat R=m^{-1}\sum_{i=1}^m\ell_i]. Take the square root to
+  obtain RMSE in the response units. You can also report MAE, the
+  average of stem:[|e_i|].
+. Compare models on the same rows. Find a station-hour with a large
+  error and read its estimate and measurement. Then examine whether
+  nearby station-hours show similar errors.
+
+For example, measured values of 30 and 60 and estimates of 25 and 70 give
+residuals +5 and −10. MAE is 7.5, and RMSE is
+stem:[\sqrt{(25+100)/2}\approx7.9]. This summarizes two prediction errors
+in the measurement units. The first estimate is too low and the second
+is too high.
+
+[%collapsible]
+.How uncertain is the mean test loss?
+====
+Suppose the fitted rule is fixed and the stem:[m] test units are independent
+draws from the same evaluation population with finite loss variance. The
+sample standard deviation stem:[s_\ell] measures the spread of the individual
+squared losses. The estimated standard error stem:[s_\ell/\sqrt m] measures
+how much their average would fluctuate across repeated test samples. This
+comes from adding the variances of independent losses and dividing by
+stem:[m^2].
+
+Nearby Beijing hours may share a pollution episode, including across
+stations. Positive dependence means that many rows can carry repeated
+information. With enough data, repeat the evaluation over several
+chronological windows. Another method is a *block bootstrap*, which
+resamples chunks of consecutive hours together to preserve some of the
+dependence within each chunk.
+====
+
+[#_probability_connection]
+== Why Gaussian errors lead to least squares
+
+The least-squares algorithm and the validation steps above are sufficient
+for the 23 November practical. The following extension asks a different
+question: under a specified probability model, why does the same squared
+error arise?
+
+=== Start with a likelihood you can compute by hand
+
+Suppose two independent binary observations are success and failure,
+in that order. For a candidate success probability stem:[\theta] the
+chance of getting that sequence is stem:[\theta(1-\theta)].
+For stem:[\theta=0.5] it is stem:[0.25], and for stem:[\theta=0.9] it
+is stem:[0.09]. The *likelihood* is this expression viewed as a
+function of the candidate parameter, with the observations already fixed.
+Maximizing it chooses the parameter for which the observed sequence was
+most probable. Taking the natural logarithm preserves the order and turns
+the product into the sum stem:[\log\theta+\log(1-\theta)].
+
+A continuous observation uses a probability *density*. A density describes
+probability per unit of measurement. At a time and station with a fixed
+set of predictors, the density at a measured value describes how much
+probability the model puts in a very small interval around that value,
+per unit of interval width. To compare parameters, evaluate the joint
+density at the same measured values each time.
+
+=== Identify the data, parameters and assumptions
+
+Treat the predictor matrix stem:[X] as fixed. Capital stem:[Y_i]
+represents the random response before measurement, and lowercase stem:[y_i]
+is its observed value. Assume stem:[Y_i=x_i^\top\beta+\varepsilon_i].
+Here stem:[\beta] is the model's unknown coefficient vector, and
+stem:[\varepsilon_i] is the random difference from the model mean
+stem:[x_i^\top\beta]. Assume the differences are independent and have
+the same normal distribution with mean zero and variance
+stem:[\sigma^2>0], written stem:[\mathcal N(0,\sigma^2)].
+For a candidate stem:[\beta], the observed difference is
+stem:[y_i-x_i^\top\beta]. Its density is highest at zero and decreases
+as the absolute difference grows.
+
+[%collapsible]
+.Derivation: from the Gaussian density to squared errors
+====
+For one row, the density stem:[f_i] is
 
 [stem]
 ++++
-\widehat\beta=V\Sigma^+U^\top y.
+f_i(y_i\mid x_i,\beta,\sigma^2)=
+\frac{1}{\sqrt{2\pi\sigma^2}}\,
+\exp\!\left(-\frac{(y_i-x_i^\top\beta)^2}{2\sigma^2}\right).
 ++++
 
-Small singular values identify directions in coefficient space that are weakly determined by the data. Predictions can remain stable while individual coefficients vary greatly.
-
-== Error estimation
-
-Under the Gaussian linear model with full column rank,
+Independence makes the joint density the product of the row densities.
+With stem:[X] and stem:[y] fixed, that product is the likelihood
+stem:[L(\beta,\sigma^2)]. Taking the logarithm turns the product into
+a sum and cancels each exponential. Use a minus sign to express the
+maximization as a minimization:
 
 [stem]
 ++++
-\widehat\sigma^2
-=\frac{\lVert y-X\widehat\beta\rVert_2^2}{n-p},
-\qquad
+\begin{aligned}
+-\log L(\beta,\sigma^2)
+  &= \sum_{i=1}^{n} -\log f_i(y_i\mid x_i,\beta,\sigma^2) \\
+  &= \sum_{i=1}^{n}\left[
+     \tfrac12\log(2\pi\sigma^2)
+     +\frac{(y_i-x_i^\top\beta)^2}{2\sigma^2}\right]\\
+  &=\tfrac n2\log(2\pi\sigma^2)
+     +\frac{1}{2\sigma^2}J(\beta).
+\end{aligned}
+++++
+
+For fixed stem:[\sigma^2], the first term is constant in stem:[\beta]
+and the factor of stem:[J(\beta)] is positive. Thus both objectives
+select the same coefficients. The reasoning uses the normal density
+to get a square, independence to multiply densities, and the common
+variance to give every square equal weight.
+====
+
+=== Estimate noise and coefficient uncertainty under the model
+
+The residual sum of squares stem:[J(\widehat\beta)] measures how much
+variation is left in the training responses after fitting. If the
+stem:[p] columns of stem:[X] are independent and stem:[n>p], fitting
+uses stem:[p] directions in response space. There are stem:[n-p]
+orthogonal directions left. Under the independent, constant-variance
+error model, each remaining unit direction has noise variance
+stem:[\sigma^2]. This gives the unbiased residual-based estimator
+stem:[\widehat\sigma^2=J(\widehat\beta)/(n-p)].
+Estimating the error level after fitting here plays the same role as using
+stem:[n-1] after fitting just a mean.
+
+[%collapsible]
+.Why the coefficient estimates vary across repeated samples
+====
+Before measuring stem:[Y], the estimate stem:[\widehat\beta] is a random
+vector. With full column rank, the normal equations and
+stem:[Y=X\beta+\varepsilon] yield
+
+[stem]
+++++
+\widehat\beta=\beta+(X^\top X)^{-1}X^\top\varepsilon.
+++++
+
+This equation describes the effect of the noise on the coefficients.
+With stem:[\operatorname{Cov}(\varepsilon\mid X)=\sigma^2 I_n],
+where stem:[I_n] is the identity matrix, propagating covariance through
+the linear map stem:[B=(X^\top X)^{-1}X^\top] yields
+
+[stem]
+++++
 \operatorname{Cov}(\widehat\beta\mid X)
-=\sigma^2(X^\top X)^{-1}.
+  =\sigma^2 BB^\top
+  =\sigma^2(X^\top X)^{-1}.
 ++++
 
-These formulas quantify sampling variation conditional on stem:[X]. They do not include model misspecification, measurement error in stem:[X], data-dependent feature selection, temporal dependence, or distribution shift. When those assumptions fail, use group/time-aware resampling and report residual structure rather than presenting classical standard errors as universal.
-
-For protected test losses stem:[\ell_i=(y_i-\widehat y_i)^2], estimate mean-squared prediction risk and its finite-test uncertainty by
-
-[stem]
-++++
-\widehat R=\frac1m\sum_{i=1}^{m}\ell_i,
-\qquad
-\widehat{\operatorname{SE}}(\widehat R)=\frac{s_\ell}{\sqrt m},
-++++
-
-only when the test units are independent. A block bootstrap is more appropriate for serially correlated air-quality observations.
+The diagonal entries are the sampling variances of the fitted
+coefficients under the model. Using stem:[\widehat\sigma^2] gives
+estimated variances, and their square roots give standard errors.
+Near-dependent predictors make some estimated directions highly
+variable. On the Beijing extract, dependence across hours and stations
+also calls for chronological evaluation. Use the holdout error above
+to describe observed prediction accuracy.
+====
 
 == Worked example: exact fit versus coefficient stability
 
@@ -117,7 +341,7 @@ only when the test units are independent. A block bootstrap is more appropriate 
 
 *Importance:* Essential (P0)
 
-An exact training fit is often presented as evidence that a linear model has solved the problem. This example separates residual fit, numerical coefficient stability, and future prediction by starting with an exact line and then introducing a nearly collinear design.
+Start with an exact line, then introduce two nearly collinear predictors. Compare three quantities: residual error on the training rows, coefficient sensitivity, and error on future data.
 
 [.worked-example-method#worked-linear-method]
 === Method
@@ -134,7 +358,7 @@ For stem:[x=(0,1,2)] and stem:[y=(1,3,5)], use
 X=\begin{bmatrix}1&0\\1&1\\1&2\end{bmatrix}.
 ++++
 
-The vector stem:[\widehat\beta=(1,2)^\top] gives stem:[X\widehat\beta=y], so the residual norm and training RMSE are zero. This does not imply zero future error: three noiseless collinear points contain no evidence about curvature, changing noise, or a new population. If the last response becomes stem:[5.3], the fitted coefficient and residual uncertainty must be recomputed rather than treating stem:[(1,2)] as exact truth.
+The vector stem:[\widehat\beta=(1,2)^\top] gives stem:[X\widehat\beta=y], so the residual norm and training RMSE are zero. This does not imply zero future error: three noiseless collinear points tell us little about curvature, changing noise, or a new population. If the last response becomes stem:[5.3], the fitted coefficient and residual uncertainty must be recomputed rather than treating stem:[(1,2)] as exact truth.
 ****
 
 .Mathematical insight — conditioning controls coefficient sensitivity
@@ -151,16 +375,16 @@ The vector stem:[\widehat\beta=(1,2)^\top] gives stem:[X\widehat\beta=y], so the
 
 *Importance:* Essential (P0)
 
-The hand calculation is exact because the small design identifies its two coefficients. The executable extension changes one condition: it creates two nearly collinear predictors with known coefficients. It compares explicit normal-equation inversion, `numpy.linalg.lstsq`, and Ridge and reports coefficients, training RMSE, condition number, residuals, and singular values. Read the table before the figure: similar prediction errors need not imply stable coefficient estimates.
+The hand calculation is exact because the small design identifies its two coefficients. The executable example makes two predictor columns nearly identical. It compares solving the normal equations directly with `numpy.linalg.lstsq` and Ridge, a method that penalizes large coefficients. Read the training RMSE beside the fitted coefficients. Do the methods with similar errors give similar coefficients?
 
 [#linear-conditioning-table]
-[%dynamic%open,python,fail-on-error=,output=table,table-caption="Stable and unstable fits for a nearly collinear design",table-description="Rows compare an explicit normal-equation solve, singular-value least squares, and Ridge. Columns report two slope coefficients, training RMSE, and the design condition number."]
+[%dynamic%open,python,fail-on-error=,output=table,table-caption="Stable and unstable fits for a nearly collinear design",table-description="Rows compare a direct solve of the normal equations, singular-value least squares, and Ridge. Columns report two slope coefficients, training RMSE, and the design condition number."]
 ----
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
 
-# Fix the random generator so webpage and notebook evidence are reproducible.
+# Fix the random generator so the webpage and notebook reproduce the same example.
 rng = np.random.default_rng(20260722)
 n = 250
 x1 = rng.normal(size=n)
@@ -226,7 +450,7 @@ The exact three-point problem has zero residual norm, while the nearly collinear
 
 *Importance:* Essential (P0)
 
-An exact or low-RMSE fit does not establish stable coefficients or future predictive validity. RMSE checks agreement on observed responses, the residual plot challenges mean and variance structure, and the singular values diagnose coefficient sensitivity. Ridge changes the estimand through shrinkage rather than recovering the unstable unregularised coefficients. None of these diagnostics estimates performance on a new population; the generator fixes one noise law and one collinearity mechanism, so this is a numerical experiment rather than evidence that a real dataset obeys the Gaussian model.
+An exact or low-RMSE fit does not establish stable coefficients or future predictive validity. RMSE checks agreement on observed responses, the residual plot challenges mean and variance structure, and the singular values diagnose coefficient sensitivity. Ridge changes the estimand through shrinkage rather than recovering the unstable unregularised coefficients. None of these diagnostics estimates performance on a new population; the generator fixes one noise law and one collinearity mechanism, so its conclusions describe this numerical experiment.
 
 Use the page toolbar to download the generated notebook. Re-execute it before changing the perturbation scale, seed, or Ridge penalty.
 
@@ -234,9 +458,9 @@ Use the page toolbar to download the generated notebook. Re-execute it before ch
 
 Use the air-quality teaching table to predict PM2.5 from weather variables for one declared station/time scope. Create a protected chronological holdout, fit a stable linear baseline, inspect residuals by time and predicted value, and state which Gaussian/independence assumptions are not credible. Compare prediction stability after standardising or removing one collinear feature.
 
-== Assessment evidence
+== What to demonstrate
 
-Students must explain the objective/likelihood connection, reject explicit inversion, interpret conditioning and residuals, and distinguish predictive evidence from parameter or causal claims. Equivalent stable solvers receive full credit when justified.
+Students must explain the objective/likelihood connection, reject explicit inversion, interpret conditioning and residuals, and distinguish prediction accuracy, parameter uncertainty, and causal claims. Equivalent stable solvers receive full credit when justified.
 
 == Exercises
 

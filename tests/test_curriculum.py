@@ -12,10 +12,10 @@ def test_multivariate_route_records_dates_and_canonical_notebook_sources() -> No
     curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text())
     route = curriculum["classroom_routes"]["multivariate"]
     lesson = json.loads((ROOT / "teaching/sessions/multivariate/lesson.json").read_text())
-    assert route["contact_minutes"] == sum(s["minutes"] for s in route["sessions"]) == 360
-    assert route["dates"] == ["2026-10-20", "2026-11-02"]
+    assert route["contact_minutes"] == sum(s["minutes"] for s in route["sessions"]) == 600
+    assert route["dates"] == ["2026-10-20", "2026-11-02", "2026-11-23"]
     assert route["sessions"][0]["status"] == "taught_through_pearson_matrix"
-    assert route["next_session"]["date"] == "2026-11-09"
+    assert route["sessions"][-1]["id"] == "linear-regression"
     assert route["slides_language"] == "fr" and route["notebook_language"] == "en"
     includes = yaml.safe_load((ROOT / "site.yml").read_text())["antora"]["extensions"][1][
         "jupyter"
@@ -24,8 +24,9 @@ def test_multivariate_route_records_dates_and_canonical_notebook_sources() -> No
         path = ROOT / source
         assert path.relative_to(ROOT / "docs/course/modules/ROOT/pages").as_posix() in includes
         assert ":page-jupyter: true" in path.read_text()
-    for recorded, session in zip(route["sessions"], lesson["sessions"], strict=True):
-        assert recorded["date"] == session["date"]
+    records = {record["date"]: record for record in route["sessions"]}
+    for session in lesson["sessions"]:
+        recorded = records[session["date"]]
         assert recorded["minutes"] == session["minutes"]
         if session["timing_mode"] == "planned":
             assert sum(item[0] for item in session["schedule"]) == session["minutes"] == 120
@@ -34,6 +35,9 @@ def test_multivariate_route_records_dates_and_canonical_notebook_sources() -> No
     practical = ROOT / route["sessions"][1]["practical"]
     assert str(practical.relative_to(ROOT)) in route["notebook_sources"]
     assert ":page-course-duration-minutes: 45" in practical.read_text()
+    regression_practical = route["sessions"][-1]["practical"]
+    assert regression_practical in route["notebook_sources"]
+    assert ":page-course-duration-minutes: 75" in (ROOT / regression_practical).read_text()
 
 
 def test_public_contact_plan_matches_the_canonical_schedule() -> None:

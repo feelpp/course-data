@@ -1,0 +1,276 @@
+= 23 November 2026 — From PCA reconstruction to linear regression
+:page-course-language: en
+:page-course-concepts: DP-PCA-01, DP-LIN-01, DP-NUM-01, DP-EVAL-01, DP-EVAL-02, DP-EVAL-03, DP-MET-01
+:page-course-priority: P1
+:page-course-difficulty: D2
+:page-course-duration-minutes: 240
+:page-course-outcomes: LO4, LO6, LO7, LO8, LO9
+:page-course-prerequisites: PCA directions and scores, covariance and Pearson correlation, matrix products
+:page-course-assessed: no
+:stem: latexmath
+
+Bring your xref:sessions/pca-practical.adoc#_4_reconstruct_and_change_one_decision_10_minutes[2 November PCA practical].
+The class introduced PCA, and the practical assigned reconstruction with two
+and three components. Start by checking that work, then estimate a designated
+response using the same Beijing data.
+
+By the end, you should be able to reconstruct a standardized observation and
+restore its physical units, fit a simple and a multiple linear model, and
+compare their errors on a later time window.
+
+[cols="1,2,4",options="header"]
+|===
+|Elapsed minutes |Topic |Work
+
+|0–25 |PCA reconstruction |Compare two and three components in your existing notebook.
+|25–40 |A response to estimate |Specify PM2.5 and the predictors available at the same hour.
+|40–75 |Simple linear regression |Derive the slope and intercept and connect the slope to Pearson correlation.
+|75–100 |Practical, steps 1–2 |Split the data and fit the PM10-only model.
+|100–110 |Break |
+|110–135 |Multiple linear regression |Build the design matrix, derive the normal equations, and interpret the residual.
+|135–155 |Chronological validation |Define the baseline, fit preprocessing on training rows, and choose error metrics.
+|155–205 |Practical, steps 3–5 |Compare three rules and read a prediction error.
+|205–215 |Break |
+|215–240 |Discussion and conclusion |Compare the class results and discuss the dates covered.
+|===
+
+*In class:* Open the xref:sessions/regression-practical.adoc[guided Beijing practical]
+or xref:attachment$sessions/regression-practical.ipynb[download the student notebook].
+The two work periods total 75 minutes. Use the same notebook for both.
+
+ifdef::local-session-20261123-slides[]
+link:../_attachments/slides/session-20261123.pdf[French class slides (PDF)]
+endif::[]
+
+[#nov23-reconstruction]
+== 1. Reconstruct the six measured variables
+
+Let stem:[A] be the table with one line per retained station-hour and one
+column per measured variable. Write stem:[n] for the number of rows,
+stem:[p=6] for the number of variables, and stem:[\bar a_j] and stem:[s_j]
+for the mean and sample standard deviation of column stem:[j]. The
+standardized table has entries stem:[(A_z)_{ij}=(A_{ij}-\bar a_j)/s_j].
+The columns of stem:[V_k] are the first stem:[k] unit principal directions,
+ordered by decreasing variance. Each direction has one coefficient per
+variable. In the notebook, take the first stem:[k] rows of `Vt` from the
+SVD of stem:[A_z] and transpose them to form stem:[V_k].
+
+[cols="2,2,2,4",options="header"]
+|===
+|Step |Calculation |Shape |What each row contains
+
+|Project |stem:[Z_k=A_zV_k] |stem:[n\times k] |Scores on the chosen axes
+|Reconstruct |stem:[\widehat A_z=Z_kV_k^\top] |stem:[n\times p] |Approximate values on the original variable axes, still standardized
+|Restore units |stem:[\widehat A_{ij}=\bar a_j+s_j(\widehat A_z)_{ij}] |stem:[n\times p] |Approximate measurements in physical units
+|===
+
+For example, an approximate standardized temperature of 1.5 corresponds to
+13 °C if the original temperature mean and standard deviation are 10 °C and
+2 °C. With two directions, every reconstructed row combines two scores with
+two directions. Each direction supplies a coefficient for all six variables.
+
+[%collapsible]
+.Why does the reconstruction error decrease?
+====
+The residual table stem:[A_z-\widehat A_z] contains the projections on the
+omitted orthogonal axes. Each omitted score column has squared norm
+stem:[(n-1)\lambda_j], where stem:[\lambda_j] is its sample variance. By
+orthogonality, adding a component removes precisely its squared score norm
+from the sum of squared reconstruction errors. Thus, when total variance is
+positive, the error relative to a reconstruction using only the means is
+
+[stem]
+++++
+\frac{\lVert A_z-\widehat A_z\rVert_F^2}{\lVert A_z\rVert_F^2}
+=
+\frac{\sum_{j=k+1}^p\lambda_j}{\sum_{j=1}^p\lambda_j}.
+++++
+
+The Frobenius norm squared sums the squared differences of all cells. The
+equality uses standardized coordinates throughout.
+====
+
+Discuss why two score columns reconstruct six variable columns. Compare the
+relative errors for k=2 and k=3. The
+xref:sessions/matrix-geometry.adoc[2 November lesson] derives the PCA directions
+and supplies a worked calculation.
+
+[#nov23-simple]
+== 2. Fit a line to a designated response
+
+If PM2.5 is unavailable at a given station-hour, estimate it from PM10 and,
+later, from meteorological values measured at that same station-hour. For
+observed pairs stem:[(x_i,y_i)], take x to be PM10 and y to be PM2.5. Let
+stem:[e_i=y_i-(\beta_0+\beta_1x_i)] be the observed value minus the fitted
+value. Ordinary least squares minimizes the sum of the squared residuals.
+
+[%collapsible]
+.From the squared error to the slope and intercept
+====
+Write stem:[m] for the number of training pairs and stem:[J] for
+their sum of squared residuals. The derivative with respect to the intercept
+gives the first equation below. The second follows by summing the three terms
+and dividing by stem:[m].
+
+[stem]
+++++
+\begin{aligned}
+0 &= -2\sum_{i=1}^m (y_i-\widehat\beta_0-\widehat\beta_1x_i),\\
+\widehat\beta_0 &= \bar y-\widehat\beta_1\bar x.
+\end{aligned}
+++++
+
+For each candidate slope, inserting this intercept formula changes the
+residual to stem:[(y_i-\bar y)-\beta_1(x_i-\bar x)]. Differentiating the
+sum of the squares of these centered residuals with respect to the slope,
+then solving for it, gives
+
+[stem]
+++++
+\begin{aligned}
+0 &= -2\sum_{i=1}^m(x_i-\bar x)
+       \big[(y_i-\bar y)-\widehat\beta_1(x_i-\bar x)\big],\\
+\widehat\beta_1 &=
+\frac{\sum_i(x_i-\bar x)(y_i-\bar y)}{\sum_i(x_i-\bar x)^2}
+=\frac{s_{xy}}{s_x^2}.
+\end{aligned}
+++++
+
+Here stem:[s_{xy}] is the training sample covariance and stem:[s_x^2] the
+training sample variance of PM10, computed on the same pairs. If the response
+also varies, the slope is stem:[r_{xy}s_y/s_x], where stem:[r_{xy}] is Pearson
+correlation and stem:[s_x,s_y] are the sample standard deviations. A slope
+has units of response per unit of predictor.
+====
+
+[#nov23-multiple]
+== 3. Fit several predictors
+
+Write stem:[m] for the number of training rows and stem:[d] for the number
+of predictors. The *design matrix* stem:[X] has shape stem:[m\times(d+1)].
+Its first column contains ones, which multiply the intercept. The remaining
+columns contain predictor values in a fixed order. The vector stem:[\beta]
+has stem:[d+1] entries, one coefficient per column. Multiplying stem:[X\beta]
+produces one estimate per row, in the same order as the measurements in
+stem:[y]. For example, a row stem:[(1,2,-1)] gives a prediction of
+stem:[\beta_0+2\beta_1-\beta_2].
+
+Define the trial residual vector stem:[e(\beta)=y-X\beta] and the squared
+error stem:[J(\beta)=\lVert e(\beta)\rVert_2^2]. A coefficient vector
+stem:[\widehat\beta] that minimizes stem:[J] satisfies the normal equations.
+
+[stem]
+++++
+\begin{aligned}
+X^\top X\widehat\beta &= X^\top y,\\
+X^\top(y-X\widehat\beta) &= 0.
+\end{aligned}
+++++
+
+[%collapsible]
+.From the squared error to the normal equations
+====
+Write stem:[X_{ij}] for the entry in row stem:[i] and column stem:[j].
+For this calculation, index the columns from stem:[0] to stem:[d].
+Increasing coefficient stem:[\beta_j] by a small amount changes the estimate
+in row stem:[i] at rate stem:[X_{ij}] and changes its residual at rate
+stem:[-X_{ij}]. The chain rule for the square therefore gives
+
+[stem]
+++++
+\begin{aligned}
+\frac{\partial J}{\partial\beta_j}
+  &= \sum_{i=1}^m 2 e_i(\beta)(-X_{ij}),\\
+\nabla_\beta J(\beta) &= -2X^\top e(\beta)=2X^\top(X\beta-y).
+\end{aligned}
+++++
+
+The gradient puts one derivative per coefficient into a vector. Setting it
+to zero yields the two equivalent equations above. Each component of
+stem:[X^\top e(\widehat\beta)] is the dot product of a design column with
+the fitted residual. In particular, the column of ones shows that the
+training residuals sum to zero.
+
+For any other coefficient vector, the change in predictions is a
+combination of the design columns. It is perpendicular to the fitted
+residual. By Pythagoras, the new squared error is the fitted squared error
+plus the squared norm of that change. This establishes the minimum.
+====
+
+Compute the coefficients with `np.linalg.lstsq(Xtr, ytr, rcond=None)`, where
+`Xtr` and `ytr` are the training design and response. Multiply `Xva @ beta`
+to predict, using a validation design with the same columns and the same
+training transformations. The fitted vector is unique. The coefficients
+are unique when the design columns are linearly independent. The
+xref:analytical/linear-probabilistic.adoc[linear regression reference]
+develops the SVD algorithm, numerical sensitivity and prediction error. Its
+probability section is optional for this session.
+
+[#nov23-validation]
+== 4. Compare models on a later window
+
+Use March 1–10, 2013 for training and March 11–14 for validation. The same date
+boundary applies across the three stations. On the common complete rows,
+compare the training-mean rule, the PM10-only line, and a model using PM10,
+temperature, pressure, dew point and wind speed. Compute any scaling
+parameters on training rows and apply them to both windows.
+
+For the same stem:[b] validation rows, subtract each prediction from its
+measurement and call the difference stem:[e_i]. Compute the mean absolute
+error (MAE) and root mean squared error (RMSE) over those differences.
+
+[stem]
+++++
+\begin{aligned}
+\operatorname{MAE} &= \frac{1}{b}\sum_{i=1}^{b}|e_i|,\\
+\operatorname{RMSE} &= \sqrt{\frac{1}{b}\sum_{i=1}^{b}e_i^2}.
+\end{aligned}
+++++
+
+For two errors of 0 and 10 µg/m³ the MAE is 5 µg/m³ and the RMSE is about
+7.1 µg/m³. Squaring gives more weight to larger errors. Both summaries are in
+µg/m³. The residual at an individual station-hour gives the direction of the
+error as well. When the measured value is 60 and the prediction is 45, the
+residual is +15 µg/m³ and the model estimated too low by 15 µg/m³.
+
+This experiment estimates PM2.5 *at the same hour* from other available
+measurements. The later window supports a comparison in this short teaching
+extract. To assess performance across periods, repeat the comparison over further chronological windows.
+See xref:foundations/safe-pipelines.adoc[training and validation] and
+xref:foundations/metrics-errors.adoc[regression error metrics] for references.
+
+[#nov23-takeaways]
+== Questions to ask the data and steps to answer them
+
+[cols="3,5",options="header"]
+|===
+|Question |Steps
+
+|Can two or three PCA components reconstruct six measured variables?
+|Fix the scale, project to the selected axes, reconstruct the table, then
+ compare the errors for two and three components and restore physical units.
+
+|Can we estimate missing PM2.5 at a station-hour from measurements available then?
+|Choose the response and available predictors. Fit a training-mean reference,
+ a PM10 line, and a PM10-and-weather model by least squares.
+
+|Does adding weather improve the estimates on later dates?
+|Keep one chronological split for all three rules. Apply the fixed rules to
+ the same later rows and compare RMSE and MAE. Pick one large error, look up
+ the measured and estimated PM2.5, and state its size and direction.
+|===
+
+*Takeaways.* Least squares gives the coefficients that minimize squared
+training residuals. Adding predictors to a nested model can only decrease
+or preserve that training error on the same rows. The comparison on later
+dates checks how the fixed rules performed in this validation window.
+
+*Assumptions and limits.* Each estimation uses predictors available at that
+station-hour and the same column definitions as training. The evaluation
+covers complete rows from three stations over four later days. The local
+errors can be related across nearby hours and stations. A claim about other
+periods needs further validation windows.
+
+*Exit question:* Why does adding a predictor always weakly reduce the
+training sum of squared errors for nested least-squares models on the same
+rows? What does your later-window comparison actually show?

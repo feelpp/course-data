@@ -7,9 +7,9 @@
 <text x="44" y="102" font-size="38" class="" font-weight="bold">Data Processing and Mining · CSMI M1</text>
 <text x="44" y="138" font-size="21" class="" font-weight="normal">14 × 2 h = 28 contact hours · Planned sequence, not a record of completed classes</text>
 <rect x="44" y="165" width="1512" height="121" rx="12" fill="#eaf0e9"/>
-<text x="64" y="193" font-size="14" class="green label" font-weight="normal">TEACHING POSITION · 2 November 2026</text>
-<text x="64" y="227" font-size="22" class="" font-weight="normal">Introduced: Pandas · audit · descriptions · covariance · Pearson matrix</text>
-<text x="64" y="261" font-size="20" class="green" font-weight="normal">Next: PCA / SVD and reconstruction on 2 November; regression planned for 9 November. Introduced does not mean mastered.</text>
+<text x="64" y="193" font-size="14" class="green label" font-weight="normal">TEACHING POSITION · 23 November 2026</text>
+<text x="64" y="227" font-size="22" class="" font-weight="normal">Introduced: Pandas · audit · descriptions · covariance · Pearson matrix · PCA</text>
+<text x="64" y="261" font-size="20" class="green" font-weight="normal">Next: Review PCA reconstruction, then fit and validate linear models on 23 November. Introduced does not mean mastered.</text>
 <text x="44" y="333" font-size="24" class="green" font-weight="bold">1. Reliable observations</text>
 <text x="44" y="362" font-size="17" class="muted" font-weight="normal">What can these measurements tell</text>
 <text x="44" y="384" font-size="17" class="muted" font-weight="normal">us?</text>
@@ -55,8 +55,8 @@
 <rect x="426" y="922" width="364" height="153" rx="10" fill="white" stroke="#cad6cd" stroke-width="1"/>
 <text x="441" y="950" font-size="20" class="" font-weight="bold">08  Control 1 + regularisation</text>
 <text x="441" y="979" font-size="16" class="green" font-weight="normal">Validity checks · penalised objectives</text>
-<text x="441" y="1030" font-size="16" class="" font-weight="normal">Individual evidence, then a</text>
-<text x="441" y="1051" font-size="16" class="" font-weight="normal">regularisation prediction</text>
+<text x="441" y="1030" font-size="16" class="" font-weight="normal">An individual audit and a prediction</text>
+<text x="441" y="1051" font-size="16" class="" font-weight="normal">about regularisation</text>
 <text x="808" y="333" font-size="24" class="green" font-weight="bold">3. Compare and understand</text>
 <text x="808" y="362" font-size="17" class="muted" font-weight="normal">Which complexity and geometry</text>
 <text x="808" y="384" font-size="17" class="muted" font-weight="normal">help?</text>

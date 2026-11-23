@@ -1256,7 +1256,7 @@ schedule:
     datasets: [uci-501]
     activities: [E04]
     assessment_evidence: [A1, A2, A3, A4]
-    checkpoint: Statistical evidence brief with declared units, paired counts, and limitations
+    checkpoint: Statistical summary with declared units, paired counts, and limitations
     contact_plan:
       - label: Reconnect with the audited slice
         minutes: 5
@@ -1499,16 +1499,17 @@ schedule:
 classroom_routes:
   multivariate:
     role: delivery_route_through_existing_core_topics
-    dates: ["2026-10-20", "2026-11-02"]
-    contact_minutes: 360
+    dates: ["2026-10-20", "2026-11-02", "2026-11-23"]
+    contact_minutes: 600
     slides_language: fr
     notebook_language: en
-    human_timing_status: october_boundary_reported_november_planned
+    human_timing_status: pca_introduced_reconstruction_assigned_regression_planned
     hub: docs/course/modules/ROOT/pages/session-multivariate.adoc
     notebook_sources:
       - docs/course/modules/ROOT/pages/sessions/joint-variation.adoc
       - docs/course/modules/ROOT/pages/sessions/matrix-geometry.adoc
       - docs/course/modules/ROOT/pages/sessions/pca-practical.adoc
+      - docs/course/modules/ROOT/pages/sessions/regression-practical.adoc
     teaching_data:
       - datasets/teaching/air-quality/MANIFEST.yml
       - datasets/teaching/air-quality-seasonal/MANIFEST.yml
@@ -1521,14 +1522,16 @@ classroom_routes:
         concepts: [DP-EDA-01, DP-SMP-01, DP-NUM-01]
       - id: matrix-geometry
         date: "2026-11-02"
-        status: planned_pca_svd_and_reconstruction
+        status: pca_introduced_reconstruction_assigned
         practical: docs/course/modules/ROOT/pages/sessions/pca-practical.adoc
         minutes: 120
         concepts: [DP-PCA-01, DP-NUM-01, DP-LIN-01, DP-CV-01]
-    next_session:
-      date: "2026-11-09"
-      status: planned_continuation
-      focus: Regression and first steps in supervised learning
+      - id: linear-regression
+        date: "2026-11-23"
+        status: planned_reconstruction_review_regression_and_validation
+        practical: docs/course/modules/ROOT/pages/sessions/regression-practical.adoc
+        minutes: 240
+        concepts: [DP-PCA-01, DP-LIN-01, DP-NUM-01, DP-EVAL-01, DP-EVAL-02, DP-EVAL-03, DP-MET-01]
     note: Dated delivery record and plan reuse existing topics; no additional hours beyond the fourteen-block schedule.
 
 practice_release:

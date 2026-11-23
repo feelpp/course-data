@@ -14,7 +14,7 @@ test('collapsible multivariate proofs and code survive canonical notebook conver
       'Step 3 — Expand the covariance', 'two independent fair coin tosses',
       '\\frac1{n^2}', '\\mathbb E[Q_{XY}]', 'Step 4 — Take the expectation', 'intersection']],
     ['matrix-geometry', 4, 8, ['2 November 2026', 'PCA maximizes',
-      'reference/preparation for 9 November', 'new coordinate need not be a physical sensor',
+      'reference/preparation for 23 November', 'new coordinate need not be a physical sensor',
       '\\Sigma^\\top\\Sigma', '\\mathbf X(\\widehat\\beta-\\gamma)',
       'Step 3.', 'same-hour', 'not an untouched final test']],
     ['pca-practical', 0, 6, ['45-minute practical', 'calculate the quantities',

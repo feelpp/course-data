@@ -16,9 +16,9 @@ Use the block guide below for the teaching sequence. Page-duration labels descri
 
 image::course-roadmap.svg[Planned fourteen-block progression from reliable observations to validated models and reproducible delivery,width=100%]
 
-xref:attachment$course-roadmap.html[Open the roadmap with expandable questions, mathematical tools and practical evidence]. The diagram follows the planned curriculum; it does not mark blocks as completed. As of 2 November, pandas, audit, descriptive statistics, covariance and the Pearson matrix have been introduced. The 20 October class stopped at that matrix. PCA and SVD are the 2 November focus; regression is planned for 9 November. Introduced topics still need checks of understanding.
+xref:attachment$course-roadmap.html[Open the roadmap with expandable questions, mathematical tools and expected results]. The diagram follows the planned curriculum; it does not mark blocks as completed. As of 23 November, the class has moved from pandas, audit and descriptive statistics to covariance, the Pearson matrix and PCA. Reconstruction was assigned in the 2 November practical.
 
-The xref:session-multivariate.adoc[dated class route] distinguishes the xref:sessions/joint-variation.adoc[20 October covariance/Pearson lesson] from the xref:sessions/matrix-geometry.adoc[2 November PCA/SVD lesson] and its xref:sessions/pca-practical.adoc[guided practical]. The 2 November session includes a 45-minute PCA practical; regression and its validation are planned for 9 November. These materials reuse existing course topics without adding contact hours.
+The xref:session-multivariate.adoc[dated class route] distinguishes the xref:sessions/joint-variation.adoc[20 October covariance/Pearson lesson] from the xref:sessions/matrix-geometry.adoc[2 November PCA/SVD lesson] and its xref:sessions/pca-practical.adoc[guided practical]. The xref:sessions/linear-regression.adoc[23 November session] revisits reconstruction and moves to linear regression and chronological validation in a guided Beijing practical. These materials reuse existing course topics without adding contact hours.
 
 == Learning Python and pandas together
 

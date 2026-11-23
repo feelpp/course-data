@@ -280,7 +280,7 @@ particular response well: PCA has not used a target variable.
 == Connection to the next lesson
 
 Today ends by asking how the task would change if PM2.5 were the response
-to estimate. No regression fit is required. The planned 9 November lesson
-will fit and evaluate such a rule using training and validation observations.
+to estimate. No regression fit is required. The xref:./../sessions/regression-practical.adoc[23 November guided practical]
+fits and evaluates such a rule using training and validation observations.
 Keep the distinction explicit:
 *PCA reconstructs inputs; regression estimates a chosen response*.

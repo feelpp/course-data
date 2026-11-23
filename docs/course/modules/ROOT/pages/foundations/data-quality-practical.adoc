@@ -616,6 +616,19 @@ Continue with xref:foundations/statistical-exploration.adoc[Beijing Air Quality 
 
 The audit supports a limited descriptive comparison of this three-station, fourteen-day extract. It does not establish sensor calibration, explain the missing NO2 mechanism, represent other seasons or stations, identify causes, or measure individual exposure. The controlled-defect copy shows that the checks detect known failures, while the unchanged source preserves the released data for future review.
 
+== Questions to ask before trusting a table
+
+*Is each expected station-hour present?* Check the station and timestamp key,
+look for duplicates, then compare the observed keys with the expected grid.
+*Which measurements are usable?* Count missing and invalid values by variable
+and by station. Investigate flagged readings in their time and station context
+before deciding whether to retain them.
+
+*Takeaways.* The audit starts with the unit of observation and explicit
+validity rules. A complete grid can still have missing measurements. A flag
+asks for investigation. These checks describe the released extract, whose
+stations and dates define the scope of the analysis.
+
 == Exit ticket
 
 Answer in one or two sentences each:
