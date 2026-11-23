@@ -1,9 +1,9 @@
-= Class sessions — Covariance, PCA and regression
+= Class sessions — From covariance to predictive models
 :page-course-language: en
 :page-course-concepts: DP-EDA-01, DP-SMP-01, DP-PCA-01, DP-NUM-01, DP-LIN-01, DP-EVAL-01, DP-MET-01
 :page-course-priority: P1
 :page-course-difficulty: D2
-:page-course-duration-minutes: 600
+:page-course-duration-minutes: 720
 :page-course-outcomes: LO4, LO6, LO7, LO8
 :page-course-prerequisites: audit, univariate exploration, inner products, elementary probability
 :page-course-assessed: no
@@ -18,7 +18,9 @@ coordinates, how to find directions of greatest variance, and how to interpret
 their combinations of physical measurements. Theory alternates with a guided
 PCA practical. The reconstruction task was assigned for students to complete.
 On *23 November (4 hours)*, the class plan begins by revisiting that work and
-continues with linear regression and validation on later dates.
+continues with linear regression and binary classification on Beijing.
+The *30 November session (2 hours)* uses the same two responses in decision
+trees and random forests, ending with validation, depth and Ridge.
 
 The slides are in French. English AsciiDoc lesson pages are the authoritative
 sources for the downloadable notebooks, which have no stored outputs.
@@ -35,6 +37,9 @@ sources for the downloadable notebooks, which have no stored outputs.
 |23 November · 4 h · reconstruction, regression and classification
 |French instructor slides
 |xref:sessions/linear-regression.adoc[Dated lesson] · xref:sessions/regression-practical.adoc[Guided Beijing practical, 75 min] · xref:attachment$sessions/regression-practical.ipynb[Download practical notebook]
+|30 November · 2 h · decision trees and random forests
+|French instructor slides
+|xref:sessions/trees-and-forests.adoc[Dated lesson] · xref:sessions/trees-forests-practical.adoc[Guided Beijing practical, 45 min] · xref:attachment$sessions/trees-forests-practical.ipynb[Download practical notebook]
 |===
 
 == The transition: why principal components?

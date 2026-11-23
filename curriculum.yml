@@ -1499,8 +1499,8 @@ schedule:
 classroom_routes:
   multivariate:
     role: delivery_route_through_existing_core_topics
-    dates: ["2026-10-20", "2026-11-02", "2026-11-23"]
-    contact_minutes: 600
+    dates: ["2026-10-20", "2026-11-02", "2026-11-23", "2026-11-30"]
+    contact_minutes: 720
     slides_language: fr
     notebook_language: en
     human_timing_status: pca_introduced_reconstruction_assigned_regression_and_classification_planned
@@ -1510,6 +1510,7 @@ classroom_routes:
       - docs/course/modules/ROOT/pages/sessions/matrix-geometry.adoc
       - docs/course/modules/ROOT/pages/sessions/pca-practical.adoc
       - docs/course/modules/ROOT/pages/sessions/regression-practical.adoc
+      - docs/course/modules/ROOT/pages/sessions/trees-forests-practical.adoc
     teaching_data:
       - datasets/teaching/air-quality/MANIFEST.yml
       - datasets/teaching/air-quality-seasonal/MANIFEST.yml
@@ -1532,6 +1533,12 @@ classroom_routes:
         practical: docs/course/modules/ROOT/pages/sessions/regression-practical.adoc
         minutes: 240
         concepts: [DP-PCA-01, DP-LIN-01, DP-NUM-01, DP-EVAL-01, DP-EVAL-02, DP-EVAL-03, DP-MET-01, DP-CLS-01, DP-MET-02, DP-THR-01]
+      - id: trees-and-forests
+        date: "2026-11-30"
+        status: planned_trees_forests_validation_and_ridge
+        practical: docs/course/modules/ROOT/pages/sessions/trees-forests-practical.adoc
+        minutes: 120
+        concepts: [DP-TREE-01, DP-ENS-01, DP-REG-01, DP-GEN-01, DP-CV-01, DP-MET-01, DP-MET-02]
     note: Dated delivery record and plan reuse existing topics; no additional hours beyond the fourteen-block schedule.
 
 practice_release:

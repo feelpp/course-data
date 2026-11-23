@@ -9,7 +9,7 @@
 <rect x="44" y="165" width="1512" height="121" rx="12" fill="#eaf0e9"/>
 <text x="64" y="193" font-size="14" class="green label" font-weight="normal">TEACHING POSITION · 23 November 2026</text>
 <text x="64" y="227" font-size="22" class="" font-weight="normal">Introduced: Pandas · audit · descriptions · covariance · Pearson matrix · PCA</text>
-<text x="64" y="261" font-size="20" class="green" font-weight="normal">Next: 23 November: review PCA reconstruction, fit linear models and introduce binary classification. Next: validation across dates, model complexity, trees and random forests. Introduced does not mean mastered.</text>
+<text x="64" y="261" font-size="20" class="green" font-weight="normal">Next: 30 November: trees and random forests for regression and classification. Final block: validation across dates, model complexity and Ridge. Introduced does not mean mastered.</text>
 <text x="44" y="333" font-size="24" class="green" font-weight="bold">1. Reliable observations</text>
 <text x="44" y="362" font-size="17" class="muted" font-weight="normal">What can these measurements tell</text>
 <text x="44" y="384" font-size="17" class="muted" font-weight="normal">us?</text>
