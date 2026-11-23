@@ -32,7 +32,7 @@ continues from the matrix, rather than reteaching it as a new topic.
 
 *Principal component analysis* (*PCA*, *ACP* in the French slides) chooses
 new coordinates that preserve variance. *Singular value decomposition*
-(*SVD*) supplies a matrix factorization for computing them. On 9 November,
+(*SVD*) supplies a matrix factorization for computing them. In the follow-up session,
 *regression* will ask a different question: estimating a designated response
 from other measured variables. Today ends by posing that question; fitting a
 regression is not required. The slides and downloads are on {session-hub-link}.
@@ -61,7 +61,7 @@ Centering and matrix multiplication are expected student calculations; allow
 time to perform and check them. The practical adds optional hints and three
 checkpoints without supplying computed PCA answers. Complete regression
 derivations and the chronological Beijing validation experiment below are
-*reference/preparation for 9 November*, outside today's required route.
+*reference/preparation for 23 November*, outside today's required route.
 
 == Recall: the Pearson matrix introduced on 20 October
 
@@ -509,8 +509,8 @@ of physical units before covariance PCA, or removal of PM10 as a related
 pollutant. Compute the
 new quantities yourself. Keep a common complete table for each controlled
 comparison. State which geometry changed, the retained variance and the
-reconstruction loss. A separated station cloud is not evidence of causal
-station effects or of a validated clustering algorithm.
+reconstruction loss. Separation by station in the score plot can motivate a closer look at
+station differences and their possible causes. Clustering requires a separate evaluation.
 
 [source,python]
 ----
@@ -539,7 +539,8 @@ reduction course will develop reduced dynamical models; deriving reduced PDE
 operators is outside today's lesson. This paragraph is optional reading, not
 another required exercise.
 
-== 4. Preparation for 9 November: choose a response and fit a line
+[#_4_preparation_for_9_november_choose_a_response_and_fit_a_line]
+== 4. Regression reference: choose a response and fit a line
 
 [NOTE]
 ====
@@ -548,9 +549,8 @@ reconstruction. Read this section to prepare the regression lesson; no fitted
 line or regression exercise is required in today's practical.
 ====
 
-*Live on 2 November:* identify a response and predictors, read a fitted line,
-and run the four-pair example. The full projection and slope proofs are
-reference material for the continuation on 9 November.
+The 23 November session revisits this four-pair example and uses the
+projection and slope proofs to introduce the Beijing regression practical.
 
 *Regression* estimates a designated variable, the *response*, from other
 variables, called *predictors* or explanatory variables. Let m be the number
@@ -695,11 +695,12 @@ print({"intercept": beta[0], "slope (points/hour)": beta[1], "rank": rank})
 ----
 ====
 
-== 5. Next week: Beijing regression and chronological validation
+[#_5_next_week_beijing_regression_and_chronological_validation]
+== 5. Beijing regression and chronological validation
 
 [NOTE]
 ====
-*Preparation/reference for 9 November.* This supplied experiment and exercise D
+*Reference for 23 November.* This supplied experiment and exercise D
 belong to the continuation of regression and first steps in supervised
 machine learning. They are available for study; they are not part of the
 required PCA practical on 2 November.
@@ -850,15 +851,29 @@ Use QR/SVD; computing an inverse of the normal matrix is not required.
 |Least squares |How well can columns approximate a response? |Projection onto the design column space. |Training orthogonality does not guarantee future accuracy.
 |===
 
+*Question for the data.* Can we reconstruct six measurements reasonably well
+using only two or three coordinates per station-hour? Choose and state the
+scales, center the columns, compute the principal directions and scores,
+then reconstruct with two and three directions. Compare the reconstruction
+errors on the same standardized table and inspect errors for an original
+variable in its physical units.
+
+*Takeaways.* The directions and scores describe different objects. PCA maximizes
+retained variance for the chosen scale and the retained rows. The axes are
+linear combinations of variables. Their physical interpretation requires
+examining their coefficients and the data. Reconstruction quality on this
+table describes variance preservation for these measurements.
+
 *Today's exit question:* derive stem:[v^\top Sv] in one line, give the
 dimensions of one direction and its scores, and explain what is lost by
 retaining two components. Relate your reconstruction error to the variance
 you discarded. Which original measurements support your interpretation of
 one axis? The regression row above is a question for the next lesson.
 
-== Next week: introduce regression and supervised learning
+[#_next_week_introduce_regression_and_supervised_learning]
+== Next session: introduce regression and supervised learning
 
-For the planned 9 November lesson, keep the PCA result and your interpretation
+For the 23 November lesson, keep the PCA result and your interpretation
 of one axis. No first fitted line is assumed. *Supervised learning* means learning a rule
 from examples with a known response, then evaluating it on observations
 that were not used to fit the rule. The response is often called the target.
@@ -871,5 +886,4 @@ that were not used to fit the rule. The response is often called the target.
 
 Use the xref:./../analytical/linear-probabilistic.adoc[regression reference],
 xref:./../foundations/safe-pipelines.adoc[training and validation guide] and
-xref:./../foundations/metrics-errors.adoc[error-metric guide]. The detailed
-9 November session remains to be prepared; this is its announced direction.
+xref:./../foundations/metrics-errors.adoc[error-metric guide]. Follow the xref:./../sessions/regression-practical.adoc[23 November guided Beijing practical] to apply these ideas.

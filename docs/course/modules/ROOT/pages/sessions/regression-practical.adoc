@@ -1,0 +1,285 @@
+= 23 November 2026 practical — Estimate PM2.5 and classify station-hours
+:page-course-language: en
+:page-course-concepts: DP-LIN-01, DP-NUM-01, DP-EVAL-01, DP-EVAL-02, DP-EVAL-03, DP-MET-01, DP-CLS-01, DP-MET-02, DP-THR-01
+:page-course-priority: P1
+:page-course-difficulty: D2
+:page-course-duration-minutes: 75
+:page-course-outcomes: LO4, LO6, LO7, LO8, LO9
+:page-course-prerequisites: covariance, Pearson correlation, PCA reconstruction, matrix products
+:page-course-assessed: no
+:page-jupyter: true
+:page-course-execution-profile: fast
+:stem: latexmath
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 8388608
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+
+*Question.* Can available PM10 and weather measurements estimate PM2.5 at the
+same station-hour? How much does the fitted rule improve on a simple reference
+on later dates?
+
+ifndef::backend-jupyter[]
+The xref:sessions/linear-regression.adoc[23 November lesson] gives the derivations.
+endif::[]
+ifdef::backend-jupyter[]
+The https://feelpp.github.io/course-data/course-data/sessions/linear-regression.html[23 November lesson] gives the derivations.
+endif::[]
+The supplied cell opens the dataset and prepares timestamps. Complete the
+commented calculations yourself. Keep one notebook across the three work periods.
+
+[#regression-problem]
+== 0. State the regression problem (5 min)
+
+Before fitting, complete this description in your own words.
+
+* “One row represents ___. We want to estimate ___, in units of ___.”
+* “At that station-hour, our simplest fitted model will use ___.
+  The multiple model will also need ___.”
+* “We will compare both models with a constant reference learned from ___.
+  We will compare their predictions with ___ on the later dates.”
+
+Keep the measured target separate from the predictor columns. Write down
+what each method needs at the station-hour where the target is missing.
+
+== 1. Establish the chronological split (5 min)
+
+One row represents a station-hour. The prepared extract covers 1–14 March 2013
+at three Beijing stations. Choose PM2.5 as the response in µg/m³. The candidates
+for the multiple model are PM10, TEMP, PRES, DEWP and WSPM. They must be
+available at the same station-hour. Take the common complete rows for these
+five predictors and the response so all three rules use identical observations.
+Count rows before and after this restriction in each window.
+
+[#regression-practical-setup]
+[%dynamic,python,fail-on-error=]
+----
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+relative = Path("datasets/teaching/air-quality/observations.csv")
+root = next((folder for folder in (Path.cwd(), *Path.cwd().parents)
+             if (folder / relative).is_file()), None)
+if root is None:
+    raise FileNotFoundError("Open this notebook inside the course checkout or student bundle.")
+
+air = pd.read_csv(root / relative)
+air["timestamp"] = pd.to_datetime(air[["year", "month", "day", "hour"]])
+target = "PM2.5"
+predictors = ["PM10", "TEMP", "PRES", "DEWP", "WSPM"]
+cutoff = pd.Timestamp("2013-03-11")
+----
+
+[source,python]
+----
+# Step 1
+# past = ...                    # timestamps strictly before cutoff
+# later = ...                   # timestamps at or after cutoff
+# train = ...                   # complete rows in past
+# valid = ...                   # same required columns in later
+# ytr, yva = ...                # 1-D arrays in the respective row orders
+# Report raw and retained row counts by window.
+# Verify the latest training timestamp precedes the earliest validation timestamp.
+----
+
+*Check before fitting.* Why is the split made once across stations? Which
+columns decide row eligibility, and which one must stay outside the predictors?
+
+== 2. Fit the PM10-only line (15 min)
+
+Use the training rows to fit an intercept and a slope. Compute the slope from
+centered products, then verify the fitted coefficients with `np.linalg.lstsq`
+and a design matrix with two columns. Compare the training scatter with its
+fitted line. In this first comparison both x and y are in µg/m³.
+
+[source,python]
+----
+# Step 2
+# xtr, xva = ...                # PM10 in original units
+# xc, yc = ...                  # centered training arrays
+# slope, intercept = ...        # use the centered products and the training means
+# simple_va = ...               # apply the fixed line to validation PM10
+# X_simple = ...                # intercept column plus training PM10
+# beta_simple = ...             # use np.linalg.lstsq to check the two coefficients
+# Draw the training scatter and the line; sort x or draw the line on a grid.
+----
+
+[%collapsible]
+.Hint for the simple model
+====
+The slope is the inner product of centered PM10 and centered PM2.5 divided by
+the squared norm of centered PM10. At the training mean of PM10 the fitted
+line must return the training mean of PM2.5. For the plot, use
+`ax.scatter(xtr, ytr)` for the measured pairs. Evaluate the fitted line on a
+grid from `xtr.min()` to `xtr.max()` and plot the grid and fitted values with
+`ax.plot`.
+====
+
+*Check before moving on.* What change in the fitted response does the slope
+assign to an increase of 10 µg/m³ in PM10? Keep `simple_va` for the comparison.
+
+== 3. Fit the multiple model using training scales (20 min)
+
+Return to the same split. Center and scale each of the five predictor columns
+using its training mean and sample standard deviation. Keep the response in
+its original units. Build the two design matrices with a leading column of
+ones and fit the coefficients using the training design. Verify the training
+residual orthogonality with a tolerance. Record design rank and dimensions.
+
+[cols="2,2,2",options="header"]
+|===
+|Object |Training |Validation
+
+|Standardized predictor matrix |`Atr`, five columns |`Ava`, five columns
+|Design with intercept |`Xtr`, six columns |`Xva`, six columns
+|Observed PM2.5 |`ytr`, one value per row |`yva`, one value per row
+|Predicted PM2.5 |`Xtr @ beta` |`Xva @ beta`
+|===
+
+Compute each predictor's mean and sample standard deviation from `train`.
+Subtract that mean and divide by that standard deviation in both windows.
+Keep the order of `predictors` throughout, since each coefficient acts on
+one particular column.
+
+[source,python]
+----
+# Step 3
+# mu_train, sd_train = ...      # one number per predictor, training rows only
+# Atr, Ava = ...                # transform both windows with these same statistics
+# Xtr, Xva = ...                # add one intercept column to each array
+# beta, _, rank, singular = ... # solve the least-squares problem on training data
+# multiple_va = ...             # predict on validation rows
+# e_train = ...                 # observed minus fitted on training rows
+# Check Xtr.T @ e_train is close to zero.
+----
+
+[%collapsible]
+.Hint for shapes
+====
+The two designs have six columns each. The coefficient vector has six
+entries. The validation prediction has one entry per retained validation
+station-hour. Use the same predictor order and apply the same training scales
+in both matrices.
+====
+
+== 4. Compare three rules on the same rows (10 min)
+
+Fit a constant reference by taking the mean of training PM2.5. Compare this
+rule, the PM10-only line and the multiple model on the retained March 11–14
+rows. Use the difference observed minus predicted. Report the RMSE and MAE
+in µg/m³ and the validation row count.
+
+[source,python]
+----
+# Step 4
+# baseline_va = ...             # repeat the training response mean
+# estimates = ...               # map each rule name to its validation predictions
+# metric_rows = ...             # compute RMSE and MAE from each residual vector
+# Compare errors on the same yva; report the number of evaluated station-hours.
+----
+
+*Check before interpreting.* The raw validation count and the evaluated
+validation count describe different quantities even if they happen to agree.
+Record both. Which measurements must be available at the station-hour for the fitted
+rule to be usable?
+
+[#_5_inspect_residuals_and_defend_a_conclusion_15_min]
+== 5. Optional extension — read a prediction error
+
+Use the multiple model on the later dates. For one station-hour, the
+*residual* is the measured PM2.5 minus the estimated PM2.5. If the
+measurement is 60 µg/m³ and the estimate is 45 µg/m³, the residual is
++15 µg/m³. The model estimated too low by 15 µg/m³.
+
+. Put the dates, stations, measurements and estimates in the same table.
+  Compute the residual for each row, then select one station to plot.
+. Each point shows one hour at that station. Read its height relative to
+  the zero line: above means the estimate was too low, below means it was
+  too high. Pick one point clearly away from zero and find its row in the table.
+. Give the station, date and hour, measured value and estimated value.
+  Say whether the estimate was too high or too low, and by how much.
+
+[source,python]
+----
+# Step 5
+# valid_results = valid[["station", "timestamp"]].copy()
+# valid_results["observed"] = yva
+# valid_results["estimated"] = multiple_va
+# valid_results["residual"] = ...    # use the two columns above
+# station = ...                      # choose one station name
+# rows = valid_results.loc[valid_results["station"] == station]
+# fig, ax = plt.subplots(figsize=(9, 4), layout="constrained")
+# ax.scatter(rows["timestamp"], rows["residual"], s=16)
+# ax.axhline(0, color="black", linestyle="--")
+# ax.set(title=station, xlabel="Date",
+#        ylabel="Measured minus estimated PM2.5 (µg/m³)")
+# fig.autofmt_xdate()
+# plt.show()
+----
+
+*Two sentences to finish.*
+
+* “On 11–14 March, ___ had the lowest RMSE, ___ µg/m³.”
+* “At ___ on ___ at ___, the multiple model estimated ___ µg/m³ and the
+  measurement was ___ µg/m³. The estimate was too ___ by ___ µg/m³.”
+
+[%collapsible]
+.If you have time
+====
+Pick several consecutive points on the same side of zero. During which
+hours did the model tend to estimate too high or too low? To compare stations,
+compute the mean absolute error and the number of hours for each station.
+====
+
+[#classification-practical]
+== 6. Classify a station-hour (20 min)
+
+Return to the same rows from step 1. Use PM10 as the predictor. With measured
+PM2.5, assign class 1 when the concentration is at least 75 µg/m³ and class
+0 otherwise. These are the classes you will ask the model to learn. In
+`scikit-learn`, a pipeline can learn the PM10 scaling on the training rows
+and apply it when scoring the later rows.
+
+. Make the training and validation class arrays from `ytr` and `yva`.
+  Count zeros and ones in each window.
+. Fit the supplied logistic pipeline on training PM10 and the training
+  classes. Check that `classifier.classes_` is `[0, 1]`. The second
+  column of `predict_proba` then gives the probability of class 1.
+. Assign class 1 when that probability is at least 0.5. Cross-tabulate the
+  observed and predicted classes on the validation rows.
+. Report one of the two mistake counts. Find one row that made that mistake
+  and report measured PM2.5, the estimated probability and the predicted class.
+  If that count is zero, report the other mistake type or explain the four
+  counts if both are zero.
+
+[source,python]
+----
+# Step 6
+# from sklearn.linear_model import LogisticRegression
+# from sklearn.pipeline import make_pipeline
+# from sklearn.preprocessing import StandardScaler
+#
+# class_cutoff = 75.0
+# class_tr = ...                # integer labels from the training concentrations
+# class_va = ...                # integer labels from the validation concentrations
+# classifier = make_pipeline(StandardScaler(), LogisticRegression())
+# classifier.fit(train[["PM10"]], ...)
+# print(classifier.classes_)
+# p_high = classifier.predict_proba(valid[["PM10"]])[:, 1]
+# decision_cutoff = 0.5
+# class_pred = ...              # convert probabilities to integer labels
+# table = pd.crosstab(
+#     pd.Series(class_va, name="Observed class"),
+#     pd.Series(class_pred, name="Predicted class"),
+# ).reindex(index=[0, 1], columns=[0, 1], fill_value=0)
+# display(table)
+----
+
+*Check your interpretation.* If PM2.5 is measured at 90 µg/m³ and the model
+assigns a probability of 0.30 to class 1, which cell of the table gets this
+station-hour? Explain what each of the cutoffs 75 and 0.5 controls.

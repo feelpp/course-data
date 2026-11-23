@@ -169,7 +169,7 @@ test('course mathematics sequence uses the vendored Antora generator determinist
   assert.match(explorationMarkdown, /do not presume a Simpson reversal/i)
   assert.match(explorationMarkdown, /inverse ECDF/)
   assert.match(explorationMarkdown, /not a representative sample/)
-  assert.match(explorationMarkdown, /one-page statistical evidence brief/)
+  assert.match(explorationMarkdown, /one-page statistical analysis summary/)
   assert.match(explorationMarkdown, /How the support changes/)
   assert.match(explorationCode, /profile = None/)
   assert.match(explorationCode, /daily = None/)

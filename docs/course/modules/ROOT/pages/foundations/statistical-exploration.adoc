@@ -36,16 +36,16 @@ This notebook is the live-session route after the xref:foundations/data-quality-
 |75–85 |Part 5: predict associations, then inspect paired observations.
 |85–100 |Parts 6–7: compute covariance explicitly, standardise it, read correlations.
 |100–110 |Part 8: investigate whether aggregation changes the association.
-|110–120 |Part 9: draft the evidence brief and exchange one checked claim.
+|110–120 |Part 9: draft the analysis summary and exchange one checked claim.
 |===
 
-By the end, explain and compute location, quantiles and dispersion; compare numerical summaries with distributions; expose valid counts; distinguish hourly from daily quantities; compute covariance and correlation; and support a bounded claim with numerical and graphical evidence. This session ends with descriptive association.
+By the end, explain and compute location, quantiles and dispersion; compare numerical summaries with distributions; expose valid counts; distinguish hourly from daily quantities; compute covariance and correlation; and support a bounded claim with numerical results and figures. This session ends with descriptive association.
 
 *Student exercises* are the prediction and interpretation prompts and the final brief. *Optional extensions* are labelled at the end and are outside the live timing. The xref:foundations/mathematical-background.adoc[mathematical foundation], xref:foundations/probability-distributions-moments.adoc[distribution and moment reference], and xref:foundations/quantiles-exceedance-risk.adoc[quantile reference] already contain theory and small examples. Follow the links when a concept arises; reading those complete chapters is not a prerequisite for this investigation. Use the short xref:foundations/covariance-correlation.adoc[covariance and correlation reference] for paired variation and the xref:foundations/statistical-plots.adoc[plot-purpose reference] to choose and read each figure.
 
 == How the support changes
 
-The website shows code and questions, with no computed tables, finished figures or numerical interpretations. Execute the downloaded notebook to obtain your own evidence. Early complete code demonstrates the operations; it is not an answer to the written interpretation. Later cells deliberately leave work for you.
+The website shows code and questions, with no computed tables, finished figures or numerical interpretations. Execute the downloaded notebook to obtain your own results. Early complete code demonstrates the operations; it is not an answer to the written interpretation. Later cells deliberately leave work for you.
 
 [cols="1,2,4",options="header"]
 |===
@@ -54,12 +54,12 @@ The website shows code and questions, with no computed tables, finished figures 
 |2 |Partly supplied plotting code |Complete ECDF and boxplot, then compare what the three views reveal.
 |3–4 |Editable skeletons and checks |Build the profile and grouped summaries; create the daily figure.
 |5–7 |Commented plot skeletons and consistency checks |Prepare paired observations, compute covariance explicitly, then construct correlations and their counts.
-|8–9 |Independent investigation with layout hints |Choose comparisons, create the evidence and defend your interpretation.
+|8–9 |Independent investigation with layout hints |Choose comparisons, produce results and explain your interpretation.
 |===
 
-A `None` placeholder means *not yet computed*. Replace it with your implementation and rerun the relevant cells. A message asking you to complete a step is not successful completion. The starter notebook can run without errors while unfinished; the evidence brief requires you to complete the tasks. Write your interpretation before moving to the next question.
+A `None` placeholder means *not yet computed*. Replace it with your implementation and rerun the relevant cells. A message asking you to complete a step is not successful completion. The starter notebook can run without errors while unfinished; the analysis summary requires you to complete the tasks. Write your interpretation before moving to the next question.
 
-*Plotting support:* Commented skeletons supply Matplotlib layout, labels, legends and colour settings so that configuration does not take over the investigation. First prepare the quantities to plot, replace each `...` with your own inputs, then uncomment the relevant lines. The skeletons do not compute those inputs. `fig` is the whole figure; `ax` is one panel; `axes` contains several panels. `constrained_layout=True` leaves room for labels, and `plt.show()` displays the finished figure. Reuse these settings for figures in your evidence brief.
+*Plotting support:* Commented skeletons supply Matplotlib layout, labels, legends and colour settings so that configuration does not take over the investigation. First prepare the quantities to plot, replace each `...` with your own inputs, then uncomment the relevant lines. The skeletons do not compute those inputs. `fig` is the whole figure; `ax` is one panel; `axes` contains several panels. `constrained_layout=True` leaves room for labels, and `plt.show()` displays the finished figure. Reuse these settings for figures in your analysis summary.
 
 == Worked example: build your statistical exploration
 
@@ -255,7 +255,7 @@ axes[2].set_yticks([])
 plt.show()
 ----
 
-*Your interpretation:* Calculate stem:[\bar x\pm s] and compare it with the full range and IQR. What does this symmetric summary hide in your plots? It is neither a confidence interval nor a guaranteed coverage interval. Boxplot whiskers reach observations within 1.5 IQR of the quartiles; flagged points require inspection, not automatic deletion. Write the numerical and graphical evidence for your reading.
+*Your interpretation:* Calculate stem:[\bar x\pm s] and compare it with the full range and IQR. What does this symmetric summary hide in your plots? It is neither a confidence interval nor a guaranteed coverage interval. Boxplot whiskers reach observations within 1.5 IQR of the quartiles; flagged points require inspection, not automatic deletion. Write the numerical results and figures for your reading.
 
 *Student prompt:* Read the fraction at or below 150 µg/m³ from the ECDF, then calculate `(x <= 150).mean()`. Would changing the histogram bins change this fraction? Would mean and standard deviation alone answer it?
 
@@ -396,7 +396,7 @@ correlation matrix. Keep your existing
 work. Reuse the scatter plots below, then prioritize Part 6's explicit covariance
 and Part 7's Pearson calculation on the same complete pairs. If time remains,
 finish the correlation heatmap and pair counts, then continue Part 8.
-Use Part 9 and Results to update your existing evidence brief with one checked
+Use Part 9 and Results to update your existing analysis summary with one checked
 paired finding. The xref:./../sessions/joint-variation.adoc[20 October lesson] gives
 the derivations and the final practical checklist.
 ====
@@ -518,7 +518,7 @@ else:
 # Label both axes with variable names; write each value in its cell.
 # Include a colour bar labelled "Pearson r (dimensionless)".
 # Choose two off-diagonal pairs, check their counts, and create scatter plots.
-# A heatmap alone is not evidence that a relationship is linear.
+# Use a scatter plot to check the shape of a relationship.
 # Layout skeleton: supply your matrix and its cell values, then uncomment.
 # fig, ax = plt.subplots(figsize=(9, 7), constrained_layout=True)
 # image = ax.imshow(..., cmap="RdBu_r", vmin=-1, vmax=1)
@@ -589,13 +589,13 @@ else:
 
 `sharex=True, sharey=True` keeps both panels on the same concentration and temperature scales. Reuse each station's marker and colour across panels. Supply the hourly and daily pairs yourself, and report their respective counts; the layout does not perform aggregation or missing-value selection.
 
-*Your interpretation:* Report the correlations you computed. Does grouping or averaging change their magnitude, sign, or both? Is the change visible in your plots? Do not presume a Simpson reversal: only claim what your evidence shows. Shared time regimes and weather remain possible explanations; a larger absolute correlation is not evidence of causation or representativeness.
+*Your interpretation:* Report the correlations you computed. Does grouping or averaging change their magnitude, sign, or both? Is the change visible in your plots? Do not presume a Simpson reversal: only describe the pattern you computed and observed. Shared time regimes and weather remain possible explanations; a larger absolute correlation leaves questions of causation and representativeness open.
 
 *Student prompt:* Write the two population questions these correlations could address. Why would treating 1,008 hourly rows as independent overstate the information available? For uncertainty and resampling, continue later with the xref:foundations/eda-sampling.adoc[sampling companion] and xref:foundations/mean-uncertainty.adoc[mean uncertainty reference].
 
 ===== Computation checks — before the brief
 
-Check that the computations below are ready before drafting conclusions. These flags do not assess your plots or written reasoning; check those against the evidence-brief instructions.
+Check that the computations below are ready before drafting conclusions. These flags do not assess your plots or written reasoning; check those against the analysis summary instructions.
 
 [#exploration-completion-check]
 [source,python]
@@ -613,11 +613,11 @@ computation_ready = pd.Series({
 computation_ready
 ----
 
-==== Part 9 — Prepare your evidence brief
+==== Part 9 — Prepare your analysis summary
 
-*Purpose:* Choose and check the evidence you will communicate. Parts 0–8 produce the calculations and figures; the Results section below is the template for your finished brief.
+*Purpose:* Choose and check the results you will communicate. Parts 0–8 produce the calculations and figures; the Results section below is the template for your finished brief.
 
-*Deliverable:* A one-page statistical evidence brief about the three-station, 14-day dataset extract (1–14 March 2013): two selected variables, a compact summary table, three figures, one supported claim per figure and a concrete limitation.
+*Deliverable:* A one-page statistical analysis summary about the three-station, 14-day dataset extract (1–14 March 2013): two selected variables, a compact summary table, three figures, one supported claim per figure and a concrete limitation.
 
 *Preparation steps:*
 
@@ -626,16 +626,16 @@ computation_ready
 . *Check one claim per figure* against a numerical summary and the plotted geometry. For a paired relationship, give Pearson r and the complete-pair count; exclude self-correlations and check whether a linear reading is supported. If comparing hourly and daily associations, state both observational units, r values and counts.
 . *Choose a concrete limitation* from coverage, missingness, measurement, dependence or selection. State which broader conclusion it prevents, then use Results to assemble the brief.
 
-*Review before exchanging:* Each claim cites a number or figure. Each caption states measurement units, observational unit, missing-data rule, valid count and one limitation. The distribution claim explains something the summary table hides; the grouped claim accounts for coverage and weighting; the paired claim distinguishes association from causation. Do not claim a sign reversal without evidence.
+*Review before exchanging:* Each claim cites a number or figure. Each caption states measurement units, observational unit, missing-data rule, valid count and one limitation. The distribution claim explains something the summary table hides; the grouped claim accounts for coverage and weighting; the paired claim distinguishes association from causation. Report a sign reversal only if the calculated coefficients have opposite signs.
 
-In class, select the evidence and exchange one checked claim with a neighbour. Finish the brief independently after class and rerun the notebook from a fresh kernel. An unfinished calculation or plot should be reported as unfinished work, not presented as a result.
+In class, select your results and exchange one checked claim with a neighbour. Finish the brief independently after class and rerun the notebook from a fresh kernel. An unfinished calculation or plot should be reported as unfinished work, not presented as a result.
 
 [.worked-example-results#worked-statistical-exploration-results]
 === Results
 
 *Importance:* Essential (P0)
 
-*Purpose: present your evidence brief.* Fill the table and short-paragraph outline below with the evidence selected in Part 9, and attach your three figures. This is the writing template for the deliverable; the preparation and review instructions are in Part 9. No numerical results or finished figures are supplied here.
+*Purpose: present your analysis summary.* Fill the table and short-paragraph outline below with the results selected in Part 9, and attach your three figures. This is the writing template for the deliverable; the preparation and review instructions are in Part 9. No numerical results or finished figures are supplied here.
 
 ==== Selected-variable summary
 
@@ -648,15 +648,15 @@ One row per selected variable, using the completed profile and declared quartile
 |Your second variable |… |… |… |… |… |…
 |===
 
-==== Your evidence brief
+==== Your analysis summary
 
 *Variable choice:* We chose … and … because … .
 
-The following outline is for your short paragraphs. Replace the gaps with your own observations and evidence; the sentence starters do not prescribe a direction or a result.
+The following outline is for your short paragraphs. Replace the gaps with your own observations and supporting results; the sentence starters do not prescribe a direction or a result.
 
 [cols="1,3,3",options="header"]
 |===
-|Component |Draft sentence |Supporting evidence
+|Component |Draft sentence |What to show
 |Distribution
 |For …, the mean and median …; Figure 1 reveals … that the table alone hides.
 |Selected-variable table and Figure 1; units and valid n.
@@ -677,16 +677,30 @@ The following outline is for your short paragraphs. Replace the gaps with your o
 
 *Figure 3 — Paired association:* Attach your selected paired figure and its caption here.
 
-The compact table, short paragraphs and three captioned figures together form your one-page evidence brief.
+The compact table, short paragraphs and three captioned figures together form your one-page analysis summary.
 
 [.worked-example-conclusion#worked-statistical-exploration-conclusion]
 === Conclusion
 
 *Importance:* Essential (P0)
 
-*Your conclusion:* Close your evidence brief with three sentences: one finding about a distribution, one about grouping or association, and one limitation. Each finding must cite your numerical or graphical evidence. State why this short three-station slice does not establish city-wide representativeness, independence, sensor calibration or causation.
+*Your conclusion:* Close your analysis summary with three sentences: one finding about a distribution, one about grouping or association, and one limitation. Each finding must cite your numerical result or figure. State why this short three-station slice does not establish city-wide representativeness, independence, sensor calibration or causation.
 
 Download the xref:attachment$foundations/statistical-exploration.ipynb[student notebook]. Complete the skeletons in your copy, add your written interpretations, then restart the kernel and run all cells. No reference answers are embedded in this notebook.
+
+== Questions to carry into the next analysis
+
+*What values are typical, and how much do they vary?* Start with units and
+valid counts. Compute a median and interquartile range, then read a histogram
+or an empirical cumulative distribution to locate skew, gaps or tails.
+*Does the description change by station or day?* Repeat the summary within
+each group. Record the time window, the number of valid readings and what one
+point represents.
+
+*Takeaways.* A summary answers a question about specific retained readings.
+Report the denominator and the plot settings that affect your reading.
+Different groups may cover different hours or have different missing values.
+A single pooled summary can hide those differences.
 
 == Optional extensions — after the live session
 

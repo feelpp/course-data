@@ -17,8 +17,10 @@
 :dynamic-python-interpreter: python3
 :dynamic-python-isolate-user-site:
 :session-hub-link: xref:session-multivariate.adoc[the session hub]
+:regression-session-link: xref:sessions/linear-regression.adoc[23 November session]
 ifdef::backend-jupyter[]
 :session-hub-link: https://feelpp.github.io/course-data/course-data/session-multivariate.html[the session hub on the course website]
+:regression-session-link: https://feelpp.github.io/course-data/course-data/sessions/linear-regression.html[23 November session]
 endif::[]
 :audit-denominators-link: xref:./../foundations/data-quality-practical.adoc#_7_show_how_missingness_changes_analysis_denominators[missing-value exercise]
 ifdef::backend-jupyter[]
@@ -37,8 +39,8 @@ xref:./../foundations/data-quality-practical.adoc[guided data audit] and the
 xref:./../foundations/statistical-exploration.adoc[description of one variable at a time].
 Predict before running each demonstration. Guided exercises leave the choice of
 quantities and the interpretation to you; supplied plotting layouts save time.
-The website displays the code; run the notebook to produce the evidence.
-On the website, open a proof or code panel when needed; computed results have their own nested panel. In the notebook, all proof steps remain readable and code stays executable. French slides and the two-session route are on {session-hub-link}.
+The website displays the code; run the notebook to reproduce the results.
+On the website, open a proof or code panel when needed; computed results have their own nested panel. In the notebook, all proof steps remain readable and code stays executable. Find the French slides and session dates on {session-hub-link}.
 
 == Probability recall: model, sampling and observations
 
@@ -222,8 +224,8 @@ for consecutive meteorological hours?
 
 The four-hour class reached covariance, scalar Pearson correlation and the
 *Pearson correlation matrix*. The matrix introduction formerly at the start
-of the former second lesson is now included in §§ 10–12 of this dated lesson. PCA and SVD are planned for 2 November; regression for 9 November; they are not
-listed as completed on 20 October.
+of the former second lesson is now included in §§ 10–12 of this dated lesson. The subsequent PCA lesson is dated 2 November and the regression lesson
+is dated 23 November.
 
 Students were asked to finish the existing 5 October Statistical Exploration
 practical, using the covariance and Pearson calculations developed here.
@@ -1051,13 +1053,27 @@ establish that one variable causes the other.
 
 == 9. Synthesis and exit question
 
+*Do two measurements tend to be high or low together?* Pair the measurements
+by station and hour, count the complete pairs and draw a scatter plot.
+Center each column, compute covariance and Pearson correlation, then
+compare the sign and strength with the shape of the cloud.
+*Which relationships stand out across several variables?* State which
+station-hours contribute to each entry, form the Pearson matrix and use
+selected scatter plots to investigate what its entries summarize.
+
+*Takeaways.* Covariance measures the average product of centered values in
+the product of the original units. Pearson rescales this to describe linear
+association. A curve or a few extreme observations can change what a single
+coefficient tells you. Interpreting the expectation of an estimator requires
+sampling assumptions. A descriptive coefficient refers to its retained pairs.
+
 Centering defines deviations; their inner product defines covariance;
 standardization gives Pearson; normalized centered vectors reveal its angle.
 Projection explains the best linear approximation and the limitations of zero
 correlation. Sampling assumptions explain an estimator's expectation, whereas
 an observed scatter plot describes only the retained pairs.
 
-*Use this synthesis in your existing evidence brief:* name the station/time
+*Use this synthesis in your existing statistical summary:* name the station/time
 window, pair, n and units; give one checked computation and one labeled cloud;
 explain the linear pattern and one limitation. Update the 5 October
 notebook's Results section when finishing the practical, rather than write
@@ -1411,7 +1427,8 @@ another assignment or write a second report.
 Before starting the 2 November lesson, be ready to read a Pearson matrix entry,
 identify its rows and distinguish a linear association from a causal claim.
 
-== 14. Next: 2 November PCA, then 9 November regression
+[#_14_next_2_november_pca_then_9_november_regression]
+== 14. Next: 2 November PCA, then 23 November regression
 
 The 20 October question was how the measured variables vary together. S and R
 now organize all their pairwise covariances and correlations on a common table.
@@ -1426,7 +1443,7 @@ They make two new questions possible:
 
 The xref:./../sessions/matrix-geometry.adoc[2 November lesson] develops PCA and
 SVD and a guided reconstruction practical. Regression and the first steps
-in supervised machine learning are planned for the following week, 9 November.
+in supervised learning are covered in the {regression-session-link}.
 The closing question on 2 November introduces that purpose without requiring
 a fitted line. This progression reuses the same data and the same centering and
 projection ideas; it does not imply that regression was already covered on

@@ -47,3 +47,15 @@ The pages are fuller references: this session follows selected examples rather t
 Use the green *Download bundle* button and follow xref:environment.adoc[Computing environment: install uv, create a virtual environment and open the notebook in VS Code]. The bundle supplies `pyproject.toml` and `uv.lock`; `uv sync --locked` installs the required libraries. The four corresponding notebooks are available from each page's download toolbar. Open notebooks inside the extracted bundle so the air-quality examples can find their data.
 
 Students whose environment is not ready can work in pairs and follow the demonstrations. Keep the original sensor values, create a separate Celsius column, and report both the mean and the number of available readings. The xref:foundations/python-pandas.adoc#_practise_on_the_same_table[first short exercise] changes only one reading.
+
+== Questions to ask the data
+
+*What does one row represent?* Inspect the column names and types, then
+choose a key that identifies a row. Verify that the key is unique.
+*How many observations belong to each group?* Choose a grouping column,
+count the rows per group and check that the totals add up.
+
+*Takeaways.* Filtering selects rows, grouping changes what one row in the
+output represents, and joining can increase the number of rows. A join assumes
+the chosen keys relate the intended records. Check key uniqueness and compare
+row counts before and after the join.

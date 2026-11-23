@@ -87,7 +87,7 @@ def main() -> None:
             )
             text(x + 15, y + 28, f"{number:02d}  {b['short']}", 20, weight="bold")
             wrapped(x + 15, y + 57, b["math"], 39, 16, 21, "green")
-            wrapped(x + 15, y + 108, b["evidence"], 39, 16, 21)
+            wrapped(x + 15, y + 108, b["expected_result"], 39, 16, 21)
     text(
         44,
         1126,
@@ -114,9 +114,9 @@ def main() -> None:
             cards.append(
                 f'<article id="block-{n}"><div class="tag">BLOCK {n:02d} · 2 HOURS</div>'
                 f'<h3>{esc(b["short"])}</h3><p class="math">{esc(b["math"])}</p>'
-                "<details><summary>Question, practice and expected evidence</summary>"
+                "<details><summary>Practice, expected result and checkpoint</summary>"
                 f"<p><b>Practice:</b> {esc(b['practice'])}</p>"
-                f"<p><b>Evidence:</b> {esc(b['evidence'])}</p>"
+                f"<p><b>Expected result:</b> {esc(b['expected_result'])}</p>"
                 f"<p><b>Curriculum focus:</b> {esc(plan['title'])}</p>"
                 f"<p><b>Checkpoint:</b> {esc(plan['checkpoint'])}</p>"
                 f'<a href="../{esc(b["page"])}">Open course reference ↗</a>'
@@ -157,7 +157,7 @@ actual teaching progress is recorded separately.</p>
         f'<aside class="position"><b>Teaching position · {esc(source["asOf"])}</b>'
         f"<p>Introduced: {esc(source['introduced'])}.</p><p>Next: {esc(source['next'])}.</p>"
         "<p>Introduced does not mean mastered. Blocks are not marked complete.</p></aside>"
-        "<p>Open a block for the practical work, mathematical tools and expected evidence. "
+        "<p>Open a block for the practical work, mathematical tools and expected results. "
         "The project starts in Block 5; Controls 1 and 2 are in Blocks 8 and 14.</p>"
         + "".join(sections)
         + "<footer><p>Across the course: formulate a question, calculate, check and explain. "

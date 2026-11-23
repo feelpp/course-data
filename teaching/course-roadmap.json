@@ -1,7 +1,7 @@
 {
-  "asOf": "2 November 2026",
-  "introduced": "Pandas · audit · descriptions · covariance · Pearson matrix",
-  "next": "PCA / SVD and reconstruction on 2 November; regression planned for 9 November",
+  "asOf": "23 November 2026",
+  "introduced": "Pandas · audit · descriptions · covariance · Pearson matrix · PCA",
+  "next": "23 November: review PCA reconstruction, fit linear models and introduce binary classification. Next: validation across dates, model complexity, trees and random forests",
   "stages": [
     {
       "title": "1. Reliable observations",
@@ -48,7 +48,7 @@
       "short": "Question and audit",
       "math": "Units · populations · measurement error",
       "practice": "State the observation unit; document missingness and provenance.",
-      "evidence": "An audit with one justified quality decision",
+      "expected_result": "An audit with one justified quality decision",
       "page": "foundations/data-quality-practical.html"
     },
     {
@@ -56,7 +56,7 @@
       "short": "Python and pandas",
       "math": "Sets · masks · finite sums",
       "practice": "Select, derive and summarise a small sensor table; check by hand.",
-      "evidence": "An explained calculation and a rerunnable notebook",
+      "expected_result": "An explained calculation and a rerunnable notebook",
       "page": "foundations/python-pandas.html"
     },
     {
@@ -64,7 +64,7 @@
       "short": "Groups, joins and SQL",
       "math": "Partitions · keys · cardinality",
       "practice": "Aggregate observations and join sensor metadata without duplication.",
-      "evidence": "A checked join and a quality record",
+      "expected_result": "A checked join and a quality record",
       "page": "foundations/pandas-sql.html"
     },
     {
@@ -72,7 +72,7 @@
       "short": "Describe and relate",
       "math": "Empirical distributions · covariance · Pearson",
       "practice": "Explain distribution plots, centred products and common-row matrices.",
-      "evidence": "A statistical profile and a qualified joint claim",
+      "expected_result": "A statistical profile and a qualified joint claim",
       "page": "foundations/statistical-exploration.html"
     },
     {
@@ -80,7 +80,7 @@
       "short": "Splits and baselines",
       "math": "Conditioning · empirical loss · information boundaries",
       "practice": "Choose a split; fit preprocessing on training rows; evaluate a baseline.",
-      "evidence": "A leakage-safe pipeline and a project question",
+      "expected_result": "A leakage-safe pipeline and a project question",
       "page": "foundations/safe-pipelines.html"
     },
     {
@@ -88,7 +88,7 @@
       "short": "Regression",
       "math": "Least squares · QR/SVD · likelihood",
       "practice": "Use a stable solver; inspect residuals and numerical conditioning.",
-      "evidence": "A checked fit with residual interpretation",
+      "expected_result": "A checked fit with residual interpretation",
       "page": "analytical/linear-probabilistic.html"
     },
     {
@@ -96,7 +96,7 @@
       "short": "Classification",
       "math": "Conditional probability · log loss · thresholds",
       "practice": "Fit logistic/softmax models; interpret confusion counts and metrics.",
-      "evidence": "A justified metric and decision threshold",
+      "expected_result": "A justified metric and decision threshold",
       "page": "analytical/linear-probabilistic.html"
     },
     {
@@ -104,7 +104,7 @@
       "short": "Control 1 + regularisation",
       "math": "Validity checks · penalised objectives",
       "practice": "Demonstrate the foundations; begin the regularisation/CV comparison.",
-      "evidence": "Individual evidence, then a regularisation prediction",
+      "expected_result": "An individual audit and a prediction about regularisation",
       "page": "assessment/overview.html"
     },
     {
@@ -112,7 +112,7 @@
       "short": "Select complexity",
       "math": "Bias–variance · penalties · cross-validation",
       "practice": "Search over full pipelines and interpret learning curves.",
-      "evidence": "A justified model-selection result",
+      "expected_result": "A justified model-selection result",
       "page": "analytical/model-selection.html"
     },
     {
@@ -120,7 +120,7 @@
       "short": "Trees and ensembles",
       "math": "Partitions · impurity · averaging · additive losses",
       "practice": "Compare a tree and forest; explain a supplied boosting comparison.",
-      "evidence": "A model comparison with interpretation limits",
+      "expected_result": "A model comparison with interpretation limits",
       "page": "analytical/tree-ensembles.html"
     },
     {
@@ -128,7 +128,7 @@
       "short": "PCA and clustering",
       "math": "Covariance · SVD · distances · stability",
       "practice": "Project the data; compare k-means, hierarchical and density geometries.",
-      "evidence": "A geometric interpretation and a stability check",
+      "expected_result": "A geometric interpretation and a stability check",
       "page": "analytical/pca-clustering.html"
     },
     {
@@ -136,7 +136,7 @@
       "short": "Performance and delivery",
       "math": "Memory size · complexity · numerical equivalence",
       "practice": "Measure a columnar workflow and rerun a documented analysis.",
-      "evidence": "A measured comparison and reproducible delivery",
+      "expected_result": "A measured comparison and reproducible delivery",
       "page": "analytical/performance-columnar.html"
     },
     {
@@ -144,7 +144,7 @@
       "short": "Mini-project clinic",
       "math": "Assumptions · uncertainty · comparison criteria",
       "practice": "Defend the question, data decisions, baseline and selection procedure.",
-      "evidence": "A revised project and result card",
+      "expected_result": "A revised project and result card",
       "page": "assessment/mini-project.html"
     },
     {
@@ -152,7 +152,7 @@
       "short": "Control 2 and synthesis",
       "math": "Validity · generalisation · synthesis",
       "practice": "Audit an analysis and connect the mathematical and computational choices.",
-      "evidence": "An individual validity audit and course synthesis",
+      "expected_result": "An individual validity audit and course synthesis",
       "page": "assessment/overview.html"
     }
   ]
