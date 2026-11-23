@@ -1,0 +1,252 @@
+= 30 November 2026 practical — Trees and forests on Beijing station-hours
+:page-course-language: en
+:page-course-concepts: DP-TREE-01, DP-ENS-01, DP-REG-01, DP-GEN-01, DP-CV-01, DP-MET-01, DP-MET-02
+:page-course-priority: P1
+:page-course-difficulty: D2
+:page-course-duration-minutes: 45
+:page-course-outcomes: LO5, LO6, LO7, LO9
+:page-course-prerequisites: regression, logistic classification, MAE, RMSE, confusion matrices
+:page-course-assessed: no
+:page-jupyter: true
+:page-course-execution-profile: fast
+:stem: latexmath
+:dynamic-blocks:
+:dynamic-blocks-strict:
+:dynamic-blocks-timeout-seconds: 120
+:dynamic-blocks-max-output-bytes: 8388608
+:dynamic-python-interpreter: python3
+:dynamic-python-isolate-user-site:
+
+*Question for the data.* Can a tree or an average of trees improve the estimate
+of same-hour PM2.5? Can either improve the decision that PM2.5 reaches
+75 µg/m³?
+
+ifndef::backend-jupyter[]
+The xref:sessions/trees-and-forests.adoc[30 November lesson] gives the split
+criteria and the four-row example.
+endif::[]
+ifdef::backend-jupyter[]
+The https://feelpp.github.io/course-data/course-data/sessions/trees-and-forests.html[30 November lesson]
+gives the split criteria and the four-row example.
+endif::[]
+
+Run the setup. Keep one row per station-hour and the five ordered predictor
+columns. Use the same complete rows for all methods and both tasks. For the
+first fits, the boundary is supplied. Rows from 1–10 March train the models.
+Save predictions for 11–14 March and compare them in the final block.
+
+[#trees-forests-setup]
+[%dynamic,python,fail-on-error=]
+----
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge
+from sklearn.metrics import confusion_matrix, mean_absolute_error, root_mean_squared_error
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor, export_text
+
+relative = Path("datasets/teaching/air-quality/observations.csv")
+root = next((folder for folder in (Path.cwd(), *Path.cwd().parents)
+             if (folder / relative).is_file()), None)
+if root is None:
+    raise FileNotFoundError("Open this notebook inside the course checkout or student bundle.")
+
+air = pd.read_csv(root / relative)
+air["timestamp"] = pd.to_datetime(air[["year", "month", "day", "hour"]])
+predictors = ["PM10", "TEMP", "PRES", "DEWP", "WSPM"]
+response = "PM2.5"
+rows = air.dropna(subset=[response, *predictors]).sort_values(["timestamp", "station"])
+
+cutoff = pd.Timestamp("2013-03-11")
+train = rows.loc[rows["timestamp"] < cutoff]
+later = rows.loc[rows["timestamp"] >= cutoff]
+X_train, X_later = train[predictors], later[predictors]
+y_train, y_later = train[response], later[response]
+
+class_cutoff = 75.0
+probability_cutoff = 0.50
+tree_options = dict(max_depth=5, min_samples_leaf=10, random_state=42)
+forest_options = dict(
+    **tree_options, n_estimators=100, max_features="sqrt", bootstrap=True
+)
+----
+
+[#nov30-tp-regression]
+== 1. Fit and read a regression tree and forest (15 min)
+
+Fit `LinearRegression`, `DecisionTreeRegressor` and `RandomForestRegressor`.
+Give `tree_options` to the tree and `forest_options` to the forest using
+`**`, which passes the dictionary entries as named arguments.
+Fit each model to `X_train` and the measured concentrations `y_train`.
+
+Compare their predictions for the first later station-hour using
+`X_later.iloc[[0]]`. The two brackets give a one-row table. Print the upper
+levels of the fitted tree to find its first question. For one row, verify
+that the forest prediction equals the mean of its trees' predictions.
+
+[source,python]
+----
+# Step 1
+# reg_models = {
+#     "Linear": LinearRegression(),
+#     "Tree": ...,
+#     "Forest": ...,
+# }
+# for model in reg_models.values():
+#     model.fit(..., ...)
+# first_later = X_later.iloc[[0]]
+# print(export_text(reg_models["Tree"], max_depth=2))
+# Use predict(first_later) for each model. Which feature is tested first?
+# Convert first_later to an array before calling each individual forest tree.
+# individual = [... for tree in reg_models["Forest"].estimators_]
+# Compare np.mean(individual) with the forest prediction for the same row.
+----
+
+[%collapsible]
+.Hint — a single tree in a forest
+====
+The fitted forest's `estimators_` attribute contains its individual trees.
+`tree.predict(first_later.to_numpy())[0]` gives one tree's numerical prediction
+for the chosen station-hour. These trees receive the same predictor order used
+when fitting the forest.
+====
+
+[#nov30-tp-classification]
+== 2. Fit and read a classification tree and forest (15 min)
+
+Create class labels from PM2.5. Assign 1 for a concentration at least
+75 µg/m³ and 0 otherwise. Fit a logistic pipeline, a classification tree and
+a classification forest using the same five predictors as in step 1.
+The pipeline fits `StandardScaler` on the training rows before fitting
+`LogisticRegression`. Give `criterion="gini"` to the tree and forest.
+
+For the first later station-hour, predict the probability of class 1 and
+make a class decision with the cutoff of 0.50. Verify that the forest
+probability equals the average of the corresponding tree probabilities.
+
+[source,python]
+----
+# Step 2
+# c_train = ...  # integer labels from y_train
+# c_later = ...  # integer labels from y_later, for the final comparison
+# cls_models = {
+#     "Logistic": make_pipeline(StandardScaler(), LogisticRegression()),
+#     "Tree": ...,
+#     "Forest": ...,
+# }
+# for model in cls_models.values():
+#     model.fit(..., ...)
+# Check each model.classes_ before taking column 1.
+# p_first = {... for name, model in cls_models.items()}
+# Apply probability_cutoff to each class-1 probability.
+# Average the probabilities from cls_models["Forest"].estimators_ on first_later.
+----
+
+The fitted classifier stores labels in `classes_`. With `[0, 1]`, column
+1 of `predict_proba` is the class-1 probability. In this binary example,
+individual trees from the fitted forest also have columns for both classes.
+
+[#nov30-tp-validation]
+== Final block — validate the fits, then try Ridge
+
+=== 3. Compare on the same later rows (6 min)
+
+For each fitted regressor, call `predict(X_later)` and compare with
+`y_later` using MAE and RMSE. Report both in µg/m³. For each classifier,
+take the class-1 probability, apply the 0.50 cutoff and compute a confusion
+matrix using the observed classes as rows. Report the false-negative and
+false-positive counts. The confusion matrix should sum to the number of later
+rows used.
+
+[source,python]
+----
+# Step 3
+# regression_results = []
+# for name, model in reg_models.items():
+#     estimated = ...
+#     regression_results.append({
+#         "Model": name,
+#         "MAE": mean_absolute_error(..., ...),
+#         "RMSE": root_mean_squared_error(..., ...),
+#     })
+# display(pd.DataFrame(regression_results).set_index("Model"))
+#
+# for name, model in cls_models.items():
+#     probabilities = ...
+#     decision = ...
+#     cm = confusion_matrix(..., ..., labels=[0, 1])
+#     print(name, cm, sep="\n")
+#     print("False negatives:", cm[1, 0], "False positives:", cm[0, 1])
+----
+
+=== 4. Try two chronological windows (4 min)
+
+Compare a regression tree of depth 2, 5 and unrestricted depth in the two
+windows below. Keep the leaf-size rule fixed. Fit a fresh tree for every
+window and depth. Record training and later MAE, then see whether the
+training ranking carries over to later dates.
+
+[source,python]
+----
+# Step 4
+# depth_results = []
+# windows = [("2013-03-08", "2013-03-11"), ("2013-03-11", "2013-03-15")]
+# for start, stop in windows:
+#     past = rows.loc[rows["timestamp"] < pd.Timestamp(start)]
+#     test = rows.loc[rows["timestamp"].between(
+#         pd.Timestamp(start), pd.Timestamp(stop), inclusive="left"
+#     )]
+#     for depth in (2, 5, None):
+#         candidate = DecisionTreeRegressor(
+#             max_depth=depth, min_samples_leaf=10, random_state=42
+#         )
+#         candidate.fit(..., ...)
+#         depth_results.append({
+#             "Window begins": start,
+#             "Depth": str(depth),
+#             "Training MAE": ...,
+#             "Later MAE": ...,
+#         })
+# display(pd.DataFrame(depth_results))
+----
+
+For each fit, pass the predictor columns and PM2.5 from `past`.
+For the later MAE, use only `test`. The value `None` lets the tree split
+as far as permitted by its other rules. These March windows have already
+been explored in the course. If you use their scores to choose depth,
+record that decision and name an additional period you would set aside to
+check it.
+
+[#nov30-tp-ridge]
+=== 5. Compare ordinary least squares with Ridge (5 min)
+
+Run both linear approaches with a scaler in front. Use the original split
+and keep Ridge's `alpha=100` fixed. Compare the Euclidean norm of the slope
+vector on the standardized predictors and the later MAE. The intercept is
+separate from `coef_`.
+
+[source,python]
+----
+# Step 5
+# linear_comparison = {
+#     "Scaled least squares": make_pipeline(StandardScaler(), LinearRegression()),
+#     "Ridge": make_pipeline(StandardScaler(), Ridge(alpha=100)),
+# }
+# ridge_results = []
+# for name, model in linear_comparison.items():
+#     model.fit(..., ...)
+#     ridge_results.append({
+#         "Model": name,
+#         "Slope norm": np.linalg.norm(model[-1].coef_),
+#         "Later MAE": ...,
+#     })
+# display(pd.DataFrame(ridge_results).set_index("Model"))
+----
+
+*Before leaving.* Write one sentence about a regression error, one about a
+classification error and one about the effect of depth or Ridge. Include the
+dates evaluated and one limit of what your comparison supports.

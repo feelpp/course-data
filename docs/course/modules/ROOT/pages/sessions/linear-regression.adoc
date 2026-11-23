@@ -37,8 +37,9 @@ turn the same measurements into a first binary classification problem.
 *In class:* Open the xref:sessions/regression-practical.adoc[guided Beijing practical]
 or xref:attachment$sessions/regression-practical.ipynb[download the student notebook].
 The three work periods total 75 minutes. Use the same notebook throughout.
-The date boundary is supplied today. The next session will study validation
-and model complexity, then use them to compare trees and random forests.
+The date boundary is supplied today. The xref:sessions/trees-and-forests.adoc[30 November session] introduces
+decision trees and random forests for the same two questions. Validation,
+model complexity and Ridge close that session.
 
 [#nov23-reconstruction]
 == 1. Reconstruct the six measured variables

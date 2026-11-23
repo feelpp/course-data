@@ -38,6 +38,7 @@ antora:
           - sessions/matrix-geometry.adoc
           - sessions/pca-practical.adoc
           - sessions/regression-practical.adoc
+          - sessions/trees-forests-practical.adoc
           - foundations/statistical-plots.adoc
           - foundations/eda-sampling.adoc
           - foundations/safe-pipelines.adoc

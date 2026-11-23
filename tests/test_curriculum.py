@@ -12,10 +12,10 @@ def test_multivariate_route_records_dates_and_canonical_notebook_sources() -> No
     curriculum = yaml.safe_load((ROOT / "curriculum.yml").read_text())
     route = curriculum["classroom_routes"]["multivariate"]
     lesson = json.loads((ROOT / "teaching/sessions/multivariate/lesson.json").read_text())
-    assert route["contact_minutes"] == sum(s["minutes"] for s in route["sessions"]) == 600
-    assert route["dates"] == ["2026-10-20", "2026-11-02", "2026-11-23"]
+    assert route["contact_minutes"] == sum(s["minutes"] for s in route["sessions"]) == 720
+    assert route["dates"] == ["2026-10-20", "2026-11-02", "2026-11-23", "2026-11-30"]
     assert route["sessions"][0]["status"] == "taught_through_pearson_matrix"
-    assert route["sessions"][-1]["id"] == "linear-regression"
+    assert route["sessions"][-1]["id"] == "trees-and-forests"
     assert route["slides_language"] == "fr" and route["notebook_language"] == "en"
     includes = yaml.safe_load((ROOT / "site.yml").read_text())["antora"]["extensions"][1][
         "jupyter"
@@ -35,9 +35,12 @@ def test_multivariate_route_records_dates_and_canonical_notebook_sources() -> No
     practical = ROOT / route["sessions"][1]["practical"]
     assert str(practical.relative_to(ROOT)) in route["notebook_sources"]
     assert ":page-course-duration-minutes: 45" in practical.read_text()
-    regression_practical = route["sessions"][-1]["practical"]
+    regression_practical = records["2026-11-23"]["practical"]
     assert regression_practical in route["notebook_sources"]
     assert ":page-course-duration-minutes: 75" in (ROOT / regression_practical).read_text()
+    trees_practical = records["2026-11-30"]["practical"]
+    assert trees_practical in route["notebook_sources"]
+    assert ":page-course-duration-minutes: 45" in (ROOT / trees_practical).read_text()
 
 
 def test_public_contact_plan_matches_the_canonical_schedule() -> None:

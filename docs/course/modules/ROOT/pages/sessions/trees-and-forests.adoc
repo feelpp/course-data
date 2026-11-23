@@ -1,0 +1,241 @@
+= 30 November 2026 — Decision trees and random forests
+:page-course-language: en
+:page-course-concepts: DP-TREE-01, DP-ENS-01, DP-LIN-01, DP-CLS-01, DP-REG-01, DP-GEN-01, DP-CV-01, DP-EVAL-03, DP-MET-01, DP-MET-02
+:page-course-priority: P1
+:page-course-difficulty: D2
+:page-course-duration-minutes: 120
+:page-course-outcomes: LO5, LO6, LO7, LO9
+:page-course-prerequisites: linear and logistic regression, residuals, confusion matrices, chronological split
+:page-course-assessed: no
+:stem: latexmath
+
+Return to the two Beijing questions from xref:sessions/linear-regression.adoc[23 November].
+Given measurements at one station-hour, estimate the PM2.5 concentration or
+estimate whether it reaches 75 µg/m³. An *observation* is one station-hour.
+A *predictor* is a measurement available at that hour. The *response* is the
+measured concentration for regression or a class derived from it for classification.
+
+[cols="1,2,4",options="header"]
+|===
+|Minutes elapsed |Topic |Work
+|0–10 |Two questions, two responses |Identify the inputs, outputs and reference models.
+|10–30 |A regression tree |Compare two splits by hand and read a numerical prediction from a leaf.
+|30–45 |A classification tree |Calculate weighted Gini impurity and read a leaf probability.
+|45–60 |Random forests |Build many trees and aggregate their outputs for both tasks.
+|60–65 |Break |
+|65–95 |Guided practical, steps 1–2 |Fit one tree and one forest per task. Inspect one prediction.
+|95–102 |Validation and complexity |Explain what is fitted, what is compared and how depth changes a tree.
+|102–112 |Guided practical, steps 3–4 |Compare models on common later rows and repeat a depth comparison across dates.
+|112–115 |Ridge |Add a penalty to the linear regression objective.
+|115–120 |Guided practical, step 5 |Compare a fixed Ridge fit with ordinary least squares and state one limitation.
+|===
+
+*In class.* Open the xref:sessions/trees-forests-practical.adoc[guided Beijing practical]
+or xref:attachment$sessions/trees-forests-practical.ipynb[download the student notebook].
+Use one notebook for the 45 minutes of practical work.
+
+[#nov30-regression-tree]
+== 1. Regression tree — where should we split the input?
+
+An ordinary linear model uses one formula across all input values. A *decision
+tree* asks a series of questions such as “Is PM10 at most 55 µg/m³?” The
+*root node* contains all training rows. Each *split* sends the rows to two
+*child nodes*, and a *leaf* is a node at which the tree stops splitting.
+To predict, start at the root, answer each question and return the value in
+the leaf reached.
+
+Let stem:[I] be the set of training row indices at a node. The quantity
+stem:[|I|] is the number of rows. For a regression response stem:[y_i],
+a leaf predicts the mean stem:[\bar y_I] of the responses in that leaf.
+Define its sum of squared errors stem:[Q(I)] by
+
+[stem]
+++++
+\begin{aligned}
+\bar y_I &= \frac{1}{|I|}\sum_{i\in I}y_i,\\
+Q(I) &= \sum_{i\in I}(y_i-\bar y_I)^2.
+\end{aligned}
+++++
+
+To test a threshold stem:[t] on predictor stem:[j], send rows with
+stem:[x_{ij}\le t] to stem:[I_L] and the others to stem:[I_R].
+Among permitted candidates at that node, choose the split with the smallest
+combined error stem:[Q(I_L)+Q(I_R)]. Then repeat this search inside each child
+until a stopping rule is reached. This is a *greedy* search. Each decision uses
+the improvement at the current node.
+
+[%collapsible]
+.Why predict the mean in a leaf?
+====
+For a constant prediction stem:[a], expand
+stem:[y_i-a=(y_i-\bar y_I)+(\bar y_I-a)]. The centred deviations sum to
+zero, which removes the cross term. Thus
+
+[stem]
+++++
+\sum_{i\in I}(y_i-a)^2=Q(I)+|I|(\bar y_I-a)^2.
+++++
+
+The second term is smallest at stem:[a=\bar y_I].
+====
+
+=== Four observations on the board
+
+These are fictional concentrations in µg/m³.
+
+[cols="1,1,1",options="header"]
+|===
+|PM10 |Measured PM2.5 |Observed class
+|30 |20 |0
+|40 |30 |0
+|70 |80 |1
+|90 |90 |1
+|===
+
+The root mean is 55 and its squared error is 3,700. With a split at
+PM10 ≤ 55, the two means are 25 and 85. Each child has squared error 50,
+so the combined error is 100. A split at PM10 ≤ 80 puts the first three
+observations together. Its combined error is about 2,066.7. Between those two
+candidates, choose 55. A new PM10 value of 45 follows the left branch and
+gets a predicted PM2.5 of 25 in this one-split tree.
+
+[#nov30-classification-tree]
+== 2. Classification tree — where do the class proportions change?
+
+In the exercise, class 1 means measured PM2.5 is at least 75 µg/m³.
+Let stem:[p_I] be the fraction of class-1 training rows in node stem:[I].
+The fraction of class 0 is stem:[1-p_I]. The *Gini impurity* measures class
+mixing. It is zero when every row in the node has the same class.
+
+[stem]
+++++
+G(I)=1-p_I^2-(1-p_I)^2.
+++++
+
+For a split, weight each child's impurity by the fraction of rows sent to it.
+
+[stem]
+++++
+G_{\mathrm{split}}
+=\frac{|I_L|}{|I|}G(I_L)+\frac{|I_R|}{|I|}G(I_R).
+++++
+
+In the four-row example the root impurity is 0.5. The split at 55 separates
+the classes completely and gives weighted impurity 0. At 80, the left child
+has two zeros and one one, so its impurity is 4/9. The right child is pure and
+the weighted score is stem:[(3/4)(4/9)=1/3]. Choose the smaller score.
+
+For a new row, the class-1 probability estimated by the tree is the fraction
+of class 1 in the leaf it reaches. We apply the same decision rule as last
+week. Predict class 1 when the estimated probability is at least 0.50.
+The concentration cutoff defines the observed classes. The probability cutoff
+turns model outputs into decisions.
+
+[#nov30-forest]
+== 3. Random forest — can several trees give a steadier prediction?
+
+A forest fits stem:[B] trees. Each tree draws a *bootstrap sample* from
+the training rows, meaning a sample with replacement. For four rows, a draw
+such as (2, 2, 4, 1) repeats row 2 and leaves out row 3. At each split the
+tree also considers a random subset of the predictors. In the practical,
+`max_features="sqrt"` first samples two of the five predictors for a split. The implementation
+can inspect more predictors if needed to find a valid split.
+
+Let stem:[f_b(x)] be the numerical prediction of tree stem:[b] for a row
+of predictors stem:[x]. For classification, write stem:[p_b(x)] for its
+class-1 leaf fraction. The forest aggregates as follows.
+
+[stem]
+++++
+\begin{aligned}
+\widehat y_{\text{forest}}(x) &= \frac{1}{B}\sum_{b=1}^{B} f_b(x),\\
+\widehat p_{\text{forest}}(x) &= \frac{1}{B}\sum_{b=1}^{B} p_b(x).
+\end{aligned}
+++++
+
+If three regression trees predict 55, 70 and 85 µg/m³, the forest returns
+70 µg/m³. If three classification trees estimate probabilities 0.20, 0.45
+and 0.95, the mean is about 0.53. With our cutoff, the class decision is 1.
+Randomization helps trees vary, which gives the average a chance to dampen
+individual fluctuations. Forests still use the same predictor information
+and can make similar errors.
+
+.Implementation reference
+[NOTE]
+====
+See the https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html[scikit-learn regression forest] and
+https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html[classification forest].
+For the classifier, `predict_proba` averages tree probabilities. Apply the
+TP's explicit probability cutoff after averaging.
+====
+
+[#nov30-validation]
+== 4. Final block — validate and control complexity
+
+A tree's *depth* is the maximum number of splits along a root-to-leaf path.
+A deeper tree can distinguish more regions of the input space. It can reduce
+training error by fitting small groups whose patterns may change on later
+dates. A minimum leaf size prevents splitting training rows into very small
+groups.
+
+The TP starts with a common cut at 11 March, applied to all stations.
+Evaluate the linear, tree and forest regressions with MAE and RMSE on the
+same complete later rows. Evaluate logistic, tree and forest classifications
+with the same class-1 cutoff and a confusion table. For each table, record
+how many station-hours were used.
+
+To compare depths, repeat the experiment with two predefined windows.
+
+[cols="1,2,2",options="header"]
+|===
+|Window |Fit |Evaluate
+|A |1–7 March |8–10 March
+|B |1–10 March |11–14 March
+|===
+
+Fit a fresh model for each depth and each window. Compare training and later
+MAE within a window, and check whether the ranking holds in both. If you use
+these results to choose depth, these later rows are part of model selection.
+The March extract has already been explored in class. Estimating performance
+on a fresh period would require an additional set of dates kept aside.
+
+[#nov30-ridge]
+== 5. Final block — Ridge as a linear comparison
+
+Ridge is a linear regression model. For the stem:[d] standardized predictors
+stem:[z_{ij}], let stem:[\beta_0] be the intercept and stem:[\beta_j] the
+coefficient of predictor stem:[j]. It minimizes least-squares error plus
+a penalty on the slopes.
+
+[stem]
+++++
+J_\alpha(\beta_0,\beta)
+=\sum_{i=1}^{m}\left(y_i-\beta_0-\sum_{j=1}^{d}\beta_jz_{ij}\right)^2
++\alpha\sum_{j=1}^{d}\beta_j^2.
+++++
+
+Here stem:[m] is the number of training rows and stem:[\alpha\ge0] controls the
+penalty. Ordinary least squares corresponds to zero penalty. For positive
+stem:[\alpha], large slopes make the objective larger. Scaling the predictors
+puts their slope penalties on comparable scales. Fit the scaling only on the
+training window. The intercept is free and the predicted PM2.5 stays in µg/m³.
+
+In the practical, compare `LinearRegression()` and `Ridge(alpha=100)` with
+the same scaled predictors, dates and metric. The value 100 is fixed for the
+demonstration. Write down the change in the norm of the slopes and the change
+in later MAE. See the https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html[implemented Ridge objective]
+and the xref:analytical/regularisation-generalisation.adoc[regularisation reference].
+
+== Questions to take away
+
+* *What prediction does an individual tree make, and why?* Trace one row to
+  a leaf and read the mean or the class proportion.
+* *Does averaging trees help on later dates?* Compare common rows and metrics,
+  then inspect a specific error or mistake.
+* *Does a more complex model work better?* Compare training and later errors,
+  repeat the split by date and describe the dates and stations covered.
+
+The split thresholds describe a fitted rule. Interpretation depends on the
+available measurements and the dates evaluated. Use the
+xref:analytical/tree-ensembles.adoc[trees and ensembles reference] for
+additional diagnostics.
