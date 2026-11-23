@@ -1,7 +1,7 @@
 {
   "asOf": "23 November 2026",
   "introduced": "Pandas · audit · descriptions · covariance · Pearson matrix · PCA",
-  "next": "Review PCA reconstruction, then fit and validate linear models on 23 November",
+  "next": "23 November: review PCA reconstruction, fit linear models and introduce binary classification. Next: validation across dates, model complexity, trees and random forests",
   "stages": [
     {
       "title": "1. Reliable observations",

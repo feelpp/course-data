@@ -1503,7 +1503,7 @@ classroom_routes:
     contact_minutes: 600
     slides_language: fr
     notebook_language: en
-    human_timing_status: pca_introduced_reconstruction_assigned_regression_planned
+    human_timing_status: pca_introduced_reconstruction_assigned_regression_and_classification_planned
     hub: docs/course/modules/ROOT/pages/session-multivariate.adoc
     notebook_sources:
       - docs/course/modules/ROOT/pages/sessions/joint-variation.adoc
@@ -1528,10 +1528,10 @@ classroom_routes:
         concepts: [DP-PCA-01, DP-NUM-01, DP-LIN-01, DP-CV-01]
       - id: linear-regression
         date: "2026-11-23"
-        status: planned_reconstruction_review_regression_and_validation
+        status: planned_reconstruction_review_regression_and_classification
         practical: docs/course/modules/ROOT/pages/sessions/regression-practical.adoc
         minutes: 240
-        concepts: [DP-PCA-01, DP-LIN-01, DP-NUM-01, DP-EVAL-01, DP-EVAL-02, DP-EVAL-03, DP-MET-01]
+        concepts: [DP-PCA-01, DP-LIN-01, DP-NUM-01, DP-EVAL-01, DP-EVAL-02, DP-EVAL-03, DP-MET-01, DP-CLS-01, DP-MET-02, DP-THR-01]
     note: Dated delivery record and plan reuse existing topics; no additional hours beyond the fourteen-block schedule.
 
 practice_release:

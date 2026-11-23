@@ -1,6 +1,6 @@
-= 23 November 2026 — From PCA reconstruction to linear regression
+= 23 November 2026 — PCA reconstruction, regression and classification
 :page-course-language: en
-:page-course-concepts: DP-PCA-01, DP-LIN-01, DP-NUM-01, DP-EVAL-01, DP-EVAL-02, DP-EVAL-03, DP-MET-01
+:page-course-concepts: DP-PCA-01, DP-LIN-01, DP-NUM-01, DP-EVAL-01, DP-EVAL-02, DP-EVAL-03, DP-MET-01, DP-CLS-01, DP-MET-02, DP-THR-01
 :page-course-priority: P1
 :page-course-difficulty: D2
 :page-course-duration-minutes: 240
@@ -15,32 +15,30 @@ and three components. Start by checking that work, then estimate a designated
 response using the same Beijing data.
 
 By the end, you should be able to reconstruct a standardized observation and
-restore its physical units, fit a simple and a multiple linear model, and
-compare their errors on a later time window.
+restore its physical units, frame and solve a regression problem, and
+turn the same measurements into a first binary classification problem.
 
 [cols="1,2,4",options="header"]
 |===
 |Elapsed minutes |Topic |Work
 
 |0–25 |PCA reconstruction |Compare two and three components in your existing notebook.
-|25–40 |A response to estimate |Specify PM2.5 and the predictors available at the same hour.
-|40–75 |Simple linear regression |Derive the slope and intercept and connect the slope to Pearson correlation.
-|75–100 |Practical, steps 1–2 |Split the data and fit the PM10-only model.
-|100–110 |Break |
-|110–135 |Multiple linear regression |Build the design matrix, derive the normal equations, and interpret the residual.
-|135–155 |Chronological validation |Define the baseline, fit preprocessing on training rows, and choose error metrics.
-|155–205 |Practical, steps 3–5 |Compare three rules and read a prediction error.
-|205–215 |Break |
-|215–240 |Discussion and conclusion |Compare the class results and discuss the dates covered.
+|25–65 |Regression problem and simple line |Choose a response, a reference rule and available predictors. Fit a line by least squares.
+|65–90 |Regression practical, steps 0–2 |State the problem, use the supplied date boundary and fit the PM10-only line.
+|90–100 |Break |
+|100–125 |Multiple linear regression |Build the design matrix and use a common set of rows to compare fits.
+|125–155 |Regression practical, steps 3–4 |Fit the multiple model and compare it with the mean and PM10 rules.
+|155–185 |Binary classification |Define a class from PM2.5, estimate its probability and turn the probability into a decision.
+|185–195 |Break |
+|195–215 |Classification practical, step 6 |Fit a logistic model and read its confusion table.
+|215–240 |Discussion and conclusion |Explain a regression error and a classification error. Identify what to check on other dates.
 |===
 
 *In class:* Open the xref:sessions/regression-practical.adoc[guided Beijing practical]
 or xref:attachment$sessions/regression-practical.ipynb[download the student notebook].
-The two work periods total 75 minutes. Use the same notebook for both.
-
-ifdef::local-session-20261123-slides[]
-link:../_attachments/slides/session-20261123.pdf[French class slides (PDF)]
-endif::[]
+The three work periods total 75 minutes. Use the same notebook throughout.
+The date boundary is supplied today. The next session will study validation
+and model complexity, then use them to compare trees and random forests.
 
 [#nov23-reconstruction]
 == 1. Reconstruct the six measured variables
@@ -95,8 +93,34 @@ relative errors for k=2 and k=3. The
 xref:sessions/matrix-geometry.adoc[2 November lesson] derives the PCA directions
 and supplies a worked calculation.
 
+[#nov23-regression-problem]
+== 2. Formulate a regression problem
+
+*Question for the data.* A particular station-hour has a missing PM2.5 value.
+Can we estimate its concentration from the measurements available at that
+same station-hour?
+
+. *Choose the response and unit.* One row is one station-hour. The response
+  stem:[y_i] is the measured PM2.5 concentration in µg/m³. It must be available
+  in the training data so that we can fit and check a numerical prediction.
+. *Choose the inputs.* Start with simultaneous PM10. Then consider temperature,
+  pressure, dew point and wind speed. List the measurements each model would
+  require at the station-hour where PM2.5 is missing.
+. *Choose a reference.* Predict the mean PM2.5 of the training rows. This is a
+  constant rule and gives a point of comparison for models that use the inputs.
+. *Fit and compare.* Fit first a line with PM10, then a multiple linear model
+  with PM10 and weather. Use the same complete rows and date boundary for all
+  three rules. Compare their prediction errors in the original measurement units.
+
+For example, a row can contain PM10 and temperature along with a measured
+PM2.5 of 60 µg/m³. A prediction of 45 µg/m³ on this row has a residual of
++15 µg/m³. In use, a similar row with PM2.5 missing would supply the predictors.
+In evaluation, the recorded PM2.5 gives us the quantity to compare against.
+
+Start with xref:sessions/regression-practical.adoc#regression-problem[step 0 of the Beijing practical].
+
 [#nov23-simple]
-== 2. Fit a line to a designated response
+== 3. Fit a line to a designated response
 
 If PM2.5 is unavailable at a given station-hour, estimate it from PM10 and,
 later, from meteorological values measured at that same station-hour. For
@@ -144,7 +168,7 @@ has units of response per unit of predictor.
 ====
 
 [#nov23-multiple]
-== 3. Fit several predictors
+== 4. Fit several predictors
 
 Write stem:[m] for the number of training rows and stem:[d] for the number
 of predictors. The *design matrix* stem:[X] has shape stem:[m\times(d+1)].
@@ -207,7 +231,7 @@ develops the SVD algorithm, numerical sensitivity and prediction error. Its
 probability section is optional for this session.
 
 [#nov23-validation]
-== 4. Compare models on a later window
+== 5. Use a fixed later window
 
 Use March 1–10, 2013 for training and March 11–14 for validation. The same date
 boundary applies across the three stations. On the common complete rows,
@@ -239,6 +263,45 @@ extract. To assess performance across periods, repeat the comparison over furthe
 See xref:foundations/safe-pipelines.adoc[training and validation] and
 xref:foundations/metrics-errors.adoc[regression error metrics] for references.
 
+[#nov23-classification]
+== 6. Turn a numerical response into a class
+
+Ask a new question about the same station-hour. Is measured PM2.5 at least
+75 µg/m³? We use 75 µg/m³ to define the two classes in this exercise. The
+observed label stem:[c_i] is 1 when stem:[y_i\ge75] and 0 otherwise.
+For example, a measurement of 90 µg/m³ has observed class 1.
+
+. Keep PM10 as the predictor and the same training and later rows.
+  Fit a binary *logistic regression* to the training class labels.
+. For a row with standardized PM10 stem:[x_i], the fitted model calculates a
+  score stem:[\eta_i=\alpha_0+\alpha_1x_i] and converts it to an estimated
+  probability stem:[p_i] of class 1.
++
+[stem]
+++++
+p_i=\frac{1}{1+\exp(-\eta_i)}.
+++++
+. Use class 1 when the estimated probability is at least 0.5 and class 0
+  otherwise. The cutoff of 75 µg/m³ defines the *observed label*, and the
+  probability cutoff of 0.5 defines the *model decision*.
+. Compare observed and predicted classes. A false negative is an observed
+  class 1 assigned to class 0. For example, the row measured at 90 µg/m³
+  would be a false negative if the model assigns it a probability of 0.30.
+
+The four counts form a *confusion table*. Read the row as the measured
+class and the column as the predicted class.
+
+[cols="2,2,2",options="header"]
+|===
+| |Predicted 0 |Predicted 1
+|Observed 0 |True negative |False positive
+|Observed 1 |False negative |True positive
+|===
+
+Try xref:sessions/regression-practical.adoc#classification-practical[step 6 of the Beijing practical].
+The xref:analytical/classification-losses.adoc[logistic regression reference]
+develops the training objective.
+
 [#nov23-takeaways]
 == Questions to ask the data and steps to answer them
 
@@ -256,8 +319,11 @@ xref:foundations/metrics-errors.adoc[regression error metrics] for references.
 
 |Does adding weather improve the estimates on later dates?
 |Keep one chronological split for all three rules. Apply the fixed rules to
- the same later rows and compare RMSE and MAE. Pick one large error, look up
- the measured and estimated PM2.5, and state its size and direction.
+ the same later rows and compare RMSE and MAE.
+
+|Which station-hours are likely to meet the exercise cutoff?
+|Make a class label from measured PM2.5, fit a logistic model and apply a
+ probability cutoff. Count the two kinds of mistakes on the later rows.
 |===
 
 *Takeaways.* Least squares gives the coefficients that minimize squared
@@ -271,6 +337,8 @@ covers complete rows from three stations over four later days. The local
 errors can be related across nearby hours and stations. A claim about other
 periods needs further validation windows.
 
-*Exit question:* Why does adding a predictor always weakly reduce the
-training sum of squared errors for nested least-squares models on the same
-rows? What does your later-window comparison actually show?
+*Exit question.* What does the model output for regression and for
+classification? In each case, point to one result you can check against
+a measurement. In the next session, we will ask whether model rankings
+hold over several time windows and compare simple models with a decision
+tree and a random forest.

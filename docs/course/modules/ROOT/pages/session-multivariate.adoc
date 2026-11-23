@@ -32,7 +32,7 @@ sources for the downloadable notebooks, which have no stored outputs.
 |2 November · 2 h · PCA, SVD and reconstruction
 |xref:attachment$slides/multivariate/session-2.pdf[PCA, SVD and reconstruction (18 slides)]
 |xref:sessions/matrix-geometry.adoc[Theory and worked reference] · xref:attachment$sessions/matrix-geometry.ipynb[Download reference notebook] · xref:sessions/pca-practical.adoc[Guided PCA practical, 45 min] · xref:attachment$sessions/pca-practical.ipynb[Download practical notebook]
-|23 November · 4 h · reconstruction, regression and validation
+|23 November · 4 h · reconstruction, regression and classification
 |French instructor slides
 |xref:sessions/linear-regression.adoc[Dated lesson] · xref:sessions/regression-practical.adoc[Guided Beijing practical, 75 min] · xref:attachment$sessions/regression-practical.ipynb[Download practical notebook]
 |===

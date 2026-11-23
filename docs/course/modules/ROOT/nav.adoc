@@ -27,7 +27,7 @@
 *** xref:sessions/joint-variation.adoc[20 October: covariance and Pearson matrix]
 *** xref:sessions/matrix-geometry.adoc[2 November: PCA, SVD and reconstruction]
 **** xref:sessions/pca-practical.adoc[2 November: guided PCA practical]
-*** xref:sessions/linear-regression.adoc[23 November: linear regression and chronological validation]
+*** xref:sessions/linear-regression.adoc[23 November: regression and classification]
 **** xref:sessions/regression-practical.adoc[23 November: guided Beijing regression practical]
 ** xref:foundations/eda-sampling.adoc[Sampling, dependence, and uncertainty]
 ** xref:foundations/probability-distributions-moments.adoc[Probability distributions and moments]

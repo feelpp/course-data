@@ -1,6 +1,6 @@
-= 23 November 2026 practical — Estimate PM2.5 and validate on later dates
+= 23 November 2026 practical — Estimate PM2.5 and classify station-hours
 :page-course-language: en
-:page-course-concepts: DP-LIN-01, DP-NUM-01, DP-EVAL-01, DP-EVAL-02, DP-EVAL-03, DP-MET-01
+:page-course-concepts: DP-LIN-01, DP-NUM-01, DP-EVAL-01, DP-EVAL-02, DP-EVAL-03, DP-MET-01, DP-CLS-01, DP-MET-02, DP-THR-01
 :page-course-priority: P1
 :page-course-difficulty: D2
 :page-course-duration-minutes: 75
@@ -28,10 +28,23 @@ ifdef::backend-jupyter[]
 The https://feelpp.github.io/course-data/course-data/sessions/linear-regression.html[23 November lesson] gives the derivations.
 endif::[]
 The supplied cell opens the dataset and prepares timestamps. Complete the
-commented calculations yourself. Keep one notebook across the two work periods
-and record a reason for each modelling choice.
+commented calculations yourself. Keep one notebook across the three work periods.
 
-== 1. Establish the chronological split (10 min)
+[#regression-problem]
+== 0. State the regression problem (5 min)
+
+Before fitting, complete this description in your own words.
+
+* “One row represents ___. We want to estimate ___, in units of ___.”
+* “At that station-hour, our simplest fitted model will use ___.
+  The multiple model will also need ___.”
+* “We will compare both models with a constant reference learned from ___.
+  We will compare their predictions with ___ on the later dates.”
+
+Keep the measured target separate from the predictor columns. Write down
+what each method needs at the station-hour where the target is missing.
+
+== 1. Establish the chronological split (5 min)
 
 One row represents a station-hour. The prepared extract covers 1–14 March 2013
 at three Beijing stations. Choose PM2.5 as the response in µg/m³. The candidates
@@ -154,7 +167,7 @@ station-hour. Use the same predictor order and apply the same training scales
 in both matrices.
 ====
 
-== 4. Compare three rules on the same rows (15 min)
+== 4. Compare three rules on the same rows (10 min)
 
 Fit a constant reference by taking the mean of training PM2.5. Compare this
 rule, the PM10-only line and the multiple model on the retained March 11–14
@@ -176,7 +189,7 @@ Record both. Which measurements must be available at the station-hour for the fi
 rule to be usable?
 
 [#_5_inspect_residuals_and_defend_a_conclusion_15_min]
-== 5. Read a prediction error (15 min)
+== 5. Optional extension — read a prediction error
 
 Use the multiple model on the later dates. For one station-hour, the
 *residual* is the measured PM2.5 minus the estimated PM2.5. If the
@@ -222,3 +235,51 @@ Pick several consecutive points on the same side of zero. During which
 hours did the model tend to estimate too high or too low? To compare stations,
 compute the mean absolute error and the number of hours for each station.
 ====
+
+[#classification-practical]
+== 6. Classify a station-hour (20 min)
+
+Return to the same rows from step 1. Use PM10 as the predictor. With measured
+PM2.5, assign class 1 when the concentration is at least 75 µg/m³ and class
+0 otherwise. These are the classes you will ask the model to learn. In
+`scikit-learn`, a pipeline can learn the PM10 scaling on the training rows
+and apply it when scoring the later rows.
+
+. Make the training and validation class arrays from `ytr` and `yva`.
+  Count zeros and ones in each window.
+. Fit the supplied logistic pipeline on training PM10 and the training
+  classes. Check that `classifier.classes_` is `[0, 1]`. The second
+  column of `predict_proba` then gives the probability of class 1.
+. Assign class 1 when that probability is at least 0.5. Cross-tabulate the
+  observed and predicted classes on the validation rows.
+. Report one of the two mistake counts. Find one row that made that mistake
+  and report measured PM2.5, the estimated probability and the predicted class.
+  If that count is zero, report the other mistake type or explain the four
+  counts if both are zero.
+
+[source,python]
+----
+# Step 6
+# from sklearn.linear_model import LogisticRegression
+# from sklearn.pipeline import make_pipeline
+# from sklearn.preprocessing import StandardScaler
+#
+# class_cutoff = 75.0
+# class_tr = ...                # integer labels from the training concentrations
+# class_va = ...                # integer labels from the validation concentrations
+# classifier = make_pipeline(StandardScaler(), LogisticRegression())
+# classifier.fit(train[["PM10"]], ...)
+# print(classifier.classes_)
+# p_high = classifier.predict_proba(valid[["PM10"]])[:, 1]
+# decision_cutoff = 0.5
+# class_pred = ...              # convert probabilities to integer labels
+# table = pd.crosstab(
+#     pd.Series(class_va, name="Observed class"),
+#     pd.Series(class_pred, name="Predicted class"),
+# ).reindex(index=[0, 1], columns=[0, 1], fill_value=0)
+# display(table)
+----
+
+*Check your interpretation.* If PM2.5 is measured at 90 µg/m³ and the model
+assigns a probability of 0.30 to class 1, which cell of the table gets this
+station-hour? Explain what each of the cutoffs 75 and 0.5 controls.
